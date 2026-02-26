@@ -314,3 +314,5 @@ No preprint yet. One is forthcoming. For now:
 Copyright 2026 Dennis Lewis. Licensed under the [Apache License 2.0](LICENSE).
 
 This repository was forked from [badaramoni/wave-field-llm](https://github.com/badaramani/wave-field-llm), which was MIT-licensed at the time of fork. The original FFT-convolution architecture has been substantially redesigned; DWARF is an independent architecture developed from that starting point.
+
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Lanerra/DWARF)
