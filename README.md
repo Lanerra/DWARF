@@ -302,7 +302,7 @@ No preprint yet. One is forthcoming. For now:
   author       = {Lewis, Dennis},
   title        = {{DWARF}: Dyadic Wave And Resonant Field Attention},
   year         = {2026},
-  howpublished = {\url{https://github.com/dlewis3/DWARF}},
+  howpublished = {\url{https://github.com/Lanerra/DWARF}},
   note         = {Preprint forthcoming}
 }
 ```
