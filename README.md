@@ -156,7 +156,7 @@ cd verification
 PATH="$HOME/.cargo/bin:$PATH" cargo test -- --nocapture
 ```
 
-**52 tests total (all passing):**
+**52 tests total:**
 - OPWF algebraic decomposition and math equivalence (error < 1e-13)
 - Causality: output at position i cannot depend on position i+k (pre-10: 0.000, post-10: >0)
 - ELU normalizer variance effect (OPWF vs DSQG)
@@ -169,26 +169,6 @@ PATH="$HOME/.cargo/bin:$PATH" cargo test -- --nocapture
 - **Copy attractor feedback loop** (loop depth by offset set; ε needed for concentration)
 
 3 known failures in `cond_d_db4` (KdV nonlinear instability) — expected, condD was abandoned.
-
----
-
-## Semantic Search (RAG)
-
-A ChromaDB semantic index over all DWARF documentation is maintained at `rag/chroma_db/`:
-- ~1,600 chunks from 85+ documents
-- Sources: Holocron research notes, training journals, logs, the writeup draft, feedback files
-- Embedding: `qwen3-embedding:0.6b` via Ollama at `http://192.168.64.126:11434`
-
-```bash
-# Query
-cd /home/Lanerra/Desktop/AI/DWARF
-.venv/bin/python3 rag/query.py "coverage density collapse attractor"
-.venv/bin/python3 rag/query.py "condN epoch 10 results" --type training_log
-.venv/bin/python3 rag/query.py "ELU normalizer mechanism" --n 8
-
-# Update index after new logs/journals
-.venv/bin/python3 rag/ingest.py --update
-```
 
 ---
 
