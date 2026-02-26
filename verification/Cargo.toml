@@ -1,0 +1,12 @@
+[package]
+name = "wave_field_verification"
+version = "0.1.0"
+edition = "2021"
+description = "Physics verification suite for Wave Field Transformer architectural proposals"
+
+[dependencies]
+rustfft    = "6"
+num-complex = "0.4"
+rand        = "0.8"
+rand_distr  = "0.4"
+rayon       = "1"
