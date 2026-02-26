@@ -1,0 +1,49 @@
+{
+  "test_ppl": 93.27938744514644,
+  "test_loss": 4.535599155740424,
+  "best_val_ppl": 93.46379699150127,
+  "best_epoch": 10,
+  "total_time": 7171.766967535019,
+  "scale_summary": {
+    "gains_mean_per_scale": [
+      0.11016266544659932,
+      0.09709688896934192,
+      0.09720187882582347,
+      0.09459218134482701,
+      0.0936380277077357,
+      0.09120966369907062,
+      0.08955605824788411,
+      0.08782711997628212,
+      0.07899737606445949,
+      0.052479000141223274,
+      0.10723913585146268
+    ],
+    "dominant_scale": 0,
+    "dominant_scale_rf_tokens": 4,
+    "note": "global learned prior (actual gains are position-specific)"
+  },
+  "description": "Causal D4 DWT + query-conditioned scale selection (pre-gather)",
+  "architecture": {
+    "n_scales": 11,
+    "filter": "D4 (fixed)",
+    "dilations": [
+      1,
+      2,
+      4,
+      8,
+      16,
+      32,
+      64,
+      128,
+      256,
+      512,
+      1024
+    ],
+    "max_rf_tokens": 4096,
+    "G": 2048,
+    "stride": 1,
+    "scale_selection": "query-conditioned (per-position softmax)",
+    "q_scale_proj": "Linear(32, 11, bias=False)",
+    "gate": "standard embedding-space gate (same as G)"
+  }
+}

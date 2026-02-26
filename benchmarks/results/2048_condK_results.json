@@ -1,0 +1,34 @@
+{
+  "test_ppl": 84.74151571325163,
+  "test_loss": 4.439605631671109,
+  "best_val_ppl": 84.92535442010234,
+  "best_epoch": 10,
+  "total_time_s": 14441.76076555252,
+  "scale_summary": {
+    "gains_mean_per_scale": [
+      0.13280515000224113,
+      0.1129613642891248,
+      0.10285939027865727,
+      0.09342458223303159,
+      0.07896314561367035,
+      0.07729600369930267,
+      0.07597978413105011,
+      0.07421474158763885,
+      0.08437810962398846,
+      0.08547283957401912,
+      0.08164489145080249
+    ],
+    "dominant_scale": 0,
+    "dominant_scale_rf_tokens": 4,
+    "identity_bypass_mean": 0.028358260528572526,
+    "pos_bias_abs_mean": 0.5046056509017944,
+    "pos_bias_abs_max": 1.9711732864379883
+  },
+  "architecture_name": "DWARF \u2014 Dyadic Wave And Resonant Field Attention",
+  "improvements_over_condJ": {
+    "1_relative_pos_bias": "44 tap offsets \u00d7 8 heads = 352 params/layer",
+    "2_elu_normalizer": "\u03c6(x)=elu(x)+1; Z=\u03a3|h_\u03c4|\u03c6(Q\u00b7K); out/=Z",
+    "3_no_interference_pool": "cumulative-mean blocks removed (ablation)",
+    "4_rg_scale_init": "early layers biased j0-j3; late layers j8-j10"
+  }
+}

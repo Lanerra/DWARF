@@ -1,0 +1,117 @@
+{
+  "model": "Standard Transformer 13M",
+  "architecture": {
+    "type": "pre-norm causal transformer",
+    "vocab_size": 32000,
+    "embedding_dim": 256,
+    "num_layers": 6,
+    "num_heads": 8,
+    "ffn_dim": 1024,
+    "max_seq_len": 2048,
+    "pos_encoding": "learned",
+    "tied_embeddings": true,
+    "activation": "gelu",
+    "normalization": "pre-norm LayerNorm"
+  },
+  "training": {
+    "optimizer": "AdamW",
+    "lr": 0.0003,
+    "weight_decay": 0.1,
+    "betas": [
+      0.9,
+      0.95
+    ],
+    "batch_size": 8,
+    "grad_accum": 4,
+    "effective_batch": 32,
+    "lr_schedule": "cosine",
+    "grad_clip": 1.0,
+    "epochs": 10,
+    "tokenizer": "condI BPE 32K (2048_condI_tokenizer.json)",
+    "dataset": "OpenWebText 100K docs",
+    "precision": "bf16/fp16 AMP"
+  },
+  "test_ppl": 64.073,
+  "test_loss": 4.16,
+  "best_val_ppl": 65.3579,
+  "best_val_loss": 4.1799,
+  "best_epoch": 10,
+  "total_time_s": 22527.4,
+  "epoch_log": [
+    {
+      "epoch": 1,
+      "train_loss": 5.1982,
+      "val_loss": 5.4023,
+      "val_ppl": 221.91,
+      "elapsed_s": 2280.9
+    },
+    {
+      "epoch": 2,
+      "train_loss": 4.8377,
+      "val_loss": 4.8936,
+      "val_ppl": 133.44,
+      "elapsed_s": 4615.8
+    },
+    {
+      "epoch": 3,
+      "train_loss": 4.4434,
+      "val_loss": 4.5355,
+      "val_ppl": 93.27,
+      "elapsed_s": 7001.0
+    },
+    {
+      "epoch": 4,
+      "train_loss": 4.4226,
+      "val_loss": 4.3701,
+      "val_ppl": 79.05,
+      "elapsed_s": 9321.9
+    },
+    {
+      "epoch": 5,
+      "train_loss": 4.584,
+      "val_loss": 4.2944,
+      "val_ppl": 73.29,
+      "elapsed_s": 11518.1
+    },
+    {
+      "epoch": 6,
+      "train_loss": 4.4228,
+      "val_loss": 4.2459,
+      "val_ppl": 69.82,
+      "elapsed_s": 13715.0
+    },
+    {
+      "epoch": 7,
+      "train_loss": 4.299,
+      "val_loss": 4.209,
+      "val_ppl": 67.29,
+      "elapsed_s": 15912.0
+    },
+    {
+      "epoch": 8,
+      "train_loss": 4.2731,
+      "val_loss": 4.1919,
+      "val_ppl": 66.15,
+      "elapsed_s": 18109.5
+    },
+    {
+      "epoch": 9,
+      "train_loss": 4.4007,
+      "val_loss": 4.1818,
+      "val_ppl": 65.49,
+      "elapsed_s": 20307.3
+    },
+    {
+      "epoch": 10,
+      "train_loss": 3.9738,
+      "val_loss": 4.1799,
+      "val_ppl": 65.36,
+      "elapsed_s": 22504.1
+    }
+  ],
+  "prior_reference": {
+    "ppl": 64.5,
+    "note": "hardcoded from undocumented earlier run, unknown tokenizer"
+  },
+  "delta_vs_prior": -0.43
+}

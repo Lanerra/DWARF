@@ -25,13 +25,13 @@ DWARF replaces standard quadratic attention with two parallel memory systems:
 - **D4 Daubechies wavelet basis.** 4-tap causal filter provides multi-scale field propagation with compact support and better frequency localization than simpler kernels (Morlet condC, FFT condA–B).
 - **Two-memory architecture.** Local track: exact, bounded, fast. Wave field: compressed, unbounded, diffusive. The interaction between them (condK+RP pooling) provides both within-layer amplitude normalization (ELU) and cross-layer state continuity (interference pooling) — orthogonal contributions, both needed.
 - **Coverage density as structural regularization.** Dense local coverage prevents individual offsets from becoming collapse attractors (see condL+RP failure). condN's dense-32 region eliminated the δ=1 collapse basin. condP's dense-64 region further reduces uncovered gaps.
-- **1.03 PPL gap vs standard transformer at 13M (condP).** condP: 65.1 PPL vs 64.07 standard. condN: 70.8 PPL. The linear-vs-softmax capacity gap is almost entirely closed by coverage density and offset structure — and the baseline's remaining advantage likely reflects copy-attractor exploitation rather than genuine language modeling superiority (see Generation Quality below).
+- **0.99 PPL gap vs standard transformer at 13M (condP).** condP: 65.057 PPL vs 64.07 standard. condN: 70.8 PPL. The linear-vs-softmax capacity gap is almost entirely closed by coverage density and offset structure — and the baseline's remaining advantage likely reflects copy-attractor exploitation rather than genuine language modeling superiority (see Generation Quality below).
 
 ---
 
 ## Architecture
 
-### condP — best configuration (65.1 PPL)
+### condP — best configuration (65.057 PPL)
 
 condP extends condN's dense local window from 32 to 64 tokens:
 
@@ -109,11 +109,11 @@ All runs: OpenWebText, 2048 sequence length, 13M parameters, 10 epochs, 32k BPE 
 | condK+RP (+ interference pooling) | **83.3** | Pooling confirmed −1.6 PPL improvement |
 | condL+RP (DSQG 24 dyadic offsets) | *terminated ep4* | δ=1 structural collapse; PPL improved while generation degraded — key PPL/generation divergence finding |
 | **condN (dense-32 + dyadic DSQG)** | **70.8** ✓ | Dense-32 eliminates δ=1 collapse basin; ALiBi pos_bias init; coherent generation; concept-level attractor |
-| **condP (dense-64 + dyadic DSQG)** | **65.1** ✓ | **Best DWARF 13M.** Within 1.03 PPL of standard transformer. Generation superior to baseline throughout; no word-level copy attractor |
+| **condP (dense-64 + dyadic DSQG)** | **65.057** ✓ | **Best DWARF 13M.** Within 0.99 PPL of standard transformer. Generation superior to baseline throughout; no word-level copy attractor |
 
-**Gap to standard transformer:** 1.03 PPL (condP) — down from 20.2 PPL (condK+RP). Three architectural steps, each closing roughly two-thirds of the remaining gap.
+**Gap to standard transformer:** 0.99 PPL (condP) — down from 20.2 PPL (condK+RP). Three architectural steps, each closing roughly two-thirds of the remaining gap.
 
-**The main story:** condG→condJ (99.4 → 85.1) established that content-gated routing is essential. condJ→condN (85.1 → 70.8) established that dense local coverage and softmax gather (vs ELU linear) close most of the remaining gap. condN→condP (70.8 → 65.1) established that extending the dense window from 32 to 64 closes ~85% of the remaining gap. condL+RP failure established the mechanism: sparse dyadic without dense local creates structural collapse attractors. With condP, DWARF is no longer a "promising alternative" to standard attention — it is within experimental error of a fair PPL comparison, while maintaining structural properties standard transformers cannot match.
+**The main story:** condG→condJ (99.4 → 85.1) established that content-gated routing is essential. condJ→condN (85.1 → 70.8) established that dense local coverage and softmax gather (vs ELU linear) close most of the remaining gap. condN→condP (70.8 → 65.057) established that extending the dense window from 32 to 64 closes ~85% of the remaining gap. condL+RP failure established the mechanism: sparse dyadic without dense local creates structural collapse attractors. With condP, DWARF is no longer a "promising alternative" to standard attention — it is within experimental error of a fair PPL comparison, while maintaining structural properties standard transformers cannot match.
 
 ---
 
@@ -123,9 +123,9 @@ All runs: OpenWebText, 2048 sequence length, 13M parameters, 10 epochs, 32k BPE 
 
 1. **condL+RP (ep4, Feb 2026):** PPL improved while generation degraded — all heads converging on δ=1 copy-previous token. The model was getting better at predicting by copying, which lowers loss but makes generation degenerate.
 
-2. **condP vs standard transformer (Feb 2026):** Standard transformer at PPL 64.07 produces severe repetition loops on all generation prompts from the first evaluation epoch onward ("stormy stormy stormy..."). condP at PPL 65.1 (worse by only 1.03 PPL) produces coherent sentences and never exhibits this pattern.
+2. **condP vs standard transformer (Feb 2026):** Standard transformer at PPL 64.07 produces severe repetition loops on all generation prompts from the first evaluation epoch onward ("stormy stormy stormy..."). condP at PPL 65.057 (worse by only 0.99 PPL) produces coherent sentences and never exhibits this pattern.
 
-**Why the baseline's PPL lead doesn't mean what it appears to mean.** The copy attractor is *falsifiable*: a model that earns 64.07 through genuine language modeling doesn't collapse to token repetition on basic completion prompts. The standard transformer's PPL advantage is partially attributable to δ=1 copy exploitation — and we can demonstrate this directly from the generation samples. This makes the 1.03 PPL gap a ceiling on the "real" gap, not a floor.
+**Why the baseline's PPL lead doesn't mean what it appears to mean.** The copy attractor is *falsifiable*: a model that earns 64.07 through genuine language modeling doesn't collapse to token repetition on basic completion prompts. The standard transformer's PPL advantage is partially attributable to δ=1 copy exploitation — and we can demonstrate this directly from the generation samples. This makes the 0.99 PPL gap a ceiling on the "real" gap, not a floor.
 
 **Architecture-dependent generation taxonomy (13M scale).** The ablation series reveals three distinct failure modes corresponding to different levels of gradient competition:
 
@@ -202,7 +202,7 @@ PATH="$HOME/.cargo/bin:$PATH" cargo test -- --nocapture
 
 | Condition | Design | Status |
 |---|---|---|
-| condP | Dense-64 local + dyadic long-range (74 offsets) | **COMPLETE — 65.1 PPL** (best DWARF 13M) |
+| condP | Dense-64 local + dyadic long-range (74 offsets) | **COMPLETE — 65.057 PPL** (best DWARF 13M) |
 | condM | Learned softmax correction layer at layer boundaries; alternative to structural gap-fill | Planned after condP |
 | condQ | TBD based on condP result | Planned |
 | 85M condN-equiv | Best 13M architecture at 85M scale | Pending — waiting for 13M ablation to stabilize |
@@ -268,7 +268,7 @@ DWARF/
 │   ├── train_2048_condL.py          # DSQG 24 dyadic (no dense)
 │   ├── train_2048_condLRP.py        # + interference pooling (terminated ep4)
 │   ├── train_2048_condN.py          # dense-32 + dyadic DSQG (70.8 PPL)
-│   ├── train_2048_condP.py          # ★ dense-64 + dyadic DSQG — BEST (65.1 PPL)
+│   ├── train_2048_condP.py          # ★ dense-64 + dyadic DSQG — BEST (65.057 PPL)
 │   ├── train_2048_standard_baseline.py  # matched standard transformer (64.07 PPL)
 │   ├── passkey_test.py              # passkey retrieval evaluation
 │   ├── eval_temperature_sweep.py    # temperature sweep evaluation

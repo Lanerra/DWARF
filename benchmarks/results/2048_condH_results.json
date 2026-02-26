@@ -1,0 +1,35 @@
+{
+  "test_ppl": 99.98984189563792,
+  "test_loss": 4.605068599784767,
+  "best_val_ppl": 100.32782307686752,
+  "best_epoch": 10,
+  "total_time": 6828.079904317856,
+  "scale_summary": {
+    "gains_mean_per_scale": [
+      0.4418359200159709,
+      0.10436743746201198,
+      0.09776820863286655,
+      0.07399032575388749,
+      0.058104008436203,
+      0.047336253027121224,
+      0.036761837701002754,
+      0.026970253015557926,
+      0.02385822714616855,
+      0.02661458371828,
+      0.0623929500579834
+    ],
+    "dominant_scale": 0,
+    "dominant_scale_rf_tokens": 4,
+    "sparse_skip_weights_avg": {
+      "d=512": 0.005866666666666667,
+      "d=1024": 0.0057666666666666665
+    }
+  },
+  "description": "Causal D4 DWT + query-multiplicative gate + sparse skip",
+  "hypothesis": "query-less gather is the binding constraint in G",
+  "changes_from_g": {
+    "gate": "q_gate_proj(Q) instead of gate_proj(x)",
+    "sparse_skip": "dilations (512, 1024), sigmoid weight init -4.0",
+    "dtw": "unchanged from G (11 scales, D4, softmax gains)"
+  }
+}

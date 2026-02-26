@@ -1,0 +1,329 @@
+{
+  "checkpoint": "/home/dlewis3/Desktop/AI/wave-field-llm/2048_condP_checkpoints/best.pt",
+  "model_params": 14118368,
+  "n_offsets": 74,
+  "max_new": 200,
+  "configs": [
+    {
+      "label": "greedy (T=0)",
+      "sampler": "greedy",
+      "temperature": 0.0
+    },
+    {
+      "label": "top-p T=0.5",
+      "sampler": "top_p",
+      "temperature": 0.5,
+      "top_p": 0.9
+    },
+    {
+      "label": "top-p T=0.7",
+      "sampler": "top_p",
+      "temperature": 0.7,
+      "top_p": 0.9
+    },
+    {
+      "label": "top-p T=1.0",
+      "sampler": "top_p",
+      "temperature": 1.0,
+      "top_p": 0.9
+    },
+    {
+      "label": "top-k50 T=0.7",
+      "sampler": "top_k",
+      "temperature": 0.7,
+      "top_k": 50
+    }
+  ],
+  "results": {
+    "greedy (T=0)": {
+      "It was a dark and stormy": {
+        "generation": " night, and it was a little bit of a surprise.\n\n\"I was a little bit of a little bit of a little bit of a little bit of a little bit of a little bit of a little bit of a little bit of a little bit of a little bit of a little bit of a little bit of a little bit of a little bit of a little bit of a little bit of a little bit of a little bit of a little bit of a little bit of a little bit of a little bit of a little bit of a little bit of a little bit of a little bit of a little bit of a little bit of a little bit of a little bit of a little bit of a little bit of a little bit of a little bit of a little bit of a little bit of a little bit of a little bit of a little bit of a little bit of a little bit of a little bit of a little bit of a little bit of a little bit of a little bit",
+        "rep_rate_4gram": 0.9322916666666666,
+        "distinct_2": 0.05670103092783505,
+        "distinct_4": 0.06770833333333333,
+        "time_s": 3.7487680912017822
+      },
+      "The length of the hypotenuse": {
+        "generation": " is a bit of a bit of a bit of a bit of a bit of a bit of a bit of a bit of a bit of a bit of a bit of a bit of a bit of a bit of a bit of a bit of a bit of a bit of a bit of a bit of a bit of a bit of a bit of a bit of a bit of a bit of a bit of a bit of a bit of a bit of a bit of a bit of a bit of a bit of a bit of a bit of a bit of a bit of a bit of a bit of a bit of a bit of a bit of a bit of a bit of a bit of a bit of a bit of a bit of a bit of a bit of a bit of a bit of a bit of a bit of a bit of a bit of a bit of a bit of a bit of a bit of a bit of a bit of a bit of a bit of a bit of a",
+        "rep_rate_4gram": 0.9796954314720813,
+        "distinct_2": 0.020100502512562814,
+        "distinct_4": 0.02030456852791878,
+        "time_s": 1.7386927604675293
+      },
+      "The President of the United": {
+        "generation": " States, who was the first to be elected president in the United States, was the first president to be elected president in the United States.\n\nThe president was the first president to be elected president in the United States to be elected president in the United States.\n\nThe president was the first president to be elected president in the United States to be elected president in the United States.\n\nThe president was the first president to be elected president in the United States to be elected president in the United States.\n\nThe president was the first president to be elected president in the United States to be elected president in the United States.\n\nThe president was the first president to be elected president in the United States to be elected president in the United States.\n\nThe president was the first president to be elected president in the United States to be elected president in the United States.\n\nThe president was the first president to be elected president in the United States to be elected president in the",
+        "rep_rate_4gram": 0.8448275862068966,
+        "distinct_2": 0.11931818181818182,
+        "distinct_4": 0.15517241379310345,
+        "time_s": 1.7075021266937256
+      },
+      "Once upon a time there was": {
+        "generation": " a chance to be a new person, and the idea of a new person is to be a new person.\n\nThe idea of a new person is to be a new person, and to be a new person, to be a new person, to be a new person, to be a new person, to be a new person, to be a new person, to be a new person, to be a new person, to be a new person, to be a new person, to be a new person, to be a new person, to be a new person, to be a new person, to be a new person, to be a new person, to be a new person, to be a new person, to be a new person, to be a new person, to be a new person, to be a new person, to be a new person, to be a new person, to be a new person, to be a new person, to be a new person,",
+        "rep_rate_4gram": 0.8424242424242424,
+        "distinct_2": 0.11377245508982035,
+        "distinct_4": 0.15757575757575756,
+        "time_s": 1.6975185871124268
+      },
+      "The results indicate that": {
+        "generation": " the results are not accurate.\n\nThe results are based on the results of the results. The results are based on the results of the results.\n\nThe results are based on the results of the results.\n\nThe results are based on the results of the results.\n\nThe results are based on the results of the results.\n\nThe results are based on the results of the results.\n\nThe results are based on the results of the results.\n\nThe results are based on the results of the results.\n\nThe results are based on the results of the results.\n\nThe results are based on the results of the results.\n\nThe results are based on the results of the results.\n\nThe results are based on the results of the results.\n\nThe results are based on the results of the results.\n\nThe results are based on the results of the results.\n\nThe results are based on the results of the results.\n",
+        "rep_rate_4gram": 0.9013157894736842,
+        "distinct_2": 0.08441558441558442,
+        "distinct_4": 0.09868421052631579,
+        "time_s": 1.692211627960205
+      },
+      "Scientists have recently discovered": {
+        "generation": " that the new species is a \"baby\" and that the species is a \"baby\" and that is the only way to get the species into the wild.\n\nThe researchers have found that the species is a \"baby\" and that the species is a \"baby\" and that is a \"baby\" and that is a \"baby\" and that is a \"baby\" and that is a \"baby\" and that is a \"baby\" and that is a \"baby\" and that is a \"baby\" and that is a \"baby\" and that is a \"baby\" and that is a \"baby\" and that is a \"baby\" and that is a \"baby\" and that is a \"baby\" and that is a \"baby\" and that is a \"baby\" and that is a \"baby\" and that is a \"baby\" and that is a \"",
+        "rep_rate_4gram": 0.7633587786259542,
+        "distinct_2": 0.18796992481203006,
+        "distinct_4": 0.2366412213740458,
+        "time_s": 1.7364730834960938
+      },
+      "The best way to learn programming is": {
+        "generation": " to learn how to learn and learn how to learn.\n\nThe first thing you can do is to learn how to learn how to learn how to learn how to learn how to learn how to learn how to learn how to learn how to learn how to learn how to learn how to learn how to learn how to learn how to learn how to learn how to learn how to learn how to learn how to learn how to learn how to learn how to learn how to learn how to learn how to learn how to learn how to learn how to learn how to learn how to learn how to learn how to learn how to learn how to learn how to learn how to learn how to learn how to learn how to learn how to learn how to learn how to learn how to learn how to learn how to learn how to learn how to learn how to learn how to learn how to learn how to learn how to learn how to learn how to learn how to learn how to learn how to learn how to learn how",
+        "rep_rate_4gram": 0.9072164948453608,
+        "distinct_2": 0.07142857142857142,
+        "distinct_4": 0.09278350515463918,
+        "time_s": 1.7728219032287598
+      },
+      "In the year 2045,": {
+        "generation": " the city was in the midst of a massive earthquake.\n\nThe city was in the midst of a massive earthquake, and the city was in the midst of a tsunami.\n\nThe city was in the midst of a tsunami, and the city was in the midst of a tsunami.\n\nThe city was in the midst of a tsunami. The city was in the midst of a tsunami.\n\nThe city was in the midst of a tsunami.\n\nThe city was in the midst of a tsunami.\n\nThe city was in the midst of a tsunami.\n\nThe city was in the midst of a tsunami.\n\nThe city was in the midst of a tsunami.\n\nThe city was in the midst of a tsunami.\n\nThe city was in the midst of a tsunami.\n\nThe city was in the midst of a tsunami.\n\nThe city was in the midst of a tsunami.\n\nThe city was in the midst of a tsunami.",
+        "rep_rate_4gram": 0.8441558441558441,
+        "distinct_2": 0.11538461538461539,
+        "distinct_4": 0.15584415584415584,
+        "time_s": 1.7937977313995361
+      }
+    },
+    "top-p T=0.5": {
+      "It was a dark and stormy": {
+        "generation": ", and it was a stormy storm. It was a stormy storm, and it was a stormy storm. It was a stormy storm. It was a stormy storm. It was a stormy storm. It was a stormy storm. It was a stormy storm. It was a stormy storm. It was a stormy storm. It was a storm. It was a storm. It was a storm. It was a storm. It was a storm. It was a storm. It was a storm. It was a storm. It was a storm. It was a storm. It was a storm. It was a storm. It was a storm. It was a storm. It was a storm. It was a storm. It was a storm. It was a storm. It was a storm. It was a storm. It was a storm. It was a storm. It was a storm. It was a storm. It was a storm. It was",
+        "rep_rate_4gram": 0.9013157894736842,
+        "distinct_2": 0.07142857142857142,
+        "distinct_4": 0.09868421052631579,
+        "time_s": 1.9813196659088135
+      },
+      "The length of the hypotenuse": {
+        "generation": " is a small amount of energy. The amount of energy is a small amount of energy, and the amount of energy is a small amount of energy. The amount of energy is a small amount of energy, and the amount of energy is a large amount of energy. The amount of energy is a small amount of energy. The amount of energy is a small amount of energy, and the amount of energy is a small amount of energy. The amount of energy is a small amount of energy. The amount of energy is a small amount of energy. The amount of energy is a small amount of energy. The amount of energy is a small amount of energy. The amount of energy is a small amount of energy. The amount of energy is a small amount of energy. The amount of energy is a small amount of energy. The amount of energy is a small amount of energy. The amount of energy is a small amount of energy. The amount of energy is a small amount of energy. The amount of",
+        "rep_rate_4gram": 0.888268156424581,
+        "distinct_2": 0.08287292817679558,
+        "distinct_4": 0.11173184357541899,
+        "time_s": 1.9027583599090576
+      },
+      "The President of the United": {
+        "generation": " States, the United States, is a member of the United States, and he is a member of the United States. He is a member of the United States, and is a member of the United States.\n\nThe United States is the United States, and the United States is the United States. It is the United States, the United States, and the United States.\n\nThe United States is the United States. It is the United States. It is the United States. It is the United States. It is the United States. It is the United States. It is the United States. It is the United States. It is the United States. It is the United States. It is the United States. It is the United States. It is the United States. It is the United States. It is the United States. It is the United States. It is the United States. It is the United States. It is the United States. It is the United States.",
+        "rep_rate_4gram": 0.7530864197530864,
+        "distinct_2": 0.1402439024390244,
+        "distinct_4": 0.24691358024691357,
+        "time_s": 1.7993621826171875
+      },
+      "Once upon a time there was": {
+        "generation": " no chance of a new boss to play with the game, and I\u2019m not sure if I\u2019m going to be able to get a few games.\n\nI\u2019m not sure if I\u2019m going to be able to play with the game, but I\u2019m not sure if I\u2019m going to be able to play with the game.\n\nI\u2019m not sure if I\u2019m going to be able to play with the game, but I\u2019m not sure if I\u2019m going to be able to play with the game. I\u2019m not sure if I\u2019m going to be able to play with the game. I\u2019m sure I\u2019m going to be able to play with the game. I\u2019m not going to be able to play with the game. I\u2019m not going to be able to play with the game. I\u2019m going to be able to play with the game. I\u2019m going to be able to play",
+        "rep_rate_4gram": 0.6917808219178082,
+        "distinct_2": 0.22297297297297297,
+        "distinct_4": 0.3082191780821918,
+        "time_s": 1.7776908874511719
+      },
+      "The results indicate that": {
+        "generation": " the number of people who are in the area are not likely to be affected by the number of people who are affected.\n\nThe number of people who are affected by the number of people who are affected by the number of people who are affected by the number of people who are affected by the number of people who are affected by the number of people who are affected by the number of people who are affected by the number of people who are affected by the number of people who are affected by the number of people who are affected by the number of people who are affected by the number of people who are affected by the number of people who are affected by the number of people who are affected by the number of people who are affected by the number of people who are affected by the number of people who are affected by the number of people who are affected by the number of people who are affected by the number of people who are affected by the number of people who are affected by the number of people who are",
+        "rep_rate_4gram": 0.8762886597938144,
+        "distinct_2": 0.10204081632653061,
+        "distinct_4": 0.12371134020618557,
+        "time_s": 1.7571890354156494
+      },
+      "Scientists have recently discovered": {
+        "generation": " that the ability to be able to make a difference is not a problem.\n\n\"The idea of a new planet is that the planet is a planet that is very similar to a planet,\" says Dr. Dr. Dr. Dr. Dr. Dr. Dr. Dr. Dr. Dr. Dr. Dr. Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr Dr",
+        "rep_rate_4gram": 0.7777777777777778,
+        "distinct_2": 0.1978021978021978,
+        "distinct_4": 0.2222222222222222,
+        "time_s": 1.7319128513336182
+      },
+      "The best way to learn programming is": {
+        "generation": " to get a better understanding of how to use the language and how to use the language.\n\nThe second thing I\u2019ve learned is that the language is a good way to learn the language. The language is a good way to learn the language. The language is a good way to learn the language.\n\nThe language is a good way to learn the language. The language is a good way to learn the language. The language is a good way to learn the language.\n\nThe language is a good way to learn the language. The language is a good way to learn the language.\n\nThe language is a good way to learn the language. The language is a good way to learn the language. The language is a good way to learn the language.\n\nThe language is a good way to learn the language. The language is a good way to learn the language. The language is a good way to learn the language.\n\nThe language is a good way to",
+        "rep_rate_4gram": 0.7976190476190477,
+        "distinct_2": 0.17058823529411765,
+        "distinct_4": 0.20238095238095238,
+        "time_s": 1.7487215995788574
+      },
+      "In the year 2045,": {
+        "generation": " the U.S. government was forced to take the job of the U.S. government in the wake of the U.S. government's failure to stop the U.S. government's economic crisis.\n\nThe U.S. government was in the process of a new government in the U.S. government in the early 1990s.\n\nThe U.S. government was in the process of taking a new government into the U.S. government.\n\nThe U.S. government was the first government to be able to use the U.S. government to use the U.S. government to make the U.S. government more difficult to use.\n\nThe U.S. government was able to use the U.S. government to use the U.S. government to use the U.S. government to use the U.S. government to use the U.S. government to use the U.S. government to",
+        "rep_rate_4gram": 0.328,
+        "distinct_2": 0.4330708661417323,
+        "distinct_4": 0.672,
+        "time_s": 1.7599222660064697
+      }
+    },
+    "top-p T=0.7": {
+      "It was a dark and stormy": {
+        "generation": ", yet even a man was killed by a truck.\n\nThe cops told the ABC that they were trying to get the victims to see their child, but the investigation was still ongoing.\n\nThe other victims were identified as the victim, who was told that the victim had been shot and killed in the car.\n\nThe victim told the news agency that he and her daughter had been arrested and charged with conspiracy to murder.\n\nPolice are investigating the incident.\n\nThe investigation is ongoing.(Room 1: A) No. The company has filed a lawsuit against the California Federal Court of Appeals for the District of Columbia. It is the first time that the plaintiffs will have filed a lawsuit against the agency.\n\nA) The complaint is filed by the city and the state of California. The complaint is filed by the Federal Court of Appeals for the District of Columbia. The lawsuit alleges that the plaintiff was the plaintiff of a lawsuit, the plaintiff, and the plaintiff",
+        "rep_rate_4gram": 0.06748466257668712,
+        "distinct_2": 0.8545454545454545,
+        "distinct_4": 0.9325153374233128,
+        "time_s": 1.8285808563232422
+      },
+      "The length of the hypotenuse": {
+        "generation": " has been more than three times the size of the shove. It is a very hard to argue with how the brain is going to work, as it is, at the expense of a few people. The brain is a bit more complex than the brain itself, and it has a very strong brain. It is a bit more complex than the brain itself, and it is a bit more complex than the brain itself. The brain itself is an entirely different object.\n\nThe brain itself is a lot more complex than the brain itself. The brain itself is a lot more complex than the brain itself. It is a bit more complex than the brain itself, and its core vision is a bit more complex. It is a lot more complex. The brain itself is a lot more complex, which is a bit more complex, and is very sophisticated. The brain itself is a lot more complex. It is a lot more complex. It is a lot more complex. It is a lot more complex.",
+        "rep_rate_4gram": 0.3815028901734104,
+        "distinct_2": 0.44571428571428573,
+        "distinct_4": 0.6184971098265896,
+        "time_s": 1.865713357925415
+      },
+      "The President of the United": {
+        "generation": " States, has been accused of plotting to address his record-breaking record.\n\nHe said he would not be in charge of the issue if he was a former secretary of state.\n\n\u201cIt is a very important question, but I think it is not a serious issue that we would have expected. But I would have been to the U.S. to have been a strong leader, and I would have been to the U.S. to take part in the fight against the U.S.,\u201d said Mr. Salamucci.\n\nMr. Salamucci, who was also a member of the U.S. Senate, said he was not interested in the U.S. presidential candidate for the Senate.\n\n\u201cI think we\u2019re not a member of the U.S. Senate and that is what we are saying,\u201d Mr. Salamucci said. \u201cIt\u2019s not a member of the U.S. Senate. It\u2019s",
+        "rep_rate_4gram": 0.07462686567164178,
+        "distinct_2": 0.8161764705882353,
+        "distinct_4": 0.9253731343283582,
+        "time_s": 1.8807282447814941
+      },
+      "Once upon a time there was": {
+        "generation": " an intense experience.\n\nAs a result, the people in this building were aware of the fact that they were creating a real possibility of a new building.\n\nWith this, I\u2019m not sure whether they could be any more than one person.\n\nThis is a possibility.\n\nI\u2019m not sure if I could find a way to create a new building.\n\nAs I\u2019ve seen since last week, I\u2019ve seen the issue of building a new building in a number of ways.\n\nThe proposal is something I\u2019ve seen since the start of the project, which I have already seen since the start of the project.\n\nI\u2019ve seen the impact of building the building in my blog post.\n\nI\u2019ve seen the project for quite a while.\n\nBut there are also people who have been told that there\u2019s a lot of people in this area who have been in the works for years.\n\nI\u2019",
+        "rep_rate_4gram": 0.02054794520547945,
+        "distinct_2": 0.8378378378378378,
+        "distinct_4": 0.9794520547945206,
+        "time_s": 1.880218267440796
+      },
+      "The results indicate that": {
+        "generation": " they were both considered to be the first suspect in the recent disappearance of an unknown location.\n\nThe researchers found that an unknown location in the area was not the target of the discovery.\n\nThe site was also known to have a smaller location, where the suspect was seen on a nearby site.\n\nThe suspect, identified by the suspect, was seen by the suspect, and was identified by the suspect.\n\nThe suspect is believed to have a small impact on the presence of a special suspect.\n\nThe suspect, who is now living in the area of the site, was identified by a group of people in the area.\n\nThe suspect is believed to be a suspect.\n\nThe suspect is believed to be a local population of the area of the area.\n\nThe suspect is the suspect, identified by the suspect.\n\nThe suspect is the suspect who is identified as the suspect.\n\nThe suspect is believed to be a local population of the National",
+        "rep_rate_4gram": 0.1625,
+        "distinct_2": 0.6296296296296297,
+        "distinct_4": 0.8375,
+        "time_s": 1.8092947006225586
+      },
+      "Scientists have recently discovered": {
+        "generation": " that the number of \u201cdealers\u201d in the water were increasing from 20 to 40 percent.\n\n\u201cThe species that are supposed to have been extremely high in the air are probably not as low as they are in the air,\u201d said Dr. Kundundin.\n\nThe evidence suggests that the temperature of the water was not stable and that the water was not stable.\n\n\u201cIt is possible that there was no evidence that there was a delay in the water that occurred when the water was over,\u201d said Dr. Kundundin, who was a local resident at the University of Texas.\n\n\u201cI think it\u2019s important to keep people safe and safe and safe. I think it\u2019s important to get people safe and safe,\u201d he said.\n\nThe conditions of the water are not only necessary for the water, he said.\n\n\u201cWe are going to be able to make sure that the water is safe and safe,\u201d he said.\n",
+        "rep_rate_4gram": 0.02666666666666667,
+        "distinct_2": 0.7960526315789473,
+        "distinct_4": 0.9733333333333334,
+        "time_s": 1.7212069034576416
+      },
+      "The best way to learn programming is": {
+        "generation": " to be able to learn the language.\n\nLargely, the best way to learn programming is to learn the language. This means that a computer is a proper way to learn programming, not just a language. In the other case, it is necessary to learn a computer, and to learn the language.\n\nI\u2019m going to read a game in a single day. It is hard to read a computer, but it is important to understand how to learn the language. There is a way to learn how to learn and learn how to learn.\n\nI am happy to learn how to learn how to learn how to learn how to learn how to learn how to learn how to learn how to learn how to learn how to learn how to learn how to learn how to learn how to learn how to learn how to learn how to learn how to learn how to learn how to learn how to learn how to learn how to learn how to learn how to learn how to learn how to",
+        "rep_rate_4gram": 0.46285714285714286,
+        "distinct_2": 0.4067796610169492,
+        "distinct_4": 0.5371428571428571,
+        "time_s": 1.732762098312378
+      },
+      "In the year 2045,": {
+        "generation": " the world\u2019s largest,000-dollar corporations are becoming increasingly open to the world\u2019s largest corporations.\n\nThe internet is also an open source site for internet-based websites. The internet is also open source.\n\nThe internet is the largest web-based website in the world, and is a hub for sites like Google, Google, and Google.\n\nThe Internet is open source, but it is not the web-based site of the Internet. It is also the site of the Internet.\n\nThe Internet is the site of the Internet. It is the site of Internet and web-based websites. It is the site of the internet. It is the site of internet.\n\nThe internet is the site of Internet, Web-based sites. It is the site of Internet.\n\nThe Internet is the site of Internet.\n\nIn the last year, the Internet has been hosting hundreds of sites for thousands of years.\n\nThe Internet has been",
+        "rep_rate_4gram": 0.14685314685314685,
+        "distinct_2": 0.6551724137931034,
+        "distinct_4": 0.8531468531468531,
+        "time_s": 1.735823392868042
+      }
+    },
+    "top-p T=1.0": {
+      "It was a dark and stormy": {
+        "generation": " story.\n\n\"I don't think we've put up with that video or something on the off either side,\" said Brian Wandenberg, director of the Migs' Strategic Institute for Strategic Studies.\n\n\"One of the most memorable images was this video game a lot of fun,\" said Obama. \"People think this was the latest broadcast of an \"commercial\" video game. So they also saw a video game involving one in the video game. They see about 200 people they wrote about. That was almost that. What is the biggest accomplishment of the video game? Who are we?\"\n\n\"The Faces in the game,\" said Brian E. Lewis, his own policy analyst. \"We're like, 'We're real. We've done what the very game is. Our justbantening, weird, fun. We've got to see the basics of the game. But the feeling of love is crazy. We're in the early stages of this",
+        "rep_rate_4gram": 0.0,
+        "distinct_2": 0.9375,
+        "distinct_4": 1.0,
+        "time_s": 1.7471957206726074
+      },
+      "The length of the hypotenuse": {
+        "generation": " despecetic, when the tubal is artificially clapped, having it then burst into the disorganised dipecets of the Celuti-Causes. The liver-resistant phase is in one of the gaps. While one of these fluorescent, resistant, spirited tissues is in the most dramatic rise of the mineralium, which is experienced in just over 30 seconds (excluding as many as 50 kR) and absorbs an evolutionary shadowy axis, it's also seen as the most expensive to flow from the mass of terran and tunnel.[6] The activity of these cells, coupled with the effects of renaissance, was thought to be the same when the cerebral collapses into the distance of the pyramids. While there is even the earlier research in the cell in the early era, we have met with other opium engineers and these researchers both served to achieve the huge potential of synof of a chamber with linearity.\n",
+        "rep_rate_4gram": 0.0,
+        "distinct_2": 0.9236111111111112,
+        "distinct_4": 1.0,
+        "time_s": 1.7667896747589111
+      },
+      "The President of the United": {
+        "generation": " States, traveling across all of America, has been appealing to the Department of Justice to represent the country.\n\nLast year the People\u2019s Division of Military Affairs set its sights on the arts, prosecutors and officials on the ground. Their involvement on the Vietnam War, is a feat that will be made in its six years of national defense, taking place under the more sophisticated powers of the nuclear program. As the Society of Veterans Affairs expands its ranks, military and military commandments will make the peace available for those who conduct such service as maritime aircraft and military vessels to help expand the legacy of exceptional military programs.\n\nMetro.com, which is reporting on a failed bombing conducted on the Gulf Arabian Peninsula and Vietnam by Gulf Arabian Sea Air Force Base and Special Forces training personnel on patrol missions, the Pentagon also charges military intervention on Joint Transportation Safety Department program that has a control level of support from states that may record readiness as a way of saying such missions to prevent the U.S.",
+        "rep_rate_4gram": 0.0,
+        "distinct_2": 0.9712643678160919,
+        "distinct_4": 1.0,
+        "time_s": 1.7393052577972412
+      },
+      "Once upon a time there was": {
+        "generation": " no time for breaking anything at all, nothing could change to come back.\u201d\n\nOf course, despite \u201cgive fans\u201d celebrating \u201cDylan Browne\u201d from Harvard, even if he's the only \u201chot young woman to have Donald Trump,\u201d and it all won\u2019t be possible.\n\nIt\u2019s not nearly all possible that Enernius\u2019s responsibilities will likely be delivered publicly.\n\n\u201cI don\u2019t mean our universities are getting close to back when I\u2019ve got the music,\u201d said Marc Bethen. \u201cI think the human presence in the background and the scripting. Now it\u2019s not just the general mentality of any individual who sees it. No one can observe, the way I\u2019ve done it, I\u2019ve done it every day, and I don\u2019t get any direction at all.\u201d\n\nMayan Brinton in North Carolina, in a gathering of people whose blogs remain on board.CLOSE Documents on the American",
+        "rep_rate_4gram": 0.0,
+        "distinct_2": 0.9926470588235294,
+        "distinct_4": 1.0,
+        "time_s": 1.7219007015228271
+      },
+      "The results indicate that": {
+        "generation": " the word automatically allows us to build robots and plants in one it looks like we can happen to only in a single country.\n\nThe Weaction Institute for NASA's Goddard Space Observatory adds that \u201cThe physical reward we have has over 10 years of competing, faster and faster than the average in an event.\u201d The National Museum of Nature analysed several experiments focusing on the appearance of the HVA's Cube cargo surface, both cost and price of every official astronaut.\n\nFor commercial research, Professor Cornyn Margon later said that the abundance of visual space cannot be easily charged by necessity.\n\n\"NASA [has the future] under which they understand that DNA is already produced during the winter or even longer by year,\" Cornyn Margon said.Happy Halloween for you? From the proceeds to the Amazon Christmas Eve Saturday?\n\nEvery year, we're coming to include the Holy Trinity Youth Sacred Arrow Shake With Life Setin by the HBO Network. Now,",
+        "rep_rate_4gram": 0.0,
+        "distinct_2": 0.9935897435897436,
+        "distinct_4": 1.0,
+        "time_s": 1.7265839576721191
+      },
+      "Scientists have recently discovered": {
+        "generation": " a three-year-old body born into his body according to an American rock set that eventually followed her death death: her girl was forced to take the step toward her death if she was wounded.\n\nThe method was tested and tested for near-hell-dimensional biomes, in which she was trapped. The genetic factors that she suffered were put into the brain and its DNA and cell after receiving CJT for his injuries.\n\nA third pregnancy could affect the pregnancy and is found to have an accelerated kind of fundamental skills discovered in her body.\n\nAfter receiving an agent's death, she received an upstanding agreement with Ms Shebov and Mr Shebov.\n\nThe woman was briefly on the plane, where she was re-edited by the kidney and was next to the FFI. She was diagnosed with two stab wounds, but her mother was eventually diagnosed with an alternate illness. She was a doctor and 20s were struck with and she was released",
+        "rep_rate_4gram": 0.0,
+        "distinct_2": 0.9617834394904459,
+        "distinct_4": 1.0,
+        "time_s": 1.7255306243896484
+      },
+      "The best way to learn programming is": {
+        "generation": " to call the community of passionate students and students. Even if you find a type or business model, a member of these would probably be able to succeed in this world of English.\n\nThere were 32,000 types. Here are some topics that should be included on the experience:\n\n1. Do you realize your parents are recruited from attending the classroom?\n\n2. Do you remember a school in Hindi?\n\n3. Can you even do personal beliefs or the student-athocasts?\n\n3. Do you remember an organized school in Pakistan and a children\u2019s school in Arabic?\n\n6. Do you know that kids play for the students?\n\n3. Do you remember the school in Arabic?\n\n4. Do you know in Arabic?\n\n4. Can you remember any school in Arabic?\n\n4. Do you know that schools learn well in Arabic?\n\n5. Do you know this?\n\n5. Do",
+        "rep_rate_4gram": 0.04316546762589928,
+        "distinct_2": 0.8014184397163121,
+        "distinct_4": 0.9568345323741008,
+        "time_s": 1.7352991104125977
+      },
+      "In the year 2045,": {
+        "generation": " Batman has retired from one of the more stringent strategies required in the field. His skills are designed to protect the people and making improvements in the use of the landscape. At the same time, they are due to alienation of the art.\n\nThe Dark Knight would say, \"That's a triumphant game, a project that takes the mantle for that character. It's not an accident,\" and, in it, what if it were hidden from the arc - for now is the ability to use the power of the spacer - but \"mixed.\"\n\nThe Dark Knight\u2019s role goes well beyond its former goal, with the exclusive sword right. As the distance is not gone, rendering the hand on a blanket from a SWVON ring is reminiscent of just the storyline mentioned above. The armor mask has worked in the real-world, fundamental ways of life, art, and software.\n\nThe Pro Order\n\nThere are several elements here and there that now seem",
+        "rep_rate_4gram": 0.0,
+        "distinct_2": 0.9620253164556962,
+        "distinct_4": 1.0,
+        "time_s": 1.7325289249420166
+      }
+    },
+    "top-k50 T=0.7": {
+      "It was a dark and stormy": {
+        "generation": " incident.\n\nThe video was broadcast on the network in January, though it was broadcast at the time.\n\nThe video was broadcast on the network and broadcast on the network on television.\n\nThe video was broadcast on the network in the summer of 2001. The video was broadcast on the network on the network in the morning of the day.\n\nOn October 22, the video was broadcast on TV.\n\nThe video was broadcast on the Channel 25 channel in the morning of September 27, 2000.\n\nThe video was broadcast on TV on radio\n\nOn October 26, 2005, the video was broadcast on Fox and radio at the BBC at the night of August 29, 2007.\n\nThe video was broadcast on television on Channel 4 TV on TV on TV on TV on TV on television on TV on TV on TV on TV on mobile devices.\n\nIn the video, BBC broadcasts broadcast on TV on television on television on TV on TV on TV on television on",
+        "rep_rate_4gram": 0.3067484662576687,
+        "distinct_2": 0.4666666666666667,
+        "distinct_4": 0.6932515337423313,
+        "time_s": 1.75040602684021
+      },
+      "The length of the hypotenuse": {
+        "generation": ", the first of which is the length of the millimeter the time the millimeter is converted. The millimeter is the length of the millimeter, or the width of the millimeter, and the third is the length of the millimeter, and the first is the length of the millimeter, the second is the length of the millimeter. In the millimeter, the millimeter is the velocity of the millimeter. The millimeter is the amount of millimeter.\n\nThe millimeter is the amount of millimeter of millimeter in the millimeter. It is the amount of millimeter of millimeter of millimeter in the millimeter. The millimeter is the amount of millimeter of millimeter of millimeter of millimeter of millimeter.\n\nThe millimeter of millimeter of millimeter of millimeter of millimeter of millimeter of millimeter of millimeter of millimeter of millimeter. The millimeter of millimeter of millimeter of mill",
+        "rep_rate_4gram": 0.44285714285714284,
+        "distinct_2": 0.323943661971831,
+        "distinct_4": 0.5571428571428572,
+        "time_s": 1.7221956253051758
+      },
+      "The President of the United": {
+        "generation": " States, in turn, was responsible for the fact that the country is in the midst of a disastrous recession and that the country is under the control of the US economy. Because of the fact that the US is the world\u2019s largest economy, it is the country that is dominated by the American economy and the world\u2019s largest economy.\n\nBut it is not. We need to do something that is not being broken. It is not a real fight. It is not a fight against the US and its allies. It is a fight against the US. It is the fight against the US. It is not a fight against the US. It is a fight against the US. It is a fight against the US. It is a fight against the US. It is a fight against the US. It is afight against the US. It is a fight against the US. It is a fight against the US. It is a fight against the US. It is a fight against the",
+        "rep_rate_4gram": 0.4,
+        "distinct_2": 0.4476744186046512,
+        "distinct_4": 0.6,
+        "time_s": 1.7170374393463135
+      },
+      "Once upon a time there was": {
+        "generation": " a lot of progress that could eventually happen.\n\n\"The key of people who understand the environment is that it can be very different from others,\" he said. \"We don't want to be able to do that. We think it's difficult to have someone in the world.\"\n\nA group of people who have been able to create jobs for decades have been able to grow a job for the past two decades in the UK, said the number of people facing the crisis has risen much faster than that.\n\n\"It's difficult to find a job for people who have been able to help them,\" he said.\n\nPoor-born students who took part in the event at the University of Surrey in Melbourne are expected to be able to make a case for their school.\n\n\"I think it's difficult for people to find a job,\" he said.\n\nImage copyright Getty Images Image caption The job has been to \"make a living in the world\", he said",
+        "rep_rate_4gram": 0.03125,
+        "distinct_2": 0.8271604938271605,
+        "distinct_4": 0.96875,
+        "time_s": 1.7147748470306396
+      },
+      "The results indicate that": {
+        "generation": " even as a single person is the most important factor in this story, the results suggest that the average person is at least a third of the total person.\n\nThe fact that the average person is the most likely to be a third of the time is that it is difficult to detect the number of people in the world that are more likely to be in the future, and that the average person is not as likely to be a tenth of the time. Even if the number of people in the world is more likely to be less likely to be less likely to be less likely to be less likely to be less likely to have less likely to be more likely to be less likely to be less likely to be less likely to be less likely to be less likely to be less likely to be less likely to be less likely to be less likely to have less likely to be less likely to be less likely to be less likely to be less likely to be more likely to be more likely to be less likely to",
+        "rep_rate_4gram": 0.5026178010471204,
+        "distinct_2": 0.37823834196891193,
+        "distinct_4": 0.4973821989528796,
+        "time_s": 1.7035548686981201
+      },
+      "Scientists have recently discovered": {
+        "generation": " that a significant number of humans have been extinct since the early 1900s.\n\nA report from the journal Nature showed that humans had been extinct in the early 20th century and now are now extinct in the early 20th century.\n\nThe researchers found that there are a number of different species that have been extinct, and the researchers found that the more than 800,000,000 species are extinct.\n\nThe researchers found that the more than 1.2 million,000,000,000,000 (4.4 billion,000,000,000,000,000 million).\n\nSome researchers found that the smaller numbers of species were more than 1.3 million,000 because of the larger numbers of the larger numbers of species.\n\nAnother study found that the number of extinct species that were found to be the smallest, most likely species are species that were extinct.\n\nThe data showed that the number of extinct species were larger than 1.5 million \u2014 more",
+        "rep_rate_4gram": 0.0851063829787234,
+        "distinct_2": 0.7202797202797203,
+        "distinct_4": 0.9148936170212766,
+        "time_s": 1.7084612846374512
+      },
+      "The best way to learn programming is": {
+        "generation": " to learn where to learn new languages.\n\nIn general, the best way to learn is to learn the following things:\n\n(3) A\n\nV: a\n\nA\n\n(4) A\n\nV: a\n\nA\n\nV: a\n\nx) a\n\nA\n\nV: a\n\nV: a\n\nA\n\nV: a\n\nV: a\n\nV: a\n\nV: an\n\nV: a\n\nV: a\n\nV: a\n\nV: a\n\nV: a\n\nV: a\n\nV: a\n\nV: a\n\nV: a\n\nV: a\n\nV: a\n\nV: a\n\nV: a\n\nV: a\n\nV: a\n\nV: a\n\nV: a\n\nV: a\n\nV: a\n\nV: a\n",
+        "rep_rate_4gram": 0.5294117647058824,
+        "distinct_2": 0.3218390804597701,
+        "distinct_4": 0.47058823529411764,
+        "time_s": 1.72495436668396
+      },
+      "In the year 2045,": {
+        "generation": " the most expensive, the most expensive, and most expensive, is to buy and purchase the most expensive, and the cost of buying is $150,500, just $600,000.\n\nAs for the sale of the $250,000, the $100,000 is the only way to go.\n\nIf the price is not just about $200,000, then the price is about $5,000, and the price is about $100,000. I will not be surprised if the price is about $30,000.\n\nIf the price is about $800, then a price is about $250,000, and I would like to think about the cost and the price is going to be $20,000, but that\u2019s how the price goes.\n\nThis is a good deal. This is a good deal. That\u2019s just how the price works.\n\nIf you\u2019re a small, unassuming and expensive, you",
+        "rep_rate_4gram": 0.0625,
+        "distinct_2": 0.7538461538461538,
+        "distinct_4": 0.9375,
+        "time_s": 1.7139708995819092
+      }
+    }
+  }
+}

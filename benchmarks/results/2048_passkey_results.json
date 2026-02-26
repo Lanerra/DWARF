@@ -1,0 +1,369 @@
+{
+  "model": "condK",
+  "checkpoint": "/home/dlewis3/Desktop/AI/wave-field-llm/2048_condK_checkpoints",
+  "timestamp": "2026-02-25 14:58:02",
+  "results_by_distance": {
+    "4": {
+      "distance_tokens": 4,
+      "accuracy_10way": 0.1,
+      "mean_rank": 2634.9,
+      "mean_log_prob": -9.775390625,
+      "n_tests": 20,
+      "is_d4_offset": true
+    },
+    "5": {
+      "distance_tokens": 5,
+      "accuracy_10way": 0.1,
+      "mean_rank": 2564.3,
+      "mean_log_prob": -9.4646484375,
+      "n_tests": 20,
+      "is_d4_offset": false
+    },
+    "8": {
+      "distance_tokens": 8,
+      "accuracy_10way": 0.1,
+      "mean_rank": 3362.95,
+      "mean_log_prob": -10.216796875,
+      "n_tests": 20,
+      "is_d4_offset": true
+    },
+    "10": {
+      "distance_tokens": 10,
+      "accuracy_10way": 0.1,
+      "mean_rank": 4688.0,
+      "mean_log_prob": -10.862890625,
+      "n_tests": 20,
+      "is_d4_offset": false
+    },
+    "12": {
+      "distance_tokens": 12,
+      "accuracy_10way": 0.05,
+      "mean_rank": 3605.7,
+      "mean_log_prob": -10.35625,
+      "n_tests": 20,
+      "is_d4_offset": true
+    },
+    "16": {
+      "distance_tokens": 16,
+      "accuracy_10way": 0.1,
+      "mean_rank": 4482.85,
+      "mean_log_prob": -10.5634765625,
+      "n_tests": 20,
+      "is_d4_offset": true
+    },
+    "20": {
+      "distance_tokens": 20,
+      "accuracy_10way": 0.1,
+      "mean_rank": 5127.3,
+      "mean_log_prob": -10.8943359375,
+      "n_tests": 20,
+      "is_d4_offset": false
+    },
+    "24": {
+      "distance_tokens": 24,
+      "accuracy_10way": 0.1,
+      "mean_rank": 5447.6,
+      "mean_log_prob": -11.0513671875,
+      "n_tests": 20,
+      "is_d4_offset": true
+    },
+    "32": {
+      "distance_tokens": 32,
+      "accuracy_10way": 0.1,
+      "mean_rank": 5398.1,
+      "mean_log_prob": -11.03359375,
+      "n_tests": 20,
+      "is_d4_offset": true
+    },
+    "40": {
+      "distance_tokens": 40,
+      "accuracy_10way": 0.1,
+      "mean_rank": 6822.35,
+      "mean_log_prob": -11.496875,
+      "n_tests": 20,
+      "is_d4_offset": false
+    },
+    "48": {
+      "distance_tokens": 48,
+      "accuracy_10way": 0.1,
+      "mean_rank": 6490.7,
+      "mean_log_prob": -11.3462890625,
+      "n_tests": 20,
+      "is_d4_offset": true
+    },
+    "50": {
+      "distance_tokens": 50,
+      "accuracy_10way": 0.1,
+      "mean_rank": 7108.1,
+      "mean_log_prob": -11.666796875,
+      "n_tests": 20,
+      "is_d4_offset": false
+    },
+    "64": {
+      "distance_tokens": 64,
+      "accuracy_10way": 0.1,
+      "mean_rank": 5348.65,
+      "mean_log_prob": -10.9857421875,
+      "n_tests": 20,
+      "is_d4_offset": true
+    },
+    "80": {
+      "distance_tokens": 80,
+      "accuracy_10way": 0.1,
+      "mean_rank": 6761.45,
+      "mean_log_prob": -11.4357421875,
+      "n_tests": 20,
+      "is_d4_offset": false
+    },
+    "96": {
+      "distance_tokens": 96,
+      "accuracy_10way": 0.1,
+      "mean_rank": 6975.3,
+      "mean_log_prob": -11.459765625,
+      "n_tests": 20,
+      "is_d4_offset": true
+    },
+    "100": {
+      "distance_tokens": 100,
+      "accuracy_10way": 0.1,
+      "mean_rank": 6307.75,
+      "mean_log_prob": -11.45703125,
+      "n_tests": 20,
+      "is_d4_offset": false
+    },
+    "128": {
+      "distance_tokens": 128,
+      "accuracy_10way": 0.1,
+      "mean_rank": 6294.3,
+      "mean_log_prob": -11.3267578125,
+      "n_tests": 20,
+      "is_d4_offset": true
+    },
+    "160": {
+      "distance_tokens": 160,
+      "accuracy_10way": 0.1,
+      "mean_rank": 7051.0,
+      "mean_log_prob": -11.7291015625,
+      "n_tests": 20,
+      "is_d4_offset": false
+    },
+    "192": {
+      "distance_tokens": 192,
+      "accuracy_10way": 0.1,
+      "mean_rank": 7012.15,
+      "mean_log_prob": -11.699609375,
+      "n_tests": 20,
+      "is_d4_offset": true
+    },
+    "200": {
+      "distance_tokens": 200,
+      "accuracy_10way": 0.1,
+      "mean_rank": 6898.1,
+      "mean_log_prob": -11.54375,
+      "n_tests": 20,
+      "is_d4_offset": false
+    },
+    "256": {
+      "distance_tokens": 256,
+      "accuracy_10way": 0.1,
+      "mean_rank": 5613.8,
+      "mean_log_prob": -11.065625,
+      "n_tests": 20,
+      "is_d4_offset": true
+    },
+    "300": {
+      "distance_tokens": 300,
+      "accuracy_10way": 0.1,
+      "mean_rank": 6721.85,
+      "mean_log_prob": -11.501171875,
+      "n_tests": 20,
+      "is_d4_offset": false
+    },
+    "320": {
+      "distance_tokens": 320,
+      "accuracy_10way": 0.1,
+      "mean_rank": 6459.45,
+      "mean_log_prob": -11.5466796875,
+      "n_tests": 20,
+      "is_d4_offset": false
+    },
+    "384": {
+      "distance_tokens": 384,
+      "accuracy_10way": 0.1,
+      "mean_rank": 6903.55,
+      "mean_log_prob": -11.721484375,
+      "n_tests": 20,
+      "is_d4_offset": true
+    },
+    "500": {
+      "distance_tokens": 500,
+      "accuracy_10way": 0.1,
+      "mean_rank": 7038.05,
+      "mean_log_prob": -11.7615234375,
+      "n_tests": 20,
+      "is_d4_offset": false
+    },
+    "512": {
+      "distance_tokens": 512,
+      "accuracy_10way": 0.1,
+      "mean_rank": 6500.75,
+      "mean_log_prob": -11.593359375,
+      "n_tests": 20,
+      "is_d4_offset": true
+    },
+    "640": {
+      "distance_tokens": 640,
+      "accuracy_10way": 0.1,
+      "mean_rank": 6695.85,
+      "mean_log_prob": -11.541015625,
+      "n_tests": 20,
+      "is_d4_offset": false
+    },
+    "750": {
+      "distance_tokens": 750,
+      "accuracy_10way": 0.1,
+      "mean_rank": 6715.95,
+      "mean_log_prob": -11.5345703125,
+      "n_tests": 20,
+      "is_d4_offset": false
+    },
+    "768": {
+      "distance_tokens": 768,
+      "accuracy_10way": 0.1,
+      "mean_rank": 6775.35,
+      "mean_log_prob": -11.6828125,
+      "n_tests": 20,
+      "is_d4_offset": true
+    },
+    "1000": {
+      "distance_tokens": 1000,
+      "accuracy_10way": 0.1,
+      "mean_rank": 6883.6,
+      "mean_log_prob": -11.75234375,
+      "n_tests": 20,
+      "is_d4_offset": false
+    },
+    "1024": {
+      "distance_tokens": 1024,
+      "accuracy_10way": 0.1,
+      "mean_rank": 5919.0,
+      "mean_log_prob": -11.3734375,
+      "n_tests": 20,
+      "is_d4_offset": true
+    },
+    "1250": {
+      "distance_tokens": 1250,
+      "accuracy_10way": 0.1,
+      "mean_rank": 7211.5,
+      "mean_log_prob": -11.7646484375,
+      "n_tests": 20,
+      "is_d4_offset": false
+    },
+    "1280": {
+      "distance_tokens": 1280,
+      "accuracy_10way": 0.1,
+      "mean_rank": 6628.2,
+      "mean_log_prob": -11.5900390625,
+      "n_tests": 20,
+      "is_d4_offset": false
+    },
+    "1500": {
+      "distance_tokens": 1500,
+      "accuracy_10way": 0.1,
+      "mean_rank": 6657.6,
+      "mean_log_prob": -11.5833984375,
+      "n_tests": 20,
+      "is_d4_offset": false
+    },
+    "1536": {
+      "distance_tokens": 1536,
+      "accuracy_10way": 0.1,
+      "mean_rank": 7215.5,
+      "mean_log_prob": -11.780859375,
+      "n_tests": 20,
+      "is_d4_offset": true
+    },
+    "1700": {
+      "distance_tokens": 1700,
+      "accuracy_10way": 0.1,
+      "mean_rank": 6926.45,
+      "mean_log_prob": -11.7740234375,
+      "n_tests": 20,
+      "is_d4_offset": false
+    },
+    "1850": {
+      "distance_tokens": 1850,
+      "accuracy_10way": 0.1,
+      "mean_rank": 6608.1,
+      "mean_log_prob": -11.5275390625,
+      "n_tests": 20,
+      "is_d4_offset": false
+    }
+  },
+  "baseline_accuracy": 0.1,
+  "d4_offsets_tested": [
+    4,
+    8,
+    12,
+    16,
+    24,
+    32,
+    48,
+    64,
+    96,
+    128,
+    192,
+    256,
+    384,
+    512,
+    768,
+    1024,
+    1536
+  ],
+  "non_d4_offsets_tested": [
+    5,
+    10,
+    20,
+    40,
+    50,
+    80,
+    100,
+    160,
+    200,
+    300,
+    320,
+    500,
+    640,
+    750,
+    1000,
+    1250,
+    1280,
+    1500,
+    1700,
+    1850
+  ],
+  "passkey_words": [
+    "apple",
+    "tiger",
+    "robot",
+    "ocean",
+    "piano",
+    "eagle",
+    "storm",
+    "river",
+    "crown",
+    "flame",
+    "ghost",
+    "clock",
+    "brick",
+    "frost",
+    "sword",
+    "light",
+    "brush",
+    "stone",
+    "shelf",
+    "grape"
+  ],
+  "test_format": "completion: \"the secret word is X. [filler] the secret word is\"",
+  "hypothesis": "Does DWARF wave field preserve specific content vs distributional coherence?"
+}

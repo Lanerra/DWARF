@@ -1,0 +1,38 @@
+{
+  "test_ppl": 85.12987339520215,
+  "test_loss": 4.444178012701181,
+  "best_val_ppl": 85.20572676053376,
+  "best_epoch": 10,
+  "total_time": 13760.417639017105,
+  "scale_summary": {
+    "gains_mean_per_scale": [
+      0.15696624666452408,
+      0.10772931699951489,
+      0.10219697902599971,
+      0.08770161991318066,
+      0.08463226134578387,
+      0.08017492418487866,
+      0.07773817827304204,
+      0.07674440865715344,
+      0.07567397380868594,
+      0.06743230173985164,
+      0.08300979187091191
+    ],
+    "dominant_scale": 0,
+    "dominant_scale_rf_tokens": 4,
+    "identity_bypass_mean": 0.03575879907778775,
+    "note": "global learned prior (actual gains are position-specific)"
+  },
+  "description": "Outer-product wave field (K\u2297V), Q @ F gather, causal D4 DWT + Q-scale gains (condI)",
+  "architecture": {
+    "n_scales": 11,
+    "filter": "D4 (fixed)",
+    "field_shape": "none (efficient gather; no K\u2297V tensor)",
+    "deposit": "K \u2297 V  (einsum bhni,bhnj->bhnij)",
+    "gather": "Q @ F  (einsum bhni,bhnij->bhnj)",
+    "identity_bypass": "F_prop += softplus(param) * F_0 per head",
+    "q_scale_gains": "per-position softmax (from condI)",
+    "cross_head_coupling": "removed (minimal delta from condI)",
+    "extra_params_vs_condI": 48
+  }
+}
