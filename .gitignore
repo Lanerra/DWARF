@@ -44,3 +44,4 @@ outputs/
 # HuggingFace cache
 .cache/
 verification/target/
+rag/

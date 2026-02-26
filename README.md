@@ -181,7 +181,7 @@ A ChromaDB semantic index over all DWARF documentation is maintained at `rag/chr
 
 ```bash
 # Query
-cd /home/dlewis3/Desktop/AI/DWARF
+cd /home/Lanerra/Desktop/AI/DWARF
 .venv/bin/python3 rag/query.py "coverage density collapse attractor"
 .venv/bin/python3 rag/query.py "condN epoch 10 results" --type training_log
 .venv/bin/python3 rag/query.py "ELU normalizer mechanism" --n 8
@@ -208,7 +208,7 @@ cd /home/dlewis3/Desktop/AI/DWARF
 ### Local GPU
 
 ```bash
-git clone https://github.com/dlewis3/DWARF.git
+git clone https://github.com/Lanerra/DWARF.git
 cd DWARF
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
@@ -227,7 +227,7 @@ python -u benchmarks/train_2048_condP.py 2>&1 | tee benchmarks/logs/condP_run.lo
 ### RunPod
 
 ```bash
-git clone https://github.com/dlewis3/DWARF.git
+git clone https://github.com/Lanerra/DWARF.git
 cd DWARF
 bash runpod_setup.sh
 
