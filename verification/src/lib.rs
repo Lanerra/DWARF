@@ -25,8 +25,9 @@
 //! (3 known failures in cond_d_db4: KdV instability, correct behavior)
 
 pub mod cond_d_db4;
-pub mod cond_m;
+pub mod cond_m;            // NOTE: tests hypothetical gated-mixture condM (never built); see condm_actual
 pub mod cond_o;
+pub mod condm_actual;      // Tests the ACTUAL condM (5:1 interleaving, trained Feb 27 2026, 54.529 PPL)
 pub mod condm_sawtooth;
 pub mod condl_ablation;
 pub mod coverage_attractor;
