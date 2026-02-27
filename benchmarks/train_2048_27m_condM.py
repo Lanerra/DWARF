@@ -1,47 +1,36 @@
 """
-DWARF Attention — Condition M: condN 5:1 Hybrid (5 DSQG + 1 Full Attention)
+DWARF 27M condM — Scaling Validation: 5:1 Hybrid at 27M Parameters
 
-MOTIVATION
-----------
-All three frontier models (Gemini Pro 3.1, GPT-5.2-Thinking, Claude Opus 4.6)
-recommended testing a hybrid architecture where most layers use condN (efficient
-DSQG) and one layer uses full causal softmax attention.
+Scales condM from 13M (D=256) to 27M (D=400) while preserving the hybrid
+architecture: 5 DSQG layers (condN offsets, 44) + 1 full causal attention
+at layer 5.
 
-Production references for hybrid linear/efficient + full attention architectures:
-  - Gemma 3 (Google, 2025):    5:1 local-sliding-window : global-attention (same ratio as condM)
-  - Qwen3.5 (Alibaba, Feb 2026): 3:1 Gated DeltaNet : Gated Attention hybrid
-  - MiniMax-01 (2024):         7:1 Lightning Attention : full attention (MiniMax later reverted
-                               to full attention for M2 citing multi-hop reasoning deficits)
-  Theory: Ye et al. arXiv:2602.01763 (Feb 2026) proves expressiveness hierarchy:
-          full attention > hybrid linear-full for sequential function composition.
+PURPOSE
+-------
+Provides an intermediary data point between 13M condM (54.529 PPL) and the
+planned 85M condM run. The 27M condM allows:
+  1. Scaling law fit: do 13M→27M→85M condM gains follow a consistent curve?
+  2. Comparison vs 27M condP (52.756 PPL): does the condM architectural advantage
+     persist at larger scale? (13M condM beats 13M condP by ~10 PPL despite
+     having fewer parameters; same gap at 27M would confirm scaling trend.)
+  3. Comparison vs 27M standard baseline (TBD): is condM PPL gain vs standard
+     transformer maintained at 27M scale?
 
-Reasoning: condN's sparse gather (37-74 offsets) misses some positions entirely.
-One full attention layer provides a "global read-out" that can access any token
-in the 2048-length context and route information from skipped spans (33-63,
-65-95, etc.) into the condN layers.
+ARCHITECTURE
+  D=400, H=8, d_head=50, L=6, FFN=1600 (same dimensions as 27M condP)
+  Layers 0-4: condN DSQG (dense-32 + dyadic, 44 offsets, interference every 3rd)
+  Layer   5:  Full O(N²) causal attention (same as 13M condM)
+  ~27M parameters (same as 27M condP)
 
-condM ARCHITECTURE: 5 condN Layers + 1 Full Causal Attention (5:1 hybrid)
-  Layers 0-4: condN DSQG (dense-32 + dyadic, 44 offsets, ALiBi, interference)
-  Layer   5:  Standard full causal softmax attention (attends to all N positions)
-              with learned relative position bias (no ALiBi constraint)
+HYPERPARAMETERS
+  B=32, GA=1 (H100 native; same effective batch as 13M, same as 27M condP)
+  LR=3e-4, cosine, AdamW, 10 epochs, 100K docs
 
-  The full attention layer is placed last (layer 5) to serve as a "global
-  read-out" over the rich condN-processed context. Alternative: place at
-  layer 2 (middle); controllable via FULL_ATTN_LAYER constant.
-
-  Memory cost: the full attention layer requires O(N²) memory at training time.
-  At N=2048, B=8: ~268M attention weights per head × 8 heads = feasible on 4090.
-  At inference: only this one layer requires O(N) KV cache (grows with context).
-
-EXPECTED RESULT
-  condN test PPL: ~70.7 (ep10 projected)
-  condM hypothesis: -3 to -6 PPL from global read-out, potentially more
-  If condM >> condN: full attention provides critical information; hybrid is the path
-  If condM ≈ condN: condN's sparse coverage is sufficient; pure DSQG is the architecture
-
-Run:
-  CUDA_VISIBLE_DEVICES=0 .venv/bin/python3 -u benchmarks/train_2048_condM.py \
-    2>&1 | tee benchmarks/logs/condM_run.log
+Run on RunPod H100:
+  tmux new-session -d -s condM27m -x 220 -y 50
+  tmux send-keys -t condM27m \\
+    "cd /workspace/DWARF && python3 -u benchmarks/train_2048_27m_condM.py \\
+    2>&1 | tee benchmarks/logs/27m_condM_run.log" Enter
 """
 
 import json, math, os, sys, time
@@ -54,23 +43,22 @@ import torch.utils.checkpoint
 
 VOCAB_SIZE      = 32000
 NUM_EPOCHS      = 10
-BATCH_SIZE      = 8
-GRAD_ACCUM      = 4
+BATCH_SIZE      = 32     # H100: B=32 GA=1 = effective batch 32 (same as 13M B=8 GA=4)
+GRAD_ACCUM      = 1
 LR              = 3e-4
 MAX_SEQ_LEN     = 2048
 NUM_DOCS        = 100_000
 BPE_TRAIN_DOCS  = 50_000
 
-EMBEDDING_DIM   = 256
+EMBEDDING_DIM   = 400    # 13M: 256 → 27M: 400 (same as 27M condP)
 NUM_LAYERS      = 6
-NUM_HEADS       = 8
-FFN_DIM         = 1024
+NUM_HEADS       = 8      # d_head = 50
+FFN_DIM         = 1600   # 4 × EMBEDDING_DIM (same as 27M condP)
 INTERFERENCE    = 3
 
-# Which layer index gets full attention (0-indexed)
-# 5 = last layer (global read-out after condN processing)
-# 2 = middle layer (global context injected mid-network)
-FULL_ATTN_LAYER = 5
+FULL_ATTN_LAYER = 5      # last layer; same as 13M condM
+
+CHECKPOINT_DIR  = '2048_27m_condM_checkpoints'
 
 # ─── condN offset set (same as condN) ────────────────────────────────────────
 
@@ -544,7 +532,7 @@ def train(model, train_data, val_data, test_data, tokenizer,
     ss = model.attn_summary()
 
     print('\n' + '=' * 70)
-    print('  condM ABLATION SUMMARY')
+    print('  27M condM ABLATION SUMMARY')
     print('=' * 70)
     print(f'  {"Standard transformer 13M (reference)":<52} {"~64-68":>8}')
     print(f'  {"condN (pure DSQG, 44 offsets)":<52} {"~70.7":>8}')
@@ -578,14 +566,14 @@ def train(model, train_data, val_data, test_data, tokenizer,
 def main():
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     print('=' * 70)
-    print(f'  DWARF condM — 5:1 Hybrid (5 condN DSQG + 1 Full Causal Attention)')
+    print(f'  DWARF 27M condM — 5:1 Hybrid (5 condN DSQG + 1 Full Causal Attention)')
+    print(f'  D={EMBEDDING_DIM}, H={NUM_HEADS}, d_head={EMBEDDING_DIM//NUM_HEADS}, L={NUM_LAYERS}, FFN={FFN_DIM}')
     print(f'  Full attention at layer {FULL_ATTN_LAYER} (0-indexed)')
     print('=' * 70)
     if torch.cuda.is_available():
         print(f'  GPU: {torch.cuda.get_device_name(0)}  '
               f'({torch.cuda.get_device_properties(0).total_memory/1e9:.1f} GB)')
-    print(f'  Layers 0-{NUM_LAYERS-1}: condN DSQG (44 offsets) except layer {FULL_ATTN_LAYER} (full O(N²))')
-    print(f'  Production refs: Gemma 3 (5:1 SWA:global), Qwen3.5 (3:1 DeltaNet:attn), MiniMax-01 (7:1)')
+    print(f'  Checkpoint → {CHECKPOINT_DIR}/')
 
     os.makedirs('benchmarks/logs', exist_ok=True)
 
@@ -631,10 +619,10 @@ def main():
     if not causality_check(model, device): return
 
     results = train(model, train_data, val_data, test_data, tokenizer,
-                    save_dir='2048_condM_checkpoints', device=device)
+                    save_dir=CHECKPOINT_DIR, device=device)
 
     script_dir   = os.path.dirname(os.path.abspath(__file__))
-    results_path = os.path.join(script_dir, '2048_condM_results.json')
+    results_path = os.path.join(script_dir, '2048_27m_condM_results.json')
     with open(results_path, 'w') as fp:
         json.dump(results, fp, indent=2)
     print(f'\n  Results → {results_path}')

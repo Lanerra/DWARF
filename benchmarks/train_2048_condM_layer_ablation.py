@@ -1,50 +1,35 @@
 """
-DWARF Attention — Condition M: condN 5:1 Hybrid (5 DSQG + 1 Full Attention)
+DWARF condM Layer-Position Ablation
 
-MOTIVATION
-----------
-All three frontier models (Gemini Pro 3.1, GPT-5.2-Thinking, Claude Opus 4.6)
-recommended testing a hybrid architecture where most layers use condN (efficient
-DSQG) and one layer uses full causal softmax attention.
+Tests where in the 6-layer stack the single full causal attention layer
+should sit. This directly tests the "funnel hypothesis":
+  - If funnel is real: layer 5 (last) is best — DSQG preprocessing produces
+    richer inputs to full attention than raw embeddings would.
+  - If global-lookup-recovery is all that matters: position shouldn't matter much.
 
-Production references for hybrid linear/efficient + full attention architectures:
-  - Gemma 3 (Google, 2025):    5:1 local-sliding-window : global-attention (same ratio as condM)
-  - Qwen3.5 (Alibaba, Feb 2026): 3:1 Gated DeltaNet : Gated Attention hybrid
-  - MiniMax-01 (2024):         7:1 Lightning Attention : full attention (MiniMax later reverted
-                               to full attention for M2 citing multi-hop reasoning deficits)
-  Theory: Ye et al. arXiv:2602.01763 (Feb 2026) proves expressiveness hierarchy:
-          full attention > hybrid linear-full for sequential function composition.
+POSITIONS TESTED (run with --full_layer N):
+  --full_layer 0  →  1 full attn + 5 DSQG  (attention first, no preprocessing)
+  --full_layer 2  →  2 DSQG + 1 full attn + 3 DSQG  (middle injection)
+  --full_layer 4  →  4 DSQG + 1 full attn + 1 DSQG  (near-last)
+  --full_layer 5  →  5 DSQG + 1 full attn            (last; original condM)
 
-Reasoning: condN's sparse gather (37-74 offsets) misses some positions entirely.
-One full attention layer provides a "global read-out" that can access any token
-in the 2048-length context and route information from skipped spans (33-63,
-65-95, etc.) into the condN layers.
+Baseline condM (layer 5) test PPL: 54.529.
+If funnel hypothesis is correct, expect: layer 5 < layer 4 < layer 2 < layer 0.
 
-condM ARCHITECTURE: 5 condN Layers + 1 Full Causal Attention (5:1 hybrid)
-  Layers 0-4: condN DSQG (dense-32 + dyadic, 44 offsets, ALiBi, interference)
-  Layer   5:  Standard full causal softmax attention (attends to all N positions)
-              with learned relative position bias (no ALiBi constraint)
+Run (4 instances, each ~2h on RTX 4090):
+  CUDA_VISIBLE_DEVICES=0 .venv/bin/python3 -u benchmarks/train_2048_condM_layer_ablation.py \\
+    --full_layer 0 2>&1 | tee benchmarks/logs/condM_layer0_run.log
+  CUDA_VISIBLE_DEVICES=0 .venv/bin/python3 -u benchmarks/train_2048_condM_layer_ablation.py \\
+    --full_layer 2 2>&1 | tee benchmarks/logs/condM_layer2_run.log
+  CUDA_VISIBLE_DEVICES=0 .venv/bin/python3 -u benchmarks/train_2048_condM_layer_ablation.py \\
+    --full_layer 4 2>&1 | tee benchmarks/logs/condM_layer4_run.log
 
-  The full attention layer is placed last (layer 5) to serve as a "global
-  read-out" over the rich condN-processed context. Alternative: place at
-  layer 2 (middle); controllable via FULL_ATTN_LAYER constant.
-
-  Memory cost: the full attention layer requires O(N²) memory at training time.
-  At N=2048, B=8: ~268M attention weights per head × 8 heads = feasible on 4090.
-  At inference: only this one layer requires O(N) KV cache (grows with context).
-
-EXPECTED RESULT
-  condN test PPL: ~70.7 (ep10 projected)
-  condM hypothesis: -3 to -6 PPL from global read-out, potentially more
-  If condM >> condN: full attention provides critical information; hybrid is the path
-  If condM ≈ condN: condN's sparse coverage is sufficient; pure DSQG is the architecture
-
-Run:
-  CUDA_VISIBLE_DEVICES=0 .venv/bin/python3 -u benchmarks/train_2048_condM.py \
-    2>&1 | tee benchmarks/logs/condM_run.log
+  (layer 5 already trained — condM result is 54.529 PPL)
 """
 
-import json, math, os, sys, time
+import argparse
+
+import json, math, os, sys, time, argparse
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -67,10 +52,8 @@ NUM_HEADS       = 8
 FFN_DIM         = 1024
 INTERFERENCE    = 3
 
-# Which layer index gets full attention (0-indexed)
-# 5 = last layer (global read-out after condN processing)
-# 2 = middle layer (global context injected mid-network)
-FULL_ATTN_LAYER = 5
+# Which layer index gets full attention — overridden by --full_layer arg at runtime
+FULL_ATTN_LAYER = 5  # default; will be set from args in main()
 
 # ─── condN offset set (same as condN) ────────────────────────────────────────
 
@@ -544,7 +527,7 @@ def train(model, train_data, val_data, test_data, tokenizer,
     ss = model.attn_summary()
 
     print('\n' + '=' * 70)
-    print('  condM ABLATION SUMMARY')
+    print(f'  condM LAYER-POSITION ABLATION — full_attn @ layer {FULL_ATTN_LAYER}')
     print('=' * 70)
     print(f'  {"Standard transformer 13M (reference)":<52} {"~64-68":>8}')
     print(f'  {"condN (pure DSQG, 44 offsets)":<52} {"~70.7":>8}')
@@ -576,18 +559,34 @@ def train(model, train_data, val_data, test_data, tokenizer,
 # ─── Main ─────────────────────────────────────────────────────────────────────
 
 def main():
+    global FULL_ATTN_LAYER  # allow overriding the module-level constant
+
+    parser = argparse.ArgumentParser(description='condM layer-position ablation')
+    parser.add_argument('--full_layer', type=int, default=5,
+                        choices=[0, 1, 2, 3, 4, 5],
+                        help='Which layer index receives full O(N²) causal attention (0-indexed, default 5=last)')
+    args = parser.parse_args()
+    FULL_ATTN_LAYER = args.full_layer
+
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    n_dsqg = NUM_LAYERS - 1
     print('=' * 70)
-    print(f'  DWARF condM — 5:1 Hybrid (5 condN DSQG + 1 Full Causal Attention)')
-    print(f'  Full attention at layer {FULL_ATTN_LAYER} (0-indexed)')
+    print(f'  DWARF condM Layer-Position Ablation')
+    print(f'  Full attention at layer {FULL_ATTN_LAYER} (0-indexed)  |  {n_dsqg} DSQG layers')
     print('=' * 70)
     if torch.cuda.is_available():
         print(f'  GPU: {torch.cuda.get_device_name(0)}  '
               f'({torch.cuda.get_device_properties(0).total_memory/1e9:.1f} GB)')
-    print(f'  Layers 0-{NUM_LAYERS-1}: condN DSQG (44 offsets) except layer {FULL_ATTN_LAYER} (full O(N²))')
-    print(f'  Production refs: Gemma 3 (5:1 SWA:global), Qwen3.5 (3:1 DeltaNet:attn), MiniMax-01 (7:1)')
+    dsqg_before = FULL_ATTN_LAYER
+    dsqg_after  = NUM_LAYERS - 1 - FULL_ATTN_LAYER
+    print(f'  Layer stack: {dsqg_before} DSQG → 1 full attn (layer {FULL_ATTN_LAYER}) → {dsqg_after} DSQG')
+    print(f'  Funnel hypothesis: layer 5 (last) should be best; layer 0 should be worst')
 
     os.makedirs('benchmarks/logs', exist_ok=True)
+
+    # Layer-specific checkpoint dir and result file
+    ckpt_dir_name    = f'2048_condM_layer{FULL_ATTN_LAYER}_checkpoints'
+    result_file_name = f'benchmarks/2048_condM_layer{FULL_ATTN_LAYER}_results.json'
 
     splits   = load_data(NUM_DOCS)
     _script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -631,10 +630,10 @@ def main():
     if not causality_check(model, device): return
 
     results = train(model, train_data, val_data, test_data, tokenizer,
-                    save_dir='2048_condM_checkpoints', device=device)
+                    save_dir=ckpt_dir_name, device=device)
 
     script_dir   = os.path.dirname(os.path.abspath(__file__))
-    results_path = os.path.join(script_dir, '2048_condM_results.json')
+    results_path = os.path.join(script_dir, f'2048_condM_layer{FULL_ATTN_LAYER}_results.json')
     with open(results_path, 'w') as fp:
         json.dump(results, fp, indent=2)
     print(f'\n  Results → {results_path}')
