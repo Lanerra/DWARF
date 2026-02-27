@@ -49,6 +49,12 @@ _DYADIC_LONG_RANGE = [48, 64, 96, 128, 192, 256, 384, 512, 768, 1024, 1536]
 _COND_N_OFFSETS    = sorted(set(range(0, _DENSE_LOCAL_W + 1)) |
                              set(_DYADIC_LONG_RANGE))
 
+_DENSE_LOCAL_W_P     = 64
+_DYADIC_LONG_RANGE_P = [96, 128, 192, 256, 384, 512, 768, 1024, 1536]
+_COND_P_OFFSETS      = sorted(set(range(0, _DENSE_LOCAL_W_P + 1)) |
+                               set(_DYADIC_LONG_RANGE_P))
+assert len(_COND_P_OFFSETS) == 74, f"Expected 74 condP offsets, got {len(_COND_P_OFFSETS)}"
+
 
 # ─── Model (condN, copy of architecture for loading) ─────────────────────────
 
@@ -120,13 +126,14 @@ class FFN(nn.Module):
 
 class DSQGBlock(nn.Module):
     def __init__(self, embedding_dim, num_heads, ffn_dim, seq_len,
-                 dropout=0.1, interference=False):
+                 dropout=0.1, interference=False, offsets=None):
         super().__init__()
         self.interference = interference
         self.norm1 = nn.LayerNorm(embedding_dim)
         self.norm2 = nn.LayerNorm(embedding_dim)
         self.attn  = DSQGAttentionN(embedding_dim, num_heads,
-                                     seq_len=seq_len, dropout=dropout)
+                                     seq_len=seq_len, dropout=dropout,
+                                     offsets=offsets)
         self.ffn   = FFN(embedding_dim, ffn_dim, dropout)
         if interference:
             self.inter_norm = nn.LayerNorm(embedding_dim)
@@ -154,7 +161,7 @@ class CondNTransformer(nn.Module):
     def __init__(self, vocab_size=VOCAB_SIZE, embedding_dim=EMBEDDING_DIM,
                  num_layers=NUM_LAYERS, num_heads=NUM_HEADS, ffn_dim=FFN_DIM,
                  seq_len=MAX_SEQ_LEN, interference_interval=INTERFERENCE,
-                 dropout=0.1):
+                 dropout=0.1, offsets=None):
         super().__init__()
         self.embedding = nn.Embedding(vocab_size, embedding_dim)
         self.pos_embed = nn.Embedding(seq_len + 2, embedding_dim)
@@ -162,7 +169,8 @@ class CondNTransformer(nn.Module):
         self.blocks    = nn.ModuleList([
             DSQGBlock(embedding_dim, num_heads, ffn_dim, seq_len,
                       dropout=dropout,
-                      interference=(i % interference_interval == interference_interval - 1))
+                      interference=(i % interference_interval == interference_interval - 1),
+                      offsets=offsets)
             for i in range(num_layers)
         ])
         self.norm = nn.LayerNorm(embedding_dim)
@@ -264,6 +272,8 @@ def main():
     parser.add_argument('--tokenizer',  default='benchmarks/2048_condI_tokenizer.json')
     parser.add_argument('--output',     default='benchmarks/2048_condN_temp_sweep.json')
     parser.add_argument('--max_new',    type=int, default=200)
+    parser.add_argument('--arch',       choices=['condN', 'condP'], default='condN',
+                        help='Model architecture variant (condN=44 offsets, condP=74 offsets)')
     args = parser.parse_args()
 
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -288,13 +298,14 @@ def main():
         print('  Run training first, or pass --checkpoint <path>')
         sys.exit(1)
 
-    model = CondNTransformer().to(device)
+    arch_offsets = _COND_P_OFFSETS if args.arch == 'condP' else _COND_N_OFFSETS
+    model = CondNTransformer(offsets=arch_offsets).to(device)
     state = torch.load(ckpt_path, map_location=device, weights_only=True)
     model.load_state_dict(state)
     model.eval()
     n_params = sum(p.numel() for p in model.parameters())
     print(f'Loaded checkpoint: {ckpt_path}')
-    print(f'Model: {n_params:,} parameters, condN architecture ({len(_COND_N_OFFSETS)} offsets)')
+    print(f'Model: {n_params:,} parameters, {args.arch} architecture ({len(arch_offsets)} offsets)')
 
     # ── Prompts ───────────────────────────────────────────────────────────────
     PROMPTS = [
@@ -321,7 +332,7 @@ def main():
     all_results = {}
 
     print('\n' + '=' * 70)
-    print('  TEMPERATURE SWEEP — condN best checkpoint')
+    print(f'  TEMPERATURE SWEEP — {args.arch} checkpoint')
     print('=' * 70)
 
     for cfg in CONFIGS:
@@ -387,7 +398,8 @@ def main():
     output = {
         'checkpoint':   args.checkpoint,
         'model_params': n_params,
-        'n_offsets':    len(_COND_N_OFFSETS),
+        'arch':         args.arch,
+        'n_offsets':    len(arch_offsets),
         'max_new':      args.max_new,
         'configs':      CONFIGS,
         'results':      all_results,
