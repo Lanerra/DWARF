@@ -1,45 +1,38 @@
 """
-DWARF Attention — Condition M: condN 5:1 Hybrid (5 DSQG + 1 Full Attention)
+DWARF Attention — 27M Condition P: Scaling Validation
 
 MOTIVATION
 ----------
-All three frontier models (Gemini Pro 3.1, GPT-5.2-Thinking, Claude Opus 4.6)
-recommended testing a hybrid architecture where most layers use condN (efficient
-DSQG) and one layer uses full causal softmax attention.
+condP (13.5M) closed the condN→baseline gap from 6.73 to 0.99 PPL.
+This run validates whether the two-thirds closure pattern holds at scale.
 
-Production references:
-  - MiniMax-01:    "one transformer block follows every seven transnormer blocks"
-                   (7:1 ratio achieves GPT-4o level performance)
-  - Griffin/Jamba: explicit interleaving of local/linear layers with full attention
-  - Samba:         "keeps complexity strictly linear by pairing Mamba with SWA"
+Scaling series: 13.5M → 27M (this) → 85M
+  - 13.5M condP: test PPL 65.057  (+0.99 vs baseline 64.07)
+  - 27M condP (this run): predicts ~50-55 PPL if gap pattern holds
+  - 85M condP (prior condB): test PPL 58.1 (+0.4 vs condA 57.7)
 
-Reasoning: condN's sparse gather (37-74 offsets) misses some positions entirely.
-One full attention layer provides a "global read-out" that can access any token
-in the 2048-length context and route information from skipped spans (33-63,
-65-95, etc.) into the condN layers.
+ARCHITECTURE: identical condP design, wider
+  D=400, H=8 (d_head=50), L=6, FFN=1600
+  Same offsets: {0..64} ∪ {96,128,192,256,384,512,768,1024,1536} = 74
+  Same interference pooling every 3rd layer
+  Same ALiBi-style position bias init
+  Approximate parameter count: ~27M
 
-condM ARCHITECTURE: 5 condN Layers + 1 Full Causal Attention (5:1 hybrid)
-  Layers 0-4: condN DSQG (dense-32 + dyadic, 44 offsets, ALiBi, interference)
-  Layer   5:  Standard full causal softmax attention (attends to all N positions)
-              with learned relative position bias (no ALiBi constraint)
+WHAT CHANGES vs condP 13M
+  - EMBEDDING_DIM 256 → 400
+  - FFN_DIM 1024 → 1600  (maintains 4× ratio)
+  - Checkpoint dir: 2048_27m_condP_checkpoints
+  - Everything else identical: same data, same tokenizer, same optimizer settings
 
-  The full attention layer is placed last (layer 5) to serve as a "global
-  read-out" over the rich condN-processed context. Alternative: place at
-  layer 2 (middle); controllable via FULL_ATTN_LAYER constant.
+Run on RunPod (H100/A100):
+  tmux new-session -d -s train
+  tmux send-keys -t train \
+    "cd /workspace/DWARF && .venv/bin/python3 -u benchmarks/train_2048_27m_condP.py \
+    2>&1 | tee /workspace/logs/27m_condP_run.log" Enter
 
-  Memory cost: the full attention layer requires O(N²) memory at training time.
-  At N=2048, B=8: ~268M attention weights per head × 8 heads = feasible on 4090.
-  At inference: only this one layer requires O(N) KV cache (grows with context).
-
-EXPECTED RESULT
-  condN test PPL: ~70.7 (ep10 projected)
-  condM hypothesis: -3 to -6 PPL from global read-out, potentially more
-  If condM >> condN: full attention provides critical information; hybrid is the path
-  If condM ≈ condN: condN's sparse coverage is sufficient; pure DSQG is the architecture
-
-Run:
-  CUDA_VISIBLE_DEVICES=0 .venv/bin/python3 -u benchmarks/train_2048_condM.py \
-    2>&1 | tee benchmarks/logs/condM_run.log
+Monitor:
+  tmux attach -t train
+  tail -f /workspace/logs/27m_condP_run.log
 """
 
 import json, math, os, sys, time
@@ -48,7 +41,9 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.utils.checkpoint
 
-# ─── Hyperparameters (identical to condN) ─────────────────────────────────────
+# ─── Hyperparameters ──────────────────────────────────────────────────────────
+# All values identical to 13M condP for fair scaling comparison.
+# Only the model dimensions change.
 
 VOCAB_SIZE      = 32000
 NUM_EPOCHS      = 10
@@ -59,29 +54,35 @@ MAX_SEQ_LEN     = 2048
 NUM_DOCS        = 100_000
 BPE_TRAIN_DOCS  = 50_000
 
-EMBEDDING_DIM   = 256
+# 27M dimensions — same depth, wider
+EMBEDDING_DIM   = 400
 NUM_LAYERS      = 6
-NUM_HEADS       = 8
-FFN_DIM         = 1024
-INTERFERENCE    = 3
+NUM_HEADS       = 8          # d_head = 50
+FFN_DIM         = 1600       # 4 × EMBEDDING_DIM
+INTERFERENCE    = 3          # interference pooling every 3rd layer
 
-# Which layer index gets full attention (0-indexed)
-# 5 = last layer (global read-out after condN processing)
-# 2 = middle layer (global context injected mid-network)
-FULL_ATTN_LAYER = 5
+CHECKPOINT_DIR  = '2048_27m_condP_checkpoints'
+RESULTS_FILE    = 'results/2048_27m_condP_results.json'
 
-# ─── condN offset set (same as condN) ────────────────────────────────────────
+# ─── condP offset set (74 unique offsets — identical to 13M condP) ────────────
+_DENSE_LOCAL_W_P     = 64
+_DYADIC_LONG_RANGE_P = [96, 128, 192, 256, 384, 512, 768, 1024, 1536]
+_COND_P_OFFSETS      = sorted(
+    set(range(0, _DENSE_LOCAL_W_P + 1)) | set(_DYADIC_LONG_RANGE_P))
+assert len(_COND_P_OFFSETS) == 74, f"Expected 74 offsets, got {len(_COND_P_OFFSETS)}"
 
-_DENSE_LOCAL_W     = 32
-_DYADIC_LONG_RANGE = [48, 64, 96, 128, 192, 256, 384, 512, 768, 1024, 1536]
-_COND_N_OFFSETS    = sorted(set(range(0, _DENSE_LOCAL_W + 1)) |
-                             set(_DYADIC_LONG_RANGE))
-assert len(_COND_N_OFFSETS) == 44
+GEN_PROMPTS = [
+    'It was a dark and stormy',
+    'The length of the hypotenuse',
+    'The President of the United',
+    'Once upon a time there was',
+    'The results indicate that',
+]
 
 
-# ─── DSQG Attention (condN, identical to train_2048_condN.py) ────────────────
+# ─── DSQG Attention (condP, parameterised by embedding_dim) ──────────────────
 
-class DSQGAttentionN(nn.Module):
+class DSQGAttentionP(nn.Module):
     def __init__(self, embedding_dim, num_heads, seq_len=2048,
                  offsets=None, dropout=0.1):
         super().__init__()
@@ -91,7 +92,7 @@ class DSQGAttentionN(nn.Module):
         self.seq_len       = seq_len
 
         if offsets is None:
-            offsets = _COND_N_OFFSETS
+            offsets = _COND_P_OFFSETS
         self.register_buffer('offsets', torch.tensor(offsets, dtype=torch.long))
         self.n_offsets = len(offsets)
 
@@ -100,11 +101,12 @@ class DSQGAttentionN(nn.Module):
         self.gate_proj = nn.Linear(embedding_dim, embedding_dim, bias=True)
         nn.init.constant_(self.gate_proj.bias, 2.0)
 
-        alphas = torch.linspace(0.2, 2.0, num_heads)
-        delta_vals = torch.tensor(
+        # ALiBi-style position bias: shape (n_offsets, num_heads)
+        alphas         = torch.linspace(0.2, 2.0, num_heads)
+        delta_vals     = torch.tensor(
             [math.log(1.0 + d) for d in offsets], dtype=torch.float32)
-        pos_bias_init = -delta_vals.unsqueeze(1) * alphas.unsqueeze(0)
-        self.pos_bias = nn.Parameter(pos_bias_init)
+        pos_bias_init  = -delta_vals.unsqueeze(1) * alphas.unsqueeze(0)
+        self.pos_bias  = nn.Parameter(pos_bias_init)
 
         self.dropout = nn.Dropout(dropout)
 
@@ -119,10 +121,12 @@ class DSQGAttentionN(nn.Module):
         v = v.view(B, N, H, HD).permute(0, 2, 1, 3)
 
         scale = HD ** -0.5
+
         K_list, V_list = [], []
         for delta in self.offsets.tolist():
             if delta == 0:
-                K_list.append(k); V_list.append(v)
+                K_list.append(k)
+                V_list.append(v)
             elif delta >= N:
                 K_list.append(torch.zeros_like(k))
                 V_list.append(torch.zeros_like(v))
@@ -131,18 +135,21 @@ class DSQGAttentionN(nn.Module):
                 K_list.append(torch.cat([pad, k[:, :, :N - delta, :]], dim=2))
                 V_list.append(torch.cat([pad, v[:, :, :N - delta, :]], dim=2))
 
-        K_all = torch.stack(K_list, dim=3)
-        V_all = torch.stack(V_list, dim=3)
+        K_all  = torch.stack(K_list, dim=3)   # B, H, N, n_offsets, HD
+        V_all  = torch.stack(V_list, dim=3)
+
         scores = (q.unsqueeze(3) * K_all).sum(-1) * scale
         scores = scores + self.pos_bias.T.unsqueeze(0).unsqueeze(2)
 
-        n_idx = torch.arange(N, device=x.device).unsqueeze(1)
-        d_idx = self.offsets.unsqueeze(0)
+        n_idx         = torch.arange(N, device=x.device).unsqueeze(1)
+        d_idx         = self.offsets.unsqueeze(0)
+        causal_invalid = (n_idx < d_idx)
         scores = scores.masked_fill(
-            (n_idx < d_idx).unsqueeze(0).unsqueeze(0), float('-inf'))
+            causal_invalid.unsqueeze(0).unsqueeze(0), float('-inf'))
 
         alpha = F.softmax(scores, dim=-1)
         out   = (alpha.unsqueeze(-1) * V_all).sum(dim=3)
+
         gathered_flat = out.permute(0, 2, 1, 3).reshape(B, N, D)
         gate = torch.sigmoid(self.gate_proj(x))
         return self.dropout(self.out_proj(gathered_flat * gate))
@@ -157,55 +164,6 @@ class DSQGAttentionN(nn.Module):
         }
 
 
-# ─── Full Causal Self-Attention ───────────────────────────────────────────────
-
-class FullCausalAttention(nn.Module):
-    """
-    Standard full causal softmax attention (O(N²)).
-    Used for the one "global read-out" layer in the hybrid.
-    No ALiBi constraint — uses learned absolute position bias.
-    Uses PyTorch scaled_dot_product_attention with causal mask (flash-attention
-    compatible where available).
-    """
-    def __init__(self, embedding_dim, num_heads, dropout=0.1):
-        super().__init__()
-        self.embedding_dim = embedding_dim
-        self.num_heads     = num_heads
-        self.head_dim      = embedding_dim // num_heads
-
-        self.qkv_proj  = nn.Linear(embedding_dim, 3 * embedding_dim, bias=True)
-        self.out_proj  = nn.Linear(embedding_dim, embedding_dim, bias=True)
-        self.gate_proj = nn.Linear(embedding_dim, embedding_dim, bias=True)
-        nn.init.constant_(self.gate_proj.bias, 2.0)
-        self.dropout_p = dropout
-
-    def forward(self, x):
-        B, N, D = x.shape
-        H, HD   = self.num_heads, self.head_dim
-
-        qkv = self.qkv_proj(x)
-        q, k, v = qkv.split(D, dim=-1)
-        q = q.view(B, N, H, HD).permute(0, 2, 1, 3)
-        k = k.view(B, N, H, HD).permute(0, 2, 1, 3)
-        v = v.view(B, N, H, HD).permute(0, 2, 1, 3)
-
-        # Use PyTorch's efficient attention (flash where available, causal mask)
-        out = F.scaled_dot_product_attention(
-            q, k, v,
-            attn_mask=None,
-            dropout_p=self.dropout_p if self.training else 0.0,
-            is_causal=True)
-
-        out_flat = out.permute(0, 2, 1, 3).reshape(B, N, D)
-        gate = torch.sigmoid(self.gate_proj(x))
-        return F.dropout(self.out_proj(out_flat * gate),
-                         p=self.dropout_p, training=self.training)
-
-    def attn_summary(self):
-        return {'type': 'full_causal', 'pos_bias_abs_mean': 0.0,
-                'pos_bias_abs_max': 0.0, 'pos_bias_mean_per_head': [0.0] * 8}
-
-
 # ─── FFN ─────────────────────────────────────────────────────────────────────
 
 class FFN(nn.Module):
@@ -214,13 +172,14 @@ class FFN(nn.Module):
         self.fc1  = nn.Linear(embedding_dim, ffn_dim)
         self.fc2  = nn.Linear(ffn_dim, embedding_dim)
         self.drop = nn.Dropout(dropout)
+
     def forward(self, x):
         return self.fc2(self.drop(F.gelu(self.fc1(x))))
 
 
-# ─── DSQG Block (condN style) ────────────────────────────────────────────────
+# ─── Block ───────────────────────────────────────────────────────────────────
 
-class DSQGBlock(nn.Module):
+class DSQGBlockP(nn.Module):
     def __init__(self, embedding_dim, num_heads, ffn_dim, seq_len,
                  dropout=0.1, use_checkpoint=True, interference=False):
         super().__init__()
@@ -228,7 +187,7 @@ class DSQGBlock(nn.Module):
         self.interference   = interference
         self.norm1 = nn.LayerNorm(embedding_dim)
         self.norm2 = nn.LayerNorm(embedding_dim)
-        self.attn  = DSQGAttentionN(
+        self.attn  = DSQGAttentionP(
             embedding_dim, num_heads, seq_len=seq_len, dropout=dropout)
         self.ffn   = FFN(embedding_dim, ffn_dim, dropout)
 
@@ -248,59 +207,37 @@ class DSQGBlock(nn.Module):
             x = x + self._attn_fn(x)
 
         if self.interference:
-            xi = self.inter_norm(x)
+            xi    = self.inter_norm(x)
             B, N, D = xi.shape
             counts = torch.arange(1, N + 1, device=xi.device,
                                   dtype=xi.dtype).view(1, N, 1)
-            pool = xi.cumsum(dim=1) / counts
+            pool  = xi.cumsum(dim=1) / counts
             x = x + torch.sigmoid(self.inter_gate(xi)) * self.inter_pool(pool)
 
         x = x + self.ffn(self.norm2(x))
         return x
 
 
-# ─── Full Attention Block ─────────────────────────────────────────────────────
+# ─── 27M Transformer ─────────────────────────────────────────────────────────
 
-class FullAttentionBlock(nn.Module):
-    def __init__(self, embedding_dim, num_heads, ffn_dim, dropout=0.1):
-        super().__init__()
-        self.norm1 = nn.LayerNorm(embedding_dim)
-        self.norm2 = nn.LayerNorm(embedding_dim)
-        self.attn  = FullCausalAttention(embedding_dim, num_heads, dropout)
-        self.ffn   = FFN(embedding_dim, ffn_dim, dropout)
-
-    def forward(self, x):
-        x = x + self.attn(self.norm1(x))
-        x = x + self.ffn(self.norm2(x))
-        return x
-
-
-# ─── condM Transformer (5:1 hybrid) ──────────────────────────────────────────
-
-class CondMTransformer(nn.Module):
+class CondP27MTransformer(nn.Module):
     def __init__(self, vocab_size, embedding_dim, num_layers, num_heads,
-                 ffn_dim, seq_len, full_attn_layer=FULL_ATTN_LAYER,
-                 interference_interval=INTERFERENCE, dropout=0.1):
+                 ffn_dim, seq_len, interference_interval=INTERFERENCE,
+                 dropout=0.1):
         super().__init__()
-        self.embedding      = nn.Embedding(vocab_size, embedding_dim)
-        self.pos_embed      = nn.Embedding(seq_len + 2, embedding_dim)
-        self.drop           = nn.Dropout(dropout)
-        self.full_attn_layer = full_attn_layer
-
-        blocks = []
-        for i in range(num_layers):
-            if i == full_attn_layer:
-                blocks.append(FullAttentionBlock(
-                    embedding_dim, num_heads, ffn_dim, dropout))
-            else:
-                blocks.append(DSQGBlock(
-                    embedding_dim, num_heads, ffn_dim, seq_len,
-                    dropout=dropout, use_checkpoint=True,
-                    interference=(i % interference_interval == interference_interval - 1)))
-        self.blocks = nn.ModuleList(blocks)
-        self.norm   = nn.LayerNorm(embedding_dim)
-        self.out    = nn.Linear(embedding_dim, vocab_size, bias=False)
-        self.out.weight = self.embedding.weight
+        self.embedding = nn.Embedding(vocab_size, embedding_dim)
+        self.pos_embed = nn.Embedding(seq_len + 2, embedding_dim)
+        self.drop      = nn.Dropout(dropout)
+        self.blocks    = nn.ModuleList([
+            DSQGBlockP(
+                embedding_dim, num_heads, ffn_dim, seq_len,
+                dropout=dropout, use_checkpoint=True,
+                interference=(i % interference_interval == interference_interval - 1))
+            for i in range(num_layers)
+        ])
+        self.norm = nn.LayerNorm(embedding_dim)
+        self.out  = nn.Linear(embedding_dim, vocab_size, bias=False)
+        self.out.weight = self.embedding.weight   # weight tying
         self._init_weights()
 
     def _init_weights(self):
@@ -311,8 +248,7 @@ class CondMTransformer(nn.Module):
             elif isinstance(m, nn.Embedding):
                 nn.init.normal_(m.weight, 0, 0.02)
         for block in self.blocks:
-            if hasattr(block, 'attn') and hasattr(block.attn, 'gate_proj'):
-                nn.init.constant_(block.attn.gate_proj.bias, 2.0)
+            nn.init.constant_(block.attn.gate_proj.bias, 2.0)
 
     def forward(self, idx):
         B, N = idx.shape
@@ -326,11 +262,7 @@ class CondMTransformer(nn.Module):
         return sum(p.numel() for p in self.parameters())
 
     def attn_summary(self):
-        dsqg_blocks = [b for b in self.blocks if isinstance(b, DSQGBlock)]
-        if not dsqg_blocks:
-            return {'pos_bias_abs_mean': 0.0, 'pos_bias_abs_max': 0.0,
-                    'pos_bias_mean_per_head': [0.0] * NUM_HEADS}
-        summaries = [b.attn.attn_summary() for b in dsqg_blocks]
+        summaries = [b.attn.attn_summary() for b in self.blocks]
         n = len(summaries)
         return {
             'pos_bias_abs_mean':      sum(s['pos_bias_abs_mean'] for s in summaries) / n,
@@ -342,7 +274,7 @@ class CondMTransformer(nn.Module):
         }
 
 
-# ─── Data utilities (identical to condN) ─────────────────────────────────────
+# ─── Data utilities ───────────────────────────────────────────────────────────
 
 class BPETokenizerWrapper:
     def __init__(self, tok): self.tokenizer = tok
@@ -404,7 +336,7 @@ def generate(model, tokenizer, prompts, device, max_new=150,
                            dtype=torch.long, device=device)
         with torch.no_grad():
             for _ in range(max_new):
-                logits = model(ids[:, -MAX_SEQ_LEN:])
+                logits      = model(ids[:, -MAX_SEQ_LEN:])
                 logits_last = logits[0, -1]
                 if temperature <= 0.01:
                     next_id = logits_last.argmax()
@@ -444,7 +376,7 @@ def causality_check(model, device):
 # ─── Training loop ────────────────────────────────────────────────────────────
 
 def train(model, train_data, val_data, test_data, tokenizer,
-          save_dir='2048_condM_checkpoints', device='cuda'):
+          save_dir=CHECKPOINT_DIR, device='cuda'):
     os.makedirs(save_dir, exist_ok=True)
     optimizer = torch.optim.AdamW(
         model.parameters(), lr=LR, weight_decay=0.1, betas=(0.9, 0.95))
@@ -453,14 +385,6 @@ def train(model, train_data, val_data, test_data, tokenizer,
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
         optimizer, T_max=total_steps)
     scaler = torch.amp.GradScaler('cuda')
-
-    GEN_PROMPTS = [
-        'It was a dark and stormy',
-        'The length of the hypotenuse',
-        'The President of the United',
-        'Once upon a time there was',
-        'The results indicate that',
-    ]
 
     best_val_loss, best_val_ppl, best_epoch = float('inf'), float('inf'), 0
     t0 = time.time()
@@ -489,7 +413,8 @@ def train(model, train_data, val_data, test_data, tokenizer,
             scheduler.step(); step += 1
 
             if step % 200 == 0:
-                print(f'  Step {step}/{steps_per_epoch} | Loss {loss.item() * GRAD_ACCUM:.4f}')
+                loss_val = loss.item() * GRAD_ACCUM
+                print(f'  Step {step}/{steps_per_epoch} | Loss {loss_val:.4f}')
 
         train_loss = loss.item() * GRAD_ACCUM
         val_loss   = evaluate(model, val_data, BATCH_SIZE, device)
@@ -509,7 +434,7 @@ def train(model, train_data, val_data, test_data, tokenizer,
         head_means  = ss['pos_bias_mean_per_head']
         most_local  = int(max(range(NUM_HEADS), key=lambda h: abs(head_means[h])))
         most_global = int(min(range(NUM_HEADS), key=lambda h: abs(head_means[h])))
-        print(f'  DSQG pos-bias: |mean|={ss["pos_bias_abs_mean"]:.4f} '
+        print(f'  Pos-bias: |mean|={ss["pos_bias_abs_mean"]:.4f} '
               f'|max|={ss["pos_bias_abs_max"]:.4f} '
               f'most-local=h{most_local} most-global=h{most_global}')
 
@@ -521,13 +446,14 @@ def train(model, train_data, val_data, test_data, tokenizer,
         print('  ──')
         sys.stdout.flush()
 
-    # Final test + temperature sweep
+    # ── Final test eval on best checkpoint ───────────────────────────────────
     model.load_state_dict(torch.load(os.path.join(save_dir, 'best.pt'),
                                      weights_only=True))
     test_loss = evaluate(model, test_data, BATCH_SIZE, device)
     test_ppl  = math.exp(min(test_loss, 20))
-    print(f'\n  condM TEST: PPL {test_ppl:.1f} | Loss {test_loss:.4f}')
+    print(f'\n  27M condP TEST: PPL {test_ppl:.3f} | Loss {test_loss:.4f}')
 
+    # Temperature sweep
     print('\n  ── Temperature sweep (best checkpoint) ──')
     sweep_results = {}
     for temp in [0.0, 0.5, 0.7, 1.0]:
@@ -541,33 +467,62 @@ def train(model, train_data, val_data, test_data, tokenizer,
 
     ss = model.attn_summary()
 
+    # ── Scaling summary ───────────────────────────────────────────────────────
+    condP_13m_ppl   = 65.057
+    condP_85m_ppl   = 58.1
+    baseline_13m    = 64.07
+    baseline_85m    = 57.7
+
+    gap_13m  = condP_13m_ppl - baseline_13m   # +0.987
+    gap_27m  = test_ppl - baseline_13m         # rough (no 27M baseline yet)
+    gap_85m  = condP_85m_ppl - baseline_85m   # +0.4
+
     print('\n' + '=' * 70)
-    print('  condM ABLATION SUMMARY')
+    print('  27M condP SCALING SUMMARY')
     print('=' * 70)
-    print(f'  {"Standard transformer 13M (reference)":<52} {"~64-68":>8}')
-    print(f'  {"condN (pure DSQG, 44 offsets)":<52} {"~70.7":>8}')
-    print(f'  {"condM (5 DSQG + 1 full attn, hybrid)":<52} {test_ppl:>8.1f}')
-    delta_n = test_ppl - 70.7
-    print(f'\n  condM vs condN (projected): {delta_n:+.1f} PPL')
-    if delta_n < -5:
-        print('  → Full attention layer provides critical global context; hybrid is the path')
-    elif delta_n < -2:
-        print('  → Meaningful improvement; hybrid worth pursuing at 85M')
+    print(f'  {"Model":<45} {"Params":>8}  {"Test PPL":>9}  {"Gap":>7}')
+    print(f'  {"─"*45}  {"─"*8}  {"─"*9}  {"─"*7}')
+    print(f'  {"condP 13M (dense-64 + dyadic)":<45} {"~13.5M":>8}  {condP_13m_ppl:>9.3f}  {gap_13m:>+7.2f}')
+    print(f'  {"condP 27M (this run)":<45} {"~27M":>8}  {test_ppl:>9.3f}  {"?":>7}')
+    print(f'  {"condP 85M (condB)":<45} {"~85M":>8}  {condP_85m_ppl:>9.1f}  {gap_85m:>+7.2f}')
+    print()
+    print(f'  13M gap vs baseline: {gap_13m:+.3f} PPL')
+    print(f'  27M test PPL:        {test_ppl:.3f}')
+    print(f'  85M gap vs baseline: {gap_85m:+.2f} PPL')
+    print()
+
+    # Two-thirds closure check (between 13M and 85M, 27M should be ~midpoint on log scale)
+    if test_ppl < condP_13m_ppl:
+        improvement = condP_13m_ppl - test_ppl
+        print(f'  Scaling gain vs 13M: {improvement:.2f} PPL ↓')
+        # Expected roughly halfway between 13M and 85M on log-PPL scale
+        expected_mid = math.exp((math.log(condP_13m_ppl) + math.log(condP_85m_ppl)) / 2)
+        print(f'  Expected (log-linear mid 13M/85M): {expected_mid:.1f}')
+        if abs(test_ppl - expected_mid) < 2.0:
+            print('  → Consistent with smooth log-linear scaling')
+        else:
+            print('  → Deviation from log-linear; investigate scaling law fit')
     else:
-        print('  → Full attention layer provides marginal benefit; condN is sufficient')
+        print(f'  !! 27M PPL ({test_ppl:.1f}) ≥ 13M PPL ({condP_13m_ppl:.1f})')
+        print(f'     Check training run — unexpected non-improvement at scale.')
 
     return {
-        'test_ppl':            test_ppl,
-        'test_loss':           test_loss,
-        'best_val_ppl':        best_val_ppl,
-        'best_epoch':          best_epoch,
-        'total_time_s':        time.time() - t0,
-        'condN_baseline_ppl':  70.7,
-        'full_attn_layer':     FULL_ATTN_LAYER,
-        'n_dsqg_layers':       NUM_LAYERS - 1,
-        'architecture':        f'condM: {NUM_LAYERS-1}×condN DSQG + 1×full causal attention (layer {FULL_ATTN_LAYER})',
-        'temperature_sweep':   sweep_results,
-        'attn_summary':        ss,
+        'test_ppl':              test_ppl,
+        'test_loss':             test_loss,
+        'best_val_ppl':          best_val_ppl,
+        'best_epoch':            best_epoch,
+        'total_time_s':          time.time() - t0,
+        'condP_13m_ppl':         condP_13m_ppl,
+        'condP_85m_ppl':         condP_85m_ppl,
+        'n_offsets':             len(_COND_P_OFFSETS),
+        'offsets':               _COND_P_OFFSETS,
+        'architecture':          f'condP 27M: D={EMBEDDING_DIM}, H={NUM_HEADS}, L={NUM_LAYERS}, FFN={FFN_DIM}',
+        'embedding_dim':         EMBEDDING_DIM,
+        'num_layers':            NUM_LAYERS,
+        'num_heads':             NUM_HEADS,
+        'ffn_dim':               FFN_DIM,
+        'temperature_sweep':     sweep_results,
+        'attn_summary':          ss,
     }
 
 
@@ -576,24 +531,31 @@ def train(model, train_data, val_data, test_data, tokenizer,
 def main():
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     print('=' * 70)
-    print(f'  DWARF condM — 5:1 Hybrid (5 condN DSQG + 1 Full Causal Attention)')
-    print(f'  Full attention at layer {FULL_ATTN_LAYER} (0-indexed)')
+    print('  DWARF 27M condP — Scaling Validation')
+    print(f'  D={EMBEDDING_DIM}, H={NUM_HEADS}, d_head={EMBEDDING_DIM//NUM_HEADS}, '
+          f'L={NUM_LAYERS}, FFN={FFN_DIM}')
     print('=' * 70)
     if torch.cuda.is_available():
         print(f'  GPU: {torch.cuda.get_device_name(0)}  '
               f'({torch.cuda.get_device_properties(0).total_memory/1e9:.1f} GB)')
-    print(f'  Layers 0-{NUM_LAYERS-1}: condN DSQG (44 offsets) except layer {FULL_ATTN_LAYER} (full O(N²))')
-    print(f'  Production reference: MiniMax-01 uses 7:1 linear:full; Griffin/Jamba use similar ratios')
+    print(f'  Offsets: {{0..64}} ∪ {{96,128,...,1536}} = {len(_COND_P_OFFSETS)} (same as 13M condP)')
+    print(f'  Interference: every {INTERFERENCE}rd layer')
+    print(f'  Checkpoint → {CHECKPOINT_DIR}/')
 
-    os.makedirs('benchmarks/logs', exist_ok=True)
+    # Resolve to /workspace root if running on RunPod
+    script_dir  = os.path.dirname(os.path.abspath(__file__))
+    repo_root   = os.path.dirname(script_dir)
+    ckpt_dir    = os.path.join(repo_root, CHECKPOINT_DIR)
+    results_dir = os.path.join(script_dir, 'results')
+    os.makedirs(results_dir, exist_ok=True)
+    os.makedirs(os.path.join(repo_root, 'benchmarks', 'logs'), exist_ok=True)
 
-    splits   = load_data(NUM_DOCS)
-    _script_dir = os.path.dirname(os.path.abspath(__file__))
-    _tok_candidates = [
-        os.path.join(_script_dir, 'results', '2048_condI_tokenizer.json'),
-        os.path.join(_script_dir, '2048_condI_tokenizer.json'),
+    # ── Load tokenizer (committed at benchmarks/results/) ────────────────────
+    tok_candidates = [
+        os.path.join(script_dir, 'results', '2048_condI_tokenizer.json'),
+        os.path.join(script_dir, '2048_condI_tokenizer.json'),
     ]
-    tok_path = next((p for p in _tok_candidates if os.path.exists(p)), None)
+    tok_path = next((p for p in tok_candidates if os.path.exists(p)), None)
     if tok_path:
         from tokenizers import Tokenizer
         tokenizer = BPETokenizerWrapper(Tokenizer.from_file(tok_path))
@@ -601,38 +563,40 @@ def main():
     else:
         raise FileNotFoundError(
             'condI tokenizer not found. Tried:\n' +
-            '\n'.join(f'  {p}' for p in _tok_candidates))
+            '\n'.join(f'  {p}' for p in tok_candidates) +
+            '\n\nRun: git pull  (tokenizer is committed at benchmarks/results/)')
+
+    splits = load_data(NUM_DOCS)
 
     print(f'Encoding data (max_seq_len={MAX_SEQ_LEN})...')
     train_data = encode_split(splits['train'], tokenizer, MAX_SEQ_LEN, 'Train')
     val_data   = encode_split(splits['val'],   tokenizer, MAX_SEQ_LEN, 'Val')
     test_data  = encode_split(splits['test'],  tokenizer, MAX_SEQ_LEN, 'Test')
 
-    model = CondMTransformer(
+    model = CondP27MTransformer(
         vocab_size            = tokenizer.vocab_size(),
         embedding_dim         = EMBEDDING_DIM,
         num_layers            = NUM_LAYERS,
         num_heads             = NUM_HEADS,
         ffn_dim               = FFN_DIM,
         seq_len               = MAX_SEQ_LEN,
-        full_attn_layer       = FULL_ATTN_LAYER,
         interference_interval = INTERFERENCE,
     ).to(device)
 
     n_params = model.param_count()
-    layer_types = ['FULL' if i == FULL_ATTN_LAYER else 'DSQG'
-                   for i in range(NUM_LAYERS)]
-    print(f'\ncondM: {n_params:,} parameters')
-    print(f'  Layer types: {layer_types}')
-    print(f'  Note: DSQG layers use condN offsets (44); layer {FULL_ATTN_LAYER} is O(N²) causal')
+    print(f'\n27M condP: {n_params:,} parameters  ({n_params/1e6:.2f}M)')
+    print(f'  D={EMBEDDING_DIM}, H={NUM_HEADS}, d_head={EMBEDDING_DIM//NUM_HEADS}, '
+          f'L={NUM_LAYERS}, FFN={FFN_DIM}')
+    print(f'  n_offsets: {len(_COND_P_OFFSETS)} (identical to 13M condP)')
 
-    if not causality_check(model, device): return
+    if not causality_check(model, device):
+        print('Causality check FAILED — aborting.')
+        return
 
     results = train(model, train_data, val_data, test_data, tokenizer,
-                    save_dir='2048_condM_checkpoints', device=device)
+                    save_dir=ckpt_dir, device=device)
 
-    script_dir   = os.path.dirname(os.path.abspath(__file__))
-    results_path = os.path.join(script_dir, '2048_condM_results.json')
+    results_path = os.path.join(results_dir, '2048_27m_condP_results.json')
     with open(results_path, 'w') as fp:
         json.dump(results, fp, indent=2)
     print(f'\n  Results → {results_path}')

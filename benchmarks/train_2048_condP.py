@@ -530,14 +530,20 @@ def main():
     os.makedirs('benchmarks/logs', exist_ok=True)
 
     splits   = load_data(NUM_DOCS)
-    tok_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                            '2048_condI_tokenizer.json')
-    if os.path.exists(tok_path):
+    _script_dir = os.path.dirname(os.path.abspath(__file__))
+    _tok_candidates = [
+        os.path.join(_script_dir, 'results', '2048_condI_tokenizer.json'),
+        os.path.join(_script_dir, '2048_condI_tokenizer.json'),
+    ]
+    tok_path = next((p for p in _tok_candidates if os.path.exists(p)), None)
+    if tok_path:
         from tokenizers import Tokenizer
         tokenizer = BPETokenizerWrapper(Tokenizer.from_file(tok_path))
-        print(f'Loaded condI BPE tokenizer')
+        print(f'Loaded condI BPE tokenizer from {tok_path}')
     else:
-        raise FileNotFoundError(f'condI tokenizer not found at {tok_path}')
+        raise FileNotFoundError(
+            'condI tokenizer not found. Tried:\n' +
+            '\n'.join(f'  {p}' for p in _tok_candidates))
 
     print(f'Encoding data (max_seq_len={MAX_SEQ_LEN})...')
     train_data = encode_split(splits['train'], tokenizer, MAX_SEQ_LEN, 'Train')

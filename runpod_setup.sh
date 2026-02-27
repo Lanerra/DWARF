@@ -3,24 +3,27 @@
 # RunPod environment setup for DWARF experiments
 #
 # Sets up the pod and pre-caches data — does NOT start training.
-# Launch training manually after setup completes (see commands at the end).
+# Launch training with the provided launch scripts after setup completes.
 #
 # Usage:
 #   bash runpod_setup.sh
-#
-# After setup, start a training run in a persistent tmux session:
-#   tmux new-session -d -s train "python3 -u benchmarks/train_2048_condK.py 2>&1 | tee /workspace/logs/condK_run.log"
-#   tmux attach -t train
+#   bash benchmarks/launch_27m_condP_runpod.sh     # 27M condP (scaling run)
 #
 # Requirements: pod with PyTorch base image, CUDA 12+
 #   Tested: runpod/pytorch:2.4.0-py3.11-cuda12.4.1-devel-ubuntu22.04
 #
 # Persistent volume (recommended):
-#   Mount at /workspace — HuggingFace cache + tokenizer are stored there,
-#   so subsequent runs on new pods skip the 20GB OpenWebText download.
+#   Mount at /workspace — HuggingFace cache is stored there so subsequent
+#   runs on new pods skip the 20GB OpenWebText download.
+#   Checkpoints also land in /workspace/DWARF/ and survive pod termination.
 #
-# Estimated wall-clock on H100 SXM (10 epochs, 2048 tokens, 13M params):
-#   ~35–45 min per condition
+# Tokenizer note:
+#   benchmarks/results/2048_condI_tokenizer.json is committed to the repo.
+#   No tokenizer generation needed — git clone is enough.
+#
+# Estimated wall-clock on H100 SXM:
+#   13M condP  : ~35–45 min  (10 epochs)
+#   27M condP  : ~75–100 min (10 epochs, ~2× compute)
 # ──────────────────────────────────────────────────────────────────────────────
 
 set -euo pipefail
@@ -80,6 +83,8 @@ echo ""
 # Streaming=True in training scripts so this isn't strictly required, but
 # downloading once to the persistent volume avoids the 10-15 min wait on
 # every subsequent run. Skip with SKIP_DOWNLOAD=1 if already cached.
+# Tokenizer is committed at benchmarks/results/2048_condI_tokenizer.json —
+# no generation step needed.
 echo "[4/5] Pre-caching OpenWebText dataset..."
 if [ "${SKIP_DOWNLOAD:-0}" = "1" ]; then
     echo "  Skipping (SKIP_DOWNLOAD=1)"
@@ -113,29 +118,22 @@ echo ""
 echo "  Working directory : $(pwd)"
 echo "  Persistent logs   : ${WORKSPACE}/logs/ (if /workspace mounted)"
 echo ""
-echo "  ── Launch a training run ──────────────────────────────"
+echo "  ── Launch training (use the provided launch scripts) ──"
 echo ""
-echo "  # condK+RP (current best — in training queue)"
-echo "  tmux new-session -d -s train \\"
-echo "    \"python3 -u benchmarks/train_2048_condK_pooling.py 2>&1 | tee /workspace/logs/condKRP_run.log\""
+echo "  # 27M condP — scaling validation (primary RunPod target)"
+echo "  bash benchmarks/launch_27m_condP_runpod.sh"
 echo ""
-echo "  # condL+RP (DSQG, 24 unique dyadic offsets + D4 warm-start)"
-echo "  tmux new-session -d -s train \\"
-echo "    \"python3 -u benchmarks/train_2048_condLRP.py 2>&1 | tee /workspace/logs/condLRP_run.log\""
-echo ""
-echo "  # condN (dense-32 local + dyadic long-range, 44 offsets)"
-echo "  tmux new-session -d -s train \\"
-echo "    \"python3 -u benchmarks/train_2048_condN.py 2>&1 | tee /workspace/logs/condN_run.log\""
-echo ""
-echo "  # condK (reference — already done locally, rerun for validation)"
-echo "  tmux new-session -d -s train \\"
-echo "    \"python3 -u benchmarks/train_2048_condK.py 2>&1 | tee /workspace/logs/condK_run.log\""
+echo "  # condP 13M — replication / reference"
+echo "  tmux new-session -d -s trainP -x 220 -y 50"
+echo "  tmux send-keys -t trainP \"
+echo "    \"cd /workspace/DWARF && python3 -u benchmarks/train_2048_condP.py \"
+echo "    2>&1 | tee /workspace/logs/condP_run.log\" Enter"
 echo ""
 echo "  ── After launching ────────────────────────────────────"
-echo "  Attach:   tmux attach -t train"
-echo "  Detach:   Ctrl-B then D  (training keeps running)"
-echo "  Monitor:  tail -f /workspace/logs/<name>.log"
-echo "  Kill:     tmux kill-session -t train"
+echo "  Attach:    tmux attach -t train27m  (or trainP)"
+echo "  Detach:    Ctrl-B then D  (training keeps running)"
+echo "  Monitor:   tail -f /workspace/logs/27m_condP_run.log"
+echo "  Kill:      tmux kill-session -t train27m"
 echo ""
 echo "  ── GPU ────────────────────────────────────────────────"
 python3 -c "
