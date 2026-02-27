@@ -47,8 +47,14 @@ import torch.utils.checkpoint
 
 VOCAB_SIZE      = 32000
 NUM_EPOCHS      = 10
-BATCH_SIZE      = 8
-GRAD_ACCUM      = 4
+# H100 80GB: effective batch = BATCH_SIZE × GRAD_ACCUM
+# 13M condP used B=8, GA=4 (effective=32) — sized for a 24GB 4090.
+# H100 peak mem at B=32 ≈ 10.9 GB (42 GB at B=128); 80 GB is nowhere near full.
+# B=32, GA=1 keeps the SAME effective batch (32) and LR as the 13M run,
+# so PPL is directly comparable, but eliminates gradient-accum overhead.
+# Do NOT increase effective batch without also scaling LR (linear rule).
+BATCH_SIZE      = 32
+GRAD_ACCUM      = 1
 LR              = 3e-4
 MAX_SEQ_LEN     = 2048
 NUM_DOCS        = 100_000
