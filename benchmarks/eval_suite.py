@@ -18,6 +18,8 @@ Registered models:
   condm_layer3   D=256 condM full_attn=3     (tied emb)    best.pt
   condm_layer5   D=256 condM full_attn=5     (tied emb)    13M.pt
   condm_27m      D=400 condM full_attn=5     (tied emb)    27M.ptrom
+  condm_v2       D=256 condM-v2 (SwiGLU+RMSNorm+RoPE) full_attn=5  best.pt
+  condm_85m      D=640 condM full_attn=11    (tied emb)    best.pt
 
 Usage:
   cd /home/dlewis3/Desktop/AI/DWARF
@@ -31,6 +33,14 @@ import argparse, json, math, os, sys, time, datetime
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+
+# CondM-v2 architecture lives in the training script; import lazily.
+def _import_condm_v2():
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    if script_dir not in sys.path:
+        sys.path.insert(0, script_dir)
+    from train_2048_condM_v2 import CondMV2Transformer
+    return CondMV2Transformer
 
 # ─── Paths ────────────────────────────────────────────────────────────────────
 
@@ -102,6 +112,21 @@ MODEL_REGISTRY = {
         'checkpoint': os.path.join(CKPT_ROOT, '2048_condM_checkpoints', '27M.ptrom'),
         'label':      'condM 27M Layer 5 (5 DSQG → 1 full attn)',
         'params_ref': 26_457_760,
+    },
+    'condm_v2': {
+        'arch':       'condm_v2',
+        'D':          256, 'H': 8, 'FFN': 1024, 'L': 6, 'full_layer': 5,
+        'checkpoint': os.path.join(CKPT_ROOT, '2048_condM_v2_checkpoints', 'best.pt'),
+        'label':      'condM-v2 13M (SwiGLU+RMSNorm+RoPE, Layer 5)',
+        'params_ref': None,
+    },
+    'condm_85m': {
+        'arch':       'condm',
+        'D':          640, 'H': 8, 'FFN': 2560, 'L': 12, 'full_layer': 11,
+        'interference': 3,
+        'checkpoint': os.path.join(CKPT_ROOT, '2048_85m_condM_checkpoints', 'best.pt'),
+        'label':      'condM 85M (11 DSQG + 1 full attn, Layer 11)',
+        'params_ref': 88_267_552,
     },
 }
 
@@ -464,6 +489,15 @@ def build_model(cfg):
         return CondMTransformer(D=D, H=H, FFN=FFN, L=L, full_layer=cfg['full_layer'])
     elif arch == 'condp':
         return CondPTransformer(D=D, H=H, FFN=FFN, L=L)
+    elif arch == 'condm_v2':
+        CondMV2Transformer = _import_condm_v2()
+        ffn_hidden = int(8 * D / 3)   # SwiGLU iso-parameter: 8D/3
+        return CondMV2Transformer(
+            vocab_size=VOCAB_SIZE, embedding_dim=D, num_layers=L, num_heads=H,
+            ffn_hidden=ffn_hidden, seq_len=MAX_SEQ_LEN,
+            interference_interval=cfg.get('interference', 3),
+            full_attn_layer=cfg.get('full_layer', 5),
+        )
     else:
         raise ValueError(f"Unknown arch: {arch}")
 
@@ -473,9 +507,11 @@ def load_model(cfg, device):
     if not os.path.exists(ckpt_path):
         raise FileNotFoundError(f"Checkpoint not found: {ckpt_path}")
     model = build_model(cfg)
-    state = torch.load(ckpt_path, map_location='cpu')
+    state = torch.load(ckpt_path, map_location='cpu', weights_only=False)
     if isinstance(state, dict) and 'model_state_dict' in state:
         state = state['model_state_dict']
+    elif isinstance(state, dict) and 'model' in state:
+        state = state['model']
     model.load_state_dict(state)
     model = model.to(device)
     model.eval()

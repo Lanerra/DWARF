@@ -20,6 +20,7 @@ MODELS=(
     "condm_layer0"
     "condm_layer5"
     "condm_27m"
+    "condm_85m"
 )
 
 echo "====================================================" | tee -a "$RUNNER_LOG"
