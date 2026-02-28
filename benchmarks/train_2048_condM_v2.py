@@ -576,7 +576,7 @@ def build_optimizer(model, total_steps):
 
 
 def train(model, train_data, val_data, test_data, tokenizer,
-          save_dir='checkpoints/2048_condM_v2_checkpoints', device='cuda'):
+          save_dir='checkpoints/2048_condM_v2_checkpoints', device='cuda', resume=False):
     os.makedirs(save_dir, exist_ok=True)
     total_steps = NUM_EPOCHS * math.ceil(len(train_data) / BATCH_SIZE / GRAD_ACCUM)
     optimizer, scheduler = build_optimizer(model, total_steps)
@@ -585,9 +585,35 @@ def train(model, train_data, val_data, test_data, tokenizer,
     autocast_dtype = torch.bfloat16
 
     best_val_loss, best_val_ppl, best_epoch = float('inf'), float('inf'), 0
+    start_epoch = 1
     t0 = time.time()
 
-    for epoch in range(1, NUM_EPOCHS + 1):
+    # Resume support: load checkpoint and continue from next epoch.
+    ckpt_path = os.path.join(save_dir, 'best.pt')
+    if resume and os.path.exists(ckpt_path):
+        ckpt = torch.load(ckpt_path, weights_only=False, map_location=device)
+        if isinstance(ckpt, dict) and 'model' in ckpt:
+            # Full checkpoint: restore model + optimizer + scheduler
+            model.load_state_dict(ckpt['model'])
+            optimizer.load_state_dict(ckpt['optimizer'])
+            scheduler.load_state_dict(ckpt['scheduler'])
+            best_val_loss = ckpt.get('best_val_loss', float('inf'))
+            best_val_ppl  = ckpt.get('val_ppl', float('inf'))
+            best_epoch    = ckpt.get('epoch', 0)
+            start_epoch   = best_epoch + 1
+            print(f'  Resumed: epoch {best_epoch} completed (val PPL {best_val_ppl:.1f}); '
+                  f'continuing from epoch {start_epoch}')
+        else:
+            # Legacy format: only model weights; optimizer restarts (LR warmup will rerun ~1 epoch)
+            model.load_state_dict(ckpt)
+            best_epoch  = 1
+            start_epoch = 2
+            print(f'  Resumed (legacy ckpt): model weights loaded, optimizer fresh. '
+                  f'Continuing from epoch {start_epoch}. Note: LR warmup reruns briefly.')
+    elif resume:
+        print(f'  --resume set but no checkpoint found at {ckpt_path}; starting fresh.')
+
+    for epoch in range(start_epoch, NUM_EPOCHS + 1):
         model.train()
         indices = torch.randperm(len(train_data))
         step    = 0
@@ -619,7 +645,14 @@ def train(model, train_data, val_data, test_data, tokenizer,
         marker = ''
         if val_loss < best_val_loss:
             best_val_loss, best_val_ppl, best_epoch = val_loss, val_ppl, epoch
-            torch.save(model.state_dict(), os.path.join(save_dir, 'best.pt'))
+            torch.save({
+                'model':         model.state_dict(),
+                'optimizer':     optimizer.state_dict(),
+                'scheduler':     scheduler.state_dict(),
+                'epoch':         epoch,
+                'val_ppl':       val_ppl,
+                'best_val_loss': best_val_loss,
+            }, os.path.join(save_dir, 'best.pt'))
             marker = ' * BEST'
 
         print(f'Ep {epoch}/{NUM_EPOCHS} | Train {train_loss:.4f} '
@@ -642,8 +675,9 @@ def train(model, train_data, val_data, test_data, tokenizer,
         sys.stdout.flush()
 
     # Final test evaluation
-    model.load_state_dict(torch.load(os.path.join(save_dir, 'best.pt'),
-                                     weights_only=True))
+    # Checkpoint saved as full dict {model, optimizer, scheduler, epoch, val_ppl}
+    _ckpt = torch.load(os.path.join(save_dir, 'best.pt'), weights_only=False, map_location=device)
+    model.load_state_dict(_ckpt['model'] if isinstance(_ckpt, dict) and 'model' in _ckpt else _ckpt)
     test_loss = evaluate(model, test_data, BATCH_SIZE, device)
     test_ppl  = math.exp(min(test_loss, 20))
     print(f'\n  condM-v2 TEST: PPL {test_ppl:.3f} | Loss {test_loss:.4f}')
@@ -685,6 +719,8 @@ def main():
     parser = argparse.ArgumentParser(description='condM-v2 training')
     parser.add_argument('--full_layer', type=int, default=5,
                         choices=[0, 1, 2, 3, 4, 5])
+    parser.add_argument('--resume', action='store_true',
+                        help='Resume training from best.pt checkpoint')
     args = parser.parse_args()
     FULL_ATTN_LAYER = args.full_layer
 
@@ -753,7 +789,8 @@ def main():
     # A compile-friendly EMA (using torch.linalg or custom CUDA scan) is a future option.
 
     results = train(model, train_data, val_data, test_data, tokenizer,
-                    save_dir='checkpoints/2048_condM_v2_checkpoints', device=device)
+                    save_dir='checkpoints/2048_condM_v2_checkpoints', device=device,
+                    resume=args.resume)
 
     results_path = os.path.join(_script_dir, 'results', 'condM_v2_results.json')
     os.makedirs(os.path.dirname(results_path), exist_ok=True)
