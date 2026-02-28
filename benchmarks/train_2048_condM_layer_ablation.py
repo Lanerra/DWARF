@@ -529,7 +529,7 @@ def train(model, train_data, val_data, test_data, tokenizer,
     print('\n' + '=' * 70)
     print(f'  condM LAYER-POSITION ABLATION — full_attn @ layer {FULL_ATTN_LAYER}')
     print('=' * 70)
-    print(f'  {"Standard transformer 13M (reference)":<52} {"~64-68":>8}')
+    print(f'  {"Standard transformer 13M (reference)":<52} {"64.07":>8}')
     print(f'  {"condN (pure DSQG, 44 offsets)":<52} {"~70.7":>8}')
     print(f'  {"condM (5 DSQG + 1 full attn, hybrid)":<52} {test_ppl:>8.1f}')
     delta_n = test_ppl - 70.7

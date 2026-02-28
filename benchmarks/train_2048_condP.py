@@ -485,7 +485,7 @@ def train(model, train_data, val_data, test_data, tokenizer,
     print('\n' + '=' * 70)
     print('  condP ABLATION SUMMARY')
     print('=' * 70)
-    print(f'  {"Standard transformer 13M (reference)":<52} {"~64-68":>8}')
+    print(f'  {"Standard transformer 13M (reference)":<52} {"64.07":>8}')
     print(f'  {"condN (dense-32 + dyadic, 44 offsets)":<52} {"~70.7":>8}')
     print(f'  {"condP (dense-64 + dyadic, 74 offsets)":<52} {test_ppl:>8.1f}')
     delta_n = test_ppl - 70.7

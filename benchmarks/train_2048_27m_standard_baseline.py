@@ -349,8 +349,13 @@ def train(model, train_data, val_data, test_data, tokenizer,
     condP_13m_ppl     = 65.057
     baseline_13m_ppl  = 64.073
     condP_27m_ppl     = None   # filled in from the other run
-    condP_85m_ppl     = 58.1
-    baseline_85m_ppl  = 57.7
+    # NOTE: These are Wave Field architecture runs, NOT standard transformers.
+    # "baseline_85m" = condA (Wave Field V4, no dispersion): test PPL 57.7
+    # "condP_85m"    = condB (Wave Field V4 + learned dispersion): test PPL 58.1
+    # There is NO 85M standard transformer or 85M condP in our data.
+    # The closest standard transformer at scale is the pre-V4 100M run: test PPL 45.96.
+    condP_85m_ppl     = 58.1   # actually condB (Wave Field + dispersion) — mislabeled
+    baseline_85m_ppl  = 57.7   # actually condA (Wave Field V4) — mislabeled
 
     print('\n' + '=' * 72)
     print('  27M Standard Baseline — Scaling Summary')
@@ -362,8 +367,8 @@ def train(model, train_data, val_data, test_data, tokenizer,
     print(f'  {"Standard 27M baseline (this run)":<48} {"~38M":>8}  {test_ppl:>8.3f}')
     if condP_27m_ppl:
         print(f'  {"condP 27M":<48} {"26.8M":>8}  {condP_27m_ppl:>8.3f}  {condP_27m_ppl - test_ppl:>+8.3f}')
-    print(f'  {"Standard 85M baseline":<48} {"~85M":>8}  {baseline_85m_ppl:>8.1f}')
-    print(f'  {"condP 85M (condB)":<48} {"~85M":>8}  {condP_85m_ppl:>8.1f}  {condP_85m_ppl - baseline_85m_ppl:>+8.1f}')
+    print(f'  {"condA 85M (Wave Field V4, no disp) [mislabeled]":<48} {"~85M":>8}  {baseline_85m_ppl:>8.1f}')
+    print(f'  {"condB 85M (Wave Field + dispersion) [mislabeled]":<48} {"~85M":>8}  {condP_85m_ppl:>8.1f}  {condP_85m_ppl - baseline_85m_ppl:>+8.1f}')
     print()
     print(f'  13M gap: condP vs baseline = {condP_13m_ppl - baseline_13m_ppl:+.3f} PPL')
     print(f'  27M gap: condP vs baseline = (run condP 27M to complete)')
