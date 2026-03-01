@@ -11,6 +11,7 @@ Runs four evaluations on any registered model:
 
 Registered models:
   standard_13m   D=256 standard transformer  (untied emb)  13M.pt
+  standard_85m   D=640 standard transformer  (untied emb)  best.pt
   standard_27m   D=400 standard transformer  (untied emb)  27M.ptrom
   condp_13m      D=256 condP pure DSQG       (tied emb)    best.pt
   condp_27m      D=400 condP pure DSQG       (tied emb)    best.ptrom
@@ -71,6 +72,13 @@ MODEL_REGISTRY = {
         'checkpoint': os.path.join(CKPT_ROOT, '2048_standard_baseline_checkpoints', '13M.pt'),
         'label':      'Standard Transformer 13M',
         'params_ref': 21_631_008,
+    },
+    'standard_85m': {
+        'arch':       'standard',
+        'D':          640, 'H': 8, 'FFN': 2560, 'L': 12,
+        'checkpoint': os.path.join(CKPT_ROOT, '2048_85m_standard_checkpoints', 'best.pt'),
+        'label':      'Standard Transformer 85M',
+        'params_ref': 101_361_920,
     },
     'standard_27m': {
         'arch':       'standard',
