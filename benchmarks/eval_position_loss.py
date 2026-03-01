@@ -20,7 +20,6 @@ If this prediction holds, we expect loss spikes at these positions relative
 to neighboring positions.
 
 Usage:
-  cd /home/dlewis3/Desktop/AI/DWARF
   CUDA_VISIBLE_DEVICES=1 .venv/bin/python3 benchmarks/eval_position_loss.py --model condm_layer5
   CUDA_VISIBLE_DEVICES=1 .venv/bin/python3 benchmarks/eval_position_loss.py --all
   CUDA_VISIBLE_DEVICES=1 .venv/bin/python3 benchmarks/eval_position_loss.py --all --skip_slow

@@ -21,7 +21,6 @@ DESIGN
   (positive = condP worse, negative = condP better)
 
 Usage:
-  cd /home/dlewis3/Desktop/AI/DWARF
   CUDA_VISIBLE_DEVICES=0 .venv/bin/python3 benchmarks/eval_distance_loss.py
 """
 

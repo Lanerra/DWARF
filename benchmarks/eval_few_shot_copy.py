@@ -15,7 +15,6 @@ DESIGN
 - Metrics: exact match, prefix match, Levenshtein edit distance
 
 Usage:
-  cd /home/dlewis3/Desktop/AI/DWARF
   CUDA_VISIBLE_DEVICES=0 .venv/bin/python3 benchmarks/eval_few_shot_copy.py
 """
 

@@ -24,7 +24,6 @@ Registered models:
   condm_periodic_13m  D=224 condM-periodic [3:1:3:1] full_attn=[3,7]  best.pt
 
 Usage:
-  cd /home/dlewis3/Desktop/AI/DWARF
   CUDA_VISIBLE_DEVICES=1 .venv/bin/python3 benchmarks/eval_suite.py --model standard_27m
   CUDA_VISIBLE_DEVICES=1 .venv/bin/python3 benchmarks/eval_suite.py --model condm_layer0
 
@@ -76,7 +75,7 @@ MODEL_REGISTRY = {
     'standard_85m': {
         'arch':       'standard',
         'D':          640, 'H': 8, 'FFN': 2560, 'L': 12,
-        'checkpoint': os.path.join(CKPT_ROOT, '2048_85m_standard_checkpoints', 'best.pt'),
+        'checkpoint': os.path.join(CKPT_ROOT, '85m_standard_baseline', 'best.pt'),
         'label':      'Standard Transformer 85M',
         'params_ref': 101_361_920,
     },
@@ -121,6 +120,13 @@ MODEL_REGISTRY = {
         'checkpoint': os.path.join(CKPT_ROOT, '2048_condM_checkpoints', '13M.pt'),
         'label':      'condM 13M Layer 5 (5 DSQG → 1 full attn)',
         'params_ref': 13_984_480,
+    },
+    'condm_chinchilla_repeated': {
+        'arch':       'condm',
+        'D':          256, 'H': 8, 'FFN': 1024, 'L': 6, 'full_layer': 5,
+        'checkpoint': os.path.join(CKPT_ROOT, 'condm_chinchilla_repeated', 'best.pt'),
+        'label':      'condM 13M Chinchilla-Repeated (100K docs x 10 epochs)',
+        'params_ref': 13_917_664,
     },
     'condm_27m': {
         'arch':       'condm',
@@ -552,7 +558,15 @@ def load_model(cfg, device):
         state = state['model_state_dict']
     elif isinstance(state, dict) and 'model' in state:
         state = state['model']
-    model.load_state_dict(state)
+    # strict=False: standard_85m was trained with SDPA (no causal_mask buffer);
+    # all trainable weights match — only the derived buffer is absent from ckpt.
+    missing, unexpected = model.load_state_dict(state, strict=False)
+    if unexpected:
+        print(f"  WARNING: unexpected keys: {unexpected}")
+    causal_only = [k for k in missing if "causal_mask" in k]
+    other_missing = [k for k in missing if "causal_mask" not in k]
+    if other_missing:
+        raise RuntimeError(f"Missing non-buffer keys: {other_missing}")
     model = model.to(device)
     model.eval()
     n = sum(p.numel() for p in model.parameters())

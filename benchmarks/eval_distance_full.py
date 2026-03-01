@@ -10,7 +10,6 @@ Uses wikitext-103-raw-v1 (test split, already cached) to build multiple full
 across all distance ranges including the longest lookback.
 
 Usage:
-  cd /home/dlewis3/Desktop/AI/DWARF
   CUDA_VISIBLE_DEVICES=0 .venv/bin/python3 benchmarks/eval_distance_full.py
 
 Results → benchmarks/logs/eval_distance_full_<timestamp>.json

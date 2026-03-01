@@ -23,7 +23,6 @@ DESIGN
     Percentile distribution of entropies (p10/p25/p50/p75/p90)
 
 Usage:
-  cd /home/dlewis3/Desktop/AI/DWARF
   CUDA_VISIBLE_DEVICES=0 .venv/bin/python3 benchmarks/eval_calibration.py
 """
 

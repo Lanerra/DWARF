@@ -17,7 +17,6 @@ Architectures:
 Both use the condI BPE tokenizer (vocab=32000).
 
 Usage:
-  cd /home/dlewis3/Desktop/AI/DWARF
   CUDA_VISIBLE_DEVICES=0 .venv/bin/python3 benchmarks/eval_condM_vs_condP27m.py
 
 Results logged to: benchmarks/logs/eval_condM_vs_condP27m_<timestamp>.json

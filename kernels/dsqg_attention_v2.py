@@ -19,7 +19,6 @@ Memory footprint (B=128, H=8, N=2047, HD=32):
   V2 saved state:              ~142 MB  (LSE 8.4 MB + out 134 MB)
 
 Testing:
-  cd /home/dlewis3/Desktop/AI/DWARF
   .venv/bin/python3 ~/.openclaw/workspace/kernels/dsqg_attention_v2.py
   .venv/bin/python3 ~/.openclaw/workspace/kernels/dsqg_attention_v2.py bench
 

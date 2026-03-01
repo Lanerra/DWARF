@@ -2,7 +2,6 @@
 Standalone test evaluation for condM-v2.
 Loads the trained checkpoint and runs test PPL + temperature sweep.
 Usage:
-  cd /home/dlewis3/Desktop/AI/DWARF
   .venv/bin/python3 -u benchmarks/eval_condM_v2.py 2>&1 | tee benchmarks/results/condM_v2_eval.log
 """
 import sys, os

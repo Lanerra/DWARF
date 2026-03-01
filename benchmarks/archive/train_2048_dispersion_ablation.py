@@ -12,7 +12,6 @@ V4 improvements adopted (from 4A Lab fork analysis):
   - Full 2π phase coverage: linspace(0, 2π·(H-1)/H) — head diversity
   - Float32 scatter accumulation — AMP numerical stability
   - +0.05 damping floor — stability guard
-  
 V4 improvements NOT adopted:
   - Softmax kernel normalization — eliminates negative kernel values,
     removes wave oscillation character, conflicts with dispersion
