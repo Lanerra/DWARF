@@ -49,7 +49,7 @@ import torch.utils.checkpoint
 VOCAB_SIZE    = 32000
 NUM_EPOCHS    = 1                       # Chinchilla: single pass, no repetition
 NUM_DOCS      = int(os.environ.get('NUM_DOCS',    400_000))
-BATCH_SIZE    = int(os.environ.get('BATCH_SIZE',  128))
+BATCH_SIZE    = int(os.environ.get('BATCH_SIZE',  64))
 GRAD_ACCUM    = 1                       # H200 SXM handles B=128 natively
 LR            = float(os.environ.get('LR',        6e-4))   # sqrt-scaled for B=128
 WARMUP_FRAC   = 0.05
@@ -179,8 +179,7 @@ class DSQGBlock(nn.Module):
     def _attn_fn(self, x): return self.attn(self.norm1(x))
 
     def forward(self, x):
-        x = x + torch.utils.checkpoint.checkpoint(
-            self._attn_fn, x, use_reentrant=False)
+        x = x + self._attn_fn(x)
         if self.interference:
             xi = self.inter_norm(x)
             B, N, D = xi.shape
