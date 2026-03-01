@@ -96,30 +96,29 @@ class DSQGAttentionN(nn.Module):
         H, HD   = self.num_heads, self.head_dim
         qkv = self.qkv_proj(x)
         q, k, v = qkv.split(D, dim=-1)
-        q = q.view(B, N, H, HD).permute(0, 2, 1, 3)
-        k = k.view(B, N, H, HD).permute(0, 2, 1, 3)
-        v = v.view(B, N, H, HD).permute(0, 2, 1, 3)
-        scale  = HD ** -0.5
-        K_list, V_list = [], []
-        for delta in self.offsets.tolist():
-            if delta == 0:
-                K_list.append(k); V_list.append(v)
-            elif delta >= N:
-                K_list.append(torch.zeros_like(k)); V_list.append(torch.zeros_like(v))
-            else:
-                pad = k.new_zeros(B, H, delta, HD)
-                K_list.append(torch.cat([pad, k[:, :, :N - delta]], dim=2))
-                V_list.append(torch.cat([pad, v[:, :, :N - delta]], dim=2))
-        K_all  = torch.stack(K_list, dim=3)
-        V_all  = torch.stack(V_list, dim=3)
-        scores = (q.unsqueeze(3) * K_all).sum(-1) * scale
+        q = q.view(B, N, H, HD).permute(0, 2, 1, 3)  # [B, H, N, HD]
+        k = k.view(B, N, H, HD).permute(0, 2, 1, 3)  # [B, H, N, HD]
+        v = v.view(B, N, H, HD).permute(0, 2, 1, 3)  # [B, H, N, HD]
+        scale   = HD ** -0.5
+        max_off = int(self.offsets[-1].item())         # offsets sorted ascending
+        # Pad once at the front: [B, H, max_off+N, HD]
+        k_pad   = F.pad(k, (0, 0, max_off, 0))
+        v_pad   = F.pad(v, (0, 0, max_off, 0))
+        # Build all gather indices in one shot: [num_offsets, N]
+        # gather_idx[i,n] = max_off - offsets[i] + n  →  k_pad position for token n at lag offsets[i]
+        n_idx      = torch.arange(N, device=x.device)                          # [N]
+        gather_idx = max_off - self.offsets.unsqueeze(1) + n_idx.unsqueeze(0)  # [44, N]
+        # Single advanced-index gather (1 CUDA kernel, replaces 44-iter loop)
+        K_all = k_pad[:, :, gather_idx, :].permute(0, 1, 3, 2, 4).contiguous()  # [B,H,N,44,HD]
+        V_all = v_pad[:, :, gather_idx, :].permute(0, 1, 3, 2, 4).contiguous()  # [B,H,N,44,HD]
+        scores = (q.unsqueeze(3) * K_all).sum(-1) * scale  # [B, H, N, 44]
         scores = scores + self.pos_bias.T.unsqueeze(0).unsqueeze(2)
-        n_idx  = torch.arange(N, device=x.device).unsqueeze(1)
-        scores = scores.masked_fill(
-            (n_idx < self.offsets.unsqueeze(0)).unsqueeze(0).unsqueeze(0), float('-inf'))
-        alpha  = F.softmax(scores, dim=-1)
-        out    = (alpha.unsqueeze(-1) * V_all).sum(dim=3)
-        flat   = out.permute(0, 2, 1, 3).reshape(B, N, D)
+        pos_idx = torch.arange(N, device=x.device).unsqueeze(1)               # [N, 1]
+        scores  = scores.masked_fill(
+            (pos_idx < self.offsets.unsqueeze(0)).unsqueeze(0).unsqueeze(0), float('-inf'))
+        alpha = F.softmax(scores, dim=-1)
+        out   = (alpha.unsqueeze(-1) * V_all).sum(dim=3)  # [B, H, N, HD]
+        flat  = out.permute(0, 2, 1, 3).reshape(B, N, D)
         return self.dropout(self.out_proj(flat * torch.sigmoid(self.gate_proj(x))))
 
     def attn_summary(self):
