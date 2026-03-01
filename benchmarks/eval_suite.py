@@ -20,6 +20,7 @@ Registered models:
   condm_27m      D=400 condM full_attn=5     (tied emb)    27M.ptrom
   condm_v2       D=256 condM-v2 (SwiGLU+RMSNorm+RoPE) full_attn=5  best.pt
   condm_85m      D=640 condM full_attn=11    (tied emb)    best.pt
+  condm_periodic_13m  D=224 condM-periodic [3:1:3:1] full_attn=[3,7]  best.pt
 
 Usage:
   cd /home/dlewis3/Desktop/AI/DWARF
@@ -41,6 +42,13 @@ def _import_condm_v2():
         sys.path.insert(0, script_dir)
     from train_2048_condM_v2 import CondMV2Transformer
     return CondMV2Transformer
+
+def _import_condm_periodic():
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    if script_dir not in sys.path:
+        sys.path.insert(0, script_dir)
+    from train_2048_condM_periodic_13m import CondMPeriodicTransformer
+    return CondMPeriodicTransformer
 
 # ─── Paths ────────────────────────────────────────────────────────────────────
 
@@ -127,6 +135,15 @@ MODEL_REGISTRY = {
         'checkpoint': os.path.join(CKPT_ROOT, '2048_85m_condM_checkpoints', 'best.pt'),
         'label':      'condM 85M (11 DSQG + 1 full attn, Layer 11)',
         'params_ref': 88_267_552,
+    },
+    'condm_periodic_13m': {
+        'arch':            'condm_periodic',
+        'D':               224, 'H': 8, 'FFN': 896, 'L': 8,
+        'full_attn_layers': [3, 7],
+        'interference':     3,
+        'checkpoint': os.path.join(SCRIPT_DIR, '2048_condM_periodic_13m_checkpoints', 'best.pt'),
+        'label':      'condM-periodic 13M [3:1:3:1] (2x DSQG3+Full)',
+        'params_ref': 13_075_648,
     },
 }
 
@@ -489,6 +506,14 @@ def build_model(cfg):
         return CondMTransformer(D=D, H=H, FFN=FFN, L=L, full_layer=cfg['full_layer'])
     elif arch == 'condp':
         return CondPTransformer(D=D, H=H, FFN=FFN, L=L)
+    elif arch == 'condm_periodic':
+        CondMPeriodicTransformer = _import_condm_periodic()
+        return CondMPeriodicTransformer(
+            vocab_size=VOCAB_SIZE, D=D, L=L, H=H, FFN_dim=FFN,
+            seq_len=MAX_SEQ_LEN,
+            full_attn_layers=set(cfg.get('full_attn_layers', [L - 1])),
+            interference_interval=cfg.get('interference', 3),
+        )
     elif arch == 'condm_v2':
         CondMV2Transformer = _import_condm_v2()
         ffn_hidden = int(8 * D / 3)   # SwiGLU iso-parameter: 8D/3

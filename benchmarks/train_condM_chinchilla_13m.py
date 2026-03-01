@@ -317,8 +317,8 @@ def evaluate(model, data, device, dtype):
     total_loss = total_tokens = 0
     bs = min(BATCH_SIZE, 64)   # smaller eval batch — no need for full size
     for i in range(0, len(data) - bs, bs):
-        x = data[i:i+bs, :-1].to(device)
-        y = data[i:i+bs,  1:].to(device)
+        x = data[i:i+bs, :-1].long().to(device)
+        y = data[i:i+bs,  1:].long().to(device)
         with torch.amp.autocast('cuda', dtype=dtype):
             logits = model(x)
         loss = F.cross_entropy(logits.float().reshape(-1, VOCAB_SIZE), y.reshape(-1))
@@ -403,7 +403,7 @@ def train(model, data, tokenizer, save_dir, device, dtype):
         end = min((step + 1) * BATCH_SIZE, len(train_data))
         batch = train_data[indices[step * BATCH_SIZE:end]]
         if len(batch) < 2: continue
-        x, y  = batch[:, :-1].to(device), batch[:, 1:].to(device)
+        x, y  = batch[:, :-1].long().to(device), batch[:, 1:].long().to(device)
 
         with torch.amp.autocast('cuda', dtype=dtype):
             loss = F.cross_entropy(
