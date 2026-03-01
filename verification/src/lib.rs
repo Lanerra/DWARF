@@ -39,3 +39,7 @@ pub mod rank_bottleneck;
 pub mod rg_init;
 pub mod soliton;
 pub mod variance_vanishing;
+pub mod gradient_consolidation;  // AdamW momentum amplification: repeated vs unique data
+pub mod gate_retrieval;           // Sigmoid gate necessity for long-range retrieval
+pub mod passkey_data_efficiency;  // Unified passkey bound: gate × data repetition
+pub mod dsqg_chinchilla;          // DSQG-specific Chinchilla number derivation

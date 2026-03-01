@@ -509,8 +509,7 @@ mod tests {
         //   which increases the copy signal again.
         // Fixed point: α* = sigmoid(ε_copy) where ε_copy is the score advantage.
         // Loop is stable when d(α)/d(α) > 0, i.e., always once α > p_copy.
-        
-        println!("  {:<24} {:>10} {:>16} {:>18}",
+              println!("  {:<24} {:>10} {:>16} {:>18}",
                  "Config", "N offsets", "α[δ=1] at ε=2.0", "Loop depth (steps)");
         println!("  {}", "─".repeat(72));
 
