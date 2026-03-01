@@ -180,7 +180,8 @@ class DSQGBlock(nn.Module):
     def _attn_fn(self, x): return self.attn(self.norm1(x))
 
     def forward(self, x):
-        x = x + self._attn_fn(x)
+        x = x + torch.utils.checkpoint.checkpoint(
+            self._attn_fn, x, use_reentrant=False)
         if self.interference:
             xi = self.inter_norm(x)
             B, N, D = xi.shape
