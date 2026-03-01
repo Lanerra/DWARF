@@ -180,8 +180,7 @@ class DSQGBlock(nn.Module):
     def _attn_fn(self, x): return self.attn(self.norm1(x))
 
     def forward(self, x):
-        x = x + torch.utils.checkpoint.checkpoint(
-            self._attn_fn, x, use_reentrant=False)
+        x = x + self._attn_fn(x)
         if self.interference:
             xi = self.inter_norm(x)
             B, N, D = xi.shape
@@ -548,14 +547,7 @@ def main():
     if not causality_check(model, device, dtype):
         print('Causality FAILED — aborting'); return
 
-    # torch.compile: significant speedup on H200 SXM via Triton kernel fusion
-    if hasattr(torch, 'compile'):
-        print('  Compiling model with torch.compile (reduce-overhead)...')
-        tc = time.time()
-        model = torch.compile(model, mode='reduce-overhead')
-        print(f'  Done in {time.time()-tc:.1f}s')
-    else:
-        print('  torch.compile unavailable — running eager')
+    print('  Running eager (no torch.compile — fast on H200 SXM for small models)')
 
     results = train(model, data, tokenizer, CHECKPOINT_DIR, device, dtype)
 
