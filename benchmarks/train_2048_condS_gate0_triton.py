@@ -626,14 +626,26 @@ def main():
     else:
         raise FileNotFoundError('condI tokenizer not found')
 
-    print(f'Encoding data (max_seq_len={MAX_SEQ_LEN})...')
-    train_data = encode_split(splits['train'], tokenizer, MAX_SEQ_LEN, 'Train')
-    if len(train_data) > MAX_TRAIN_SEQS:
-        idx = torch.randperm(len(train_data))[:MAX_TRAIN_SEQS]
-        train_data = train_data[idx]
-        print(f'  Capped to {MAX_TRAIN_SEQS:,} train sequences (iso-compute)')
-    val_data   = encode_split(splits['val'],   tokenizer, MAX_SEQ_LEN, 'Val')
-    test_data  = encode_split(splits['test'],  tokenizer, MAX_SEQ_LEN, 'Test')
+    _encoded_cache = 'benchmarks/logs/fineweb_encoded_2048.pt'
+    if os.path.exists(_encoded_cache):
+        print(f'Loading pre-encoded dataset from {_encoded_cache} ...')
+        _cache = torch.load(_encoded_cache, weights_only=True)
+        train_data = _cache['train']
+        val_data   = _cache['val']
+        test_data  = _cache['test']
+        if len(train_data) > MAX_TRAIN_SEQS:
+            idx = torch.randperm(len(train_data))[:MAX_TRAIN_SEQS]
+            train_data = train_data[idx]
+        print(f'  train: {len(train_data):,}  val: {len(val_data):,}  test: {len(test_data):,} seqs (from cache)')
+    else:
+        print(f'Encoding data (max_seq_len={MAX_SEQ_LEN})...')
+        train_data = encode_split(splits['train'], tokenizer, MAX_SEQ_LEN, 'Train')
+        if len(train_data) > MAX_TRAIN_SEQS:
+            idx = torch.randperm(len(train_data))[:MAX_TRAIN_SEQS]
+            train_data = train_data[idx]
+            print(f'  Capped to {MAX_TRAIN_SEQS:,} train sequences (iso-compute)')
+        val_data   = encode_split(splits['val'],   tokenizer, MAX_SEQ_LEN, 'Val')
+        test_data  = encode_split(splits['test'],  tokenizer, MAX_SEQ_LEN, 'Test')
 
     model = CondMTransformer(
         vocab_size            = tokenizer.vocab_size(),
