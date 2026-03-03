@@ -43,3 +43,13 @@ pub mod gradient_consolidation;  // AdamW momentum amplification: repeated vs un
 pub mod gate_retrieval;           // Sigmoid gate necessity for long-range retrieval
 pub mod passkey_data_efficiency;  // Unified passkey bound: gate × data repetition
 pub mod dsqg_chinchilla;          // DSQG-specific Chinchilla number derivation
+pub mod coherent_scale_retrieval;  // Q-weighted scale gains: matched filter SNR analysis
+pub mod huygens_kv_injection;      // Huygens K/V-only injection vs x-injection coherence
+pub mod if_amplifier;              // Per-head IF amplifier: attenuation compensation
+pub mod spectral_band_separation;  // Hard spectral band assignment per head: SNR isolation
+pub mod pll_adaptive_q;            // Phase-Locked Loop: adaptive Q tracking, induction head emergence
+pub mod agc_dynamic_gain;          // Automatic Gain Control: dynamic IF amplifier (replaces static if_gain)
+pub mod kalman_interference;       // Kalman filter: optimal estimator for interference block (vs running mean)
+pub mod beamforming_coherent;      // Beamforming: Q-steered head combination, array gain
+pub mod soliton_dsqg_retrieval;    // Soliton DSQG: KdV stabilisation improves long-range retrieval SNR
+pub mod receiver_chain_interaction; // Combined chain: PLL+AGC+Kalman+beamforming interaction verification
