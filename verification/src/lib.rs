@@ -53,3 +53,4 @@ pub mod kalman_interference;       // Kalman filter: optimal estimator for inter
 pub mod beamforming_coherent;      // Beamforming: Q-steered head combination, array gain
 pub mod soliton_dsqg_retrieval;    // Soliton DSQG: KdV stabilisation improves long-range retrieval SNR
 pub mod receiver_chain_interaction; // Combined chain: PLL+AGC+Kalman+beamforming interaction verification
+pub mod kalman_predict_step;        // Kalman predict step: dynamic gain preserves passkey signal vs plain EMA (condX hypothesis)
