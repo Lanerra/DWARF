@@ -315,7 +315,7 @@ class CondUTransformer(nn.Module):
                 blocks.append(DSQGBlock(
                     embedding_dim, num_heads, ffn_dim, seq_len,
                     dropout=dropout,
-                    interference=(i % interference_interval == interference_interval - 1)))
+                    interference=(i == 2)))  # INT at layer 2 only — matches hybrid structure
         self.blocks = nn.ModuleList(blocks)
         self.norm   = nn.LayerNorm(embedding_dim)
         self.out    = nn.Linear(embedding_dim, vocab_size, bias=False)
