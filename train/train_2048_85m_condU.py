@@ -71,7 +71,7 @@ MAX_TRAIN_SEQS = 52_716   # iso-compute with all prior condU/condM runs
 FW_DATASET_NAME = 'HuggingFaceFW/fineweb-edu'
 FW_SUBSET       = 'sample-10BT'
 FW_MIN_CHARS    = 5_000
-FW_CACHE_FILE   = 'benchmarks/logs/condm_fineweb_edu_doc_cache.json'
+FW_CACHE_FILE   = 'logs/condm_fineweb_edu_doc_cache.json'
 
 # ── Passkey eval ──────────────────────────────────────────────────────────────
 
@@ -86,7 +86,7 @@ _RETRIEVAL_CUE    = 'the secret word is'
 # ── Save paths ────────────────────────────────────────────────────────────────
 
 SAVE_DIR    = 'checkpoints/2048_condU_85m_checkpoints'
-RESULT_FILE = 'benchmarks/logs/condU_85m_results.json'
+RESULT_FILE = 'results/condU_85m_results.json'
 
 # ── condN offset set (44 offsets — shared across all condU/condM runs) ─────────
 
@@ -404,11 +404,16 @@ def load_data(num_docs=NUM_DOCS):
         with open(FW_CACHE_FILE, 'w') as fp:
             json.dump(texts, fp)
         print(f'  Cached {len(texts):,} docs')
-    n = len(texts)
+    # Shuffle with fixed seed so val/test are drawn from the same distribution
+    # as training — NOT from the stream tail which can be OOD.
+    import random as _random
+    _random.seed(42)
+    shuffled = texts[:]
+    _random.shuffle(shuffled)
     return {
-        'train': texts[:int(n * 0.95)],
-        'val':   texts[int(n * 0.95): int(n * 0.95) + 2500],
-        'test':  texts[int(n * 0.95) + 2500: int(n * 0.95) + 5000],
+        'val':   shuffled[:2500],
+        'test':  shuffled[2500:5000],
+        'train': shuffled[5000:],
     }
 
 
@@ -736,7 +741,8 @@ def main():
     print(f'  References: condM_85M=36.042/83.3%pk | condU_35M=38.542/85.0%pk '
           f'| Standard_85M=39.447')
 
-    os.makedirs('benchmarks/logs', exist_ok=True)
+    os.makedirs('logs', exist_ok=True)
+    os.makedirs('results', exist_ok=True)
 
     splits = load_data(NUM_DOCS)
 
@@ -753,7 +759,7 @@ def main():
     else:
         raise FileNotFoundError('condI tokenizer not found')
 
-    _encoded_cache = 'benchmarks/logs/fineweb_encoded_2048.pt'
+    _encoded_cache = 'logs/fineweb_encoded_2048.pt'
     if os.path.exists(_encoded_cache):
         print(f'Loading pre-encoded dataset from {_encoded_cache} ...')
         _cache     = torch.load(_encoded_cache, weights_only=True)
@@ -774,6 +780,9 @@ def main():
             print(f'  Capped to {MAX_TRAIN_SEQS:,} train seqs (iso-compute)')
         val_data   = encode_split(splits['val'],   tokenizer, MAX_SEQ_LEN, 'Val')
         test_data  = encode_split(splits['test'],  tokenizer, MAX_SEQ_LEN, 'Test')
+        torch.save({'train': train_data, 'val': val_data, 'test': test_data},
+                   _encoded_cache)
+        print(f'  Saved encoded cache → {_encoded_cache}')
 
     model = CondUTransformer(
         vocab_size            = tokenizer.vocab_size(),
