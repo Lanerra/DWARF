@@ -80,7 +80,7 @@ ARCH_CONFIGS = {
     'condm_13m_L0':  {'arch': 'condm', 'D': 256, 'H': 8, 'FFN': 1024, 'L': 6,  'full_layer': 0},
     'condm_13m_L3':  {'arch': 'condm', 'D': 256, 'H': 8, 'FFN': 1024, 'L': 6,  'full_layer': 3},
     # condV: condM+condU physics (CondMTransformer from train_2048_condV.py)
-    'condv_13m':     {'arch': 'condv', 'D': 256, 'H': 8, 'FFN': 1024, 'L': 6,  'full_layer': 5},
+    'condv_13m':     {'arch': 'condv', 'D': 256, 'H': 8, 'FFN': 1024, 'L': 6,  'full_layer': 5, 'interference': 2},
     # condW: pure DSQG+INT, no full attention (CondWTransformer from train_2048_condW.py)
     'condw_13m':     {'arch': 'condw', 'D': 256, 'H': 8, 'FFN': 1024, 'L': 6},
     'standard_13m':{'arch': 'standard', 'D': 256, 'H': 8, 'FFN': 1024, 'L': 6},
