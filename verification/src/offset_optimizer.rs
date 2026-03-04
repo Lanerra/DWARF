@@ -73,6 +73,36 @@ fn offsets_run_d() -> Vec<usize> {
     o.into_iter().filter(|&x| x >= 1 && x < MAX_LAG).collect()
 }
 
+fn offsets_run_f() -> Vec<usize> {
+    // Run F: dense 1-15 (PPL recovery) + GAP 16-31 (commitment pressure)
+    //        + octave blocks [32-39][64-71][128-135][256-263][512-519]
+    //        + gap/tail anchors.
+    //
+    // Hypothesis: the gap 16-31 forces DSQG to commit sharply to [32-39]
+    // for d=32 retrieval (no soft alternative at δ=16-31), producing Run-C-
+    // level early passkey signal while the octave blocks extend that to d=512.
+    // Dense 1-15 restores V3-level natural-language PPL (~52-53).
+    //
+    // Design motivated by Run E's "distraction by density" problem:
+    //   dense 1-39 gave the model too many soft alternatives around each
+    //   octave boundary — it never needed to commit sharply.
+    //   dense 1-15 + gap 16-31 + block 32-39 re-creates the "cliff edge"
+    //   that forced Run C's rapid d=32 commitment (ep2).
+    let dense: Vec<usize> = (1..=15).collect();       // PPL recovery, d=1-8 δ_eff
+    let block_32:  Vec<usize> = (32..=39).collect();  // δ_eff for d=32
+    let block_64:  Vec<usize> = (64..=71).collect();  // δ_eff for d=64
+    let block_128: Vec<usize> = (128..=135).collect();// δ_eff for d=128
+    let block_256: Vec<usize> = (256..=263).collect();// δ_eff for d=256
+    let block_512: Vec<usize> = (512..=519).collect();// δ_eff for d=512
+    let gaps_tail = [48usize, 96, 192, 384, 768, 1024, 1536];
+    let mut o: Vec<usize> = dense.into_iter()
+        .chain(block_32).chain([48]).chain(block_64).chain([96])
+        .chain(block_128).chain([192]).chain(block_256).chain([384])
+        .chain(block_512).chain(gaps_tail).collect();
+    o.sort(); o.dedup();
+    o.into_iter().filter(|&x| x >= 1 && x < MAX_LAG).collect()
+}
+
 fn offsets_run_e() -> Vec<usize> {
     // Run E proposal: dense 1-39 (covers δ_eff for d=1-32) + 4 octave blocks
     // at 64-512 + gap/tail.  J = 39 + 32 + 7 = 78.
@@ -766,5 +796,124 @@ mod tests {
         println!("  + d=1024/1536 via multi-hop (d_eff > MAX_LAG range, synthesis only)");
         println!("  + Short-range density matches V3 (PPL recovery expected)");
         println!("  + Run E aggregate path score > Run D");
+    }
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // Test 9: Run F design analysis — dense 1-15 + GAP 16-31 + octave blocks
+    // ──────────────────────────────────────────────────────────────────────────
+    #[test]
+    fn run_f_analysis() {
+        let rf = offsets_run_f();
+        let re = offsets_run_e();
+        let rd = offsets_run_d();
+        let rc = offsets_run_c();
+        let v3 = offsets_v3_condu();
+        let hop_discount = 0.5_f64;
+
+        println!("\n╔══════════════════════════════════════════════════════════════════════╗");
+        println!("║               Run F Design Analysis                                   ║");
+        println!("║  dense 1-15 + GAP 16-31 + blocks [32-39][64-71][128-135]             ║");
+        println!("║                        [256-263][512-519] + gap/tail                  ║");
+        println!("╚══════════════════════════════════════════════════════════════════════╝");
+
+        println!("\n── Offset set sizes ──────────────────────────────────────────────────");
+        println!("  V3/condU : J={}", v3.len());
+        println!("  Run C    : J={}", rc.len());
+        println!("  Run D    : J={}", rd.len());
+        println!("  Run E    : J={}", re.len());
+        println!("  Run F    : J={}", rf.len());
+
+        let delta_base = PASSKEY_CUE_LEN + (PASSKEY_INTRO_LEN - PASSKEY_WORD_POS - 1);
+        let rfc = path_counts(&rf, NUM_LAYERS);
+        let rec = path_counts(&re, NUM_LAYERS);
+        let rdc = path_counts(&rd, NUM_LAYERS);
+        let rcc = path_counts(&rc, NUM_LAYERS);
+        let v3c = path_counts(&v3, NUM_LAYERS);
+
+        println!("\n── delta_eff = d+{} coverage ─────────────────────────────────────────",
+                 delta_base);
+        println!("  {:>6}  {:>8}  {:>8}  {:>8}  {:>8}  {:>8}  {:>8}",
+                 "d", "d_eff", "V3", "Run C", "Run D", "Run E", "Run F");
+        println!("  {}", "─".repeat(68));
+
+        for &d in PASSKEY_DISTANCES {
+            let d_eff = d + delta_base;
+            let chk = |c: &Vec<Vec<u64>>| if d_eff < MAX_LAG && c[1][d_eff] > 0 { "direct" } else { "multi" };
+            println!("  {:>6}  {:>8}  {:>8}  {:>8}  {:>8}  {:>8}  {:>8}",
+                     d, d_eff, chk(&v3c), chk(&rcc), chk(&rdc), chk(&rec), chk(&rfc));
+        }
+
+        println!("\n── Short-range density (delta=1..31) ─────────────────────────────────");
+        let density = |offs: &[usize]| offs.iter().filter(|&&x| x <= 31).count();
+        println!("  V3/condU : {} (dense 1-31)", density(&v3));
+        println!("  Run C    : {} (dense 1-15 only)", density(&rc));
+        println!("  Run D    : {} (sparse {{1,2,4,8,16}})", density(&rd));
+        println!("  Run E    : {} (dense 1-39 incl 16-31)", density(&re));
+        println!("  Run F    : {} (dense 1-15, GAP 16-31)", density(&rf));
+
+        let rf_gap: Vec<usize> = rf.iter().filter(|&&x| x >= 16 && x <= 31).copied().collect();
+        let re_gap: Vec<usize> = re.iter().filter(|&&x| x >= 16 && x <= 31).copied().collect();
+        println!("\n── Gap 16-31 analysis (commitment pressure zone) ─────────────────────");
+        println!("  Run E offsets in 16-31: {:?}  <- soft alternatives", re_gap);
+        println!("  Run F offsets in 16-31: {:?}  <- empty GAP", rf_gap);
+        println!("  Run F cliff edge: model must use [32-39] for d=32 (no soft alt at 16-31).");
+        println!("  Same structure Run C used -> d=32:60%+ by ep5.");
+
+        println!("\n── Path-count scores (hop_discount={}) ───────────────────────────────",
+                 hop_discount);
+        println!("  {:>6}  {:>11}  {:>11}  {:>11}  {:>11}  {:>8}",
+                 "d", "Run C", "Run D", "Run E", "Run F", "RF/RC");
+        println!("  {}", "─".repeat(64));
+
+        let mut total_rf = 0.0_f64;
+        let mut total_rc_sum = 0.0_f64;
+        for &d in PASSKEY_DISTANCES {
+            let src = path_score(&rcc, d, hop_discount);
+            let srd = path_score(&rdc, d, hop_discount);
+            let sre = path_score(&rec, d, hop_discount);
+            let srf = path_score(&rfc, d, hop_discount);
+            total_rf     += srf;
+            total_rc_sum += src;
+            println!("  {:>6}  {:>11.1}  {:>11.1}  {:>11.1}  {:>11.1}  {:>8.2}x",
+                     d, src, srd, sre, srf, if src > 0.0 { srf/src } else { 0.0 });
+        }
+        println!("  {}", "─".repeat(64));
+        println!("  TOTAL: RC={:.0}  RD={:.0}  RE={:.0}  RF={:.0}",
+                 total_rc_sum,
+                 PASSKEY_DISTANCES.iter().map(|&d| path_score(&rdc, d, hop_discount)).sum::<f64>(),
+                 PASSKEY_DISTANCES.iter().map(|&d| path_score(&rec, d, hop_discount)).sum::<f64>(),
+                 total_rf);
+        println!("  RF/RC: {:.2}x   RF/RD: {:.2}x",
+                 total_rf/total_rc_sum,
+                 total_rf / PASSKEY_DISTANCES.iter().map(|&d| path_score(&rdc, d, hop_discount)).sum::<f64>());
+
+        println!("\n── Run F predictions ─────────────────────────────────────────────────");
+        println!("  PPL     : dense 1-15 (= Run C short-range) -> ~52-53 PPL");
+        println!("  d=1-8   : delta_eff in dense 1-15 -> signal from ep2");
+        println!("  d=16    : delta_eff=23 in GAP -> multi-hop only (minor weakness)");
+        println!("  d=32    : cliff edge forces commitment -> 60%+ by ep5 (Run C rate)");
+        println!("  d=64-512: octave blocks -> 60%+ by ep7 (Run D rate)");
+        println!("  d=1024+ : multi-hop synthesis (proven in Run D: 60%)");
+        println!("  Speed   : J~63, ~15% faster than Run E (J=79)");
+        println!("  HYPOTHESIS: Run F = Run C PPL + Run D long-range passkey");
+
+        // Assertions
+        let rf_short = density(&rf);
+        let rc_short = density(&rc);
+        assert_eq!(rf_short, rc_short,
+            "Run F must match Run C short-range density ({} vs {})", rf_short, rc_short);
+        assert!(rf_gap.is_empty(),
+            "Run F must have empty gap 16-31 (commitment pressure)");
+        let octave_ok: bool = [32usize, 64, 128, 256, 512].iter().all(|&d| {
+            let de = d + delta_base;
+            de < MAX_LAG && rfc[1][de] > 0
+        });
+        assert!(octave_ok, "Run F must cover delta_eff for d=32,64,128,256,512");
+
+        println!("\n  ASSERTIONS PASSED:");
+        println!("  + Run F short-range density = Run C (15 offsets, dense 1-15)");
+        println!("  + Gap 16-31 confirmed empty");
+        println!("  + delta_eff direct for d=32,64,128,256,512");
+        println!("  + d=16 multi-hop only (acceptable: Run C also had d=16 as multi-hop)");
     }
 }
