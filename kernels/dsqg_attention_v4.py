@@ -536,10 +536,11 @@ def _reference_v3(q, k, v, pos_bias, scale_embed):
     B, H, N, HD = q.shape
     sc  = HD ** -0.5
     off = torch.tensor(ALL_OFFSETS, device=q.device, dtype=torch.long)
-    kp  = F.pad(k.float(), (0, 0, 1536, 0))
-    vp  = F.pad(v.float(), (0, 0, 1536, 0))
+    MAX_OFF = max(ALL_OFFSETS)  # 4096 for V4
+    kp  = F.pad(k.float(), (0, 0, MAX_OFF, 0))
+    vp  = F.pad(v.float(), (0, 0, MAX_OFF, 0))
     ni  = torch.arange(N, device=q.device)
-    gi  = 1536 - off[None,:] + ni[:,None]
+    gi  = MAX_OFF - off[None,:] + ni[:,None]
     Ka  = kp[:, :, gi, :]; Va = vp[:, :, gi, :]
     # Q·K scores [B, H, N, 44]
     s   = (q.float().unsqueeze(3) * Ka).sum(-1) * sc
@@ -558,8 +559,9 @@ def _reference_v3(q, k, v, pos_bias, scale_embed):
 # ─────────────────────────────────────────────────────────────────────────────
 
 def run_tests(device='cuda'):
+    J = len(ALL_OFFSETS)  # 47 for V4
     print("=" * 64)
-    print("DSQG V3 — Correctness Tests (Q-weighted scale gains)")
+    print(f"DSQG V4 — Correctness Tests (J={J} offsets, max={max(ALL_OFFSETS)})")
     print("=" * 64)
     cfgs = [
         (1,  8,   64, 32, "tiny"),
@@ -572,12 +574,12 @@ def run_tests(device='cuda'):
         q  = torch.randn(B,H,N,HD, device=device, dtype=torch.bfloat16) * 0.1
         k  = torch.randn(B,H,N,HD, device=device, dtype=torch.bfloat16) * 0.1
         v  = torch.randn(B,H,N,HD, device=device, dtype=torch.bfloat16) * 0.1
-        pb = torch.randn(44,H,  device=device, dtype=torch.float32) * 0.5
-        se = torch.randn(44,HD, device=device, dtype=torch.float32) * 0.05
+        pb = torch.randn(J, H,  device=device, dtype=torch.float32) * 0.5
+        se = torch.randn(J, HD, device=device, dtype=torch.float32) * 0.05
 
         # Forward correctness
         ref = _reference_v3(q.detach(), k.detach(), v.detach(), pb, se)
-        out = dsqg_attention_v3(q.detach().clone(), k.detach().clone(),
+        out = dsqg_attention_v4(q.detach().clone(), k.detach().clone(),
                                 v.detach().clone(), pb, se)
         fe  = (ref.float() - out.float()).abs().max().item()
 
@@ -590,7 +592,7 @@ def run_tests(device='cuda'):
 
         qt,kt2,vt = [t.clone().detach().requires_grad_(True) for t in (q,k,v)]
         se_t = se.clone().detach().requires_grad_(True)
-        dsqg_attention_v3(qt,kt2,vt,pb,se_t).sum().backward()
+        dsqg_attention_v4(qt,kt2,vt,pb,se_t).sum().backward()
         de_qkv = max((qt.grad.float()-dqr.float()).abs().max().item(),
                      (kt2.grad.float()-dkr.float()).abs().max().item(),
                      (vt.grad.float()-dvr.float()).abs().max().item())
@@ -601,23 +603,22 @@ def run_tests(device='cuda'):
         print(f"  {lbl:24s}  fwd={fe:.4f}  bwd_qkv={de_qkv:.4f}  bwd_se={de_se:.4f}  "
               f"{'PASS ✓' if ok else 'FAIL ✗'}")
 
-    # Test: zero scale_embed → same output as V2
+    # Self-consistency: zero scale_embed → same as pos_bias-only output
     print()
-    print("  Zero SE init → same as V2:")
-    from dsqg_attention_v2 import dsqg_attention_v2
+    print("  SE=0 self-consistency:")
     B,H,N,HD = 2,8,128,32
     torch.manual_seed(7)
     q  = torch.randn(B,H,N,HD, device=device, dtype=torch.bfloat16) * 0.1
     k  = torch.randn(B,H,N,HD, device=device, dtype=torch.bfloat16) * 0.1
     v  = torch.randn(B,H,N,HD, device=device, dtype=torch.bfloat16) * 0.1
-    pb = torch.randn(44,H, device=device, dtype=torch.float32) * 0.5
-    se_zero = torch.zeros(44,HD, device=device, dtype=torch.float32)
-    out_v2 = dsqg_attention_v2(q.clone(), k.clone(), v.clone(), pb)
-    out_v3 = dsqg_attention_v3(q.clone(), k.clone(), v.clone(), pb, se_zero)
-    diff   = (out_v2.float() - out_v3.float()).abs().max().item()
-    ok_compat = diff < 1e-3
-    if not ok_compat: ok_all = False
-    print(f"  {'V3(SE=0) == V2':24s}  max_diff={diff:.6f}  {'PASS ✓' if ok_compat else 'FAIL ✗'}")
+    pb      = torch.randn(J, H,  device=device, dtype=torch.float32) * 0.5
+    se_zero = torch.zeros(J, HD, device=device, dtype=torch.float32)
+    out_ref  = _reference_v3(q.clone(), k.clone(), v.clone(), pb, se_zero)
+    out_kern = dsqg_attention_v4(q.clone(), k.clone(), v.clone(), pb, se_zero)
+    diff     = (out_ref.float() - out_kern.float()).abs().max().item()
+    ok_self  = diff < 1e-3
+    if not ok_self: ok_all = False
+    print(f"  {'ref==kernel(SE=0)':24s}  max_diff={diff:.6f}  {'PASS ✓' if ok_self else 'FAIL ✗'}")
 
     print("=" * 64)
     print(f"{'ALL PASSED ✓' if ok_all else 'SOME FAILED ✗'}")

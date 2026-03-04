@@ -132,57 +132,51 @@ def _fwd_v3i(
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Backward dQ kernel
+# Backward dQ kernel  (ported from _bwd_dq_v3; only offsets changed)
 # ─────────────────────────────────────────────────────────────────────────────
 
 @triton.jit
 def _bwd_dq_v3i(
-    Q, K, V, POS_BIAS, SE, DO, LSE, Dv,
-    DQ, DSE,
-    stride_qb, stride_qh, stride_qn, stride_qd,
-    stride_kb, stride_kh, stride_kn, stride_kd,
-    stride_vb, stride_vh, stride_vn, stride_vd,
-    stride_ob, stride_oh, stride_on, stride_od,
-    stride_lb, stride_lh, stride_ln,
-    stride_Db, stride_Dh, stride_Dn,
-    stride_pbi, stride_pbh,
-    stride_sei, stride_sed,
+    Q, K, V, PB, SE, DO, LSE, Dv, DQ, DPB, DSE,
+    stride_qb,  stride_qh,  stride_qn,  stride_qd,
+    stride_kb,  stride_kh,  stride_kn,  stride_kd,
+    stride_vb,  stride_vh,  stride_vn,  stride_vd,
+    stride_dob, stride_doh, stride_don, stride_dod,
+    stride_lb,  stride_lh,  stride_ln,
+    stride_Db,  stride_Dh,  stride_Dn,
     stride_dqb, stride_dqh, stride_dqn, stride_dqd,
-    stride_dsb, stride_dsh, stride_dsn, stride_dsd,
+    stride_dpbi, stride_dpbh,
+    stride_pbi,  stride_pbh,
+    stride_sei,  stride_sed,
+    stride_dsei, stride_dsed,
     H: tl.constexpr, N, HD: tl.constexpr,
-    BLOCK_M: tl.constexpr, BLOCK_HD: tl.constexpr,
+    BLOCK_N: tl.constexpr, BLOCK_HD: tl.constexpr,
 ):
     bh  = tl.program_id(0); blk = tl.program_id(1)
-    b   = bh // H;           h   = bh % H
-    n0  = blk * BLOCK_M
-
-    ns  = n0 + tl.arange(0, BLOCK_M)
-    nm  = ns < N
-    ds  = tl.arange(0, BLOCK_HD)
-    dm  = ds < HD
+    b   = bh // H; h = bh % H
+    n0  = blk * BLOCK_N
+    ns  = n0 + tl.arange(0, BLOCK_N); nm = ns < N
+    ds  = tl.arange(0, BLOCK_HD);     dm = ds < HD
     sc  = 1.0 / (HD ** 0.5)
 
-    qb  = Q   + b*stride_qb  + h*stride_qh
-    kb  = K   + b*stride_kb  + h*stride_kh
-    vb  = V   + b*stride_vb  + h*stride_vh
-    dob = DO  + b*stride_ob  + h*stride_oh
-    dqb = DQ  + b*stride_dqb + h*stride_dqh
-    dsb = DSE + b*stride_dsb + h*stride_dsh   # per-head DSE accumulator
+    qb  = Q  + b*stride_qb + h*stride_qh
+    kb  = K  + b*stride_kb + h*stride_kh
+    vb  = V  + b*stride_vb + h*stride_vh
+    dob = DO + b*stride_dob + h*stride_doh
 
     q   = tl.load(qb  + ns[:,None]*stride_qn  + ds[None,:]*stride_qd,
                   mask=nm[:,None] & dm[None,:], other=0.0).to(tl.float32)
-    do  = tl.load(dob + ns[:,None]*stride_on  + ds[None,:]*stride_od,
+    do  = tl.load(dob + ns[:,None]*stride_don  + ds[None,:]*stride_dod,
                   mask=nm[:,None] & dm[None,:], other=0.0).to(tl.float32)
     lse = tl.load(LSE + b*stride_lb + h*stride_lh + ns*stride_ln, mask=nm, other=0.0)
     Dval= tl.load(Dv  + b*stride_Db + h*stride_Dh + ns*stride_Dn, mask=nm, other=0.0)
-    dq  = tl.zeros([BLOCK_M, BLOCK_HD], tl.float32)
+    dq  = tl.zeros([BLOCK_N, BLOCK_HD], tl.float32)
 
-    # <<< INTERLEAVED: static_range(40) and updated offset tuple
+    # <<< INTERLEAVED: static_range(40) + interleaved offset tuple
     for i in tl.static_range(40):
         delta = (0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,
                  32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,
                  64,128,256,512,768,1024,1536)[i]
-
         kp  = ns - delta
         val = (kp >= 0) & nm
 
@@ -191,107 +185,109 @@ def _bwd_dq_v3i(
         vt  = tl.load(vb + kp[:,None]*stride_vn + ds[None,:]*stride_vd,
                       mask=val[:,None] & dm[None,:], other=0.0).to(tl.float32)
 
-        pb_i = tl.load(POS_BIAS + i * stride_pbi + h * stride_pbh)
-        se_i = tl.load(SE + i * stride_sei + ds * stride_sed,
-                       mask=dm, other=0.0).to(tl.float32)
+        se_i  = tl.load(SE + i * stride_sei + ds * stride_sed, mask=dm, other=0.0).to(tl.float32)
+        q_dyn = tl.sum(q * se_i[None, :], axis=1) * sc   # [BLOCK_N]
 
-        s    = tl.sum(q * kt, axis=1) * sc + pb_i
-        s   += tl.sum(q * se_i[None,:], axis=1) * sc
-        s    = tl.where(val, s, float('-inf'))
-        a    = tl.exp(s - lse)
+        s     = tl.sum(q * kt, axis=1) * sc
+        s    += tl.load(PB + i*stride_pbi + h*stride_pbh)
+        s    += q_dyn
+        s     = tl.where(val, s, float('-inf'))
 
-        delta_i = tl.sum(a * tl.sum(do * vt, axis=1), axis=0) - tl.sum(a * Dval, axis=0)
-        dq  += a[:,None] * (kt + se_i[None,:]) * sc
-        dq  -= (a * delta_i)[:,None] / tl.sum(a, axis=0)
+        # Correct softmax backward: alpha zeroed for invalid positions (no div-by-zero)
+        alpha = tl.where(val, tl.exp(s - lse), 0.0)
+        ds_v  = alpha * (tl.sum(do * vt, axis=1) - Dval)
 
-        # DSE gradient: atomic add per (i, head_dim)
-        dse_i = tl.sum(a[:,None] * q, axis=0) * sc
-        tl.atomic_add(dsb + i*stride_dsn + ds*stride_dsd,
-                      dse_i, mask=dm)
+        dq   += ds_v[:,None] * kt * sc
+        dq   += ds_v[:,None] * se_i[None, :] * sc
 
-    tl.store(dqb + ns[:,None]*stride_dqn + ds[None,:]*stride_dqd,
+        # dPOS_BIAS gradient
+        tl.atomic_add(DPB + i*stride_dpbi + h*stride_dpbh,
+                      tl.sum(tl.where(val, ds_v, 0.0), axis=0))
+
+        # dSCALE_EMBED gradient
+        dse_i = tl.sum(ds_v[:,None] * q, axis=0) * sc
+        tl.atomic_add(DSE + i * stride_dsei + ds * stride_dsed,
+                      tl.where(dm, dse_i, 0.0))
+
+    tl.store(DQ + b*stride_dqb + h*stride_dqh
+             + ns[:,None]*stride_dqn + ds[None,:]*stride_dqd,
              dq.to(tl.bfloat16), mask=nm[:,None] & dm[None,:])
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Backward dK/dV kernel
+# Backward dK/dV kernel  (ported from _bwd_dkdv_v3; only offsets changed)
 # ─────────────────────────────────────────────────────────────────────────────
 
 @triton.jit
 def _bwd_dkdv_v3i(
-    Q, K, V, POS_BIAS, SE, DO, LSE, Dv,
-    DK, DV,
-    stride_qb, stride_qh, stride_qn, stride_qd,
-    stride_kb, stride_kh, stride_kn, stride_kd,
-    stride_vb, stride_vh, stride_vn, stride_vd,
-    stride_ob, stride_oh, stride_on, stride_od,
-    stride_lb, stride_lh, stride_ln,
-    stride_Db, stride_Dh, stride_Dn,
-    stride_pbi, stride_pbh,
-    stride_sei, stride_sed,
+    Q, K, V, PB, SE, DO, LSE, Dv, DK, DV,
+    stride_qb,  stride_qh,  stride_qn,  stride_qd,
+    stride_kb,  stride_kh,  stride_kn,  stride_kd,
+    stride_vb,  stride_vh,  stride_vn,  stride_vd,
+    stride_dob, stride_doh, stride_don, stride_dod,
+    stride_lb,  stride_lh,  stride_ln,
+    stride_Db,  stride_Dh,  stride_Dn,
     stride_dkb, stride_dkh, stride_dkn, stride_dkd,
     stride_dvb, stride_dvh, stride_dvn, stride_dvd,
+    stride_pbi, stride_pbh,
+    stride_sei, stride_sed,
     H: tl.constexpr, N, HD: tl.constexpr,
     BLOCK_M: tl.constexpr, BLOCK_HD: tl.constexpr,
 ):
-    bh = tl.program_id(0); blk = tl.program_id(1)
-    b  = bh // H;           h   = bh % H
-    n0 = blk * BLOCK_M
+    bh  = tl.program_id(0); blk = tl.program_id(1)
+    b   = bh // H; h = bh % H
+    m0  = blk * BLOCK_M
+    ms  = m0 + tl.arange(0, BLOCK_M); mm = ms < N
+    ds  = tl.arange(0, BLOCK_HD);     dm = ds < HD
+    sc  = 1.0 / (HD ** 0.5)
 
-    # This kernel computes dK and dV for position n0..n0+BLOCK_M.
-    # Every query that attends to these positions contributes.
-    ns = n0 + tl.arange(0, BLOCK_M)   # source (K/V) positions
-    nm = ns < N
-    ds = tl.arange(0, BLOCK_HD)
-    dm = ds < HD
-    sc = 1.0 / (HD ** 0.5)
+    kb  = K  + b*stride_kb + h*stride_kh
+    vb  = V  + b*stride_vb + h*stride_vh
+    qb  = Q  + b*stride_qb + h*stride_qh
+    dob = DO + b*stride_dob + h*stride_doh
 
-    kb  = K  + b*stride_kb  + h*stride_kh
-    vb  = V  + b*stride_vb  + h*stride_vh
-    qb  = Q  + b*stride_qb  + h*stride_qh
-    dob = DO + b*stride_ob  + h*stride_oh
-    dkb = DK + b*stride_dkb + h*stride_dkh
-    dvb = DV + b*stride_dvb + h*stride_dvh
+    kt  = tl.load(kb + ms[:,None]*stride_kn + ds[None,:]*stride_kd,
+                  mask=mm[:,None] & dm[None,:], other=0.0).to(tl.float32)
+    vt  = tl.load(vb + ms[:,None]*stride_vn + ds[None,:]*stride_vd,
+                  mask=mm[:,None] & dm[None,:], other=0.0).to(tl.float32)
 
     dk  = tl.zeros([BLOCK_M, BLOCK_HD], tl.float32)
     dv  = tl.zeros([BLOCK_M, BLOCK_HD], tl.float32)
 
-    # <<< INTERLEAVED: static_range(40) and updated offset tuple
+    # <<< INTERLEAVED: static_range(40) + interleaved offset tuple
     for i in tl.static_range(40):
         delta = (0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,
                  32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,
                  64,128,256,512,768,1024,1536)[i]
+        np_  = ms + delta
+        val  = (np_ < N) & mm
 
-        # Queries that attend to ns via offset delta: qpos = ns + delta
-        qp  = ns + delta
-        qval= (qp < N) & nm
+        qn   = tl.load(qb  + np_[:,None]*stride_qn  + ds[None,:]*stride_qd,
+                       mask=val[:,None] & dm[None,:], other=0.0).to(tl.float32)
+        don  = tl.load(dob + np_[:,None]*stride_don  + ds[None,:]*stride_dod,
+                       mask=val[:,None] & dm[None,:], other=0.0).to(tl.float32)
+        lsen = tl.load(LSE + b*stride_lb + h*stride_lh + np_*stride_ln, mask=val, other=0.0)
+        Dn   = tl.load(Dv  + b*stride_Db + h*stride_Dh + np_*stride_Dn, mask=val, other=0.0)
 
-        qt  = tl.load(qb  + qp[:,None]*stride_qn  + ds[None,:]*stride_qd,
-                      mask=qval[:,None] & dm[None,:], other=0.0).to(tl.float32)
-        dot = tl.load(dob + qp[:,None]*stride_on   + ds[None,:]*stride_od,
-                      mask=qval[:,None] & dm[None,:], other=0.0).to(tl.float32)
-        lse_q = tl.load(LSE + b*stride_lb + h*stride_lh + qp*stride_ln, mask=qval, other=0.0)
-        Dv_q  = tl.load(Dv  + b*stride_Db + h*stride_Dh + qp*stride_Dn, mask=qval, other=0.0)
+        se_i  = tl.load(SE + i * stride_sei + ds * stride_sed, mask=dm, other=0.0).to(tl.float32)
+        q_dyn = tl.sum(qn * se_i[None, :], axis=1) * sc
 
-        kt  = tl.load(kb + ns[:,None]*stride_kn + ds[None,:]*stride_kd,
-                      mask=nm[:,None] & dm[None,:], other=0.0).to(tl.float32)
+        s    = tl.sum(qn * kt, axis=1) * sc
+        s   += tl.load(PB + i*stride_pbi + h*stride_pbh)
+        s   += q_dyn
+        s    = tl.where(val, s, float('-inf'))
 
-        pb_i = tl.load(POS_BIAS + i*stride_pbi + h*stride_pbh)
-        se_i = tl.load(SE + i*stride_sei + ds*stride_sed, mask=dm, other=0.0).to(tl.float32)
+        alpha = tl.where(val, tl.exp(s - lsen), 0.0)
+        ds_v  = alpha * (tl.sum(don * vt, axis=1) - Dn)
+        dv   += alpha[:,None] * don
+        dk   += ds_v[:,None] * qn * sc
 
-        s  = tl.sum(qt * kt, axis=1) * sc + pb_i
-        s += tl.sum(qt * se_i[None,:], axis=1) * sc
-        s  = tl.where(qval, s, float('-inf'))
-        a  = tl.exp(s - lse_q)
-
-        dv += a[:,None] * dot
-        dk += a[:,None] * qt * sc
-        dk -= (a * Dv_q)[:,None] * qt * sc
-
-    tl.store(dkb + ns[:,None]*stride_dkn + ds[None,:]*stride_dkd,
-             dk.to(tl.bfloat16), mask=nm[:,None] & dm[None,:])
-    tl.store(dvb + ns[:,None]*stride_dvn + ds[None,:]*stride_dvd,
-             dv.to(tl.bfloat16), mask=nm[:,None] & dm[None,:])
+    tl.store(DK + b*stride_dkb + h*stride_dkh
+             + ms[:,None]*stride_dkn + ds[None,:]*stride_dkd,
+             dk.to(tl.bfloat16), mask=mm[:,None] & dm[None,:])
+    tl.store(DV + b*stride_dvb + h*stride_dvh
+             + ms[:,None]*stride_dvn + ds[None,:]*stride_dvd,
+             dv.to(tl.bfloat16), mask=mm[:,None] & dm[None,:])
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -305,11 +301,12 @@ class _DSQGFnV3I(torch.autograd.Function):
         J = pos_bias.shape[0]  # 40
         assert pos_bias.shape    == (J, H),  f"pos_bias must be [{J}, {H}]"
         assert scale_embed.shape == (J, HD), f"scale_embed must be [{J}, {HD}]"
+        assert q.dtype == torch.bfloat16
 
-        BN  = min(64, _next_pow2(N))
+        BN  = 128 if HD <= 64 else 64
         BHD = _next_pow2(HD)
-        out = torch.zeros_like(q)
-        lse = torch.zeros(B, H, N, device=q.device, dtype=torch.float32)
+        out = torch.empty_like(q)
+        lse = torch.empty(B, H, N, device=q.device, dtype=torch.float32)
 
         _fwd_v3i[(B*H, triton.cdiv(N, BN))](
             q, k, v, pos_bias, scale_embed, out, lse,
@@ -322,65 +319,60 @@ class _DSQGFnV3I(torch.autograd.Function):
             scale_embed.stride(0), scale_embed.stride(1),
             H=H, N=N, HD=HD, BLOCK_N=BN, BLOCK_HD=BHD,
         )
-        ctx.save_for_backward(q, k, v, pos_bias, scale_embed, lse)
+        ctx.save_for_backward(q, k, v, pos_bias, scale_embed, out, lse)
         ctx.BN = BN; ctx.BHD = BHD
         return out
 
     @staticmethod
     def backward(ctx, grad_out):
-        q, k, v, pos_bias, scale_embed, lse = ctx.saved_tensors
+        q, k, v, pb, se, out, lse = ctx.saved_tensors
         B, H, N, HD = q.shape
-        J = pos_bias.shape[0]
-
+        BN, BHD = ctx.BN, ctx.BHD
         grad_out = grad_out.contiguous()
-        dq = torch.zeros_like(q)
-        dk = torch.zeros_like(k)
-        dv = torch.zeros_like(v)
-        dpb = torch.zeros_like(pos_bias)
-        dse = torch.zeros(B, H, J, HD, device=q.device, dtype=torch.float32)
 
-        with torch.no_grad():
-            out = _DSQGFnV3I.apply(q, k, v, pos_bias, scale_embed)
+        # D[b,h,n] = (grad_out[b,h,n] · out[b,h,n]).sum(HD)
         Dv = (grad_out.float() * out.float()).sum(-1)
 
-        BN = ctx.BN; BHD = ctx.BHD
+        g   = (B * H, triton.cdiv(N, BN))
+        dq  = torch.empty_like(q)
+        dpb = torch.zeros_like(pb)
+        dse = torch.zeros_like(se)
 
-        _bwd_dq_v3i[(B*H, triton.cdiv(N, BN))](
-            q, k, v, pos_bias, scale_embed, grad_out, lse, Dv,
-            dq, dse,
-            q.stride(0),  q.stride(1),  q.stride(2),  q.stride(3),
-            k.stride(0),  k.stride(1),  k.stride(2),  k.stride(3),
-            v.stride(0),  v.stride(1),  v.stride(2),  v.stride(3),
+        _bwd_dq_v3i[g](
+            q, k, v, pb, se, grad_out, lse, Dv, dq, dpb, dse,
+            q.stride(0),        q.stride(1),        q.stride(2),        q.stride(3),
+            k.stride(0),        k.stride(1),        k.stride(2),        k.stride(3),
+            v.stride(0),        v.stride(1),        v.stride(2),        v.stride(3),
             grad_out.stride(0), grad_out.stride(1), grad_out.stride(2), grad_out.stride(3),
-            lse.stride(0), lse.stride(1), lse.stride(2),
-            Dv.stride(0),  Dv.stride(1),  Dv.stride(2),
-            pos_bias.stride(0), pos_bias.stride(1),
-            scale_embed.stride(0), scale_embed.stride(1),
-            dq.stride(0),  dq.stride(1),  dq.stride(2),  dq.stride(3),
-            dse.stride(0), dse.stride(1), dse.stride(2), dse.stride(3),
+            lse.stride(0),      lse.stride(1),      lse.stride(2),
+            Dv.stride(0),       Dv.stride(1),       Dv.stride(2),
+            dq.stride(0),       dq.stride(1),       dq.stride(2),       dq.stride(3),
+            dpb.stride(0),      dpb.stride(1),
+            pb.stride(0),       pb.stride(1),
+            se.stride(0),       se.stride(1),
+            dse.stride(0),      dse.stride(1),
+            H=H, N=N, HD=HD, BLOCK_N=BN, BLOCK_HD=BHD,
+        )
+
+        dk = torch.empty_like(k)
+        dv = torch.empty_like(v)
+
+        _bwd_dkdv_v3i[g](
+            q, k, v, pb, se, grad_out, lse, Dv, dk, dv,
+            q.stride(0),        q.stride(1),        q.stride(2),        q.stride(3),
+            k.stride(0),        k.stride(1),        k.stride(2),        k.stride(3),
+            v.stride(0),        v.stride(1),        v.stride(2),        v.stride(3),
+            grad_out.stride(0), grad_out.stride(1), grad_out.stride(2), grad_out.stride(3),
+            lse.stride(0),      lse.stride(1),      lse.stride(2),
+            Dv.stride(0),       Dv.stride(1),       Dv.stride(2),
+            dk.stride(0),       dk.stride(1),       dk.stride(2),       dk.stride(3),
+            dv.stride(0),       dv.stride(1),       dv.stride(2),       dv.stride(3),
+            pb.stride(0),       pb.stride(1),
+            se.stride(0),       se.stride(1),
             H=H, N=N, HD=HD, BLOCK_M=BN, BLOCK_HD=BHD,
         )
 
-        _bwd_dkdv_v3i[(B*H, triton.cdiv(N, BN))](
-            q, k, v, pos_bias, scale_embed, grad_out, lse, Dv,
-            dk, dv,
-            q.stride(0),  q.stride(1),  q.stride(2),  q.stride(3),
-            k.stride(0),  k.stride(1),  k.stride(2),  k.stride(3),
-            v.stride(0),  v.stride(1),  v.stride(2),  v.stride(3),
-            grad_out.stride(0), grad_out.stride(1), grad_out.stride(2), grad_out.stride(3),
-            lse.stride(0), lse.stride(1), lse.stride(2),
-            Dv.stride(0),  Dv.stride(1),  Dv.stride(2),
-            pos_bias.stride(0), pos_bias.stride(1),
-            scale_embed.stride(0), scale_embed.stride(1),
-            dk.stride(0),  dk.stride(1),  dk.stride(2),  dk.stride(3),
-            dv.stride(0),  dv.stride(1),  dv.stride(2),  dv.stride(3),
-            H=H, N=N, HD=HD, BLOCK_M=BN, BLOCK_HD=BHD,
-        )
-
-        dpb = None   # pos_bias gradient via parameter learning, not kernel
-        dse_final = dse.sum(0)  # [H, J, HD] → [J, HD] summed over batch
-        dse_final = dse_final.sum(0)
-        return dq, dk, dv, dpb, dse_final
+        return dq, dk, dv, dpb, dse
 
 
 def dsqg_attention_v3_interleaved(q, k, v, pos_bias, scale_embed):
