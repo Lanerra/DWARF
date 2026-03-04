@@ -431,7 +431,8 @@ def evaluate(model, data, batch_size, device):
     for i in range(0, len(data) - batch_size + 1, batch_size):
         x = data[i:i + batch_size, :-1].to(device)
         y = data[i:i + batch_size,  1:].to(device)
-        logits = model(x)
+        with torch.amp.autocast('cuda'):   # match training precision
+            logits = model(x)
         loss   = F.cross_entropy(
             logits.reshape(-1, logits.size(-1)), y.reshape(-1))
         total_loss   += loss.item() * y.numel()
@@ -448,7 +449,8 @@ def generate(model, tokenizer, prompts, device, max_new=150,
                            dtype=torch.long, device=device)
         with torch.no_grad():
             for _ in range(max_new):
-                logits      = model(ids[:, -MAX_SEQ_LEN:])
+                with torch.amp.autocast('cuda'):   # match training precision
+                    logits = model(ids[:, -MAX_SEQ_LEN:])
                 logits_last = logits[0, -1]
                 if temperature <= 0.01:
                     next_id = logits_last.argmax()
@@ -503,7 +505,8 @@ def passkey_accuracy(model, tokenizer, device):
             full_seq = intro_ids + filler[:d] + cue_ids
             if len(full_seq) >= MAX_SEQ_LEN: continue
             ids    = torch.tensor([full_seq], dtype=torch.long, device=device)
-            logits = model(ids)[:, -1, :]
+            with torch.amp.autocast('cuda'):   # match training precision
+                logits = model(ids)[:, -1, :]
             cand_ids = [(tokenizer.encode(' ' + w) or tokenizer.encode(w))[0]
                         for w in [target] + others[:9]]
             correct  += int(([target] + others[:9])[logits[0][cand_ids].argmax().item()] == target)
@@ -710,6 +713,7 @@ def train(model, train_data, val_data, test_data, tokenizer, device='cuda'):
 # ── Main ──────────────────────────────────────────────────────────────────────
 
 def main():
+    torch.set_float32_matmul_precision('high')   # enable TF32 on Ampere/Hopper
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     print('=' * 70)
     print('  condU 85M — Q-Weighted Scale Gains + IF Amplifier + Huygens K/V')
