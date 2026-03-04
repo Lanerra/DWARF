@@ -73,6 +73,29 @@ fn offsets_run_d() -> Vec<usize> {
     o.into_iter().filter(|&x| x >= 1 && x < MAX_LAG).collect()
 }
 
+fn offsets_run_e() -> Vec<usize> {
+    // Run E proposal: dense 1-39 (covers δ_eff for d=1-32) + 4 octave blocks
+    // at 64-512 + gap/tail.  J = 39 + 32 + 7 = 78.
+    //
+    // Design logic:
+    //   dense 1-39  → covers δ_eff = d+7 for d=1(8), 2(9), 4(11), 8(15),
+    //                  16(23), 32(39) — all short-range passkey distances.
+    //                  Also restores V3's natural-language short-range density.
+    //   blocks 64-519 → direct δ_eff coverage for d=64,128,256,512.
+    //   gap/tail       → combination-tone anchors + very long range.
+    let dense: Vec<usize> = (1..=39).collect();
+    let block_64:  Vec<usize> = (64..=71).collect();
+    let block_128: Vec<usize> = (128..=135).collect();
+    let block_256: Vec<usize> = (256..=263).collect();
+    let block_512: Vec<usize> = (512..=519).collect();
+    let gaps_tail = [48usize, 96, 192, 384, 768, 1024, 1536];
+    let mut o: Vec<usize> = dense.into_iter()
+        .chain(block_64).chain(block_128).chain(block_256).chain(block_512)
+        .chain(gaps_tail).collect();
+    o.sort(); o.dedup();
+    o.into_iter().filter(|&x| x >= 1 && x < MAX_LAG).collect()
+}
+
 // ── Core: path-count computation ──────────────────────────────────────────────
 
 /// Returns path_count[k][d] = number of distinct k-hop paths reaching lag d.
@@ -633,5 +656,115 @@ mod tests {
         println!("║  4. Combination tones (d=96=32+64) richest in Run D due to dense      ║");
         println!("║     blocks at both ends; Run D also has δ=96 directly.                ║");
         println!("╚══════════════════════════════════════════════════════════════════════╝");
+    }
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // Test 8: Run E design analysis — dense 1-39 + 4 octave blocks at 64-512
+    // ──────────────────────────────────────────────────────────────────────────
+    #[test]
+    fn run_e_analysis() {
+        let re = offsets_run_e();
+        let v3 = offsets_v3_condu();
+        let rc = offsets_run_c();
+        let rd = offsets_run_d();
+        let hop_discount = 0.5_f64;
+
+        println!("\n╔══════════════════════════════════════════════════════════════════════╗");
+        println!("║               Run E Design Analysis                                   ║");
+        println!("║  dense 1-39 + octave blocks [64-71][128-135][256-263][512-519]        ║");
+        println!("║  + gap/tail {{48,96,192,384,768,1024,1536}}                            ║");
+        println!("╚══════════════════════════════════════════════════════════════════════╝");
+
+        println!("\n── Offset set sizes ──────────────────────────────────────────────────");
+        println!("  V3/condU : J={}", v3.len());
+        println!("  Run C    : J={}", rc.len());
+        println!("  Run D    : J={}", rd.len());
+        println!("  Run E    : J={}", re.len());
+
+        let delta_base = PASSKEY_CUE_LEN + (PASSKEY_INTRO_LEN - PASSKEY_WORD_POS - 1);
+        println!("\n── delta_eff = d+{} coverage (direct 1-hop) ──────────────────────────",
+                 delta_base);
+        println!("  {:>6}  {:>8}  {:>8}  {:>8}  {:>8}  {:>8}",
+                 "d", "d_eff", "V3", "Run C", "Run D", "Run E");
+        println!("  {}", "─".repeat(60));
+
+        let rec = path_counts(&re, NUM_LAYERS);
+        let v3c = path_counts(&v3, NUM_LAYERS);
+        let rcc = path_counts(&rc, NUM_LAYERS);
+        let rdc = path_counts(&rd, NUM_LAYERS);
+
+        for &d in PASSKEY_DISTANCES {
+            let d_eff = d + delta_base;
+            let v3_d = if d_eff < MAX_LAG && v3c[1][d_eff] > 0 { "direct" } else { "multi" };
+            let rc_d = if d_eff < MAX_LAG && rcc[1][d_eff] > 0 { "direct" } else { "multi" };
+            let rd_d = if d_eff < MAX_LAG && rdc[1][d_eff] > 0 { "direct" } else { "multi" };
+            let re_d = if d_eff < MAX_LAG && rec[1][d_eff] > 0 { "direct" } else { "multi" };
+            println!("  {:>6}  {:>8}  {:>8}  {:>8}  {:>8}  {:>8}",
+                     d, d_eff, v3_d, rc_d, rd_d, re_d);
+        }
+
+        println!("\n── Path-count scores (hop_discount={}) ───────────────────────────────",
+                 hop_discount);
+        println!("  {:>6}  {:>12}  {:>12}  {:>12}  {:>12}  {:>8}",
+                 "d", "V3", "Run C", "Run D", "Run E", "RE/RD");
+        println!("  {}", "─".repeat(72));
+
+        let mut total_re = 0.0_f64;
+        let mut total_rd = 0.0_f64;
+        for &d in PASSKEY_DISTANCES {
+            let sv3 = path_score(&v3c, d, hop_discount);
+            let src = path_score(&rcc, d, hop_discount);
+            let srd = path_score(&rdc, d, hop_discount);
+            let sre = path_score(&rec, d, hop_discount);
+            total_re += sre;
+            total_rd += srd;
+            println!("  {:>6}  {:>12.1}  {:>12.1}  {:>12.1}  {:>12.1}  {:>8.2}x",
+                     d, sv3, src, srd, sre, if srd > 0.0 { sre / srd } else { 0.0 });
+        }
+        println!("  {}", "─".repeat(72));
+        println!("  {:>6}  {:>12}  {:>12}  {:>12}  {:>12.1}",
+                 "TOTAL", "", "", "", total_re);
+        println!("  Run E / Run D: {:.2}x", total_re / total_rd);
+
+        println!("\n── Short-range density (delta=1..31, NL modeling power) ──────────────");
+        let v3_short: usize = v3.iter().filter(|&&x| x <= 31).count();
+        let rc_short: usize = rc.iter().filter(|&&x| x <= 31).count();
+        let rd_short: usize = rd.iter().filter(|&&x| x <= 31).count();
+        let re_short: usize = re.iter().filter(|&&x| x <= 31).count();
+        println!("  V3/condU : {} offsets in d=1-31 (PPL baseline)", v3_short);
+        println!("  Run C    : {} offsets in d=1-31", rc_short);
+        println!("  Run D    : {} offsets in d=1-31  <- PPL deficit source", rd_short);
+        println!("  Run E    : {} offsets in d=1-31  <- restored", re_short);
+
+        println!("\n── Key predictions for Run E ─────────────────────────────────────────");
+        println!("  PPL      : dense 1-31 restored -> expect ~52-53 (near V3 baseline)");
+        println!("  Passkey  : d=1-32 all d_eff covered -> expect >=40% by ep5");
+        println!("  Passkey  : d=64-512 octave blocks -> expect >=60% by ep7");
+        println!("  Passkey  : d=1024/1536 via multi-hop (proven in Run D)");
+        println!("  Init     : near-zero -> first signal ep2 (like Run D)");
+        println!("  Speed    : J=78, ~80 min/run on RTX 4090");
+
+        // Assertions
+        assert_eq!(re_short, v3_short,
+            "Run E should restore V3 short-range density ({} vs {})", re_short, v3_short);
+        assert!(total_re > total_rd,
+            "Run E should score higher than Run D (RE={:.0} RD={:.0})", total_re, total_rd);
+
+        let re_deff_covered: Vec<usize> = PASSKEY_DISTANCES.iter()
+            .filter(|&&d| {
+                let d_eff = d + delta_base;
+                d_eff < MAX_LAG && rec[1][d_eff] > 0
+            })
+            .copied().collect();
+
+        let expected_deff = vec![1usize, 2, 4, 8, 16, 32, 64, 128, 256, 512];
+        assert_eq!(re_deff_covered, expected_deff,
+            "Run E should cover d_eff for all d=1..512, got {:?}", re_deff_covered);
+
+        println!("\n  ASSERTIONS PASSED:");
+        println!("  + Run E covers d_eff for d=1,2,4,8,16,32,64,128,256,512 (10/12)");
+        println!("  + d=1024/1536 via multi-hop (d_eff > MAX_LAG range, synthesis only)");
+        println!("  + Short-range density matches V3 (PPL recovery expected)");
+        println!("  + Run E aggregate path score > Run D");
     }
 }
