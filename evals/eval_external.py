@@ -54,9 +54,16 @@ import torch.nn.functional as F
 
 SCRIPT_DIR  = os.path.dirname(os.path.abspath(__file__))
 REPO_ROOT   = os.path.dirname(SCRIPT_DIR)
-CACHE_DIR   = os.path.join(SCRIPT_DIR, 'logs', 'benchmark_cache')
+CACHE_DIR   = next((p for p in [
+    os.path.join(SCRIPT_DIR,  'logs', 'benchmark_cache'),
+    os.path.join(REPO_ROOT,   'logs', 'benchmark_cache'),
+] if os.path.isdir(p)), os.path.join(SCRIPT_DIR, 'logs', 'benchmark_cache'))
 LOGS_DIR    = os.path.join(SCRIPT_DIR, 'logs')
-TOKENIZER   = os.path.join(SCRIPT_DIR, 'results', '2048_condI_tokenizer.json')
+TOKENIZER   = next((p for p in [
+    os.path.join(SCRIPT_DIR,  'results', '2048_condI_tokenizer.json'),
+    os.path.join(REPO_ROOT,   'results', '2048_condI_tokenizer.json'),
+    os.path.join(REPO_ROOT,   'benchmarks', 'results', '2048_condI_tokenizer.json'),
+] if os.path.exists(p)), os.path.join(SCRIPT_DIR, 'results', '2048_condI_tokenizer.json'))
 CKPT_ROOT   = os.path.join(REPO_ROOT, 'checkpoints')
 MAX_SEQ_LEN = 2048
 VOCAB_SIZE  = 32000
@@ -148,8 +155,11 @@ def load_model_from_arch(arch_name, checkpoint_path, device):
 
     elif arch == 'condu':
         # Import from training script — 13M uses CondMTransformer, 27M uses CondUTransformer
-        train_script = os.path.join(SCRIPT_DIR, 'train_2048_27m_condU.py' if D == 400
-                                    else 'train_2048_condU.py')
+        _train_name  = 'train_2048_27m_condU.py' if D == 400 else 'train_2048_condU.py'
+        train_script = next((p for p in [
+            os.path.join(SCRIPT_DIR,         _train_name),
+            os.path.join(REPO_ROOT, 'train', _train_name),
+        ] if os.path.exists(p)), os.path.join(SCRIPT_DIR, _train_name))
         import importlib.util
         spec = importlib.util.spec_from_file_location('condu_train', train_script)
         mod  = importlib.util.module_from_spec(spec)

@@ -1,0 +1,39 @@
+{
+  "label": "condU 13M (50-sample rerun)",
+  "n_params": 14057352,
+  "timestamp": "20260304_202715",
+  "tasks": [
+    "hellaswag",
+    "piqa",
+    "arc_easy",
+    "arc_challenge",
+    "winogrande",
+    "lambada"
+  ],
+  "results": {
+    "hellaswag": {
+      "accuracy": null,
+      "error": "not_cached"
+    },
+    "piqa": {
+      "accuracy": null,
+      "error": "not_cached"
+    },
+    "arc_easy": {
+      "accuracy": null,
+      "error": "not_cached"
+    },
+    "arc_challenge": {
+      "accuracy": null,
+      "error": "not_cached"
+    },
+    "winogrande": {
+      "accuracy": null,
+      "error": "not_cached"
+    },
+    "lambada": {
+      "accuracy": null,
+      "error": "not_cached"
+    }
+  }
+}
