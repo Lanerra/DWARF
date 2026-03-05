@@ -81,7 +81,7 @@ MAX_TRAIN_SEQS = None   # set in main()
 # -- Passkey eval config -------------------------------------------------------
 
 PASSKEY_DISTANCES = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 1536]
-PASSKEY_TRIALS    = 5
+PASSKEY_TRIALS    = 50
 _PASSKEY_WORDS    = ['apple', 'banana', 'orange', 'cherry', 'grape',
                      'lemon', 'mango', 'peach', 'plum', 'berry']
 _FILLER_SENTENCE  = 'the weather was mild and the air was still . '
@@ -91,7 +91,7 @@ _RETRIEVAL_CUE    = 'the secret word is'
 # -- Save paths ----------------------------------------------------------------
 
 SAVE_DIR    = 'checkpoints/condU'
-RESULT_FILE = 'benchmarks/logs/condU_results.json'
+RESULT_FILE = 'logs/condU_results.json'
 
 # -- condN offset set ----------------------------------------------------------
 
@@ -729,13 +729,15 @@ def main():
     print(f'  Architecture: INTERFERENCE=3, gate=0, 1 FullAttn @ layer 5')
     print(f'  References: I3G0=52.948 PPL/53.3% pk | condM=54.529/83.3%')
 
-    os.makedirs('benchmarks/logs', exist_ok=True)
+    os.makedirs('logs', exist_ok=True)
 
     splits = load_data(NUM_DOCS)
     _script_dir     = os.path.dirname(os.path.abspath(__file__))
     _tok_candidates = [
+        os.path.join(_script_dir, '..', 'results', '2048_condI_tokenizer.json'),
         os.path.join(_script_dir, 'results', '2048_condI_tokenizer.json'),
         os.path.join(_script_dir, '2048_condI_tokenizer.json'),
+        os.path.join(_script_dir, '..', 'benchmarks', 'results', '2048_condI_tokenizer.json'),
     ]
     tok_path = next((p for p in _tok_candidates if os.path.exists(p)), None)
     if tok_path:
@@ -745,7 +747,7 @@ def main():
     else:
         raise FileNotFoundError('condI tokenizer not found')
 
-    _encoded_cache = 'benchmarks/logs/fineweb_encoded_2048.pt'
+    _encoded_cache = 'logs/fineweb_encoded_2048.pt'
     if os.path.exists(_encoded_cache):
         print(f'Loading pre-encoded dataset from {_encoded_cache} ...')
         _cache = torch.load(_encoded_cache, weights_only=True)
@@ -778,15 +780,16 @@ def main():
     print(f'\ncondU: {n_params:,} parameters')
     print(f'  Layer types: {layer_types}')
 
-    # Chinchilla-normalized subsetting: epoch 7 ≈ 100% Chinchilla-optimal
-    MAX_TRAIN_SEQS = int(20 * n_params / (7 * MAX_SEQ_LEN))
-    print(f'  Chinchilla max seqs/epoch: {MAX_TRAIN_SEQS:,}')
-    print(f'  (= 20 × {n_params:,} params / (7 × {MAX_SEQ_LEN} tokens))')
+    # Fixed training budget: 52,716 seqs matches all prior condU/condM 13M runs.
+    # (Chinchilla-optimal for 13M would be ~19,611 seqs/epoch but that reduces
+    # data diversity — 52,716 seqs with 10 epochs is intentional overtraining
+    # consistent with all other 13M results in the ablation series.)
+    MAX_TRAIN_SEQS = 52_716
     if len(train_data) > MAX_TRAIN_SEQS:
         idx        = torch.randperm(len(train_data))[:MAX_TRAIN_SEQS]
         train_data = train_data[idx]
     print(f'  train: {len(train_data):,}  val: {len(val_data):,}  '
-          f'test: {len(test_data):,} seqs (after Chinchilla subsetting)')
+          f'test: {len(test_data):,} seqs (capped to {MAX_TRAIN_SEQS:,})')
 
     if not causality_check(model, device):
         return
