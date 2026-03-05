@@ -56,7 +56,7 @@ Six offset-set ablations on the condU 13M baseline, each changing one variable:
 
 | Run | Key change | Test PPL | Passkey mean | Finding |
 |---|---|---|---|---|
-| condU baseline | V3 offsets, linspace init | 52.21 | 43.3% (5-sample) | Reference |
+| condU baseline | V3 offsets, linspace init | 52.24 | 38.3% (50-sample) | Reference |
 | Run C | Interleaved offset set | 52.86 | 45.0% (5-sample) | Fills d=32 gap; best custom passkey |
 | Run D | Octave blocks, near-zero init | 55.49 | 35.0% (5-sample) | PPL penalty from sparse short-range |
 | Run E | Dense 0-39, near-zero init | 52.44 | 25.0% (5-sample) | Best PPL of custom runs; passkey destroyed |
@@ -167,7 +167,7 @@ h7 (most local):  0.949
 [DSQG, DSQG, DSQG+HK/V, DSQG, DSQG, Full]
 ```
 
-**condU 85M** (D=768, H=12, d_head=64, L=8) — in training:
+**condU 85M** (D=768, H=12, d_head=64, L=8) — *negative result: Huygens K/V injection memorizes training signatures at this scale; see paper §7.3*:
 ```
 [DSQG, DSQG, DSQG, DSQG+HK/V, DSQG, DSQG, DSQG, Full]
 ```
@@ -321,33 +321,33 @@ DWARF/
 Completed:
 - condM and condU at 13M scale, full ablation series
 - condM and standard at 27M and 85M scale
-- condU at 35M (hybrid and pure DSQG)
+- condU at 39M Chinchilla-normalized (38.293 PPL, 90.0% passkey)
+- condM at 85M Chinchilla-normalized (36.042 PPL, 83.3% passkey) — headline result
 - 6-task external benchmark sweep across all models
 - Rust verification crate (182 tests)
 - 50-sample passkey infrastructure
+- Paper complete, arXiv submission in progress
 
-In training:
-- condU 39M (local 4090, Chinchilla-normalized)
-- condU 85M (RunPod H200, Chinchilla-normalized, 300K doc corpus)
+Negative results (documented in paper):
+- condU 85M: Huygens K/V injection exhibits scale-dependent memorization pathology at ≥85M parameters; train loss converges, val PPL catastrophic (~3000). Component-level failure, not architectural — condM 85M trains correctly. See paper §7.3 for root cause and proposed fix.
 
 Planned:
-- External benchmark sweep for condU 39M and 85M
+- External benchmark sweep for condU 39M
 - Few-shot ICL and copy task evaluation on existing checkpoints
-- Paper draft
 
 ---
 
 ## Citation
 
-No preprint yet. Forthcoming.
+Paper submitted to arXiv (cs.LG). Citation will be updated with arXiv ID on acceptance.
 
 ```bibtex
 @misc{lewis2026dwarf,
   author       = {Lewis, Dennis},
-  title        = {{DWARF}: Dyadic Wave And Resonant Field Attention},
+  title        = {{DWARF}: Dyadic Wave And Resonant Field Attention with {O}(1) {KV} Cache},
   year         = {2026},
   howpublished = {\url{https://github.com/Lanerra/DWARF}},
-  note         = {Preprint forthcoming}
+  note         = {arXiv preprint, cs.LG. Preprint at https://arxiv.org/abs/[ID TBD]}
 }
 ```
 
