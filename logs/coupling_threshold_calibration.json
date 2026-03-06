@@ -1,0 +1,65 @@
+{
+  "max_stable_theoretical": 36864,
+  "min_unstable_theoretical": 73728,
+  "threshold_conservative": 36865,
+  "threshold_log_midpoint": 52133,
+  "threshold_arithmetic": 55296,
+  "recommended": 36865,
+  "measured_coupling": {},
+  "outcomes": [
+    {
+      "label": "condU_13M",
+      "D": 256,
+      "H": 8,
+      "L": 6,
+      "injection": "kv",
+      "stable": true,
+      "theoretical_coupling": 12288
+    },
+    {
+      "label": "condU_35M",
+      "D": 512,
+      "H": 8,
+      "L": 6,
+      "injection": "kv",
+      "stable": true,
+      "theoretical_coupling": 24576
+    },
+    {
+      "label": "condU_37m_coeff",
+      "D": 384,
+      "H": 16,
+      "L": 6,
+      "injection": "kv",
+      "stable": true,
+      "theoretical_coupling": 36864
+    },
+    {
+      "label": "condU_85M",
+      "D": 768,
+      "H": 12,
+      "L": 8,
+      "injection": "kv",
+      "stable": false,
+      "theoretical_coupling": 73728
+    },
+    {
+      "label": "condM_13M",
+      "D": 256,
+      "H": 8,
+      "L": 6,
+      "injection": "residual",
+      "stable": true,
+      "theoretical_coupling": 256
+    },
+    {
+      "label": "condM_85M",
+      "D": 640,
+      "H": 8,
+      "L": 12,
+      "injection": "residual",
+      "stable": true,
+      "theoretical_coupling": 640
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+[
+  {
+    "model": "condM_85M",
+    "checkpoint": "/home/dlewis3/Desktop/AI/DWARF/checkpoints/2048_condM_85m_checkpoints/best.pt",
+    "epoch": null,
+    "val_ppl": null,
+    "n_params": 88267552,
+    "injection_type": "residual",
+    "theoretical_coupling": 640,
+    "coupling_dsqg": 0.5064595341682434,
+    "coupling_full": 0.4857640564441681,
+    "coupling_mean": 0.49611179530620575,
+    "loss_joint": 4.185460090637207,
+    "loss_frozen_full": 4.178953647613525,
+    "loss_frozen_dsqg": 4.184305667877197,
+    "grad_norm_dsqg": 1.974609136581421,
+    "grad_norm_full": 0.4995814561843872
+  }
+]
