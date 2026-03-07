@@ -83,6 +83,7 @@ ARCH_CONFIGS = {
     'condu_27m':   {'arch': 'condu', 'D': 400, 'H': 8, 'FFN': 1600, 'L': 6,  'full_layer': 5},
     'condu_35m':      {'arch': 'condu', 'D': 512, 'H': 8, 'FFN': 2048, 'L': 6,  'full_layer': 5},
     'condu_35m_pure': {'arch': 'condu', 'D': 512, 'H': 8, 'FFN': 2048, 'L': 6,  'full_layer': -1},
+    'condu_v5_38m':   {'arch': 'condu_v5', 'D': 512, 'H': 8, 'FFN': 2048, 'L': 6, 'full_layer': 5, 'interference': 3},
     # condM layer-position ablation
     'condm_13m_L0':  {'arch': 'condm', 'D': 256, 'H': 8, 'FFN': 1024, 'L': 6,  'full_layer': 0},
     'condm_13m_L3':  {'arch': 'condm', 'D': 256, 'H': 8, 'FFN': 1024, 'L': 6,  'full_layer': 3},
@@ -185,6 +186,19 @@ def load_model_from_arch(arch_name, checkpoint_path, device):
             vocab_size=VOCAB_SIZE, embedding_dim=D, num_layers=L,
             num_heads=H, ffn_dim=FFN, seq_len=MAX_SEQ_LEN,
             full_attn_layer=cfg.get('full_layer', L - 1),
+            interference_interval=cfg.get('interference', 3),
+        ).to(device)
+
+    elif arch == 'condu_v5':
+        train_dir = os.path.normpath(os.path.join(SCRIPT_DIR, '..', 'train'))
+        if train_dir not in sys.path:
+            sys.path.insert(0, train_dir)
+        # Kernel paths are set up inside the training module via __file__
+        from train_2048_condU_v5 import CondUV5Transformer
+        model = CondUV5Transformer(
+            vocab_size=VOCAB_SIZE, embedding_dim=D, num_layers=L,
+            num_heads=H, ffn_dim=FFN, seq_len=MAX_SEQ_LEN,
+            full_attn_layer=cfg.get('full_layer', 5),
             interference_interval=cfg.get('interference', 3),
         ).to(device)
 

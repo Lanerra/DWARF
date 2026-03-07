@@ -1,0 +1,51 @@
+{
+  "label": "condU-v5 38M",
+  "n_params": 38732856,
+  "timestamp": "20260307_070702",
+  "tasks": [
+    "hellaswag",
+    "piqa",
+    "arc_easy",
+    "arc_challenge",
+    "winogrande",
+    "lambada"
+  ],
+  "results": {
+    "hellaswag": {
+      "accuracy": 0.24726150169288985,
+      "correct": 2483,
+      "total": 10042,
+      "elapsed_s": 94.43889093399048
+    },
+    "piqa": {
+      "accuracy": 0.5712731229597389,
+      "correct": 1050,
+      "total": 1838,
+      "elapsed_s": 7.772567987442017
+    },
+    "arc_easy": {
+      "accuracy": 0.3684210526315789,
+      "correct": 210,
+      "total": 570,
+      "elapsed_s": 4.781480550765991
+    },
+    "arc_challenge": {
+      "accuracy": 0.21070234113712374,
+      "correct": 63,
+      "total": 299,
+      "elapsed_s": 2.5113015174865723
+    },
+    "winogrande": {
+      "accuracy": 0.5224940805051302,
+      "correct": 662,
+      "total": 1267,
+      "elapsed_s": 5.281509160995483
+    },
+    "lambada": {
+      "accuracy": 0.10343489229575005,
+      "correct": 533,
+      "total": 5153,
+      "elapsed_s": 13.32509446144104
+    }
+  }
+}

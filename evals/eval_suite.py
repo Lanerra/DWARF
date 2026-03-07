@@ -43,6 +43,13 @@ def _import_condm_v2():
     from train_2048_condM_v2 import CondMV2Transformer
     return CondMV2Transformer
 
+def _import_condu_v5():
+    train_dir = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'train'))
+    if train_dir not in sys.path:
+        sys.path.insert(0, train_dir)
+    from train_2048_condU_v5 import CondUV5Transformer
+    return CondUV5Transformer
+
 def _import_condm_periodic():
     script_dir = os.path.dirname(os.path.abspath(__file__))
     if script_dir not in sys.path:
@@ -54,7 +61,7 @@ def _import_condm_periodic():
 
 SCRIPT_DIR  = os.path.dirname(os.path.abspath(__file__))
 REPO_ROOT   = os.path.dirname(SCRIPT_DIR)
-TOKENIZER   = os.path.join(SCRIPT_DIR, 'results', '2048_condI_tokenizer.json')
+TOKENIZER   = os.path.join(REPO_ROOT, 'results', '2048_condI_tokenizer.json')
 CKPT_ROOT   = os.path.join(REPO_ROOT, 'checkpoints')
 LOGS_DIR    = os.path.join(SCRIPT_DIR, 'logs')
 os.makedirs(LOGS_DIR, exist_ok=True)
@@ -165,6 +172,14 @@ MODEL_REGISTRY = {
         'checkpoint': os.path.join(CKPT_ROOT, '2048_condM_periodic_13m_checkpoints', 'best.pt'),
         'label':      'condM-periodic 13M [3:1:3:1] (2x DSQG3+Full)',
         'params_ref': 13_075_648,
+    },
+    'condu_v5_38m': {
+        'arch':       'condu_v5',
+        'D':          512, 'H': 8, 'FFN': 2048, 'L': 6, 'full_layer': 5,
+        'interference': 3,
+        'checkpoint': os.path.join(CKPT_ROOT, 'condU_v5', 'best.pt'),
+        'label':      'condU-v5 38M (MOVT+QK-OVT+NPCI, D=512)',
+        'params_ref': 38_732_856,
     },
 }
 
@@ -543,6 +558,14 @@ def build_model(cfg):
             ffn_hidden=ffn_hidden, seq_len=MAX_SEQ_LEN,
             interference_interval=cfg.get('interference', 3),
             full_attn_layer=cfg.get('full_layer', 5),
+        )
+    elif arch == 'condu_v5':
+        CondUV5Transformer = _import_condu_v5()
+        return CondUV5Transformer(
+            vocab_size=VOCAB_SIZE, embedding_dim=D, num_layers=L, num_heads=H,
+            ffn_dim=FFN, seq_len=MAX_SEQ_LEN,
+            full_attn_layer=cfg.get('full_layer', 5),
+            interference_interval=cfg.get('interference', 3),
         )
     else:
         raise ValueError(f"Unknown arch: {arch}")
