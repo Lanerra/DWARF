@@ -99,8 +99,25 @@ RESULT_FILE = 'logs/condU_v5_results.json'
 
 import pathlib as _pl
 _kernel_dir = str(_pl.Path(__file__).parent.parent / 'kernels')
-if _kernel_dir not in sys.path:
-    sys.path.insert(0, _kernel_dir)
+_cuda_ext_dir = str(_pl.Path(__file__).parent.parent / 'kernels' / 'dsqg_cuda')
+for _d in [_kernel_dir, _cuda_ext_dir]:
+    if _d not in sys.path:
+        sys.path.insert(0, _d)
+
+# Use CUDA kernel if available, fall back to Triton.
+# Strategy: monkey-patch the module-level dsqg_attention_v5 function so that
+# DSQGAttentionV5.forward() (which calls it by name) transparently uses the
+# CUDA kernel. No subclassing needed — identical call signature.
+import dsqg_attention_v5 as _v5_module
+try:
+    import dsqg_cuda as _dsqg_cuda_ext  # noqa: F401 (side-effect: loads .so)
+    from dsqg_attention_v5_cuda import dsqg_attention_v5_cuda as _cuda_attn_fn
+    _v5_module.dsqg_attention_v5 = _cuda_attn_fn   # hot-swap kernel
+    _USE_CUDA_KERNEL = True
+    print('[kernel] CUDA extension loaded — using compiled CUDA backward')
+except ImportError:
+    _USE_CUDA_KERNEL = False
+    print('[kernel] CUDA extension not found — falling back to Triton')
 
 from dsqg_attention_v5 import DSQGAttentionV5, npci_rotate
 
@@ -673,7 +690,7 @@ def train(model, train_data, val_data, test_data, tokenizer, device='cuda'):
     ss = model.attn_summary()
     results = {
         'experiment':            'condU_v5_movt_qkovt_npci',
-        'kernel':                'dsqg_attention_v5',
+        'kernel':                'dsqg_attention_v5_cuda' if _USE_CUDA_KERNEL else 'dsqg_attention_v5',
         'architecture': {
             'embedding_dim': EMBEDDING_DIM, 'num_layers': NUM_LAYERS,
             'num_heads': NUM_HEADS, 'ffn_dim': FFN_DIM,
