@@ -84,6 +84,7 @@ ARCH_CONFIGS = {
     'condu_35m':      {'arch': 'condu', 'D': 512, 'H': 8, 'FFN': 2048, 'L': 6,  'full_layer': 5},
     'condu_35m_pure': {'arch': 'condu', 'D': 512, 'H': 8, 'FFN': 2048, 'L': 6,  'full_layer': -1},
     'condu_v5_38m':   {'arch': 'condu_v5', 'D': 512, 'H': 8, 'FFN': 2048, 'L': 6, 'full_layer': 5, 'interference': 3},
+    'condu_v5_13m':   {'arch': 'condu_v5', 'D': 256, 'H': 8, 'FFN': 1024, 'L': 6, 'full_layer': 5, 'interference': 3},
     # condM layer-position ablation
     'condm_13m_L0':  {'arch': 'condm', 'D': 256, 'H': 8, 'FFN': 1024, 'L': 6,  'full_layer': 0},
     'condm_13m_L3':  {'arch': 'condm', 'D': 256, 'H': 8, 'FFN': 1024, 'L': 6,  'full_layer': 3},
@@ -94,6 +95,10 @@ ARCH_CONFIGS = {
     'standard_13m':{'arch': 'standard', 'D': 256, 'H': 8, 'FFN': 1024, 'L': 6},
     'standard_27m':{'arch': 'standard', 'D': 400, 'H': 8, 'FFN': 1600, 'L': 6},
     'standard_85m':{'arch': 'standard', 'D': 640, 'H': 8, 'FFN': 2560, 'L': 12},
+    # d41s3: dense=41 + sparse=[48,128,384]  J=44  (CondMTransformer from train_2048_14m_d41s3.py)
+    'd41s3_14m':  {'arch': 'd41s3', 'D': 256, 'H': 8, 'FFN': 1024, 'L': 6, 'full_layer': 5, 'interference': 3},
+    # d41s5: dense=41 + sparse=[48,128,384,768,1536]  J=47  (CondMTransformer from train_2048_14m_d41s5.py)
+    'd41s5_14m':  {'arch': 'd41s5', 'D': 256, 'H': 8, 'FFN': 1024, 'L': 6, 'full_layer': 5, 'interference': 3},
 }
 
 TASKS = ['hellaswag', 'piqa', 'arc_easy', 'arc_challenge', 'winogrande', 'lambada']
@@ -120,12 +125,12 @@ def load_model_from_registry(model_name, device):
     """Load a model from eval_suite.py's MODEL_REGISTRY."""
     if SCRIPT_DIR not in sys.path:
         sys.path.insert(0, SCRIPT_DIR)
-    from eval_suite import MODEL_REGISTRY, build_model
+    from eval_suite import MODEL_REGISTRY, load_model
     if model_name not in MODEL_REGISTRY:
         raise ValueError(f'Unknown model: {model_name}. '
                          f'Run with --list to see options.')
     cfg = MODEL_REGISTRY[model_name]
-    model = build_model(cfg, device)
+    model, _ = load_model(cfg, device)
     return model, cfg.get('label', model_name)
 
 
@@ -213,6 +218,24 @@ def load_model_from_arch(arch_name, checkpoint_path, device):
         model = cls(
             vocab_size=VOCAB_SIZE, embedding_dim=D, num_layers=L,
             num_heads=H, ffn_dim=FFN, seq_len=MAX_SEQ_LEN,
+            interference_interval=cfg.get('interference', 3),
+        ).to(device)
+
+    elif arch in ('d41s3', 'd41s5'):
+        # Offset ablations: CondMTransformer with d41s3 or d41s5 kernel baked into training script
+        import importlib.util
+        script_name  = f'train_2048_14m_{arch}.py'
+        train_dir    = os.path.normpath(os.path.join(SCRIPT_DIR, '..', 'train'))
+        train_script = os.path.join(train_dir, script_name)
+        spec = importlib.util.spec_from_file_location(f'{arch}_train', train_script)
+        mod  = importlib.util.module_from_spec(spec)
+        sys.path.insert(0, train_dir)
+        spec.loader.exec_module(mod)
+        cls = mod.CondMTransformer
+        model = cls(
+            vocab_size=VOCAB_SIZE, embedding_dim=D, num_layers=L,
+            num_heads=H, ffn_dim=FFN, seq_len=MAX_SEQ_LEN,
+            full_attn_layer=cfg.get('full_layer', 5),
             interference_interval=cfg.get('interference', 3),
         ).to(device)
 

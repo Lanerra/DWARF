@@ -1,0 +1,51 @@
+{
+  "label": "condU-v5 13M (MOVT+QK-OVT+NPCI, D=256)",
+  "n_params": 14059832,
+  "timestamp": "20260307_141541",
+  "tasks": [
+    "hellaswag",
+    "piqa",
+    "arc_easy",
+    "arc_challenge",
+    "winogrande",
+    "lambada"
+  ],
+  "results": {
+    "hellaswag": {
+      "accuracy": 0.246265684126668,
+      "correct": 2473,
+      "total": 10042,
+      "elapsed_s": 87.43925952911377
+    },
+    "piqa": {
+      "accuracy": 0.545157780195865,
+      "correct": 1002,
+      "total": 1838,
+      "elapsed_s": 7.551380634307861
+    },
+    "arc_easy": {
+      "accuracy": 0.33157894736842103,
+      "correct": 189,
+      "total": 570,
+      "elapsed_s": 4.678435325622559
+    },
+    "arc_challenge": {
+      "accuracy": 0.23411371237458195,
+      "correct": 70,
+      "total": 299,
+      "elapsed_s": 2.4526009559631348
+    },
+    "winogrande": {
+      "accuracy": 0.5043409629044988,
+      "correct": 639,
+      "total": 1267,
+      "elapsed_s": 5.159950256347656
+    },
+    "lambada": {
+      "accuracy": 0.07005627789637105,
+      "correct": 361,
+      "total": 5153,
+      "elapsed_s": 13.251800775527954
+    }
+  }
+}

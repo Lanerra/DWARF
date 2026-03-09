@@ -50,6 +50,18 @@ def _import_condu_v5():
     from train_2048_condU_v5 import CondUV5Transformer
     return CondUV5Transformer
 
+def _import_d41(variant: str):
+    """Import CondMTransformer from the d41s3 or d41s5 training script (kernel baked in)."""
+    train_dir = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'train'))
+    if train_dir not in sys.path:
+        sys.path.insert(0, train_dir)
+    import importlib.util
+    script = os.path.join(train_dir, f'train_2048_14m_{variant}.py')
+    spec = importlib.util.spec_from_file_location(f'{variant}_train', script)
+    mod  = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod.CondMTransformer
+
 def _import_condm_periodic():
     script_dir = os.path.dirname(os.path.abspath(__file__))
     if script_dir not in sys.path:
@@ -180,6 +192,31 @@ MODEL_REGISTRY = {
         'checkpoint': os.path.join(CKPT_ROOT, 'condU_v5', 'best.pt'),
         'label':      'condU-v5 38M (MOVT+QK-OVT+NPCI, D=512)',
         'params_ref': 38_732_856,
+    },
+    'condu_v5_13m': {
+        'arch':       'condu_v5',
+        'D':          256, 'H': 8, 'FFN': 1024, 'L': 6, 'full_layer': 5,
+        'interference': 3,
+        'checkpoint': os.path.join(CKPT_ROOT, 'condU_v5_13m', 'best.pt'),
+        'label':      'condU-v5 13M (MOVT+QK-OVT+NPCI, D=256)',
+        'params_ref': 14_059_832,
+    },
+    # Offset ablations (dense=41 vs condU dense=32)
+    'd41s3_14m': {
+        'arch':       'd41s3',
+        'D':          256, 'H': 8, 'FFN': 1024, 'L': 6, 'full_layer': 5,
+        'interference': 3,
+        'checkpoint': os.path.join(CKPT_ROOT, 'd41s3', 'best.pt'),
+        'label':      'd41s3 14M (dense=41, sparse=[48,128,384], J=44)',
+        'params_ref': None,
+    },
+    'd41s5_14m': {
+        'arch':       'd41s5',
+        'D':          256, 'H': 8, 'FFN': 1024, 'L': 6, 'full_layer': 5,
+        'interference': 3,
+        'checkpoint': os.path.join(CKPT_ROOT, 'd41s5', 'best.pt'),
+        'label':      'd41s5 14M (dense=41, sparse=[48,128,384,768,1536], J=47)',
+        'params_ref': None,
     },
 }
 
@@ -562,6 +599,14 @@ def build_model(cfg):
     elif arch == 'condu_v5':
         CondUV5Transformer = _import_condu_v5()
         return CondUV5Transformer(
+            vocab_size=VOCAB_SIZE, embedding_dim=D, num_layers=L, num_heads=H,
+            ffn_dim=FFN, seq_len=MAX_SEQ_LEN,
+            full_attn_layer=cfg.get('full_layer', 5),
+            interference_interval=cfg.get('interference', 3),
+        )
+    elif arch in ('d41s3', 'd41s5'):
+        CondMTransformer = _import_d41(arch)
+        return CondMTransformer(
             vocab_size=VOCAB_SIZE, embedding_dim=D, num_layers=L, num_heads=H,
             ffn_dim=FFN, seq_len=MAX_SEQ_LEN,
             full_attn_layer=cfg.get('full_layer', 5),
