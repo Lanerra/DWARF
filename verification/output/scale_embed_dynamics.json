@@ -1,0 +1,14 @@
+{
+  "sweep_type": "scale_embed_dynamics",
+  "model": "condX-v2 35M",
+  "threshold": 0.74,
+  "power_law_A": 1.313653,
+  "power_law_alpha": 0.660832,
+  "power_law_r2": 0.999031,
+  "predicted_crossing_chinchilla": 0.4196,
+  "results": [
+    {"epoch": 1, "chinchilla_frac": 0.1400, "observed": 0.3566, "predicted_pl": 0.3583},
+    {"epoch": 2, "chinchilla_frac": 0.2900, "observed": 0.5875, "predicted_pl": 0.5797},
+    {"epoch": 3, "chinchilla_frac": 0.4300, "observed": 0.7456, "predicted_pl": 0.7521}
+  ]
+}

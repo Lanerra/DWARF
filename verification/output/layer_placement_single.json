@@ -1,0 +1,24 @@
+{
+  "sweep_type": "layer_placement_single",
+  "num_layers": 6,
+  "lambda_relay": 1,
+  "gamma_cover": 0.5,
+  "kappa_early": 0.3,
+  "results": [
+    {"interference": 0, "full_attn": 1, "num_layers": 6, "staging_layers": 0, "staging_quality": 0.000000, "residual_coverage": 0.000335, "injection_readiness": 0.000000, "relay_score": 0.000000, "is_dwarf_default": false},
+    {"interference": 0, "full_attn": 2, "num_layers": 6, "staging_layers": 1, "staging_quality": 0.632121, "residual_coverage": 0.011109, "injection_readiness": 0.000000, "relay_score": 0.000000, "is_dwarf_default": false},
+    {"interference": 0, "full_attn": 3, "num_layers": 6, "staging_layers": 2, "staging_quality": 0.864665, "residual_coverage": 0.135335, "injection_readiness": 0.000000, "relay_score": 0.000000, "is_dwarf_default": false},
+    {"interference": 0, "full_attn": 4, "num_layers": 6, "staging_layers": 3, "staging_quality": 0.950213, "residual_coverage": 0.606531, "injection_readiness": 0.000000, "relay_score": 0.000000, "is_dwarf_default": false},
+    {"interference": 0, "full_attn": 5, "num_layers": 6, "staging_layers": 4, "staging_quality": 0.981684, "residual_coverage": 1.000000, "injection_readiness": 0.000000, "relay_score": 0.000000, "is_dwarf_default": false},
+    {"interference": 1, "full_attn": 2, "num_layers": 6, "staging_layers": 0, "staging_quality": 0.000000, "residual_coverage": 0.011109, "injection_readiness": 0.259182, "relay_score": 0.000000, "is_dwarf_default": false},
+    {"interference": 1, "full_attn": 3, "num_layers": 6, "staging_layers": 1, "staging_quality": 0.632121, "residual_coverage": 0.135335, "injection_readiness": 0.259182, "relay_score": 0.022173, "is_dwarf_default": false},
+    {"interference": 1, "full_attn": 4, "num_layers": 6, "staging_layers": 2, "staging_quality": 0.864665, "residual_coverage": 0.606531, "injection_readiness": 0.259182, "relay_score": 0.135927, "is_dwarf_default": false},
+    {"interference": 1, "full_attn": 5, "num_layers": 6, "staging_layers": 3, "staging_quality": 0.950213, "residual_coverage": 1.000000, "injection_readiness": 0.259182, "relay_score": 0.246278, "is_dwarf_default": false},
+    {"interference": 2, "full_attn": 3, "num_layers": 6, "staging_layers": 0, "staging_quality": 0.000000, "residual_coverage": 0.135335, "injection_readiness": 0.451188, "relay_score": 0.000000, "is_dwarf_default": false},
+    {"interference": 2, "full_attn": 4, "num_layers": 6, "staging_layers": 1, "staging_quality": 0.632121, "residual_coverage": 0.606531, "injection_readiness": 0.451188, "relay_score": 0.172986, "is_dwarf_default": false},
+    {"interference": 2, "full_attn": 5, "num_layers": 6, "staging_layers": 2, "staging_quality": 0.864665, "residual_coverage": 1.000000, "injection_readiness": 0.451188, "relay_score": 0.390127, "is_dwarf_default": true},
+    {"interference": 3, "full_attn": 4, "num_layers": 6, "staging_layers": 0, "staging_quality": 0.000000, "residual_coverage": 0.606531, "injection_readiness": 0.593430, "relay_score": 0.000000, "is_dwarf_default": false},
+    {"interference": 3, "full_attn": 5, "num_layers": 6, "staging_layers": 1, "staging_quality": 0.632121, "residual_coverage": 1.000000, "injection_readiness": 0.593430, "relay_score": 0.375120, "is_dwarf_default": false},
+    {"interference": 4, "full_attn": 5, "num_layers": 6, "staging_layers": 0, "staging_quality": 0.000000, "residual_coverage": 1.000000, "injection_readiness": 0.698806, "relay_score": 0.000000, "is_dwarf_default": false}
+  ]
+}

@@ -32,11 +32,19 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 from matplotlib.gridspec import GridSpec
 
-# DSQG offset set (must match training script)
-_DENSE_LOCAL_W     = 32
-_DYADIC_LONG_RANGE = [48, 64, 96, 128, 192, 256, 384, 512, 768, 1024, 1536]
-ALL_OFFSETS        = list(range(_DENSE_LOCAL_W + 1)) + _DYADIC_LONG_RANGE
-assert len(ALL_OFFSETS) == 44
+# DSQG offset sets per arch (set at runtime via --arch)
+_OFFSET_SETS = {
+    'condu':  list(range(33)) + [48, 64, 96, 128, 192, 256, 384, 512, 768, 1024, 1536],  # J=44
+    'd41s3':  list(range(42)) + [48, 128, 384],                                           # J=44 (dense=41 + 3 sparse)
+    'd41s5':  list(range(42)) + [48, 128, 384, 768, 1536],                                # J=47 (dense=41 + 5 sparse)
+}
+_TRAIN_SCRIPTS = {
+    'condu':  'train/train_2048_condU.py',
+    'd41s3':  'train/train_2048_14m_d41s3.py',
+    'd41s5':  'train/train_2048_14m_d41s5.py',
+}
+# Default — overridden in main() via --arch
+ALL_OFFSETS = _OFFSET_SETS['condu']
 
 # ---------------------------------------------------------------------------
 # Pure Python DSQG forward — computes attention weights (not just output)
@@ -338,6 +346,8 @@ def build_passkey_text(tokenizer, n_tokens=400, key_pos=50, key_val=42):
 
 def main():
     parser = argparse.ArgumentParser()
+    parser.add_argument('--arch', default='condu', choices=list(_OFFSET_SETS.keys()),
+                        help='Model architecture (sets offset set + train script)')
     parser.add_argument('--checkpoint', default='checkpoints/condU/best.pt')
     parser.add_argument('--text', default=None,
                         help='Text to run through the model')
@@ -349,6 +359,11 @@ def main():
                         help='Which DSQG layer to visualize (default: all)')
     args = parser.parse_args()
 
+    # Apply arch-specific offset set globally
+    global ALL_OFFSETS
+    ALL_OFFSETS = _OFFSET_SETS[args.arch]
+
+
     root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     os.makedirs(os.path.join(root, args.out_dir), exist_ok=True)
     device = torch.device(args.device)
@@ -357,7 +372,7 @@ def main():
     print('Loading model...')
     import importlib.util
     spec = importlib.util.spec_from_file_location('train_script',
-           os.path.join(root, 'train/train_2048_condU.py'))
+           os.path.join(root, _TRAIN_SCRIPTS[args.arch]))
     m = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(m)
 

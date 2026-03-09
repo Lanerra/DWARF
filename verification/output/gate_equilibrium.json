@@ -1,0 +1,14 @@
+{
+  "sweep_type": "gate_equilibrium",
+  "model_A": 7.164407e23,
+  "model_beta": -3.476264,
+  "r_squared": 1.000000,
+  "results": [
+    {"model": "condX-v2 13M", "n_params": 1.41e7, "gate_eq": 0.10160000, "alpha_eq": -2.179572},
+    {"model": "condX-v2 27M (hypothetical)", "n_params": 2.70e7, "gate_eq": 0.01051466, "alpha_eq": -4.544414},
+    {"model": "condX-v2 35M", "n_params": 3.87e7, "gate_eq": 0.00300000, "alpha_eq": -5.806138},
+    {"model": "condX-v2 85M (future)", "n_params": 8.50e7, "gate_eq": 0.00019517, "alpha_eq": -8.541419},
+    {"model": "condX-v2 350M (extrapolation)", "n_params": 3.50e8, "gate_eq": 0.00000142, "alpha_eq": -13.461507},
+    {"model": "condX-v2 7B  (extrapolation)", "n_params": 7.00e9, "gate_eq": 0.00000000, "alpha_eq": -23.875466}
+  ]
+}

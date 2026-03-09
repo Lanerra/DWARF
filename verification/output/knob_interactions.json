@@ -1,0 +1,16 @@
+{
+  "sweep_type": "knob_interaction_matrix",
+  "n_knobs": 9,
+  "knob_names": ["EMA_beta", "KdV_alpha", "AGC_target", "interference_pos", "dense_window_W", "full_attn_pos", "bypass_alpha_init", "num_heads_H", "FFN_ratio"],
+  "results": [
+    {"knob": "EMA_beta", "role": "Interference memory window (1/β = effective lookback)", "couplings": [1.0000, 0.8500, 0.5000, 0.1500, 0.0000, 0.0000, 0.0000, 0.2000, 0.1200]},
+    {"knob": "KdV_alpha", "role": "Nonlinear KdV field stabilization coefficient", "couplings": [0.8500, 1.0000, 0.4000, 0.1000, 0.0000, 0.0000, 0.0000, 0.0000, 0.1200]},
+    {"knob": "AGC_target", "role": "AGC amplitude normalization target (fixed at RMS=1)", "couplings": [0.5000, 0.4000, 1.0000, 0.1000, 0.0000, 0.1000, 0.0000, 0.0000, 0.1200]},
+    {"knob": "interference_pos", "role": "Layer index where Huygens K/V injection occurs", "couplings": [0.1500, 0.1000, 0.1000, 1.0000, 0.0000, 0.4500, 0.3500, 0.0000, 0.1200]},
+    {"knob": "dense_window_W", "role": "Width of dense consecutive offset window [1..W]", "couplings": [0.0000, 0.0000, 0.0000, 0.0000, 1.0000, 0.1500, 0.1000, 0.1000, 0.1200]},
+    {"knob": "full_attn_pos", "role": "Layer index of full-attention holographic decoder", "couplings": [0.0000, 0.0000, 0.1000, 0.4500, 0.1500, 1.0000, 0.3000, 0.0000, 0.1200]},
+    {"knob": "bypass_alpha_init", "role": "Initial bypass_alpha value (gate=sigmoid(alpha))", "couplings": [0.0000, 0.0000, 0.0000, 0.3500, 0.1000, 0.3000, 1.0000, 0.0000, 0.1200]},
+    {"knob": "num_heads_H", "role": "Number of attention heads (HD = D/H)", "couplings": [0.2000, 0.0000, 0.0000, 0.0000, 0.1000, 0.0000, 0.0000, 1.0000, 0.1200]},
+    {"knob": "FFN_ratio", "role": "FFN width ratio (FFN_dim = ratio × embedding_dim)", "couplings": [0.1200, 0.1200, 0.1200, 0.1200, 0.1200, 0.1200, 0.1200, 0.1200, 1.0000]}
+  ]
+}

@@ -20,8 +20,8 @@
 //!     maximises the weighted path-count score across all passkey distances.
 //!     Proves (via AM-GM) when equal vs. unequal widths are optimal.
 
-const MAX_LAG: usize = 2048;
-const NUM_LAYERS: usize = 6;   // DWARF 13M has 6 transformer layers
+pub const MAX_LAG: usize = 2048;
+pub const NUM_LAYERS: usize = 6;   // DWARF 13M has 6 transformer layers
 
 // ── Passkey test parameters (empirically measured from training script) ────────
 // Template: "the secret word is {word} ."  ≈ 6 tokens (word ≈ 2 tokens)
@@ -33,7 +33,7 @@ const PASSKEY_CUE_LEN: usize   = 5;   // tokens in cue phrase
 const PASSKEY_INTRO_LEN: usize = 6;   // tokens in intro phrase
 const PASSKEY_WORD_POS: usize  = 3;   // 0-indexed position of word token in intro
 
-const PASSKEY_DISTANCES: &[usize] = &[1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 1536];
+pub const PASSKEY_DISTANCES: &[usize] = &[1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 1536];
 
 // ── Offset set definitions ────────────────────────────────────────────────────
 
@@ -134,7 +134,7 @@ fn offsets_run_e() -> Vec<usize> {
 ///
 /// This is the k-fold convolution of the "indicator" function of the offset set.
 /// Higher path count = more gradient paths = stronger learning signal.
-fn path_counts(offsets: &[usize], max_hops: usize) -> Vec<Vec<u64>> {
+pub fn path_counts(offsets: &[usize], max_hops: usize) -> Vec<Vec<u64>> {
     let mut counts = vec![vec![0u64; MAX_LAG + 1]; max_hops + 1];
     // 1-hop: each offset δ contributes exactly one path to lag δ
     for &d in offsets {
@@ -156,7 +156,7 @@ fn path_counts(offsets: &[usize], max_hops: usize) -> Vec<Vec<u64>> {
 
 /// Weighted score: S(d) = Σ_k  path_count(d,k) × hop_discount^(k-1)
 /// Discount < 1.0 models the fact that multi-hop paths are harder to learn.
-fn path_score(counts: &[Vec<u64>], d: usize, hop_discount: f64) -> f64 {
+pub fn path_score(counts: &[Vec<u64>], d: usize, hop_discount: f64) -> f64 {
     (1..counts.len())
         .map(|k| counts[k][d] as f64 * hop_discount.powi((k - 1) as i32))
         .sum()

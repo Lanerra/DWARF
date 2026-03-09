@@ -24,6 +24,15 @@
 //! + 3 coverage_attractor + 6 hop_reachability + 3 variance_vanishing = 61 total.
 //! (3 known failures in cond_d_db4: KdV instability, correct behavior)
 
+// ─── Exploratory sweep infrastructure (see EXPLORATION_ROADMAP.md) ────────────
+pub mod sweep_engine;           // Generic parallel sweep engine (Rayon, progress, JSON output)
+pub mod offset_space_explorer;  // Offset set design space: path counts, coverage, budget analysis
+pub mod layer_placement_explorer; // Interference/full-attn layer placement scoring
+pub mod scale_embed_dynamics;   // Phase transition threshold prediction (power law / logistic fit)
+pub mod gate_equilibrium;       // Bypass gate equilibrium scaling law (g_eq ∝ N^β)
+pub mod knob_interactions;      // 9×9 pairwise coupling matrix over DWARF hyperparameters
+pub mod scale_optimizer;        // Per-scale (14M/35M/85M) full knob sweep + recommendations
+
 pub mod cond_d_db4;
 pub mod cond_m;            // NOTE: tests hypothetical gated-mixture condM (never built); see condm_actual
 pub mod cond_o;
