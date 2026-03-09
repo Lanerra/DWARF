@@ -70,3 +70,7 @@ pub mod coupling_stability;         // Pre-flight K/V vs residual coupling check
 pub mod movt_orthogonal_transport;  // MOVT: multi-plane Givens rotation value transport (generalises condU-phase r=1)
 pub mod qk_ovt;                     // QK-OVT: content-dependent orthogonal value transport (fifth DSQG mechanism)
 pub mod npci;                       // NPCI: norm-preserving coupled injection (replaces additive K/V injection)
+pub mod offset_gradient_energy;     // Gradient energy dilution: why d41s3 [48,128,384] beats d41s5 [48,128,384,768,1536]
+pub mod scale_embed_second_crossing; // scale_embed >1.0 threshold: per-head Q-match activation for global heads
+pub mod ema_window_retrieval_snr;   // EMA window b0 × retrieval distance SNR: d41s3 vs d41s5
+pub mod d41_scale_search;           // Optimal sparse set for d41s3 at 35M-scale dense widths
