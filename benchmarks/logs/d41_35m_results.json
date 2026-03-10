@@ -1,0 +1,495 @@
+{
+  "experiment": "d41_35m",
+  "kernel": "dsqg_attention_v3",
+  "changes": [
+    "dense_w48_sparse96_128_384_J52",
+    "scale_embed_init_zero",
+    "ema_clamp_floor_0.001"
+  ],
+  "final_test_ppl": 32.13630019240531,
+  "final_passkey_mean": 0.9416666666666668,
+  "final_passkey_by_d": {
+    "1": 1.0,
+    "2": 1.0,
+    "4": 1.0,
+    "8": 1.0,
+    "16": 1.0,
+    "32": 1.0,
+    "64": 1.0,
+    "128": 1.0,
+    "256": 1.0,
+    "512": 1.0,
+    "1024": 0.9,
+    "1536": 0.4
+  },
+  "per_epoch": [
+    {
+      "epoch": 1,
+      "val_ppl": 49.60398602215584,
+      "train_loss": 4.677627757156263,
+      "chinchilla_pct": 32.035260823319504,
+      "elapsed_s": 4893.555381774902,
+      "passkey_mean": 0.6333333333333333,
+      "passkey_by_d": {
+        "1": 0.6,
+        "2": 0.6,
+        "4": 0.6,
+        "8": 0.6,
+        "16": 0.5,
+        "32": 0.9,
+        "64": 0.9,
+        "128": 0.6,
+        "256": 1.0,
+        "512": 0.5,
+        "1024": 0.6,
+        "1536": 0.2
+      },
+      "scale_embed_abs_mean": 0.16965286135673524,
+      "scale_embed_abs_max": 0.5979821681976318,
+      "if_gain": [
+        1.0182031631469726,
+        0.9505416750907898,
+        0.9711422324180603,
+        0.9970369577407837,
+        0.9522047638893127,
+        0.9731558322906494,
+        0.9638066291809082,
+        0.9656461715698242
+      ],
+      "ema_factors": [
+        0.008729733526706696
+      ],
+      "kdv_alphas": [
+        -0.001152768381871283
+      ]
+    },
+    {
+      "epoch": 2,
+      "val_ppl": 39.88993032192745,
+      "train_loss": 3.8832234330780118,
+      "chinchilla_pct": 64.07052164663901,
+      "elapsed_s": 9914.349620819092,
+      "passkey_mean": 0.975,
+      "passkey_by_d": {
+        "1": 1.0,
+        "2": 1.0,
+        "4": 1.0,
+        "8": 1.0,
+        "16": 1.0,
+        "32": 1.0,
+        "64": 1.0,
+        "128": 1.0,
+        "256": 1.0,
+        "512": 1.0,
+        "1024": 0.9,
+        "1536": 0.8
+      },
+      "scale_embed_abs_mean": 0.21014007031917573,
+      "scale_embed_abs_max": 0.8857975006103516,
+      "if_gain": [
+        1.0323392033576966,
+        0.9204446792602539,
+        0.94349285364151,
+        0.9881920695304871,
+        0.8976122677326203,
+        0.9074618339538574,
+        0.9043175458908081,
+        0.8821392595767975
+      ],
+      "ema_factors": [
+        0.008104628883302212
+      ],
+      "kdv_alphas": [
+        -0.001035516383126378
+      ]
+    },
+    {
+      "epoch": 3,
+      "val_ppl": 36.2357380277081,
+      "train_loss": 3.7309482785383734,
+      "chinchilla_pct": 96.10578246995853,
+      "elapsed_s": 14778.581938505173,
+      "passkey_mean": 0.975,
+      "passkey_by_d": {
+        "1": 1.0,
+        "2": 1.0,
+        "4": 1.0,
+        "8": 1.0,
+        "16": 1.0,
+        "32": 1.0,
+        "64": 1.0,
+        "128": 1.0,
+        "256": 1.0,
+        "512": 1.0,
+        "1024": 0.9,
+        "1536": 0.8
+      },
+      "scale_embed_abs_mean": 0.2304218292236328,
+      "scale_embed_abs_max": 1.042960286140442,
+      "if_gain": [
+        1.0248222351074219,
+        0.9059924483299255,
+        0.9290951728820801,
+        0.983270812034607,
+        0.8741661131381988,
+        0.8703205168247223,
+        0.8749349057674408,
+        0.8320201873779297
+      ],
+      "ema_factors": [
+        0.007501466199755669
+      ],
+      "kdv_alphas": [
+        -0.0009399414993822575
+      ]
+    },
+    {
+      "epoch": 4,
+      "val_ppl": 34.170469491356506,
+      "train_loss": 3.653421217421801,
+      "chinchilla_pct": 128.14104329327802,
+      "elapsed_s": 19568.805155038834,
+      "passkey_mean": 0.9583333333333334,
+      "passkey_by_d": {
+        "1": 1.0,
+        "2": 1.0,
+        "4": 1.0,
+        "8": 1.0,
+        "16": 1.0,
+        "32": 1.0,
+        "64": 1.0,
+        "128": 1.0,
+        "256": 1.0,
+        "512": 0.9,
+        "1024": 0.9,
+        "1536": 0.7
+      },
+      "scale_embed_abs_mean": 0.2403163194656372,
+      "scale_embed_abs_max": 1.1540741920471191,
+      "if_gain": [
+        1.0191306710243224,
+        0.8991796016693115,
+        0.9234308540821076,
+        0.9830345988273621,
+        0.8642181098461151,
+        0.8506873190402985,
+        0.8625500857830047,
+        0.8044438600540161
+      ],
+      "ema_factors": [
+        0.007125751115381718
+      ],
+      "kdv_alphas": [
+        -0.0008655153797008097
+      ]
+    },
+    {
+      "epoch": 5,
+      "val_ppl": 32.814348841660475,
+      "train_loss": 3.592552587771422,
+      "chinchilla_pct": 160.17630411659752,
+      "elapsed_s": 24389.677049398422,
+      "passkey_mean": 0.875,
+      "passkey_by_d": {
+        "1": 1.0,
+        "2": 1.0,
+        "4": 1.0,
+        "8": 1.0,
+        "16": 1.0,
+        "32": 1.0,
+        "64": 1.0,
+        "128": 1.0,
+        "256": 0.9,
+        "512": 0.8,
+        "1024": 0.5,
+        "1536": 0.3
+      },
+      "scale_embed_abs_mean": 0.24479949474334717,
+      "scale_embed_abs_max": 1.2196520566940308,
+      "if_gain": [
+        1.0144318222999573,
+        0.8969801306724549,
+        0.9207385838031769,
+        0.9847113013267517,
+        0.8605165719985962,
+        0.841303551197052,
+        0.8566330432891845,
+        0.7894499659538269
+      ],
+      "ema_factors": [
+        0.0068983761593699455
+      ],
+      "kdv_alphas": [
+        -0.0008105252054519951
+      ]
+    },
+    {
+      "epoch": 6,
+      "val_ppl": 31.832039917019745,
+      "train_loss": 3.5552907070593833,
+      "chinchilla_pct": 192.21156493991705,
+      "elapsed_s": 29097.965495586395,
+      "passkey_mean": 0.9416666666666668,
+      "passkey_by_d": {
+        "1": 1.0,
+        "2": 1.0,
+        "4": 1.0,
+        "8": 1.0,
+        "16": 1.0,
+        "32": 1.0,
+        "64": 1.0,
+        "128": 1.0,
+        "256": 1.0,
+        "512": 0.9,
+        "1024": 0.9,
+        "1536": 0.5
+      },
+      "scale_embed_abs_mean": 0.24601435363292695,
+      "scale_embed_abs_max": 1.2571852207183838,
+      "if_gain": [
+        1.0118216633796693,
+        0.8970241248607635,
+        0.9201831340789794,
+        0.9860074520111084,
+        0.8592322468757629,
+        0.8362209260463714,
+        0.8543419182300568,
+        0.7806966960430145
+      ],
+      "ema_factors": [
+        0.0073112305253744125
+      ],
+      "kdv_alphas": [
+        -0.0007725825998932123
+      ]
+    },
+    {
+      "epoch": 7,
+      "val_ppl": 31.08705369592858,
+      "train_loss": 3.5195342001860865,
+      "chinchilla_pct": 224.24682576323653,
+      "elapsed_s": 33736.55545711517,
+      "passkey_mean": 0.9583333333333334,
+      "passkey_by_d": {
+        "1": 1.0,
+        "2": 1.0,
+        "4": 1.0,
+        "8": 1.0,
+        "16": 1.0,
+        "32": 1.0,
+        "64": 1.0,
+        "128": 1.0,
+        "256": 1.0,
+        "512": 1.0,
+        "1024": 0.9,
+        "1536": 0.6
+      },
+      "scale_embed_abs_mean": 0.24573961794376373,
+      "scale_embed_abs_max": 1.2786720991134644,
+      "if_gain": [
+        1.0102581262588501,
+        0.8976563096046448,
+        0.9199732124805451,
+        0.9869174003601074,
+        0.8593881487846374,
+        0.834000188112259,
+        0.8542436063289642,
+        0.7763612985610961
+      ],
+      "ema_factors": [
+        0.006903879810124636
+      ],
+      "kdv_alphas": [
+        -0.000748899532482028
+      ]
+    },
+    {
+      "epoch": 8,
+      "val_ppl": 30.60579086499146,
+      "train_loss": 3.4925592902091163,
+      "chinchilla_pct": 256.28208658655603,
+      "elapsed_s": 38375.51704120636,
+      "passkey_mean": 0.9249999999999999,
+      "passkey_by_d": {
+        "1": 1.0,
+        "2": 1.0,
+        "4": 1.0,
+        "8": 1.0,
+        "16": 0.9,
+        "32": 1.0,
+        "64": 1.0,
+        "128": 1.0,
+        "256": 1.0,
+        "512": 0.9,
+        "1024": 0.9,
+        "1536": 0.4
+      },
+      "scale_embed_abs_mean": 0.24508018493652345,
+      "scale_embed_abs_max": 1.2878583669662476,
+      "if_gain": [
+        1.0094302296638489,
+        0.8981157183647156,
+        0.9204856157302856,
+        0.9875062942504883,
+        0.8592167496681213,
+        0.8327571153640747,
+        0.8538135945796966,
+        0.7739115238189698
+      ],
+      "ema_factors": [
+        0.00681596202775836
+      ],
+      "kdv_alphas": [
+        -0.0007364159682765603
+      ]
+    },
+    {
+      "epoch": 9,
+      "val_ppl": 30.3608408576208,
+      "train_loss": 3.472088686046263,
+      "chinchilla_pct": 288.31734740987554,
+      "elapsed_s": 43007.54478549957,
+      "passkey_mean": 0.9500000000000001,
+      "passkey_by_d": {
+        "1": 1.0,
+        "2": 1.0,
+        "4": 1.0,
+        "8": 1.0,
+        "16": 1.0,
+        "32": 1.0,
+        "64": 1.0,
+        "128": 1.0,
+        "256": 1.0,
+        "512": 1.0,
+        "1024": 0.9,
+        "1536": 0.5
+      },
+      "scale_embed_abs_mean": 0.24467491805553437,
+      "scale_embed_abs_max": 1.2916654348373413,
+      "if_gain": [
+        1.0092658281326294,
+        0.898524260520935,
+        0.920670610666275,
+        0.9878306031227112,
+        0.8589317798614502,
+        0.8323235452175141,
+        0.8537006974220276,
+        0.7727313458919525
+      ],
+      "ema_factors": [
+        0.006903066299855709
+      ],
+      "kdv_alphas": [
+        -0.0007317152339965105
+      ]
+    },
+    {
+      "epoch": 10,
+      "val_ppl": 30.315338476605778,
+      "train_loss": 3.4632233923989824,
+      "chinchilla_pct": 320.35260823319504,
+      "elapsed_s": 47639.911553144455,
+      "passkey_mean": 0.9416666666666668,
+      "passkey_by_d": {
+        "1": 1.0,
+        "2": 1.0,
+        "4": 1.0,
+        "8": 1.0,
+        "16": 1.0,
+        "32": 1.0,
+        "64": 1.0,
+        "128": 1.0,
+        "256": 1.0,
+        "512": 1.0,
+        "1024": 0.9,
+        "1536": 0.4
+      },
+      "scale_embed_abs_mean": 0.24460221827030182,
+      "scale_embed_abs_max": 1.2921581268310547,
+      "if_gain": [
+        1.0092409372329711,
+        0.8986957788467407,
+        0.9207551896572113,
+        0.9878765106201172,
+        0.8588441908359528,
+        0.8321566939353943,
+        0.8536621451377868,
+        0.7726452231407166
+      ],
+      "ema_factors": [
+        0.006941703148186207
+      ],
+      "kdv_alphas": [
+        -0.0007310553337447345
+      ]
+    }
+  ],
+  "temperature_sweep": {
+    "greedy": [
+      " day, and the sun was shining.\nThe sun was shining, and the sun was shining.\nThe sun was shining, and the sun was shinin",
+      " is about 1.5 mm. The length of the hypotenuse is about 1.5 mm. The length of the hypotenuse is about 1.5 mm. The length",
+      " States, President of the United States, and President of the United States, is the President of the United States.\nThe ",
+      " a great deal of work in the field of medicine, and the most important of these was the study of the human body.\nThe fir",
+      " the number of people who are diagnosed with the disease is increasing.\nThe number of people who are diagnosed with the "
+    ],
+    "T=0.5": [
+      " day, and the sun was shining in the darkness, and the sun was shining in the darkness. The sun was shining in the darkn",
+      " is very small and the length of the hypotenuse is very small. The hypotenuse is small and the hypotenuse is small. The ",
+      " States, the President of the United States, and the President of the United States of America, was an active member of ",
+      " a general feeling of being in a state of confusion, but there was no doubt that the situation was going to be much wors",
+      " the team's findings are consistent with the findings of the National Center for Health Statistics (NCHH) and the Nation"
+    ],
+    "T=0.7": [
+      " day.\n\u201cThe sun was shining and it was in the sun,\u201d said Lolbert. \u201cThe sun was shining, the sun was shining and it was da",
+      " is defined by the unit number of the number of the hypotenuse.\nThe hypotenuse is defined by the number of the hypotenus",
+      " States, President of the United States of America, was in office, and he was the first president of the United States o",
+      " an obvious period of growth of the economy, and the upper classes, which were the poorer classes, had become increasing",
+      " the majority of the population (22.6%) are born prematurely. The number of children born prematurely is the highest in "
+    ],
+    "T=1.0": [
+      ", poorly ventilated part of a hospital was in the basement and the dog was a bit cold. On his first child, which never w",
+      ". Somewhat abrupt, or unsaturated, is one of the differences in length of the hypotenuse, particularly when the hypotenu",
+      " States and the Economic and Social Advocacy Advocacy Act of 1924 had published his Department of State Legislatures Dir",
+      " one man sitting down with his leg on the horse, a humble crocodile and if there had been no baby it was there to eat. T",
+      " the value of 1.2 \u03bcm of the protein is lower than that of the protease, the other value of 6.0 \u03bcm is as follows: in an e"
+    ]
+  },
+  "attn_summary": {
+    "pos_bias_abs_mean": 2.142007303237915,
+    "pos_bias_abs_max": 7.869594573974609,
+    "pos_bias_mean_per_head": [
+      -0.3442757785320282,
+      -0.8840062141418457,
+      -1.3713738679885865,
+      -1.922536516189575,
+      -2.4333952903747558,
+      -2.93100643157959,
+      -3.3626795768737794,
+      -3.865806484222412
+    ],
+    "scale_embed_abs_mean": 0.24460221827030182,
+    "scale_embed_abs_max": 1.2921581268310547,
+    "if_gain": [
+      1.0092409372329711,
+      0.8986957788467407,
+      0.9207551896572113,
+      0.9878765106201172,
+      0.8588441908359528,
+      0.8321566939353943,
+      0.8536621451377868,
+      0.7726452231407166
+    ],
+    "ema_factors": [
+      0.006941703148186207
+    ],
+    "kdv_alphas": [
+      -0.0007310553337447345
+    ]
+  },
+  "i3g0_reference_ppl": 52.948,
+  "d41s3_reference_ppl": 52.457,
+  "d41s3_reference_passkey": 0.767,
+  "i3g0_reference_passkey": 0.533,
+  "condm_reference_ppl": 54.529,
+  "condm_reference_passkey": 0.833
+}

@@ -62,6 +62,18 @@ def _import_d41(variant: str):
     spec.loader.exec_module(mod)
     return mod.CondMTransformer
 
+def _import_d41_35m():
+    """Import CondMTransformer from train_2048_35m_d41.py (dense=48, sparse=[96,128,384], J=52)."""
+    import importlib.util
+    train_dir = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'train'))
+    if train_dir not in sys.path:
+        sys.path.insert(0, train_dir)
+    script = os.path.join(train_dir, 'train_2048_35m_d41.py')
+    spec = importlib.util.spec_from_file_location('d41_35m_train', script)
+    mod  = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod.CondMTransformer
+
 def _import_condm_periodic():
     script_dir = os.path.dirname(os.path.abspath(__file__))
     if script_dir not in sys.path:
@@ -225,6 +237,15 @@ MODEL_REGISTRY = {
         'interference': 3,
         'checkpoint': os.path.join(CKPT_ROOT, 'd41s3_seinit', 'best.pt'),
         'label':      'd41s3_seinit 14M (EMA init=0.005, passkey=43.3%)',
+        'params_ref': None,
+    },
+    # d41_35m: dense=48, sparse=[96,128,384], J=52 — scaled to 35M (D=512)
+    'd41_35m': {
+        'arch':       'd41_35m',
+        'D':          512, 'H': 8, 'FFN': 2048, 'L': 6, 'full_layer': 5,
+        'interference': 3,
+        'checkpoint': os.path.join(CKPT_ROOT, 'd41_35m', 'best.pt'),
+        'label':      'd41_35m 35M (dense=48, sparse=[96,128,384], J=52)',
         'params_ref': None,
     },
 }
@@ -615,6 +636,14 @@ def build_model(cfg):
         )
     elif arch in ('d41s3', 'd41s5'):
         CondMTransformer = _import_d41(arch)
+        return CondMTransformer(
+            vocab_size=VOCAB_SIZE, embedding_dim=D, num_layers=L, num_heads=H,
+            ffn_dim=FFN, seq_len=MAX_SEQ_LEN,
+            full_attn_layer=cfg.get('full_layer', 5),
+            interference_interval=cfg.get('interference', 3),
+        )
+    elif arch == 'd41_35m':
+        CondMTransformer = _import_d41_35m()
         return CondMTransformer(
             vocab_size=VOCAB_SIZE, embedding_dim=D, num_layers=L, num_heads=H,
             ffn_dim=FFN, seq_len=MAX_SEQ_LEN,

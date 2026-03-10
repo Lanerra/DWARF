@@ -672,9 +672,14 @@ def main():
     spec.loader.exec_module(m)
 
     model = m.CondMTransformer(
-        vocab_size=m.VOCAB_SIZE, embedding_dim=256, num_layers=6,
-        num_heads=8, ffn_dim=1024, seq_len=2048,
-        full_attn_layer=5, interference_interval=3,
+        vocab_size=m.VOCAB_SIZE,
+        embedding_dim=getattr(m, 'EMBEDDING_DIM', 256),
+        num_layers=getattr(m, 'NUM_LAYERS', 6),
+        num_heads=getattr(m, 'NUM_HEADS', 8),
+        ffn_dim=getattr(m, 'FFN_DIM', 1024),
+        seq_len=2048,
+        full_attn_layer=getattr(m, 'FULL_ATTN_LAYER', 5),
+        interference_interval=getattr(m, 'INTERFERENCE', 3),
     )
     ck = torch.load(os.path.join(root, args.checkpoint), map_location='cpu', weights_only=False)
     state = ck.get('model_state_dict', ck)
