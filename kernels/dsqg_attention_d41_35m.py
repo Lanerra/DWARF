@@ -383,10 +383,12 @@ class _DSQGFnV3(torch.autograd.Function):
             H=H, N=N, HD=HD, BLOCK_N=BN, BLOCK_HD=BHD,
         )
 
+        BN_DQ = 64
         dq   = torch.empty_like(q)
         dpb  = torch.zeros_like(pb)
         dse  = torch.zeros_like(se)
-        _bwd_dq_v3[g](
+        g_dq = (B * H, triton.cdiv(N, BN_DQ))
+        _bwd_dq_v3[g_dq](
             q, k, v, pb, se, dout, out, lse, D, dq, dpb, dse,
             q.stride(0),    q.stride(1),    q.stride(2),    q.stride(3),
             k.stride(0),    k.stride(1),    k.stride(2),    k.stride(3),
@@ -400,8 +402,7 @@ class _DSQGFnV3(torch.autograd.Function):
             pb.stride(0),   pb.stride(1),
             se.stride(0),   se.stride(1),
             dse.stride(0),  dse.stride(1),
-            H=H, N=N, HD=HD, BLOCK_N=BN, BLOCK_HD=BHD,
-            num_warps=2,
+            H=H, N=N, HD=HD, BLOCK_N=BN_DQ, BLOCK_HD=BHD,
         )
 
         dk  = torch.empty_like(k)
