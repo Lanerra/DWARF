@@ -363,7 +363,7 @@ class _DSQGFnV3(torch.autograd.Function):
         assert q.dtype == torch.bfloat16
         assert pos_bias.shape    == (52, H)
         assert scale_embed.shape == (52, HD)
-        BLOCK_N  = 128 if HD <= 64 else 64
+        BLOCK_N  = 16
         BLOCK_HD = _next_pow2(HD)
 
         out = torch.empty_like(q)
