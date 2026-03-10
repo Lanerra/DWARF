@@ -1,0 +1,14 @@
+[package]
+name = "block_diagonal_analysis"
+version = "0.1.0"
+edition = "2021"
+description = "Mathematical comparison of full FFN vs block-diagonal FFN for DWARF architecture"
+
+[[bin]]
+name = "block_diagonal_analysis"
+path = "src/main.rs"
+
+[dependencies]
+ndarray = "0.15"
+rand = "0.8"
+rand_distr = "0.4"
