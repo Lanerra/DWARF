@@ -1,0 +1,51 @@
+{
+  "label": "d41s3_seinit 14M (EMA init=0.005, passkey=43.3%)",
+  "n_params": 14057554,
+  "timestamp": "20260309_210523",
+  "tasks": [
+    "hellaswag",
+    "piqa",
+    "arc_easy",
+    "arc_challenge",
+    "winogrande",
+    "lambada"
+  ],
+  "results": {
+    "hellaswag": {
+      "accuracy": 0.24287990440151364,
+      "correct": 2439,
+      "total": 10042,
+      "elapsed_s": 84.78500986099243
+    },
+    "piqa": {
+      "accuracy": 0.5500544069640914,
+      "correct": 1011,
+      "total": 1838,
+      "elapsed_s": 7.233558416366577
+    },
+    "arc_easy": {
+      "accuracy": 0.33157894736842103,
+      "correct": 189,
+      "total": 570,
+      "elapsed_s": 4.465500354766846
+    },
+    "arc_challenge": {
+      "accuracy": 0.19063545150501673,
+      "correct": 57,
+      "total": 299,
+      "elapsed_s": 2.3639354705810547
+    },
+    "winogrande": {
+      "accuracy": 0.5138121546961326,
+      "correct": 651,
+      "total": 1267,
+      "elapsed_s": 4.955929279327393
+    },
+    "lambada": {
+      "accuracy": 0.07160877158936542,
+      "correct": 369,
+      "total": 5153,
+      "elapsed_s": 12.079639911651611
+    }
+  }
+}

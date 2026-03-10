@@ -218,6 +218,15 @@ MODEL_REGISTRY = {
         'label':      'd41s5 14M (dense=41, sparse=[48,128,384,768,1536], J=47)',
         'params_ref': None,
     },
+    # d41s3_seinit: same arch as d41s3 but EMA init=0.005 — passkey collapsed to 43.3%
+    'd41s3_seinit_14m': {
+        'arch':       'd41s3',
+        'D':          256, 'H': 8, 'FFN': 1024, 'L': 6, 'full_layer': 5,
+        'interference': 3,
+        'checkpoint': os.path.join(CKPT_ROOT, 'd41s3_seinit', 'best.pt'),
+        'label':      'd41s3_seinit 14M (EMA init=0.005, passkey=43.3%)',
+        'params_ref': None,
+    },
 }
 
 # ─── Offsets ──────────────────────────────────────────────────────────────────
