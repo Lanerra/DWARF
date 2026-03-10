@@ -1,0 +1,51 @@
+{
+  "label": "d41s3 14M (dense=41, sparse=[48,128,384], J=44)",
+  "n_params": 14057554,
+  "timestamp": "20260309_203356",
+  "tasks": [
+    "hellaswag",
+    "piqa",
+    "arc_easy",
+    "arc_challenge",
+    "winogrande",
+    "lambada"
+  ],
+  "results": {
+    "hellaswag": {
+      "accuracy": 0.24337781318462456,
+      "correct": 2444,
+      "total": 10042,
+      "elapsed_s": 85.474613904953
+    },
+    "piqa": {
+      "accuracy": 0.5489662676822633,
+      "correct": 1009,
+      "total": 1838,
+      "elapsed_s": 7.2455761432647705
+    },
+    "arc_easy": {
+      "accuracy": 0.3298245614035088,
+      "correct": 188,
+      "total": 570,
+      "elapsed_s": 4.4635329246521
+    },
+    "arc_challenge": {
+      "accuracy": 0.22073578595317725,
+      "correct": 66,
+      "total": 299,
+      "elapsed_s": 2.3573169708251953
+    },
+    "winogrande": {
+      "accuracy": 0.5090765588003157,
+      "correct": 645,
+      "total": 1267,
+      "elapsed_s": 4.997352838516235
+    },
+    "lambada": {
+      "accuracy": 0.07432563555210557,
+      "correct": 383,
+      "total": 5153,
+      "elapsed_s": 12.361572504043579
+    }
+  }
+}

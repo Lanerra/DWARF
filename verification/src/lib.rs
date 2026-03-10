@@ -74,3 +74,4 @@ pub mod offset_gradient_energy;     // Gradient energy dilution: why d41s3 [48,1
 pub mod scale_embed_second_crossing; // scale_embed >1.0 threshold: per-head Q-match activation for global heads
 pub mod ema_window_retrieval_snr;   // EMA window b0 × retrieval distance SNR: d41s3 vs d41s5
 pub mod d41_scale_search;           // Optimal sparse set for d41s3 at 35M-scale dense widths
+pub mod softmax_gain_competition;   // Softmax gain-weight competition: why pos_bias init kills long offsets
