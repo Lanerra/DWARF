@@ -87,27 +87,23 @@ def _fwd_v3(
     q = tl.load(qb + ns[:,None]*stride_qn + ds[None,:]*stride_qd,
                 mask=nm[:,None] & dm[None,:], other=0.0).to(tl.float32)
 
-    k_bptr = tl.make_block_ptr(
-        base=kb, shape=(N, HD), strides=(stride_kn, stride_kd),
-        offsets=(n0, 0), block_shape=(BLOCK_N, BLOCK_HD), order=(1, 0))
-    v_bptr = tl.make_block_ptr(
-        base=vb, shape=(N, HD), strides=(stride_vn, stride_vd),
-        offsets=(n0, 0), block_shape=(BLOCK_N, BLOCK_HD), order=(1, 0))
-
     mi  = tl.full([BLOCK_N], float('-inf'), tl.float32)
     li  = tl.zeros([BLOCK_N], tl.float32)
     acc = tl.zeros([BLOCK_N, BLOCK_HD], tl.float32)
 
-    # ── Phase 1: Consecutive δ=0..32 ────────────────────────────────────────
+    # ── Phase 1: Consecutive δ=0..48 ──────────────────────────────────────
     for d in tl.static_range(49):
-        kt  = tl.load(k_bptr, boundary_check=(0, 1), padding_option='zero')
-        vt  = tl.load(v_bptr, boundary_check=(0, 1), padding_option='zero')
-        val = (ns - d >= 0) & nm
+        kp  = ns - d
+        val = (kp >= 0) & nm
+
+        kt  = tl.load(kb + kp[:,None]*stride_kn + ds[None,:]*stride_kd,
+                      mask=val[:,None] & dm[None,:], other=0.0)
+        vt  = tl.load(vb + kp[:,None]*stride_vn + ds[None,:]*stride_vd,
+                      mask=val[:,None] & dm[None,:], other=0.0)
 
         s   = tl.sum(q * kt.to(tl.float32), axis=1) * sc
         s  += tl.load(POS_BIAS + d * stride_pbi + h * stride_pbh)
 
-        # V3: Q-dynamic matched-filter term
         se_d = tl.load(SE + d * stride_sei + ds * stride_sed, mask=dm, other=0.0).to(tl.float32)
         s   += tl.sum(q * se_d[None, :], axis=1) * sc
 
@@ -119,9 +115,6 @@ def _fwd_v3(
         li  = li * cor + p
         acc = acc * cor[:,None] + p[:,None] * vt.to(tl.float32)
         mi  = mn
-
-        k_bptr = tl.advance(k_bptr, (-1, 0))
-        v_bptr = tl.advance(v_bptr, (-1, 0))
 
     # ── Phase 2: Sparse δ=48..1536 ──────────────────────────────────────────
     for si in tl.static_range(3):
