@@ -421,6 +421,7 @@ class _DSQGFnV3(torch.autograd.Function):
             se.stride(0),   se.stride(1),
             dse.stride(0),  dse.stride(1),
             H=H, N=N, HD=HD, BLOCK_N=BN, BLOCK_HD=BHD,
+            num_warps=2,
         )
 
         dk  = torch.empty_like(k)
