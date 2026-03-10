@@ -101,11 +101,9 @@ def _fwd_v3(
         vt  = tl.load(vb + kp[:,None]*stride_vn + ds[None,:]*stride_vd,
                       mask=val[:,None] & dm[None,:], other=0.0)
 
-        s   = tl.sum(q * kt.to(tl.float32), axis=1) * sc
-        s  += tl.load(POS_BIAS + d * stride_pbi + h * stride_pbh)
-
         se_d = tl.load(SE + d * stride_sei + ds * stride_sed, mask=dm, other=0.0).to(tl.float32)
-        s   += tl.sum(q * se_d[None, :], axis=1) * sc
+        s   = tl.sum(q * (kt.to(tl.float32) + se_d[None, :]), axis=1) * sc
+        s  += tl.load(POS_BIAS + d * stride_pbi + h * stride_pbh)
 
         s   = tl.where(val, s, float('-inf'))
 
@@ -116,7 +114,7 @@ def _fwd_v3(
         acc = acc * cor[:,None] + p[:,None] * vt.to(tl.float32)
         mi  = mn
 
-    # ── Phase 2: Sparse δ=48..1536 ──────────────────────────────────────────
+    # ── Phase 2: Sparse δ=(96,128,384) ────────────────────────────────────
     for si in tl.static_range(3):
         sd  = (96, 128, 384)[si]
         pbi = 49 + si
@@ -129,12 +127,9 @@ def _fwd_v3(
         vt  = tl.load(vb + kp[:,None]*stride_vn + ds[None,:]*stride_vd,
                       mask=val[:,None] & dm[None,:], other=0.0)
 
-        s   = tl.sum(q * kt.to(tl.float32), axis=1) * sc
-        s  += tl.load(POS_BIAS + pbi * stride_pbi + h * stride_pbh)
-
-        # V3: Q-dynamic matched-filter term
         se_j = tl.load(SE + pbi * stride_sei + ds * stride_sed, mask=dm, other=0.0).to(tl.float32)
-        s   += tl.sum(q * se_j[None, :], axis=1) * sc
+        s   = tl.sum(q * (kt.to(tl.float32) + se_j[None, :]), axis=1) * sc
+        s  += tl.load(POS_BIAS + pbi * stride_pbi + h * stride_pbh)
 
         s   = tl.where(val, s, float('-inf'))
 
@@ -238,21 +233,17 @@ def _bwd_dq_v3(
         vt  = tl.load(vb + kp[:,None]*stride_vn + ds[None,:]*stride_vd,
                       mask=val[:,None] & dm[None,:], other=0.0).to(tl.float32)
 
-        # V3: load scale_embed[i] and compute Q-dynamic term
         se_i = tl.load(SE + i * stride_sei + ds * stride_sed, mask=dm, other=0.0).to(tl.float32)
-        q_dyn = tl.sum(q * se_i[None, :], axis=1) * sc   # [BLOCK_N]
+        kt_se = kt + se_i[None, :]
 
-        s     = tl.sum(q * kt, axis=1) * sc
+        s     = tl.sum(q * kt_se, axis=1) * sc
         s    += tl.load(PB + i*stride_pbi + h*stride_pbh)
-        s    += q_dyn                                      # V3: add Q-dynamic
         s     = tl.where(val, s, float('-inf'))
 
         alpha = tl.where(val, tl.exp(s - lse), 0.0)
         ds_v  = alpha * (tl.sum(do * vt, axis=1) - Dval)
 
-        # dQ: standard Q·K contribution + V3 Q·SE contribution
-        dq   += ds_v[:,None] * kt * sc
-        dq   += ds_v[:,None] * se_i[None, :] * sc         # V3: SE contributes to dQ
+        dq   += ds_v[:,None] * kt_se * sc
 
         # dPOS_BIAS: unchanged
         tl.atomic_add(DPB + i*stride_dpbi + h*stride_dpbh,
@@ -322,13 +313,9 @@ def _bwd_dkdv_v3(
         lsen = tl.load(LSE + b*stride_lb + h*stride_lh + np_*stride_ln, mask=val, other=0.0)
         Dn   = tl.load(Dv  + b*stride_Db + h*stride_Dh + np_*stride_Dn, mask=val, other=0.0)
 
-        # V3: load SE[i] for correct score computation
         se_i = tl.load(SE + i * stride_sei + ds * stride_sed, mask=dm, other=0.0).to(tl.float32)
-        q_dyn = tl.sum(qn * se_i[None, :], axis=1) * sc  # [BLOCK_M]
-
-        s    = tl.sum(qn * kt, axis=1) * sc
+        s    = tl.sum(qn * (kt + se_i[None, :]), axis=1) * sc
         s   += tl.load(PB + i*stride_pbi + h*stride_pbh)
-        s   += q_dyn                                       # V3: include Q-dynamic
         s    = tl.where(val, s, float('-inf'))
 
         alpha = tl.where(val, tl.exp(s - lsen), 0.0)
