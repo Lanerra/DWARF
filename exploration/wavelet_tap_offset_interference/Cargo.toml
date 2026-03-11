@@ -1,0 +1,16 @@
+[package]
+name = "wavelet_tap_offset_interference"
+version = "0.1.0"
+edition = "2021"
+description = "Tap-offset interference analysis for DSQG wavelet filters"
+
+[[bin]]
+name = "wavelet_tap_offset_interference"
+path = "src/main.rs"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+[profile.release]
+opt-level = 3

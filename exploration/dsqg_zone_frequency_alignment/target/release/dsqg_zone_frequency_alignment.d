@@ -1,0 +1,1 @@
+/home/dlewis3/Desktop/AI/DWARF/exploration/dsqg_zone_frequency_alignment/target/release/dsqg_zone_frequency_alignment: /home/dlewis3/Desktop/AI/DWARF/exploration/dsqg_zone_frequency_alignment/src/main.rs

@@ -1,18 +1,12 @@
 {
   "search_mode": "wavelet_filter",
-  "description": "6-tap lattice exploring 2-angle space",
   "wavelet": {
-    "filter_taps": 6,
+    "filter_taps": 4,
     "lattice_angles": [
-      1.0472,
-      0.5236
+      1.1377
     ],
-    "levels_with_gelu": [
-      0,
-      2,
-      4,
-      6
-    ],
+    "levels_with_gelu": [],
     "block_structure": "full"
-  }
+  },
+  "description": "Test whether GELU is necessary at all with the optimal 4-tap configuration. Previous results show gelu=[5], gelu=[6], and gelu=[7] each achieve 0.8426 individually at similar angles. This confirms GELU may be redundant. Testing with no GELU will either: (1) reveal 0.8426 is achievable without any GELU activation (significant efficiency gain), or (2) show GELU is essential, enabling us to conclusively adopt the minimal single-level variant."
 }

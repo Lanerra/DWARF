@@ -1,29 +1,26 @@
 {
-  "config_description": "6-tap lattice exploring 2-angle space",
-  "filter_taps": 6,
+  "config_description": "Test whether GELU is necessary at all with the optimal 4-tap configuration. Previous results show gelu=[5], gelu=[6], and gelu=[7] each achieve 0.8426 individually at similar angles. This confirms GELU may be redundant. Testing with no GELU will either: (1) reveal 0.8426 is achievable without any GELU activation (significant efficiency gain), or (2) show GELU is essential, enabling us to conclusively adopt the minimal single-level variant.",
+  "filter_taps": 4,
   "lattice_angles_deg": [
-    60.0001403060998,
-    30.0000701530499
+    65.18540835203376
   ],
   "filter_coefficients": [
-    -0.30618582740500966,
-    0.17677696973394788,
-    0.8365169375289738,
-    0.22414623340601503,
-    0.1767756710625835,
-    0.3061835780465846
+    0.5260829804065347,
+    0.8228438556987007,
+    0.18102380078001282,
+    -0.11573707451215315
   ],
   "metrics": {
-    "sparse_approx_mse": 0.151283003784323,
-    "scale_separation": 0.07185666362151237,
-    "leakage": 2.3388682121496793,
-    "reconstruction_quality": 3.7040318803078766e-31,
-    "gradient_flow": 12.771367189992233,
+    "sparse_approx_mse": 0.040263204033837055,
+    "scale_separation": 0.06747799115405557,
+    "leakage": 1.8693599036217607,
+    "reconstruction_quality": 5.222750639761441e-31,
+    "gradient_flow": 16.0,
     "dsqg_dense_coverage": 0.75,
     "dsqg_mid_coverage": 1.0,
     "dsqg_long_coverage": 1.0
   },
-  "composite_score": 0.7196699358362584,
-  "vs_d4_delta": -0.11616339749707483,
-  "runtime_ms": 7
+  "composite_score": 0.8426480902894979,
+  "vs_d4_delta": 0.006814756956164736,
+  "runtime_ms": 6
 }
