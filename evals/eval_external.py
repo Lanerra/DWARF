@@ -100,7 +100,10 @@ ARCH_CONFIGS = {
     # d41s5: dense=41 + sparse=[48,128,384,768,1536]  J=47  (CondMTransformer from train_2048_14m_d41s5.py)
     'd41s5_14m':  {'arch': 'd41s5', 'D': 256, 'H': 8, 'FFN': 1024, 'L': 6, 'full_layer': 5, 'interference': 3},
     # d41_35m: dense=48, sparse=[96,128,384], J=52 — 35M (D=512, CondMTransformer from train_2048_35m_d41.py)
-    'd41_35m':    {'arch': 'd41_35m', 'D': 512, 'H': 8, 'FFN': 2048, 'L': 6, 'full_layer': 5, 'interference': 3},
+    'd41_35m':      {'arch': 'd41_35m',      'D': 512, 'H': 8, 'FFN': 2048, 'L': 6, 'full_layer': 5,  'interference': 3},
+    # d41_35m_pure: pure DSQG (FULL_ATTN_LAYER=-1), dense=41, sparse=[48,128,384], 35M
+    'd41_35m_pure': {'arch': 'd41_35m_pure', 'D': 512, 'H': 8, 'FFN': 2048, 'L': 6, 'full_layer': -1, 'interference': 3,
+                     'checkpoint': os.path.join(os.path.normpath(os.path.join(SCRIPT_DIR, '..', 'checkpoints')), 'd41_35m_pure', 'best.pt')},
 }
 
 TASKS = ['hellaswag', 'piqa', 'arc_easy', 'arc_challenge', 'winogrande', 'lambada']
@@ -241,20 +244,24 @@ def load_model_from_arch(arch_name, checkpoint_path, device):
             interference_interval=cfg.get('interference', 3),
         ).to(device)
 
-    elif arch == 'd41_35m':
-        # d41_35m: 35M model (D=512), dense=48 + sparse=[96,128,384], J=52
+    elif arch in ('d41_35m', 'd41_35m_pure'):
         import importlib.util
-        train_dir    = os.path.normpath(os.path.join(SCRIPT_DIR, '..', 'train'))
-        train_script = os.path.join(train_dir, 'train_2048_35m_d41.py')
-        spec = importlib.util.spec_from_file_location('d41_35m_train', train_script)
-        mod  = importlib.util.module_from_spec(spec)
+        train_dir = os.path.normpath(os.path.join(SCRIPT_DIR, '..', 'train'))
         sys.path.insert(0, train_dir)
+        if arch == 'd41_35m_pure':
+            train_script = os.path.join(train_dir, 'train_2048_35m_d41_pure.py')
+            mod_name = 'd41_35m_pure_train'
+        else:
+            train_script = os.path.join(train_dir, 'train_2048_35m_d41.py')
+            mod_name = 'd41_35m_train'
+        spec = importlib.util.spec_from_file_location(mod_name, train_script)
+        mod  = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(mod)
         cls = mod.CondMTransformer
         model = cls(
             vocab_size=VOCAB_SIZE, embedding_dim=D, num_layers=L,
             num_heads=H, ffn_dim=FFN, seq_len=MAX_SEQ_LEN,
-            full_attn_layer=cfg.get('full_layer', 5),
+            full_attn_layer=cfg.get('full_layer', -1 if arch == 'd41_35m_pure' else 5),
             interference_interval=cfg.get('interference', 3),
         ).to(device)
 
