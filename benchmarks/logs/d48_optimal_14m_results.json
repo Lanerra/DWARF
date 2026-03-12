@@ -1,0 +1,517 @@
+{
+  "experiment": "d48_optimal_14m",
+  "kernel": "dsqg_attention_v3",
+  "offset_set": "d48 + [96, 128, 384] = J=52",
+  "two_regime_pos_bias": true,
+  "distal_threshold": 200,
+  "scale_embed_reg_lambda": 0.0001,
+  "scale_embed_max_abs": 1.0,
+  "final_test_ppl": 64.24123234889515,
+  "final_passkey_mean": 0.08333333333333333,
+  "final_passkey_by_d": {
+    "1": 0.4,
+    "2": 0.2,
+    "4": 0.2,
+    "8": 0.2,
+    "16": 0.0,
+    "32": 0.0,
+    "64": 0.0,
+    "128": 0.0,
+    "256": 0.0,
+    "512": 0.0,
+    "1024": 0.0,
+    "1536": 0.0
+  },
+  "per_epoch": [
+    {
+      "epoch": 1,
+      "val_ppl": 153.35914955715674,
+      "train_loss": 5.878542415146689,
+      "chinchilla_pct": 37.8393178395128,
+      "elapsed_s": 651.7536103725433,
+      "passkey_mean": 0.0,
+      "passkey_by_d": {
+        "1": 0.0,
+        "2": 0.0,
+        "4": 0.0,
+        "8": 0.0,
+        "16": 0.0,
+        "32": 0.0,
+        "64": 0.0,
+        "128": 0.0,
+        "256": 0.0,
+        "512": 0.0,
+        "1024": 0.0,
+        "1536": 0.0
+      },
+      "scale_embed_abs_mean": 0.1103100844969352,
+      "scale_embed_abs_max": 0.45898935198783875,
+      "if_gain": [
+        1.0450477302074432,
+        1.0226779977480571,
+        0.9459011058012644,
+        0.9380095998446146,
+        0.9100851714611053,
+        0.9085534115632375,
+        0.8477951188882192,
+        0.8091976841290792
+      ],
+      "ema_factors": [
+        0.00382409431040287,
+        0.12517286837100983
+      ],
+      "kdv_alphas": [
+        0.023477621376514435,
+        0.021608509123325348
+      ]
+    },
+    {
+      "epoch": 2,
+      "val_ppl": 95.51223036950601,
+      "train_loss": 4.873416349436473,
+      "chinchilla_pct": 75.6786356790256,
+      "elapsed_s": 1307.134752035141,
+      "passkey_mean": 0.05000000000000001,
+      "passkey_by_d": {
+        "1": 0.0,
+        "2": 0.2,
+        "4": 0.2,
+        "8": 0.2,
+        "16": 0.0,
+        "32": 0.0,
+        "64": 0.0,
+        "128": 0.0,
+        "256": 0.0,
+        "512": 0.0,
+        "1024": 0.0,
+        "1536": 0.0
+      },
+      "scale_embed_abs_mean": 0.14550991356372833,
+      "scale_embed_abs_max": 0.8458158373832703,
+      "if_gain": [
+        1.075848509867986,
+        1.0452339152495067,
+        0.9748621384302775,
+        0.9429406921068827,
+        0.9201837579409281,
+        0.8980415637294451,
+        0.8582336728771528,
+        0.755806768933932
+      ],
+      "ema_factors": [
+        0.0036497723776847124,
+        0.40303197503089905
+      ],
+      "kdv_alphas": [
+        0.050200190395116806,
+        -0.001210438902489841
+      ]
+    },
+    {
+      "epoch": 3,
+      "val_ppl": 77.42721184831467,
+      "train_loss": 4.5509330074764,
+      "chinchilla_pct": 113.51795351853842,
+      "elapsed_s": 1968.2459752559662,
+      "passkey_mean": 0.06666666666666667,
+      "passkey_by_d": {
+        "1": 0.2,
+        "2": 0.2,
+        "4": 0.2,
+        "8": 0.2,
+        "16": 0.0,
+        "32": 0.0,
+        "64": 0.0,
+        "128": 0.0,
+        "256": 0.0,
+        "512": 0.0,
+        "1024": 0.0,
+        "1536": 0.0
+      },
+      "scale_embed_abs_mean": 0.16707027951876322,
+      "scale_embed_abs_max": 1.0577940940856934,
+      "if_gain": [
+        1.0942882696787517,
+        1.0534187853336334,
+        1.007670134305954,
+        0.9573680758476257,
+        0.9390868619084358,
+        0.9098082135121027,
+        0.8888065951565901,
+        0.7640870846807957
+      ],
+      "ema_factors": [
+        0.0034991982392966747,
+        0.5001531839370728
+      ],
+      "kdv_alphas": [
+        0.09692119061946869,
+        -0.001161464722827077
+      ]
+    },
+    {
+      "epoch": 4,
+      "val_ppl": 69.7770897113774,
+      "train_loss": 4.399198458756058,
+      "chinchilla_pct": 151.3572713580512,
+      "elapsed_s": 2626.8343324661255,
+      "passkey_mean": 0.10000000000000002,
+      "passkey_by_d": {
+        "1": 0.2,
+        "2": 0.2,
+        "4": 0.2,
+        "8": 0.2,
+        "16": 0.2,
+        "32": 0.2,
+        "64": 0.0,
+        "128": 0.0,
+        "256": 0.0,
+        "512": 0.0,
+        "1024": 0.0,
+        "1536": 0.0
+      },
+      "scale_embed_abs_mean": 0.17876613264282545,
+      "scale_embed_abs_max": 1.084864616394043,
+      "if_gain": [
+        1.1040923694769542,
+        1.0550062855084736,
+        1.0252912044525146,
+        0.9672706226507822,
+        0.9530320515235265,
+        0.9191275462508202,
+        0.9151909736295541,
+        0.7839427888393402
+      ],
+      "ema_factors": [
+        0.0033758385106921196,
+        0.5001438856124878
+      ],
+      "kdv_alphas": [
+        0.12363952398300171,
+        -0.0011205103946849704
+      ]
+    },
+    {
+      "epoch": 5,
+      "val_ppl": 65.30013512745472,
+      "train_loss": 4.3168786790185765,
+      "chinchilla_pct": 189.19658919756404,
+      "elapsed_s": 3301.258588075638,
+      "passkey_mean": 0.06666666666666667,
+      "passkey_by_d": {
+        "1": 0.2,
+        "2": 0.2,
+        "4": 0.2,
+        "8": 0.2,
+        "16": 0.0,
+        "32": 0.0,
+        "64": 0.0,
+        "128": 0.0,
+        "256": 0.0,
+        "512": 0.0,
+        "1024": 0.0,
+        "1536": 0.0
+      },
+      "scale_embed_abs_mean": 0.18547934790452322,
+      "scale_embed_abs_max": 1.0978268384933472,
+      "if_gain": [
+        1.1092297335465748,
+        1.0537558297316234,
+        1.0340627829233806,
+        0.9756591071685156,
+        0.962394913037618,
+        0.9273429935177168,
+        0.9328936152160168,
+        0.8007978548606237
+      ],
+      "ema_factors": [
+        0.0032807504758238792,
+        0.5003457069396973
+      ],
+      "kdv_alphas": [
+        0.14428898692131042,
+        -0.001088944380171597
+      ]
+    },
+    {
+      "epoch": 6,
+      "val_ppl": 62.7564488787728,
+      "train_loss": 4.261243007426123,
+      "chinchilla_pct": 227.03590703707684,
+      "elapsed_s": 3959.6174948215485,
+      "passkey_mean": 0.08333333333333333,
+      "passkey_by_d": {
+        "1": 0.2,
+        "2": 0.2,
+        "4": 0.2,
+        "8": 0.2,
+        "16": 0.2,
+        "32": 0.0,
+        "64": 0.0,
+        "128": 0.0,
+        "256": 0.0,
+        "512": 0.0,
+        "1024": 0.0,
+        "1536": 0.0
+      },
+      "scale_embed_abs_mean": 0.1885142500201861,
+      "scale_embed_abs_max": 1.0957183837890625,
+      "if_gain": [
+        1.1124580999215443,
+        1.0515573422114055,
+        1.039213756720225,
+        0.9813152551651001,
+        0.9683817227681478,
+        0.9339992751677831,
+        0.9438107411066691,
+        0.8123651519417763
+      ],
+      "ema_factors": [
+        0.003212983487173915,
+        0.5003679990768433
+      ],
+      "kdv_alphas": [
+        0.15885072946548462,
+        -0.0010664494475349784
+      ]
+    },
+    {
+      "epoch": 7,
+      "val_ppl": 60.976898065011525,
+      "train_loss": 4.227162505816487,
+      "chinchilla_pct": 264.87522487658964,
+      "elapsed_s": 4615.864312171936,
+      "passkey_mean": 0.06666666666666667,
+      "passkey_by_d": {
+        "1": 0.2,
+        "2": 0.2,
+        "4": 0.2,
+        "8": 0.2,
+        "16": 0.0,
+        "32": 0.0,
+        "64": 0.0,
+        "128": 0.0,
+        "256": 0.0,
+        "512": 0.0,
+        "1024": 0.0,
+        "1536": 0.0
+      },
+      "scale_embed_abs_mean": 0.18971451371908188,
+      "scale_embed_abs_max": 1.086362600326538,
+      "if_gain": [
+        1.1140306095282237,
+        1.0500743587811787,
+        1.0421032110850017,
+        0.9858815471331278,
+        0.9726346681515375,
+        0.9379470323522886,
+        0.9502499674757322,
+        0.8209495370586714
+      ],
+      "ema_factors": [
+        0.003169795498251915,
+        0.5001165866851807
+      ],
+      "kdv_alphas": [
+        0.16308385133743286,
+        -0.0010521134827286005
+      ]
+    },
+    {
+      "epoch": 8,
+      "val_ppl": 59.989490471919424,
+      "train_loss": 4.197074644050552,
+      "chinchilla_pct": 302.7145427161024,
+      "elapsed_s": 5285.755878210068,
+      "passkey_mean": 0.10000000000000002,
+      "passkey_by_d": {
+        "1": 0.4,
+        "2": 0.2,
+        "4": 0.2,
+        "8": 0.2,
+        "16": 0.2,
+        "32": 0.0,
+        "64": 0.0,
+        "128": 0.0,
+        "256": 0.0,
+        "512": 0.0,
+        "1024": 0.0,
+        "1536": 0.0
+      },
+      "scale_embed_abs_mean": 0.19001471375425658,
+      "scale_embed_abs_max": 1.0802658796310425,
+      "if_gain": [
+        1.114757200082143,
+        1.0491118431091309,
+        1.0440143446127574,
+        0.9884454707304636,
+        0.9748494972785314,
+        0.9402033984661102,
+        0.9542597979307175,
+        0.825885996222496
+      ],
+      "ema_factors": [
+        0.0031467091757804155,
+        0.5000467300415039
+      ],
+      "kdv_alphas": [
+        0.16672749817371368,
+        -0.0010444542858749628
+      ]
+    },
+    {
+      "epoch": 9,
+      "val_ppl": 59.556498450279065,
+      "train_loss": 4.182161424200512,
+      "chinchilla_pct": 340.55386055561524,
+      "elapsed_s": 5934.454856157303,
+      "passkey_mean": 0.08333333333333333,
+      "passkey_by_d": {
+        "1": 0.4,
+        "2": 0.2,
+        "4": 0.2,
+        "8": 0.2,
+        "16": 0.0,
+        "32": 0.0,
+        "64": 0.0,
+        "128": 0.0,
+        "256": 0.0,
+        "512": 0.0,
+        "1024": 0.0,
+        "1536": 0.0
+      },
+      "scale_embed_abs_mean": 0.19001638640960059,
+      "scale_embed_abs_max": 1.0766839981079102,
+      "if_gain": [
+        1.1148704787095387,
+        1.0486977994441986,
+        1.0447543462117512,
+        0.9893519332011541,
+        0.9756913433472315,
+        0.9410745551188787,
+        0.9557816758751869,
+        0.8280164326230685
+      ],
+      "ema_factors": [
+        0.0031379680149257183,
+        0.5000073313713074
+      ],
+      "kdv_alphas": [
+        0.16725504398345947,
+        -0.0010415485594421625
+      ]
+    },
+    {
+      "epoch": 10,
+      "val_ppl": 59.469420757357284,
+      "train_loss": 4.173240372856844,
+      "chinchilla_pct": 378.3931783951281,
+      "elapsed_s": 6581.122351646423,
+      "passkey_mean": 0.08333333333333333,
+      "passkey_by_d": {
+        "1": 0.4,
+        "2": 0.2,
+        "4": 0.2,
+        "8": 0.2,
+        "16": 0.0,
+        "32": 0.0,
+        "64": 0.0,
+        "128": 0.0,
+        "256": 0.0,
+        "512": 0.0,
+        "1024": 0.0,
+        "1536": 0.0
+      },
+      "scale_embed_abs_mean": 0.19000454371174177,
+      "scale_embed_abs_max": 1.0761957168579102,
+      "if_gain": [
+        1.114956925312678,
+        1.048629989226659,
+        1.0448988378047943,
+        0.9895363946755728,
+        0.9758069217205048,
+        0.9412234127521515,
+        0.9560115685065588,
+        0.8283962607383728
+      ],
+      "ema_factors": [
+        0.003136688843369484,
+        0.5000002980232239
+      ],
+      "kdv_alphas": [
+        0.16748419404029846,
+        -0.0010411127004772425
+      ]
+    }
+  ],
+  "temperature_sweep": {
+    "greedy": [
+      " day.\nThe first time I was in the morning, I was in the morning and I was in the morning. I was in the morning and I was",
+      " is about 1.5 mm. The length of the hypotenuse is about 1.5 mm. The length of the hypotenuse is about 1.5 mm. The length",
+      " States, the President of the United States, and the President of the United States, was the first President to be elect",
+      " a great deal of controversy about the history of the ancient world.\nThe first time in the history of the ancient world ",
+      " the results of the study are not statistically significant.\nThe results of the study are not statistically significant."
+    ],
+    "T=0.5": [
+      ", but it was a very hot and cold winter.\nIt was the first time that the first of the ice-clothing was a cold winter, and",
+      " is about 1.5 meters. The length of the hypotenuse is about 3.5 meters. The length of the hypotenuse is about 2.5 meters",
+      " States, and the United States, has been a member of the United States Congress, and has been a member of the Congress. ",
+      " a great deal of time for the Government to build a new building. The government was able to build a new building and bu",
+      " the real-world scenario is a good example of the impact of the global warming on the global economy.\nThe new report sta"
+    ],
+    "T=0.7": [
+      " day. The storm was very warm, but it was not the only storm.\nThe storm was warm and cold. But it was cold and cold. The",
+      " is 20 mm, the length of the height is a somewhat more complicated, especially if the width is below the height of the h",
+      " States has signed the treaty with the President of the United States, and the President of the United States has issued",
+      " a military invasion in an area where the French were forced to retreat. The Germans were sent to the French-speaking re",
+      " the presence of the electrolyte in the blood is the best way to monitor the blood flow in the blood.\nThe researchers fo"
+    ],
+    "T=1.0": [
+      " winter in May. It killed nearly 400 people in his hat, and the last winter was near to Medita. He continued his dirty b",
+      " is high. We can assume that somewhere in the north they will share only about 2 inkragon. We will also have the porefor",
+      " States has not met with the Governor of Texas but, according to a spokesperson, the United States will hear that Congre",
+      " no touching in a stand, it had to act over the barriers. It became known that otherwise the system was breaking apart, ",
+      " we're really not trying to represent a comparison of we are considering our origins. As they say, the growth of this re"
+    ]
+  },
+  "attn_summary": {
+    "pos_bias_abs_mean": 2.622198462486267,
+    "pos_bias_abs_max": 8.855548858642578,
+    "pos_bias_mean_per_head": [
+      -0.5142954587936401,
+      -1.1149832506974537,
+      -1.5714096625645955,
+      -2.1428209940592446,
+      -2.761100729306539,
+      -3.31896702448527,
+      -3.864689310391744,
+      -4.384246269861857
+    ],
+    "scale_embed_abs_mean": 0.19000454371174177,
+    "scale_embed_abs_max": 1.0761957168579102,
+    "if_gain": [
+      1.114956925312678,
+      1.048629989226659,
+      1.0448988378047943,
+      0.9895363946755728,
+      0.9758069217205048,
+      0.9412234127521515,
+      0.9560115685065588,
+      0.8283962607383728
+    ],
+    "ema_factors": [
+      0.003136688843369484,
+      0.5000002980232239
+    ],
+    "kdv_alphas": [
+      0.16748419404029846,
+      -0.0010411127004772425
+    ]
+  },
+  "i3g0_reference_ppl": 52.948,
+  "condU_reference_ppl": 52.206,
+  "condU_reference_passkey": 0.433,
+  "i3g0_reference_passkey": 0.533,
+  "condm_reference_ppl": 54.529,
+  "condm_reference_passkey": 0.833
+}

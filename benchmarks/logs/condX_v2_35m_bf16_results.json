@@ -1,0 +1,554 @@
+{
+  "experiment": "condX_v2_35m_learnable_gate_scaled",
+  "hypothesis": "gate=0 is optimal (sweep-confirmed); 35M may find non-zero equilibrium",
+  "kernel": "dsqg_attention_v3",
+  "base": "condV (Kalman-EMA + KdV + AGC), D=512",
+  "change": "Learnable gate bypass_alpha=-10 init (gate\u22480); condX-v2 arch at 35M",
+  "condX_v2_13m_result": "52.685 PPL / 45.0% passkey; gate sweep peak 54.2% at gate=0",
+  "gate_sweep_finding": "gate=0 optimal on both condX and condX-v2 checkpoints; monotonic decrease to gate=1",
+  "final_test_ppl": 38.17119903006256,
+  "final_passkey_mean": 0.9666666666666667,
+  "final_passkey_by_d": {
+    "1": 1.0,
+    "2": 1.0,
+    "4": 1.0,
+    "8": 1.0,
+    "16": 1.0,
+    "32": 1.0,
+    "64": 1.0,
+    "128": 1.0,
+    "256": 1.0,
+    "512": 1.0,
+    "1024": 1.0,
+    "1536": 0.6
+  },
+  "per_epoch": [
+    {
+      "epoch": 1,
+      "val_ppl": 81.72557291308158,
+      "train_loss": 5.319622021455031,
+      "chinchilla_pct": 14.285492473884215,
+      "elapsed_s": 1982.311064004898,
+      "passkey_mean": 0.15,
+      "passkey_by_d": {
+        "1": 0.2,
+        "2": 0.2,
+        "4": 0.2,
+        "8": 0.2,
+        "16": 0.2,
+        "32": 0.2,
+        "64": 0.2,
+        "128": 0.2,
+        "256": 0.2,
+        "512": 0.0,
+        "1024": 0.0,
+        "1536": 0.0
+      },
+      "scale_embed_abs_mean": 0.12300811558961869,
+      "scale_embed_abs_max": 0.35881635546684265,
+      "if_gain": [
+        1.0091108798980712,
+        0.979710602760315,
+        0.9945074439048767,
+        1.0028249621391296,
+        0.9827204585075379,
+        0.9797311067581177,
+        1.0162907123565674,
+        0.9958111763000488
+      ],
+      "ema_factors": [
+        0.012505412101745605
+      ],
+      "kdv_alphas": [
+        -0.0003504846536088735
+      ],
+      "bypass_alpha": -9.433394432067871,
+      "bypass_gate": 8.000075467862189e-05,
+      "bypass_clean_norm": 23.9869327545166,
+      "bypass_full_norm": 23.992488861083984,
+      "bypass_q_cosim": 1.0,
+      "bypass_q_delta_norm": 0.00046460446901619434
+    },
+    {
+      "epoch": 2,
+      "val_ppl": 55.311556175899575,
+      "train_loss": 4.2338584437172795,
+      "chinchilla_pct": 28.57098494776843,
+      "elapsed_s": 4010.8442599773407,
+      "passkey_mean": 0.43333333333333335,
+      "passkey_by_d": {
+        "1": 0.6,
+        "2": 0.6,
+        "4": 0.6,
+        "8": 0.6,
+        "16": 0.6,
+        "32": 0.6,
+        "64": 0.6,
+        "128": 0.4,
+        "256": 0.6,
+        "512": 0.0,
+        "1024": 0.0,
+        "1536": 0.0
+      },
+      "scale_embed_abs_mean": 0.17196702659130098,
+      "scale_embed_abs_max": 0.5810610055923462,
+      "if_gain": [
+        1.0086149334907533,
+        0.9661437511444092,
+        0.9792740106582641,
+        0.9934719800949097,
+        0.9627612352371215,
+        0.9442023515701294,
+        0.985377311706543,
+        0.9686037540435791
+      ],
+      "ema_factors": [
+        0.011307538487017155
+      ],
+      "kdv_alphas": [
+        -0.0003341124393045902
+      ],
+      "bypass_alpha": -8.700439453125,
+      "bypass_gate": 0.00016648488235659897,
+      "bypass_clean_norm": 24.19292640686035,
+      "bypass_full_norm": 24.186506271362305,
+      "bypass_q_cosim": 1.0,
+      "bypass_q_delta_norm": 0.0010668752947822213
+    },
+    {
+      "epoch": 3,
+      "val_ppl": 47.73658340286809,
+      "train_loss": 3.9831965961399867,
+      "chinchilla_pct": 42.85647742165265,
+      "elapsed_s": 5998.822654724121,
+      "passkey_mean": 0.7833333333333333,
+      "passkey_by_d": {
+        "1": 0.8,
+        "2": 0.8,
+        "4": 1.0,
+        "8": 1.0,
+        "16": 0.8,
+        "32": 0.8,
+        "64": 0.8,
+        "128": 0.8,
+        "256": 1.0,
+        "512": 0.6,
+        "1024": 0.6,
+        "1536": 0.4
+      },
+      "scale_embed_abs_mean": 0.19649634659290313,
+      "scale_embed_abs_max": 0.7188427448272705,
+      "if_gain": [
+        1.0124850273132324,
+        0.9618383049964905,
+        0.9675426721572876,
+        0.9796026110649109,
+        0.9460851311683655,
+        0.9158422946929932,
+        0.9505773186683655,
+        0.9326743483543396
+      ],
+      "ema_factors": [
+        0.010554706677794456
+      ],
+      "kdv_alphas": [
+        -0.00031998599297367036
+      ],
+      "bypass_alpha": -8.102622985839844,
+      "bypass_gate": 0.0003026523918379098,
+      "bypass_clean_norm": 24.003108978271484,
+      "bypass_full_norm": 23.99261474609375,
+      "bypass_q_cosim": 1.0,
+      "bypass_q_delta_norm": 0.0019847508519887924
+    },
+    {
+      "epoch": 4,
+      "val_ppl": 43.92152468710059,
+      "train_loss": 3.854966423074169,
+      "chinchilla_pct": 57.14196989553686,
+      "elapsed_s": 8019.822036027908,
+      "passkey_mean": 0.9500000000000001,
+      "passkey_by_d": {
+        "1": 1.0,
+        "2": 1.0,
+        "4": 1.0,
+        "8": 1.0,
+        "16": 1.0,
+        "32": 1.0,
+        "64": 1.0,
+        "128": 1.0,
+        "256": 1.0,
+        "512": 0.8,
+        "1024": 1.0,
+        "1536": 0.6
+      },
+      "scale_embed_abs_mean": 0.21060539782047272,
+      "scale_embed_abs_max": 0.8174399137496948,
+      "if_gain": [
+        1.0117414832115172,
+        0.9608271360397339,
+        0.9597829937934875,
+        0.9674183130264282,
+        0.935132896900177,
+        0.8956494927406311,
+        0.9248505353927612,
+        0.9038811326026917
+      ],
+      "ema_factors": [
+        0.009980292990803719
+      ],
+      "kdv_alphas": [
+        -0.00030842077103443444
+      ],
+      "bypass_alpha": -7.6327948570251465,
+      "bypass_gate": 0.00048407091526314616,
+      "bypass_clean_norm": 23.820362091064453,
+      "bypass_full_norm": 23.809782028198242,
+      "bypass_q_cosim": 1.0,
+      "bypass_q_delta_norm": 0.0032331598922610283
+    },
+    {
+      "epoch": 5,
+      "val_ppl": 41.45121875642148,
+      "train_loss": 3.7699909939568426,
+      "chinchilla_pct": 71.42746236942108,
+      "elapsed_s": 10073.46761584282,
+      "passkey_mean": 0.9666666666666667,
+      "passkey_by_d": {
+        "1": 1.0,
+        "2": 1.0,
+        "4": 1.0,
+        "8": 1.0,
+        "16": 1.0,
+        "32": 1.0,
+        "64": 1.0,
+        "128": 1.0,
+        "256": 1.0,
+        "512": 1.0,
+        "1024": 1.0,
+        "1536": 0.6
+      },
+      "scale_embed_abs_mean": 0.21893852353096008,
+      "scale_embed_abs_max": 0.8837307095527649,
+      "if_gain": [
+        1.008480155467987,
+        0.9601465225219726,
+        0.9550066351890564,
+        0.9600631594657898,
+        0.9284899115562439,
+        0.8826050758361816,
+        0.9069540619850158,
+        0.8845319867134094
+      ],
+      "ema_factors": [
+        0.009813866578042507
+      ],
+      "kdv_alphas": [
+        -0.0002995141549035907
+      ],
+      "bypass_alpha": -7.296438217163086,
+      "bypass_gate": 0.000677489850204438,
+      "bypass_clean_norm": 23.68562126159668,
+      "bypass_full_norm": 23.66786766052246,
+      "bypass_q_cosim": 0.9999999403953552,
+      "bypass_q_delta_norm": 0.004554910585284233
+    },
+    {
+      "epoch": 6,
+      "val_ppl": 39.805790465497964,
+      "train_loss": 3.711147900728079,
+      "chinchilla_pct": 85.7129548433053,
+      "elapsed_s": 12053.500118970871,
+      "passkey_mean": 0.9666666666666667,
+      "passkey_by_d": {
+        "1": 1.0,
+        "2": 1.0,
+        "4": 1.0,
+        "8": 1.0,
+        "16": 1.0,
+        "32": 1.0,
+        "64": 1.0,
+        "128": 1.0,
+        "256": 1.0,
+        "512": 1.0,
+        "1024": 1.0,
+        "1536": 0.6
+      },
+      "scale_embed_abs_mean": 0.22326005399227142,
+      "scale_embed_abs_max": 0.9302577972412109,
+      "if_gain": [
+        1.0058208465576173,
+        0.9608707666397095,
+        0.9526245951652527,
+        0.9551049470901489,
+        0.9250792860984802,
+        0.8751352012157441,
+        0.8964359045028687,
+        0.8717822372913361
+      ],
+      "ema_factors": [
+        0.009744455106556416
+      ],
+      "kdv_alphas": [
+        -0.00029317193548195064
+      ],
+      "bypass_alpha": -7.077050685882568,
+      "bypass_gate": 0.000843547226395458,
+      "bypass_clean_norm": 23.60379981994629,
+      "bypass_full_norm": 23.57582664489746,
+      "bypass_q_cosim": 0.9999998807907104,
+      "bypass_q_delta_norm": 0.005755283869802952
+    },
+    {
+      "epoch": 7,
+      "val_ppl": 38.682812246387606,
+      "train_loss": 3.6598824938373453,
+      "chinchilla_pct": 99.99844731718952,
+      "elapsed_s": 14009.00705242157,
+      "passkey_mean": 0.9500000000000001,
+      "passkey_by_d": {
+        "1": 1.0,
+        "2": 1.0,
+        "4": 1.0,
+        "8": 1.0,
+        "16": 1.0,
+        "32": 1.0,
+        "64": 1.0,
+        "128": 1.0,
+        "256": 1.0,
+        "512": 1.0,
+        "1024": 0.8,
+        "1536": 0.6
+      },
+      "scale_embed_abs_mean": 0.22519103288650513,
+      "scale_embed_abs_max": 0.9554704427719116,
+      "if_gain": [
+        1.004514992237091,
+        0.9620017647743225,
+        0.9515335083007812,
+        0.9529065608978271,
+        0.9235204219818115,
+        0.8712494790554046,
+        0.8900537490844727,
+        0.8642483234405518
+      ],
+      "ema_factors": [
+        0.00956167746335268
+      ],
+      "kdv_alphas": [
+        -0.00028912743437103927
+      ],
+      "bypass_alpha": -6.950540542602539,
+      "bypass_gate": 0.0009572000126354396,
+      "bypass_clean_norm": 23.56767463684082,
+      "bypass_full_norm": 23.54154396057129,
+      "bypass_q_cosim": 0.9999998807907104,
+      "bypass_q_delta_norm": 0.006574978586286306
+    },
+    {
+      "epoch": 8,
+      "val_ppl": 38.064461556180866,
+      "train_loss": 3.6306927249276426,
+      "chinchilla_pct": 114.28393979107372,
+      "elapsed_s": 15991.849731206894,
+      "passkey_mean": 0.9666666666666667,
+      "passkey_by_d": {
+        "1": 1.0,
+        "2": 1.0,
+        "4": 1.0,
+        "8": 1.0,
+        "16": 1.0,
+        "32": 1.0,
+        "64": 1.0,
+        "128": 1.0,
+        "256": 1.0,
+        "512": 1.0,
+        "1024": 1.0,
+        "1536": 0.6
+      },
+      "scale_embed_abs_mean": 0.2258910447359085,
+      "scale_embed_abs_max": 0.969310998916626,
+      "if_gain": [
+        1.0038387656211853,
+        0.9628890872001648,
+        0.9512188196182251,
+        0.9518361449241638,
+        0.9228658437728882,
+        0.86947603225708,
+        0.8870814621448517,
+        0.8604703962802887
+      ],
+      "ema_factors": [
+        0.00937596708536148
+      ],
+      "kdv_alphas": [
+        -0.0002869673480745405
+      ],
+      "bypass_alpha": -6.889934539794922,
+      "bypass_gate": 0.0010169452289119363,
+      "bypass_clean_norm": 23.562667846679688,
+      "bypass_full_norm": 23.53651237487793,
+      "bypass_q_cosim": 0.9999998807907104,
+      "bypass_q_delta_norm": 0.007001879625022411
+    },
+    {
+      "epoch": 9,
+      "val_ppl": 37.78075267368382,
+      "train_loss": 3.60912901819105,
+      "chinchilla_pct": 128.56943226495792,
+      "elapsed_s": 17951.723640441895,
+      "passkey_mean": 0.9666666666666667,
+      "passkey_by_d": {
+        "1": 1.0,
+        "2": 1.0,
+        "4": 1.0,
+        "8": 1.0,
+        "16": 1.0,
+        "32": 1.0,
+        "64": 1.0,
+        "128": 1.0,
+        "256": 1.0,
+        "512": 1.0,
+        "1024": 1.0,
+        "1536": 0.6
+      },
+      "scale_embed_abs_mean": 0.22604815363883973,
+      "scale_embed_abs_max": 0.9739058613777161,
+      "if_gain": [
+        1.0036092758178712,
+        0.9634414315223694,
+        0.951082980632782,
+        0.9515543103218078,
+        0.9227757215499878,
+        0.8688563466072082,
+        0.8858217775821686,
+        0.8588292181491852
+      ],
+      "ema_factors": [
+        0.00931355357170105
+      ],
+      "kdv_alphas": [
+        -0.00028614894836209714
+      ],
+      "bypass_alpha": -6.868830680847168,
+      "bypass_gate": 0.0010386122157797217,
+      "bypass_clean_norm": 23.565580368041992,
+      "bypass_full_norm": 23.537132263183594,
+      "bypass_q_cosim": 0.9999998807907104,
+      "bypass_q_delta_norm": 0.00719487527385354
+    },
+    {
+      "epoch": 10,
+      "val_ppl": 37.72919133888788,
+      "train_loss": 3.5917341356446757,
+      "chinchilla_pct": 142.85492473884216,
+      "elapsed_s": 19922.362029075623,
+      "passkey_mean": 0.9666666666666667,
+      "passkey_by_d": {
+        "1": 1.0,
+        "2": 1.0,
+        "4": 1.0,
+        "8": 1.0,
+        "16": 1.0,
+        "32": 1.0,
+        "64": 1.0,
+        "128": 1.0,
+        "256": 1.0,
+        "512": 1.0,
+        "1024": 1.0,
+        "1536": 0.6
+      },
+      "scale_embed_abs_mean": 0.22605951130390167,
+      "scale_embed_abs_max": 0.9745645523071289,
+      "if_gain": [
+        1.0035132884979248,
+        0.9635179281234741,
+        0.951113760471344,
+        0.9514598727226258,
+        0.922780328989029,
+        0.8687234103679657,
+        0.8856096565723419,
+        0.8585594415664672
+      ],
+      "ema_factors": [
+        0.00931539572775364
+      ],
+      "kdv_alphas": [
+        -0.0002860279055312276
+      ],
+      "bypass_alpha": -6.8661017417907715,
+      "bypass_gate": 0.0010414475109428167,
+      "bypass_clean_norm": 23.565670013427734,
+      "bypass_full_norm": 23.537452697753906,
+      "bypass_q_cosim": 0.9999998807907104,
+      "bypass_q_delta_norm": 0.007214568089693785
+    }
+  ],
+  "temperature_sweep": {
+    "greedy": [
+      " day, and the sun was shining. The sun was shining, and the sun was shining. The sun was shining, and the sun was shinin",
+      " is approximately 1.5 mm. The hypotenuse is the most common hypotenuse in the United States.\nThe hypotenuse is the most ",
+      " States, the President of the United States, and the President of the United States, the President of the United States,",
+      " a great deal of confusion and confusion between the two. The first was that the two were not in the same position, and ",
+      " the study was conducted in a small sample of the population of the United States. The study was conducted in a small sa"
+    ],
+    "T=0.7": [
+      " day. It was a hot day. The storm was not so hot and the sun was falling. It was a terrible storm. The storm was a terri",
+      " is 15.4 mm, as measured in the left side of the hypotenuse.\nThis is the 2-point hypotenuse, where the hypotenuse is mea",
+      " States, the United States and the United States of America, is the only person to choose between the two. He is the fir",
+      " a sudden change in the shape of the artery. The artery was not too large, and a large artery was needed to be attached ",
+      " the observed decrease in the number of infected persons with HIV is due to a low incidence of HIV infection. However, a"
+    ],
+    "T=1.0": [
+      " afternoon at the tomb of Sinaloa, perhaps with a real appearance, which itself was an intense swathes but it was a cons",
+      ": 200 parts\nEach method should be run using first steps:\nExpressions: Cut height\nThis process should include tensile,\nKa",
+      " States and Republican General Gallatin had the potential to confound his nation\u2019s progress toward negotiations with Cen",
+      " a war of mutiny and forced conversion to a World War I refuge. The rapidly growing human population was steadily develo",
+      " the students exhibit a similar sensation of firing. They can also assume that the damagingness is caused by the fact th"
+    ]
+  },
+  "attn_summary": {
+    "pos_bias_abs_mean": 2.9970202445983887,
+    "pos_bias_abs_max": 11.4269380569458,
+    "pos_bias_mean_per_head": [
+      -0.5352326512336731,
+      -1.292249870300293,
+      -1.9907130479812623,
+      -2.7134971141815187,
+      -3.344840908050537,
+      -3.996677112579346,
+      -4.706280612945557,
+      -5.37744026184082
+    ],
+    "scale_embed_abs_mean": 0.22605951130390167,
+    "scale_embed_abs_max": 0.9745645523071289,
+    "if_gain": [
+      1.0035132884979248,
+      0.9635179281234741,
+      0.951113760471344,
+      0.9514598727226258,
+      0.922780328989029,
+      0.8687234103679657,
+      0.8856096565723419,
+      0.8585594415664672
+    ],
+    "ema_factors": [
+      0.00931539572775364
+    ],
+    "kdv_alphas": [
+      -0.0002860279055312276
+    ],
+    "bypass_alpha": -6.8661017417907715,
+    "bypass_gate": 0.0010414475109428167,
+    "clean_norm": 23.548870086669922,
+    "full_norm": 23.58835220336914,
+    "q_cosim": 0.9999998807907104,
+    "q_delta_norm": 0.008363161236047745
+  },
+  "condV_ppl": 52.207,
+  "condV_passkey": 0.367,
+  "condU_ppl": 52.237,
+  "condU_passkey": 0.383,
+  "condM_ppl": 54.529,
+  "condM_passkey": 0.833
+}

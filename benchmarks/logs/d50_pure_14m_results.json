@@ -1,0 +1,4692 @@
+[
+  {
+    "epoch": 1,
+    "val_ppl": 163.28086591267473,
+    "train_loss": 5.82105988887359,
+    "passkey": [
+      {
+        "distance": 1,
+        "accuracy": 0.0,
+        "n_valid": 5,
+        "trials": [
+          {
+            "distance": 1,
+            "target": "apple",
+            "predicted": "not",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 1,
+            "target": "banana",
+            "predicted": "not",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 1,
+            "target": "orange",
+            "predicted": "not",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 1,
+            "target": "cherry",
+            "predicted": "not",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 1,
+            "target": "grape",
+            "predicted": "not",
+            "correct": false,
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "distance": 2,
+        "accuracy": 0.0,
+        "n_valid": 5,
+        "trials": [
+          {
+            "distance": 2,
+            "target": "apple",
+            "predicted": "not",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 2,
+            "target": "banana",
+            "predicted": "not",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 2,
+            "target": "orange",
+            "predicted": "not",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 2,
+            "target": "cherry",
+            "predicted": "not",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 2,
+            "target": "grape",
+            "predicted": "not",
+            "correct": false,
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "distance": 4,
+        "accuracy": 0.0,
+        "n_valid": 5,
+        "trials": [
+          {
+            "distance": 4,
+            "target": "apple",
+            "predicted": "not",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 4,
+            "target": "banana",
+            "predicted": "not",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 4,
+            "target": "orange",
+            "predicted": "not",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 4,
+            "target": "cherry",
+            "predicted": "not",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 4,
+            "target": "grape",
+            "predicted": "not",
+            "correct": false,
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "distance": 8,
+        "accuracy": 0.0,
+        "n_valid": 5,
+        "trials": [
+          {
+            "distance": 8,
+            "target": "apple",
+            "predicted": "not",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 8,
+            "target": "banana",
+            "predicted": "not",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 8,
+            "target": "orange",
+            "predicted": "not",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 8,
+            "target": "cherry",
+            "predicted": "not",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 8,
+            "target": "grape",
+            "predicted": "not",
+            "correct": false,
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "distance": 16,
+        "accuracy": 0.0,
+        "n_valid": 5,
+        "trials": [
+          {
+            "distance": 16,
+            "target": "apple",
+            "predicted": "not",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 16,
+            "target": "banana",
+            "predicted": "not",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 16,
+            "target": "orange",
+            "predicted": "not",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 16,
+            "target": "cherry",
+            "predicted": "not",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 16,
+            "target": "grape",
+            "predicted": "not",
+            "correct": false,
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "distance": 32,
+        "accuracy": 0.0,
+        "n_valid": 5,
+        "trials": [
+          {
+            "distance": 32,
+            "target": "apple",
+            "predicted": "not",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 32,
+            "target": "banana",
+            "predicted": "not",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 32,
+            "target": "orange",
+            "predicted": "not",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 32,
+            "target": "cherry",
+            "predicted": "not",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 32,
+            "target": "grape",
+            "predicted": "not",
+            "correct": false,
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "distance": 64,
+        "accuracy": 0.0,
+        "n_valid": 5,
+        "trials": [
+          {
+            "distance": 64,
+            "target": "apple",
+            "predicted": "not",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 64,
+            "target": "banana",
+            "predicted": "not",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 64,
+            "target": "orange",
+            "predicted": "not",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 64,
+            "target": "cherry",
+            "predicted": "not",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 64,
+            "target": "grape",
+            "predicted": "not",
+            "correct": false,
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "distance": 128,
+        "accuracy": 0.0,
+        "n_valid": 0,
+        "trials": [
+          {
+            "distance": 128,
+            "target": "apple",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 128,
+            "target": "banana",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 128,
+            "target": "orange",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 128,
+            "target": "cherry",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 128,
+            "target": "grape",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          }
+        ]
+      },
+      {
+        "distance": 256,
+        "accuracy": 0.0,
+        "n_valid": 0,
+        "trials": [
+          {
+            "distance": 256,
+            "target": "apple",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 256,
+            "target": "banana",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 256,
+            "target": "orange",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 256,
+            "target": "cherry",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 256,
+            "target": "grape",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          }
+        ]
+      },
+      {
+        "distance": 512,
+        "accuracy": 0.0,
+        "n_valid": 0,
+        "trials": [
+          {
+            "distance": 512,
+            "target": "apple",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 512,
+            "target": "banana",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 512,
+            "target": "orange",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 512,
+            "target": "cherry",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 512,
+            "target": "grape",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          }
+        ]
+      },
+      {
+        "distance": 1024,
+        "accuracy": 0.0,
+        "n_valid": 0,
+        "trials": [
+          {
+            "distance": 1024,
+            "target": "apple",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 1024,
+            "target": "banana",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 1024,
+            "target": "orange",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 1024,
+            "target": "cherry",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 1024,
+            "target": "grape",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          }
+        ]
+      },
+      {
+        "distance": 1536,
+        "accuracy": 0.0,
+        "n_valid": 0,
+        "trials": [
+          {
+            "distance": 1536,
+            "target": "apple",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 1536,
+            "target": "banana",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 1536,
+            "target": "orange",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 1536,
+            "target": "cherry",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 1536,
+            "target": "grape",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          }
+        ]
+      }
+    ],
+    "passkey_mean": 0.0,
+    "attn_stats": [
+      {
+        "scale_embed_abs_mean": 0.01924576796591282,
+        "scale_embed_abs_max": 0.28043538331985474,
+        "pos_bias_abs_mean": 4.407165050506592,
+        "pos_bias_abs_max": 9.61607551574707,
+        "pos_bias_mean_per_head": [
+          -0.8516921401023865,
+          -2.2023305892944336,
+          -3.5587081909179688,
+          -4.812281608581543,
+          -5.886670112609863,
+          -7.006605625152588,
+          -7.950852870941162,
+          -2.9721312522888184
+        ],
+        "if_gain": [
+          0.9363723993301392,
+          0.9351261258125305,
+          0.9187871813774109,
+          0.924021303653717,
+          0.9248011112213135,
+          0.9371985793113708,
+          0.9318373203277588,
+          0.9339442849159241
+        ]
+      },
+      {
+        "scale_embed_abs_mean": 0.025169862434267998,
+        "scale_embed_abs_max": 0.3672020137310028,
+        "pos_bias_abs_mean": 4.417963027954102,
+        "pos_bias_abs_max": 9.671161651611328,
+        "pos_bias_mean_per_head": [
+          -0.8347058892250061,
+          -2.17095685005188,
+          -3.5452589988708496,
+          -4.785985946655273,
+          -5.891625881195068,
+          -7.1633453369140625,
+          -7.946901321411133,
+          -3.004925012588501
+        ],
+        "if_gain": [
+          0.9966753125190735,
+          0.9712445139884949,
+          0.9641221761703491,
+          0.9497557282447815,
+          0.9364739060401917,
+          0.9585921168327332,
+          0.9351727366447449,
+          0.9555227756500244
+        ]
+      },
+      {
+        "scale_embed_abs_mean": 0.02235831506550312,
+        "scale_embed_abs_max": 0.3332275152206421,
+        "pos_bias_abs_mean": 4.394966125488281,
+        "pos_bias_abs_max": 9.906113624572754,
+        "pos_bias_mean_per_head": [
+          -0.8211824297904968,
+          -2.1405041217803955,
+          -3.534841775894165,
+          -4.770537853240967,
+          -5.912211894989014,
+          -7.113190174102783,
+          -7.925079822540283,
+          -2.9421823024749756
+        ],
+        "if_gain": [
+          1.010338544845581,
+          0.9875083565711975,
+          0.9808025360107422,
+          0.9578824043273926,
+          0.9787080883979797,
+          1.0103590488433838,
+          0.9325902462005615,
+          0.9889041185379028
+        ]
+      },
+      {
+        "scale_embed_abs_mean": 0.02783813513815403,
+        "scale_embed_abs_max": 0.3967311978340149,
+        "pos_bias_abs_mean": 4.399522304534912,
+        "pos_bias_abs_max": 9.863473892211914,
+        "pos_bias_mean_per_head": [
+          -0.8275893926620483,
+          -2.1214895248413086,
+          -3.5374703407287598,
+          -4.803650379180908,
+          -5.99984884262085,
+          -6.97733736038208,
+          -8.005876541137695,
+          -2.9229185581207275
+        ],
+        "if_gain": [
+          1.101147174835205,
+          0.9913318157196045,
+          0.9672454595565796,
+          1.0021089315414429,
+          0.9719095230102539,
+          0.9680872559547424,
+          0.9773703813552856,
+          0.9872536063194275
+        ]
+      },
+      {
+        "scale_embed_abs_mean": 0.021876079961657524,
+        "scale_embed_abs_max": 0.20766665041446686,
+        "pos_bias_abs_mean": 4.375499248504639,
+        "pos_bias_abs_max": 9.599334716796875,
+        "pos_bias_mean_per_head": [
+          -0.8376085758209229,
+          -2.105790615081787,
+          -3.561203718185425,
+          -4.802417278289795,
+          -5.89529275894165,
+          -6.989161968231201,
+          -7.889806747436523,
+          -2.922715187072754
+        ],
+        "if_gain": [
+          1.0011173486709595,
+          0.9768112301826477,
+          0.9989244937896729,
+          1.0138624906539917,
+          0.9531145095825195,
+          0.9450355172157288,
+          0.9492220878601074,
+          1.010615587234497
+        ]
+      },
+      {
+        "scale_embed_abs_mean": 0.009500333108007908,
+        "scale_embed_abs_max": 0.08134157955646515,
+        "pos_bias_abs_mean": 4.361258029937744,
+        "pos_bias_abs_max": 9.896032333374023,
+        "pos_bias_mean_per_head": [
+          -0.8446247577667236,
+          -2.1681008338928223,
+          -3.4420790672302246,
+          -4.767026901245117,
+          -5.889318943023682,
+          -7.006402969360352,
+          -7.901281356811523,
+          -2.871229648590088
+        ],
+        "if_gain": [
+          1.0026426315307617,
+          0.9917382597923279,
+          0.9431527256965637,
+          0.9814494848251343,
+          0.9429129958152771,
+          0.935571014881134,
+          0.9396575093269348,
+          0.9776574969291687
+        ]
+      }
+    ]
+  },
+  {
+    "epoch": 2,
+    "val_ppl": 108.17245001541339,
+    "train_loss": 4.900125121216362,
+    "passkey": [
+      {
+        "distance": 1,
+        "accuracy": 0.0,
+        "n_valid": 5,
+        "trials": [
+          {
+            "distance": 1,
+            "target": "apple",
+            "predicted": "not",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 1,
+            "target": "banana",
+            "predicted": "not",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 1,
+            "target": "orange",
+            "predicted": "not",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 1,
+            "target": "cherry",
+            "predicted": "a",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 1,
+            "target": "grape",
+            "predicted": "not",
+            "correct": false,
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "distance": 2,
+        "accuracy": 0.0,
+        "n_valid": 5,
+        "trials": [
+          {
+            "distance": 2,
+            "target": "apple",
+            "predicted": "not",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 2,
+            "target": "banana",
+            "predicted": "not",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 2,
+            "target": "orange",
+            "predicted": "not",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 2,
+            "target": "cherry",
+            "predicted": "not",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 2,
+            "target": "grape",
+            "predicted": "not",
+            "correct": false,
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "distance": 4,
+        "accuracy": 0.0,
+        "n_valid": 5,
+        "trials": [
+          {
+            "distance": 4,
+            "target": "apple",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 4,
+            "target": "banana",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 4,
+            "target": "orange",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 4,
+            "target": "cherry",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 4,
+            "target": "grape",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "distance": 8,
+        "accuracy": 0.0,
+        "n_valid": 5,
+        "trials": [
+          {
+            "distance": 8,
+            "target": "apple",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 8,
+            "target": "banana",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 8,
+            "target": "orange",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 8,
+            "target": "cherry",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 8,
+            "target": "grape",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "distance": 16,
+        "accuracy": 0.0,
+        "n_valid": 5,
+        "trials": [
+          {
+            "distance": 16,
+            "target": "apple",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 16,
+            "target": "banana",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 16,
+            "target": "orange",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 16,
+            "target": "cherry",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 16,
+            "target": "grape",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "distance": 32,
+        "accuracy": 0.0,
+        "n_valid": 5,
+        "trials": [
+          {
+            "distance": 32,
+            "target": "apple",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 32,
+            "target": "banana",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 32,
+            "target": "orange",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 32,
+            "target": "cherry",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 32,
+            "target": "grape",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "distance": 64,
+        "accuracy": 0.0,
+        "n_valid": 5,
+        "trials": [
+          {
+            "distance": 64,
+            "target": "apple",
+            "predicted": "not",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 64,
+            "target": "banana",
+            "predicted": "not",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 64,
+            "target": "orange",
+            "predicted": "not",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 64,
+            "target": "cherry",
+            "predicted": "not",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 64,
+            "target": "grape",
+            "predicted": "not",
+            "correct": false,
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "distance": 128,
+        "accuracy": 0.0,
+        "n_valid": 0,
+        "trials": [
+          {
+            "distance": 128,
+            "target": "apple",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 128,
+            "target": "banana",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 128,
+            "target": "orange",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 128,
+            "target": "cherry",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 128,
+            "target": "grape",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          }
+        ]
+      },
+      {
+        "distance": 256,
+        "accuracy": 0.0,
+        "n_valid": 0,
+        "trials": [
+          {
+            "distance": 256,
+            "target": "apple",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 256,
+            "target": "banana",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 256,
+            "target": "orange",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 256,
+            "target": "cherry",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 256,
+            "target": "grape",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          }
+        ]
+      },
+      {
+        "distance": 512,
+        "accuracy": 0.0,
+        "n_valid": 0,
+        "trials": [
+          {
+            "distance": 512,
+            "target": "apple",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 512,
+            "target": "banana",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 512,
+            "target": "orange",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 512,
+            "target": "cherry",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 512,
+            "target": "grape",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          }
+        ]
+      },
+      {
+        "distance": 1024,
+        "accuracy": 0.0,
+        "n_valid": 0,
+        "trials": [
+          {
+            "distance": 1024,
+            "target": "apple",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 1024,
+            "target": "banana",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 1024,
+            "target": "orange",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 1024,
+            "target": "cherry",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 1024,
+            "target": "grape",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          }
+        ]
+      },
+      {
+        "distance": 1536,
+        "accuracy": 0.0,
+        "n_valid": 0,
+        "trials": [
+          {
+            "distance": 1536,
+            "target": "apple",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 1536,
+            "target": "banana",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 1536,
+            "target": "orange",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 1536,
+            "target": "cherry",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 1536,
+            "target": "grape",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          }
+        ]
+      }
+    ],
+    "passkey_mean": 0.0,
+    "attn_stats": [
+      {
+        "scale_embed_abs_mean": 0.019806209951639175,
+        "scale_embed_abs_max": 0.31471237540245056,
+        "pos_bias_abs_mean": 4.254934310913086,
+        "pos_bias_abs_max": 9.258549690246582,
+        "pos_bias_mean_per_head": [
+          -0.8135122656822205,
+          -2.151179552078247,
+          -3.46513295173645,
+          -4.655035018920898,
+          -5.6621623039245605,
+          -6.715157985687256,
+          -7.6633405685424805,
+          -2.883096218109131
+        ],
+        "if_gain": [
+          0.8957622051239014,
+          0.8857919573783875,
+          0.846071183681488,
+          0.8766835331916809,
+          0.8741359710693359,
+          0.8976220488548279,
+          0.8855924606323242,
+          0.9057687520980835
+        ]
+      },
+      {
+        "scale_embed_abs_mean": 0.030142854899168015,
+        "scale_embed_abs_max": 0.40625813603401184,
+        "pos_bias_abs_mean": 4.265030384063721,
+        "pos_bias_abs_max": 9.307608604431152,
+        "pos_bias_mean_per_head": [
+          -0.8333694338798523,
+          -2.079598903656006,
+          -3.4322149753570557,
+          -4.6129302978515625,
+          -5.654082775115967,
+          -6.947924613952637,
+          -7.622971057891846,
+          -2.937154531478882
+        ],
+        "if_gain": [
+          0.9566527605056763,
+          0.9214053750038147,
+          0.896440863609314,
+          0.8934195041656494,
+          0.8691360950469971,
+          0.8893701434135437,
+          0.868371307849884,
+          0.9051476120948792
+        ]
+      },
+      {
+        "scale_embed_abs_mean": 0.02607964351773262,
+        "scale_embed_abs_max": 0.4734547734260559,
+        "pos_bias_abs_mean": 4.238630771636963,
+        "pos_bias_abs_max": 9.689849853515625,
+        "pos_bias_mean_per_head": [
+          -0.763227641582489,
+          -2.0479843616485596,
+          -3.469841241836548,
+          -4.623376369476318,
+          -5.670936107635498,
+          -6.912341594696045,
+          -7.572563648223877,
+          -2.8487775325775146
+        ],
+        "if_gain": [
+          0.9719924926757812,
+          0.9337554574012756,
+          0.9713263511657715,
+          0.9098425507545471,
+          0.9687624573707581,
+          0.9700536727905273,
+          0.8570185303688049,
+          0.9432188868522644
+        ]
+      },
+      {
+        "scale_embed_abs_mean": 0.041900552809238434,
+        "scale_embed_abs_max": 0.5132666826248169,
+        "pos_bias_abs_mean": 4.240040302276611,
+        "pos_bias_abs_max": 9.669549942016602,
+        "pos_bias_mean_per_head": [
+          -0.7514528632164001,
+          -2.0090575218200684,
+          -3.454098701477051,
+          -4.642400741577148,
+          -5.833998203277588,
+          -6.677565097808838,
+          -7.726989269256592,
+          -2.824756383895874
+        ],
+        "if_gain": [
+          1.2937473058700562,
+          0.9917469024658203,
+          0.943175196647644,
+          0.9789401292800903,
+          0.9334903955459595,
+          0.9170401692390442,
+          0.9414032101631165,
+          0.9793955087661743
+        ]
+      },
+      {
+        "scale_embed_abs_mean": 0.03044247440993786,
+        "scale_embed_abs_max": 0.37479227781295776,
+        "pos_bias_abs_mean": 4.217156410217285,
+        "pos_bias_abs_max": 9.209362983703613,
+        "pos_bias_mean_per_head": [
+          -0.8464096188545227,
+          -1.9779711961746216,
+          -3.5014970302581787,
+          -4.659688949584961,
+          -5.647642612457275,
+          -6.707953929901123,
+          -7.5548176765441895,
+          -2.8412694931030273
+        ],
+        "if_gain": [
+          1.0150238275527954,
+          0.9564921855926514,
+          0.9864659309387207,
+          0.9825913906097412,
+          0.9092342257499695,
+          0.9006730318069458,
+          0.8937327861785889,
+          0.9934757351875305
+        ]
+      },
+      {
+        "scale_embed_abs_mean": 0.013766730204224586,
+        "scale_embed_abs_max": 0.15750597417354584,
+        "pos_bias_abs_mean": 4.181804180145264,
+        "pos_bias_abs_max": 9.698348999023438,
+        "pos_bias_mean_per_head": [
+          -0.7895940542221069,
+          -2.0870871543884277,
+          -3.280742883682251,
+          -4.6747145652771,
+          -5.641533374786377,
+          -6.702679634094238,
+          -7.555645942687988,
+          -2.722438097000122
+        ],
+        "if_gain": [
+          1.0124142169952393,
+          0.9815974235534668,
+          0.8957818150520325,
+          0.9694090485572815,
+          0.8815731406211853,
+          0.8750219941139221,
+          0.8794450163841248,
+          0.97114497423172
+        ]
+      }
+    ]
+  },
+  {
+    "epoch": 3,
+    "val_ppl": 90.73241067162596,
+    "train_loss": 4.617015702497581,
+    "passkey": [
+      {
+        "distance": 1,
+        "accuracy": 0.0,
+        "n_valid": 5,
+        "trials": [
+          {
+            "distance": 1,
+            "target": "apple",
+            "predicted": "a",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 1,
+            "target": "banana",
+            "predicted": "a",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 1,
+            "target": "orange",
+            "predicted": "a",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 1,
+            "target": "cherry",
+            "predicted": "a",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 1,
+            "target": "grape",
+            "predicted": "a",
+            "correct": false,
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "distance": 2,
+        "accuracy": 0.0,
+        "n_valid": 5,
+        "trials": [
+          {
+            "distance": 2,
+            "target": "apple",
+            "predicted": "a",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 2,
+            "target": "banana",
+            "predicted": "a",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 2,
+            "target": "orange",
+            "predicted": "a",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 2,
+            "target": "cherry",
+            "predicted": "a",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 2,
+            "target": "grape",
+            "predicted": "a",
+            "correct": false,
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "distance": 4,
+        "accuracy": 0.0,
+        "n_valid": 5,
+        "trials": [
+          {
+            "distance": 4,
+            "target": "apple",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 4,
+            "target": "banana",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 4,
+            "target": "orange",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 4,
+            "target": "cherry",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 4,
+            "target": "grape",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "distance": 8,
+        "accuracy": 0.0,
+        "n_valid": 5,
+        "trials": [
+          {
+            "distance": 8,
+            "target": "apple",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 8,
+            "target": "banana",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 8,
+            "target": "orange",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 8,
+            "target": "cherry",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 8,
+            "target": "grape",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "distance": 16,
+        "accuracy": 0.0,
+        "n_valid": 5,
+        "trials": [
+          {
+            "distance": 16,
+            "target": "apple",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 16,
+            "target": "banana",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 16,
+            "target": "orange",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 16,
+            "target": "cherry",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 16,
+            "target": "grape",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "distance": 32,
+        "accuracy": 0.0,
+        "n_valid": 5,
+        "trials": [
+          {
+            "distance": 32,
+            "target": "apple",
+            "predicted": "a",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 32,
+            "target": "banana",
+            "predicted": "a",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 32,
+            "target": "orange",
+            "predicted": "a",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 32,
+            "target": "cherry",
+            "predicted": "a",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 32,
+            "target": "grape",
+            "predicted": "a",
+            "correct": false,
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "distance": 64,
+        "accuracy": 0.0,
+        "n_valid": 5,
+        "trials": [
+          {
+            "distance": 64,
+            "target": "apple",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 64,
+            "target": "banana",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 64,
+            "target": "orange",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 64,
+            "target": "cherry",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 64,
+            "target": "grape",
+            "predicted": "a",
+            "correct": false,
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "distance": 128,
+        "accuracy": 0.0,
+        "n_valid": 0,
+        "trials": [
+          {
+            "distance": 128,
+            "target": "apple",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 128,
+            "target": "banana",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 128,
+            "target": "orange",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 128,
+            "target": "cherry",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 128,
+            "target": "grape",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          }
+        ]
+      },
+      {
+        "distance": 256,
+        "accuracy": 0.0,
+        "n_valid": 0,
+        "trials": [
+          {
+            "distance": 256,
+            "target": "apple",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 256,
+            "target": "banana",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 256,
+            "target": "orange",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 256,
+            "target": "cherry",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 256,
+            "target": "grape",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          }
+        ]
+      },
+      {
+        "distance": 512,
+        "accuracy": 0.0,
+        "n_valid": 0,
+        "trials": [
+          {
+            "distance": 512,
+            "target": "apple",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 512,
+            "target": "banana",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 512,
+            "target": "orange",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 512,
+            "target": "cherry",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 512,
+            "target": "grape",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          }
+        ]
+      },
+      {
+        "distance": 1024,
+        "accuracy": 0.0,
+        "n_valid": 0,
+        "trials": [
+          {
+            "distance": 1024,
+            "target": "apple",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 1024,
+            "target": "banana",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 1024,
+            "target": "orange",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 1024,
+            "target": "cherry",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 1024,
+            "target": "grape",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          }
+        ]
+      },
+      {
+        "distance": 1536,
+        "accuracy": 0.0,
+        "n_valid": 0,
+        "trials": [
+          {
+            "distance": 1536,
+            "target": "apple",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 1536,
+            "target": "banana",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 1536,
+            "target": "orange",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 1536,
+            "target": "cherry",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 1536,
+            "target": "grape",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          }
+        ]
+      }
+    ],
+    "passkey_mean": 0.0,
+    "attn_stats": [
+      {
+        "scale_embed_abs_mean": 0.019635485485196114,
+        "scale_embed_abs_max": 0.317827969789505,
+        "pos_bias_abs_mean": 4.114422798156738,
+        "pos_bias_abs_max": 8.92935848236084,
+        "pos_bias_mean_per_head": [
+          -0.7702608704566956,
+          -2.1057748794555664,
+          -3.381699323654175,
+          -4.505229473114014,
+          -5.465904712677002,
+          -6.456880569458008,
+          -7.39689302444458,
+          -2.7856674194335938
+        ],
+        "if_gain": [
+          0.8686602115631104,
+          0.8542191982269287,
+          0.8013512492179871,
+          0.8421121835708618,
+          0.8349475860595703,
+          0.8578370809555054,
+          0.845943808555603,
+          0.8947049975395203
+        ]
+      },
+      {
+        "scale_embed_abs_mean": 0.029493294656276703,
+        "scale_embed_abs_max": 0.4093998074531555,
+        "pos_bias_abs_mean": 4.132139205932617,
+        "pos_bias_abs_max": 9.0015869140625,
+        "pos_bias_mean_per_head": [
+          -0.8587019443511963,
+          -1.9987126588821411,
+          -3.3317601680755615,
+          -4.451878070831299,
+          -5.448387622833252,
+          -6.757209300994873,
+          -7.345911026000977,
+          -2.8541855812072754
+        ],
+        "if_gain": [
+          0.9249374866485596,
+          0.8912491798400879,
+          0.8503523468971252,
+          0.8482654690742493,
+          0.8172303438186646,
+          0.8384678959846497,
+          0.819193959236145,
+          0.8624123334884644
+        ]
+      },
+      {
+        "scale_embed_abs_mean": 0.0256767887622118,
+        "scale_embed_abs_max": 0.4698958396911621,
+        "pos_bias_abs_mean": 4.089330196380615,
+        "pos_bias_abs_max": 9.453571319580078,
+        "pos_bias_mean_per_head": [
+          -0.7258716821670532,
+          -1.9711910486221313,
+          -3.384265184402466,
+          -4.477312088012695,
+          -5.415725231170654,
+          -6.721065998077393,
+          -7.263329029083252,
+          -2.7558796405792236
+        ],
+        "if_gain": [
+          0.9427690505981445,
+          0.9000910520553589,
+          0.941184937953949,
+          0.8685439825057983,
+          0.937119722366333,
+          0.9373237490653992,
+          0.8191688656806946,
+          0.918834388256073
+        ]
+      },
+      {
+        "scale_embed_abs_mean": 0.04286692664027214,
+        "scale_embed_abs_max": 0.5423130989074707,
+        "pos_bias_abs_mean": 4.096277236938477,
+        "pos_bias_abs_max": 9.452982902526855,
+        "pos_bias_mean_per_head": [
+          -0.7152645587921143,
+          -1.9053829908370972,
+          -3.359447479248047,
+          -4.493649482727051,
+          -5.673620223999023,
+          -6.416357040405273,
+          -7.470590591430664,
+          -2.735903024673462
+        ],
+        "if_gain": [
+          1.325648546218872,
+          1.003769874572754,
+          0.9225233793258667,
+          0.9590969085693359,
+          0.9004917144775391,
+          0.8749685883522034,
+          0.9134076237678528,
+          0.9840582013130188
+        ]
+      },
+      {
+        "scale_embed_abs_mean": 0.03360920771956444,
+        "scale_embed_abs_max": 0.36463314294815063,
+        "pos_bias_abs_mean": 4.0782670974731445,
+        "pos_bias_abs_max": 8.91655158996582,
+        "pos_bias_mean_per_head": [
+          -0.8720505237579346,
+          -1.878964900970459,
+          -3.4272964000701904,
+          -4.519917011260986,
+          -5.430395603179932,
+          -6.465595722198486,
+          -7.259649753570557,
+          -2.7602407932281494
+        ],
+        "if_gain": [
+          1.0250720977783203,
+          0.9610714316368103,
+          0.975835919380188,
+          0.9563007354736328,
+          0.8906256556510925,
+          0.8719929456710815,
+          0.8629665374755859,
+          0.9875894784927368
+        ]
+      },
+      {
+        "scale_embed_abs_mean": 0.016548151150345802,
+        "scale_embed_abs_max": 0.21452564001083374,
+        "pos_bias_abs_mean": 4.026270389556885,
+        "pos_bias_abs_max": 9.465841293334961,
+        "pos_bias_mean_per_head": [
+          -0.7429118752479553,
+          -2.015678882598877,
+          -3.144524574279785,
+          -4.602621078491211,
+          -5.421035289764404,
+          -6.442483901977539,
+          -7.255894660949707,
+          -2.585012674331665
+        ],
+        "if_gain": [
+          1.0233324766159058,
+          0.9750185012817383,
+          0.8805193305015564,
+          0.9674484133720398,
+          0.8549703359603882,
+          0.8401135802268982,
+          0.8462969064712524,
+          0.9665615558624268
+        ]
+      }
+    ]
+  },
+  {
+    "epoch": 4,
+    "val_ppl": 81.78835036750777,
+    "train_loss": 4.477583407559657,
+    "passkey": [
+      {
+        "distance": 1,
+        "accuracy": 0.0,
+        "n_valid": 5,
+        "trials": [
+          {
+            "distance": 1,
+            "target": "apple",
+            "predicted": "a",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 1,
+            "target": "banana",
+            "predicted": "a",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 1,
+            "target": "orange",
+            "predicted": "a",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 1,
+            "target": "cherry",
+            "predicted": "a",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 1,
+            "target": "grape",
+            "predicted": "used",
+            "correct": false,
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "distance": 2,
+        "accuracy": 0.0,
+        "n_valid": 5,
+        "trials": [
+          {
+            "distance": 2,
+            "target": "apple",
+            "predicted": "used",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 2,
+            "target": "banana",
+            "predicted": "used",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 2,
+            "target": "orange",
+            "predicted": "pronounced",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 2,
+            "target": "cherry",
+            "predicted": "used",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 2,
+            "target": "grape",
+            "predicted": "used",
+            "correct": false,
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "distance": 4,
+        "accuracy": 0.0,
+        "n_valid": 5,
+        "trials": [
+          {
+            "distance": 4,
+            "target": "apple",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 4,
+            "target": "banana",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 4,
+            "target": "orange",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 4,
+            "target": "cherry",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 4,
+            "target": "grape",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "distance": 8,
+        "accuracy": 0.0,
+        "n_valid": 5,
+        "trials": [
+          {
+            "distance": 8,
+            "target": "apple",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 8,
+            "target": "banana",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 8,
+            "target": "orange",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 8,
+            "target": "cherry",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 8,
+            "target": "grape",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "distance": 16,
+        "accuracy": 0.0,
+        "n_valid": 5,
+        "trials": [
+          {
+            "distance": 16,
+            "target": "apple",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 16,
+            "target": "banana",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 16,
+            "target": "orange",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 16,
+            "target": "cherry",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 16,
+            "target": "grape",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "distance": 32,
+        "accuracy": 0.0,
+        "n_valid": 5,
+        "trials": [
+          {
+            "distance": 32,
+            "target": "apple",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 32,
+            "target": "banana",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 32,
+            "target": "orange",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 32,
+            "target": "cherry",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 32,
+            "target": "grape",
+            "predicted": "a",
+            "correct": false,
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "distance": 64,
+        "accuracy": 0.0,
+        "n_valid": 5,
+        "trials": [
+          {
+            "distance": 64,
+            "target": "apple",
+            "predicted": "not",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 64,
+            "target": "banana",
+            "predicted": "not",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 64,
+            "target": "orange",
+            "predicted": "not",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 64,
+            "target": "cherry",
+            "predicted": "not",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 64,
+            "target": "grape",
+            "predicted": "not",
+            "correct": false,
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "distance": 128,
+        "accuracy": 0.0,
+        "n_valid": 0,
+        "trials": [
+          {
+            "distance": 128,
+            "target": "apple",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 128,
+            "target": "banana",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 128,
+            "target": "orange",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 128,
+            "target": "cherry",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 128,
+            "target": "grape",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          }
+        ]
+      },
+      {
+        "distance": 256,
+        "accuracy": 0.0,
+        "n_valid": 0,
+        "trials": [
+          {
+            "distance": 256,
+            "target": "apple",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 256,
+            "target": "banana",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 256,
+            "target": "orange",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 256,
+            "target": "cherry",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 256,
+            "target": "grape",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          }
+        ]
+      },
+      {
+        "distance": 512,
+        "accuracy": 0.0,
+        "n_valid": 0,
+        "trials": [
+          {
+            "distance": 512,
+            "target": "apple",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 512,
+            "target": "banana",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 512,
+            "target": "orange",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 512,
+            "target": "cherry",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 512,
+            "target": "grape",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          }
+        ]
+      },
+      {
+        "distance": 1024,
+        "accuracy": 0.0,
+        "n_valid": 0,
+        "trials": [
+          {
+            "distance": 1024,
+            "target": "apple",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 1024,
+            "target": "banana",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 1024,
+            "target": "orange",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 1024,
+            "target": "cherry",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 1024,
+            "target": "grape",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          }
+        ]
+      },
+      {
+        "distance": 1536,
+        "accuracy": 0.0,
+        "n_valid": 0,
+        "trials": [
+          {
+            "distance": 1536,
+            "target": "apple",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 1536,
+            "target": "banana",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 1536,
+            "target": "orange",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 1536,
+            "target": "cherry",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 1536,
+            "target": "grape",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          }
+        ]
+      }
+    ],
+    "passkey_mean": 0.0,
+    "attn_stats": [
+      {
+        "scale_embed_abs_mean": 0.020228730514645576,
+        "scale_embed_abs_max": 0.3219349980354309,
+        "pos_bias_abs_mean": 3.994187831878662,
+        "pos_bias_abs_max": 8.644614219665527,
+        "pos_bias_mean_per_head": [
+          -0.7270245552062988,
+          -2.068178653717041,
+          -3.3098833560943604,
+          -4.374727249145508,
+          -5.304416179656982,
+          -6.24119758605957,
+          -7.172069072723389,
+          -2.697640895843506
+        ],
+        "if_gain": [
+          0.8527606725692749,
+          0.8315327763557434,
+          0.7721379995346069,
+          0.8156945705413818,
+          0.8030945062637329,
+          0.826187252998352,
+          0.8128535747528076,
+          0.8835999965667725
+        ]
+      },
+      {
+        "scale_embed_abs_mean": 0.028977269306778908,
+        "scale_embed_abs_max": 0.4159022867679596,
+        "pos_bias_abs_mean": 4.018619060516357,
+        "pos_bias_abs_max": 8.72986125946045,
+        "pos_bias_mean_per_head": [
+          -0.8719354271888733,
+          -1.9298609495162964,
+          -3.2453453540802,
+          -4.313339710235596,
+          -5.276151657104492,
+          -6.596665859222412,
+          -7.114242076873779,
+          -2.775493860244751
+        ],
+        "if_gain": [
+          0.8991111516952515,
+          0.8670021891593933,
+          0.818264365196228,
+          0.8181970715522766,
+          0.7861457467079163,
+          0.8008295893669128,
+          0.7860465049743652,
+          0.832112729549408
+        ]
+      },
+      {
+        "scale_embed_abs_mean": 0.025994932278990746,
+        "scale_embed_abs_max": 0.4579441547393799,
+        "pos_bias_abs_mean": 3.9624006748199463,
+        "pos_bias_abs_max": 9.228143692016602,
+        "pos_bias_mean_per_head": [
+          -0.6955506801605225,
+          -1.9067561626434326,
+          -3.3044214248657227,
+          -4.3499531745910645,
+          -5.201108932495117,
+          -6.554186820983887,
+          -7.004611015319824,
+          -2.6775877475738525
+        ],
+        "if_gain": [
+          0.9242227077484131,
+          0.8773098587989807,
+          0.916951060295105,
+          0.8345704078674316,
+          0.9106476902961731,
+          0.9084182977676392,
+          0.7969717383384705,
+          0.9053485989570618
+        ]
+      },
+      {
+        "scale_embed_abs_mean": 0.04270583763718605,
+        "scale_embed_abs_max": 0.5462968945503235,
+        "pos_bias_abs_mean": 3.972412347793579,
+        "pos_bias_abs_max": 9.261143684387207,
+        "pos_bias_mean_per_head": [
+          -0.6896591782569885,
+          -1.821325659751892,
+          -3.2719151973724365,
+          -4.36674165725708,
+          -5.531389236450195,
+          -6.197512626647949,
+          -7.2459797859191895,
+          -2.6547768115997314
+        ],
+        "if_gain": [
+          1.3053046464920044,
+          1.0082801580429077,
+          0.9024993777275085,
+          0.9387199878692627,
+          0.8734080791473389,
+          0.8432376384735107,
+          0.8904902935028076,
+          0.978768527507782
+        ]
+      },
+      {
+        "scale_embed_abs_mean": 0.03497308865189552,
+        "scale_embed_abs_max": 0.40394526720046997,
+        "pos_bias_abs_mean": 3.957204580307007,
+        "pos_bias_abs_max": 8.700536727905273,
+        "pos_bias_mean_per_head": [
+          -0.8811601400375366,
+          -1.8003519773483276,
+          -3.351346015930176,
+          -4.3961591720581055,
+          -5.247975826263428,
+          -6.262036323547363,
+          -7.008459091186523,
+          -2.6837961673736572
+        ],
+        "if_gain": [
+          1.029889702796936,
+          0.9678693413734436,
+          0.964644193649292,
+          0.9335263967514038,
+          0.8821685314178467,
+          0.8551484942436218,
+          0.8399144411087036,
+          0.9824392199516296
+        ]
+      },
+      {
+        "scale_embed_abs_mean": 0.018519341945648193,
+        "scale_embed_abs_max": 0.26635465025901794,
+        "pos_bias_abs_mean": 3.895993232727051,
+        "pos_bias_abs_max": 9.237947463989258,
+        "pos_bias_mean_per_head": [
+          -0.7049410343170166,
+          -1.9542027711868286,
+          -3.0308837890625,
+          -4.538328170776367,
+          -5.2343974113464355,
+          -6.228274822235107,
+          -7.005268573760986,
+          -2.4711403846740723
+        ],
+        "if_gain": [
+          1.0330755710601807,
+          0.9670876264572144,
+          0.8782567977905273,
+          0.9619653224945068,
+          0.8368383049964905,
+          0.8203701376914978,
+          0.8270477056503296,
+          0.9607435464859009
+        ]
+      }
+    ]
+  },
+  {
+    "epoch": 5,
+    "val_ppl": 76.94702341622951,
+    "train_loss": 4.392688232084058,
+    "passkey": [
+      {
+        "distance": 1,
+        "accuracy": 0.0,
+        "n_valid": 5,
+        "trials": [
+          {
+            "distance": 1,
+            "target": "apple",
+            "predicted": "a",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 1,
+            "target": "banana",
+            "predicted": "a",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 1,
+            "target": "orange",
+            "predicted": "a",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 1,
+            "target": "cherry",
+            "predicted": "a",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 1,
+            "target": "grape",
+            "predicted": "a",
+            "correct": false,
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "distance": 2,
+        "accuracy": 0.0,
+        "n_valid": 5,
+        "trials": [
+          {
+            "distance": 2,
+            "target": "apple",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 2,
+            "target": "banana",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 2,
+            "target": "orange",
+            "predicted": "a",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 2,
+            "target": "cherry",
+            "predicted": "a",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 2,
+            "target": "grape",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "distance": 4,
+        "accuracy": 0.0,
+        "n_valid": 5,
+        "trials": [
+          {
+            "distance": 4,
+            "target": "apple",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 4,
+            "target": "banana",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 4,
+            "target": "orange",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 4,
+            "target": "cherry",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 4,
+            "target": "grape",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "distance": 8,
+        "accuracy": 0.0,
+        "n_valid": 5,
+        "trials": [
+          {
+            "distance": 8,
+            "target": "apple",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 8,
+            "target": "banana",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 8,
+            "target": "orange",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 8,
+            "target": "cherry",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 8,
+            "target": "grape",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "distance": 16,
+        "accuracy": 0.0,
+        "n_valid": 5,
+        "trials": [
+          {
+            "distance": 16,
+            "target": "apple",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 16,
+            "target": "banana",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 16,
+            "target": "orange",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 16,
+            "target": "cherry",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 16,
+            "target": "grape",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "distance": 32,
+        "accuracy": 0.0,
+        "n_valid": 5,
+        "trials": [
+          {
+            "distance": 32,
+            "target": "apple",
+            "predicted": "a",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 32,
+            "target": "banana",
+            "predicted": "a",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 32,
+            "target": "orange",
+            "predicted": "a",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 32,
+            "target": "cherry",
+            "predicted": "a",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 32,
+            "target": "grape",
+            "predicted": "a",
+            "correct": false,
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "distance": 64,
+        "accuracy": 0.0,
+        "n_valid": 5,
+        "trials": [
+          {
+            "distance": 64,
+            "target": "apple",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 64,
+            "target": "banana",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 64,
+            "target": "orange",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 64,
+            "target": "cherry",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 64,
+            "target": "grape",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "distance": 128,
+        "accuracy": 0.0,
+        "n_valid": 0,
+        "trials": [
+          {
+            "distance": 128,
+            "target": "apple",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 128,
+            "target": "banana",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 128,
+            "target": "orange",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 128,
+            "target": "cherry",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 128,
+            "target": "grape",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          }
+        ]
+      },
+      {
+        "distance": 256,
+        "accuracy": 0.0,
+        "n_valid": 0,
+        "trials": [
+          {
+            "distance": 256,
+            "target": "apple",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 256,
+            "target": "banana",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 256,
+            "target": "orange",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 256,
+            "target": "cherry",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 256,
+            "target": "grape",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          }
+        ]
+      },
+      {
+        "distance": 512,
+        "accuracy": 0.0,
+        "n_valid": 0,
+        "trials": [
+          {
+            "distance": 512,
+            "target": "apple",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 512,
+            "target": "banana",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 512,
+            "target": "orange",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 512,
+            "target": "cherry",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 512,
+            "target": "grape",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          }
+        ]
+      },
+      {
+        "distance": 1024,
+        "accuracy": 0.0,
+        "n_valid": 0,
+        "trials": [
+          {
+            "distance": 1024,
+            "target": "apple",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 1024,
+            "target": "banana",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 1024,
+            "target": "orange",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 1024,
+            "target": "cherry",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 1024,
+            "target": "grape",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          }
+        ]
+      },
+      {
+        "distance": 1536,
+        "accuracy": 0.0,
+        "n_valid": 0,
+        "trials": [
+          {
+            "distance": 1536,
+            "target": "apple",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 1536,
+            "target": "banana",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 1536,
+            "target": "orange",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 1536,
+            "target": "cherry",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 1536,
+            "target": "grape",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          }
+        ]
+      }
+    ],
+    "passkey_mean": 0.0,
+    "attn_stats": [
+      {
+        "scale_embed_abs_mean": 0.020594172179698944,
+        "scale_embed_abs_max": 0.3188038766384125,
+        "pos_bias_abs_mean": 3.8982131481170654,
+        "pos_bias_abs_max": 8.409229278564453,
+        "pos_bias_mean_per_head": [
+          -0.6935075521469116,
+          -2.0355663299560547,
+          -3.2521729469299316,
+          -4.2686991691589355,
+          -5.177883625030518,
+          -6.069357395172119,
+          -6.992579936981201,
+          -2.629408597946167
+        ],
+        "if_gain": [
+          0.8420541286468506,
+          0.8170761466026306,
+          0.7509509921073914,
+          0.7957141399383545,
+          0.7789064645767212,
+          0.7999405264854431,
+          0.7875171303749084,
+          0.8742955923080444
+        ]
+      },
+      {
+        "scale_embed_abs_mean": 0.0281875841319561,
+        "scale_embed_abs_max": 0.4147584140300751,
+        "pos_bias_abs_mean": 3.9263787269592285,
+        "pos_bias_abs_max": 8.51580810546875,
+        "pos_bias_mean_per_head": [
+          -0.878491997718811,
+          -1.875127911567688,
+          -3.1732101440429688,
+          -4.200632572174072,
+          -5.138485908508301,
+          -6.466900825500488,
+          -6.92715311050415,
+          -2.7092645168304443
+        ],
+        "if_gain": [
+          0.8780727982521057,
+          0.851499080657959,
+          0.7962010502815247,
+          0.7951098680496216,
+          0.7656964063644409,
+          0.7719878554344177,
+          0.7645715475082397,
+          0.8096064329147339
+        ]
+      },
+      {
+        "scale_embed_abs_mean": 0.025721915066242218,
+        "scale_embed_abs_max": 0.4441768527030945,
+        "pos_bias_abs_mean": 3.8600950241088867,
+        "pos_bias_abs_max": 9.031675338745117,
+        "pos_bias_mean_per_head": [
+          -0.6723361611366272,
+          -1.8543734550476074,
+          -3.2373251914978027,
+          -4.24672269821167,
+          -5.032219409942627,
+          -6.415342807769775,
+          -6.798001289367676,
+          -2.614901542663574
+        ],
+        "if_gain": [
+          0.90869140625,
+          0.8611556887626648,
+          0.8950738310813904,
+          0.8112797737121582,
+          0.8887049555778503,
+          0.8849599957466125,
+          0.7860053181648254,
+          0.8977829813957214
+        ]
+      },
+      {
+        "scale_embed_abs_mean": 0.04270453751087189,
+        "scale_embed_abs_max": 0.5439598560333252,
+        "pos_bias_abs_mean": 3.8719780445098877,
+        "pos_bias_abs_max": 9.090723037719727,
+        "pos_bias_mean_per_head": [
+          -0.6703086495399475,
+          -1.7575968503952026,
+          -3.198657274246216,
+          -4.263705730438232,
+          -5.4124884605407715,
+          -6.024180889129639,
+          -7.062575817108154,
+          -2.5863113403320312
+        ],
+        "if_gain": [
+          1.2758911848068237,
+          1.005452036857605,
+          0.88573157787323,
+          0.9219655394554138,
+          0.8523004055023193,
+          0.8196257948875427,
+          0.8713722229003906,
+          0.9694995284080505
+        ]
+      },
+      {
+        "scale_embed_abs_mean": 0.03558751195669174,
+        "scale_embed_abs_max": 0.4145132005214691,
+        "pos_bias_abs_mean": 3.8570711612701416,
+        "pos_bias_abs_max": 8.530217170715332,
+        "pos_bias_mean_per_head": [
+          -0.8807612061500549,
+          -1.7401454448699951,
+          -3.2828903198242188,
+          -4.294073581695557,
+          -5.101350784301758,
+          -6.096419811248779,
+          -6.80447244644165,
+          -2.6191229820251465
+        ],
+        "if_gain": [
+          1.0290571451187134,
+          0.9679479598999023,
+          0.9528146982192993,
+          0.9161342978477478,
+          0.8794504404067993,
+          0.8457483053207397,
+          0.8265619277954102,
+          0.9735167026519775
+        ]
+      },
+      {
+        "scale_embed_abs_mean": 0.01967834122478962,
+        "scale_embed_abs_max": 0.2943548858165741,
+        "pos_bias_abs_mean": 3.7920644283294678,
+        "pos_bias_abs_max": 9.051018714904785,
+        "pos_bias_mean_per_head": [
+          -0.6769838333129883,
+          -1.9051605463027954,
+          -2.9409263134002686,
+          -4.479653835296631,
+          -5.084684371948242,
+          -6.058692455291748,
+          -6.805438041687012,
+          -2.3819785118103027
+        ],
+        "if_gain": [
+          1.0344338417053223,
+          0.9591425061225891,
+          0.8764751553535461,
+          0.9539539217948914,
+          0.8285045623779297,
+          0.8105036616325378,
+          0.815059244632721,
+          0.9531508088111877
+        ]
+      }
+    ]
+  },
+  {
+    "epoch": 6,
+    "val_ppl": 73.854539554378,
+    "train_loss": 4.334742280705635,
+    "passkey": [
+      {
+        "distance": 1,
+        "accuracy": 0.0,
+        "n_valid": 5,
+        "trials": [
+          {
+            "distance": 1,
+            "target": "apple",
+            "predicted": "a",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 1,
+            "target": "banana",
+            "predicted": "a",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 1,
+            "target": "orange",
+            "predicted": "a",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 1,
+            "target": "cherry",
+            "predicted": "a",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 1,
+            "target": "grape",
+            "predicted": "a",
+            "correct": false,
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "distance": 2,
+        "accuracy": 0.0,
+        "n_valid": 5,
+        "trials": [
+          {
+            "distance": 2,
+            "target": "apple",
+            "predicted": "a",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 2,
+            "target": "banana",
+            "predicted": "a",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 2,
+            "target": "orange",
+            "predicted": "a",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 2,
+            "target": "cherry",
+            "predicted": "a",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 2,
+            "target": "grape",
+            "predicted": "a",
+            "correct": false,
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "distance": 4,
+        "accuracy": 0.0,
+        "n_valid": 5,
+        "trials": [
+          {
+            "distance": 4,
+            "target": "apple",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 4,
+            "target": "banana",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 4,
+            "target": "orange",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 4,
+            "target": "cherry",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 4,
+            "target": "grape",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "distance": 8,
+        "accuracy": 0.0,
+        "n_valid": 5,
+        "trials": [
+          {
+            "distance": 8,
+            "target": "apple",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 8,
+            "target": "banana",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 8,
+            "target": "orange",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 8,
+            "target": "cherry",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 8,
+            "target": "grape",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "distance": 16,
+        "accuracy": 0.0,
+        "n_valid": 5,
+        "trials": [
+          {
+            "distance": 16,
+            "target": "apple",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 16,
+            "target": "banana",
+            "predicted": "cold",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 16,
+            "target": "orange",
+            "predicted": "a",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 16,
+            "target": "cherry",
+            "predicted": "a",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 16,
+            "target": "grape",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "distance": 32,
+        "accuracy": 0.0,
+        "n_valid": 5,
+        "trials": [
+          {
+            "distance": 32,
+            "target": "apple",
+            "predicted": "cold",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 32,
+            "target": "banana",
+            "predicted": "cold",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 32,
+            "target": "orange",
+            "predicted": "cold",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 32,
+            "target": "cherry",
+            "predicted": "cold",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 32,
+            "target": "grape",
+            "predicted": "cold",
+            "correct": false,
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "distance": 64,
+        "accuracy": 0.0,
+        "n_valid": 5,
+        "trials": [
+          {
+            "distance": 64,
+            "target": "apple",
+            "predicted": "cold",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 64,
+            "target": "banana",
+            "predicted": "cold",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 64,
+            "target": "orange",
+            "predicted": "cold",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 64,
+            "target": "cherry",
+            "predicted": "cold",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 64,
+            "target": "grape",
+            "predicted": "cold",
+            "correct": false,
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "distance": 128,
+        "accuracy": 0.0,
+        "n_valid": 0,
+        "trials": [
+          {
+            "distance": 128,
+            "target": "apple",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 128,
+            "target": "banana",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 128,
+            "target": "orange",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 128,
+            "target": "cherry",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 128,
+            "target": "grape",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          }
+        ]
+      },
+      {
+        "distance": 256,
+        "accuracy": 0.0,
+        "n_valid": 0,
+        "trials": [
+          {
+            "distance": 256,
+            "target": "apple",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 256,
+            "target": "banana",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 256,
+            "target": "orange",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 256,
+            "target": "cherry",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 256,
+            "target": "grape",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          }
+        ]
+      },
+      {
+        "distance": 512,
+        "accuracy": 0.0,
+        "n_valid": 0,
+        "trials": [
+          {
+            "distance": 512,
+            "target": "apple",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 512,
+            "target": "banana",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 512,
+            "target": "orange",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 512,
+            "target": "cherry",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 512,
+            "target": "grape",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          }
+        ]
+      },
+      {
+        "distance": 1024,
+        "accuracy": 0.0,
+        "n_valid": 0,
+        "trials": [
+          {
+            "distance": 1024,
+            "target": "apple",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 1024,
+            "target": "banana",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 1024,
+            "target": "orange",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 1024,
+            "target": "cherry",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 1024,
+            "target": "grape",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          }
+        ]
+      },
+      {
+        "distance": 1536,
+        "accuracy": 0.0,
+        "n_valid": 0,
+        "trials": [
+          {
+            "distance": 1536,
+            "target": "apple",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 1536,
+            "target": "banana",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 1536,
+            "target": "orange",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 1536,
+            "target": "cherry",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 1536,
+            "target": "grape",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          }
+        ]
+      }
+    ],
+    "passkey_mean": 0.0,
+    "attn_stats": [
+      {
+        "scale_embed_abs_mean": 0.020944776013493538,
+        "scale_embed_abs_max": 0.318550705909729,
+        "pos_bias_abs_mean": 3.8257927894592285,
+        "pos_bias_abs_max": 8.23551082611084,
+        "pos_bias_mean_per_head": [
+          -0.6691046357154846,
+          -2.008861780166626,
+          -3.2079575061798096,
+          -4.1876935958862305,
+          -5.08440637588501,
+          -5.9417948722839355,
+          -6.856848239898682,
+          -2.577380895614624
+        ],
+        "if_gain": [
+          0.8329343795776367,
+          0.8064504265785217,
+          0.7363523244857788,
+          0.7815876007080078,
+          0.7623043060302734,
+          0.7821061611175537,
+          0.7693338990211487,
+          0.8648355603218079
+        ]
+      },
+      {
+        "scale_embed_abs_mean": 0.027925344184041023,
+        "scale_embed_abs_max": 0.4131675660610199,
+        "pos_bias_abs_mean": 3.8556129932403564,
+        "pos_bias_abs_max": 8.353846549987793,
+        "pos_bias_mean_per_head": [
+          -0.8831083178520203,
+          -1.8324332237243652,
+          -3.117448568344116,
+          -4.115566730499268,
+          -5.034322738647461,
+          -6.366244792938232,
+          -6.784244060516357,
+          -2.658752679824829
+        ],
+        "if_gain": [
+          0.8613972663879395,
+          0.841558039188385,
+          0.7810885906219482,
+          0.7795544862747192,
+          0.7514381408691406,
+          0.7521554827690125,
+          0.7509472370147705,
+          0.7951473593711853
+        ]
+      },
+      {
+        "scale_embed_abs_mean": 0.025566859170794487,
+        "scale_embed_abs_max": 0.43440648913383484,
+        "pos_bias_abs_mean": 3.7821874618530273,
+        "pos_bias_abs_max": 8.86902141571045,
+        "pos_bias_mean_per_head": [
+          -0.6551859378814697,
+          -1.8144348859786987,
+          -3.1854071617126465,
+          -4.16846227645874,
+          -4.906257629394531,
+          -6.308015823364258,
+          -6.640829086303711,
+          -2.5667428970336914
+        ],
+        "if_gain": [
+          0.8967527151107788,
+          0.8494786620140076,
+          0.8795297145843506,
+          0.7932509779930115,
+          0.8716272115707397,
+          0.8676198124885559,
+          0.7801703810691833,
+          0.8915068507194519
+        ]
+      },
+      {
+        "scale_embed_abs_mean": 0.04235740751028061,
+        "scale_embed_abs_max": 0.5379129648208618,
+        "pos_bias_abs_mean": 3.794889211654663,
+        "pos_bias_abs_max": 8.956130981445312,
+        "pos_bias_mean_per_head": [
+          -0.6560857892036438,
+          -1.7115575075149536,
+          -3.141669273376465,
+          -4.184666633605957,
+          -5.318767547607422,
+          -5.892765522003174,
+          -6.921388626098633,
+          -2.5322134494781494
+        ],
+        "if_gain": [
+          1.2499278783798218,
+          1.0009400844573975,
+          0.872168779373169,
+          0.9078975915908813,
+          0.8346405625343323,
+          0.8009510636329651,
+          0.8574230670928955,
+          0.9602580666542053
+        ]
+      },
+      {
+        "scale_embed_abs_mean": 0.03600136935710907,
+        "scale_embed_abs_max": 0.41213148832321167,
+        "pos_bias_abs_mean": 3.779254913330078,
+        "pos_bias_abs_max": 8.410395622253418,
+        "pos_bias_mean_per_head": [
+          -0.8749093413352966,
+          -1.6953692436218262,
+          -3.2283196449279785,
+          -4.21556282043457,
+          -4.988630771636963,
+          -5.969351291656494,
+          -6.647161483764648,
+          -2.5689523220062256
+        ],
+        "if_gain": [
+          1.0264581441879272,
+          0.9685311913490295,
+          0.9404916763305664,
+          0.9024808406829834,
+          0.8788185715675354,
+          0.8389329314231873,
+          0.8177798390388489,
+          0.9650096893310547
+        ]
+      },
+      {
+        "scale_embed_abs_mean": 0.020356012508273125,
+        "scale_embed_abs_max": 0.3056538999080658,
+        "pos_bias_abs_mean": 3.7132394313812256,
+        "pos_bias_abs_max": 8.903083801269531,
+        "pos_bias_mean_per_head": [
+          -0.6572715044021606,
+          -1.8681533336639404,
+          -2.8722763061523438,
+          -4.4319844245910645,
+          -4.971062183380127,
+          -5.930342197418213,
+          -6.654126167297363,
+          -2.3159499168395996
+        ],
+        "if_gain": [
+          1.0334478616714478,
+          0.9522436261177063,
+          0.8795104026794434,
+          0.9455623626708984,
+          0.8242723941802979,
+          0.8057233691215515,
+          0.8067647814750671,
+          0.9475743770599365
+        ]
+      }
+    ]
+  },
+  {
+    "epoch": 7,
+    "val_ppl": 71.6914248699623,
+    "train_loss": 4.292777114979033,
+    "passkey": [
+      {
+        "distance": 1,
+        "accuracy": 0.0,
+        "n_valid": 5,
+        "trials": [
+          {
+            "distance": 1,
+            "target": "apple",
+            "predicted": "a",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 1,
+            "target": "banana",
+            "predicted": "a",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 1,
+            "target": "orange",
+            "predicted": "a",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 1,
+            "target": "cherry",
+            "predicted": "a",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 1,
+            "target": "grape",
+            "predicted": "a",
+            "correct": false,
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "distance": 2,
+        "accuracy": 0.0,
+        "n_valid": 5,
+        "trials": [
+          {
+            "distance": 2,
+            "target": "apple",
+            "predicted": "a",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 2,
+            "target": "banana",
+            "predicted": "a",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 2,
+            "target": "orange",
+            "predicted": "pronounced",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 2,
+            "target": "cherry",
+            "predicted": "a",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 2,
+            "target": "grape",
+            "predicted": "used",
+            "correct": false,
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "distance": 4,
+        "accuracy": 0.0,
+        "n_valid": 5,
+        "trials": [
+          {
+            "distance": 4,
+            "target": "apple",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 4,
+            "target": "banana",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 4,
+            "target": "orange",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 4,
+            "target": "cherry",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 4,
+            "target": "grape",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "distance": 8,
+        "accuracy": 0.0,
+        "n_valid": 5,
+        "trials": [
+          {
+            "distance": 8,
+            "target": "apple",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 8,
+            "target": "banana",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 8,
+            "target": "orange",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 8,
+            "target": "cherry",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 8,
+            "target": "grape",
+            "predicted": "the",
+            "correct": false,
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "distance": 16,
+        "accuracy": 0.0,
+        "n_valid": 5,
+        "trials": [
+          {
+            "distance": 16,
+            "target": "apple",
+            "predicted": "a",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 16,
+            "target": "banana",
+            "predicted": "a",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 16,
+            "target": "orange",
+            "predicted": "a",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 16,
+            "target": "cherry",
+            "predicted": "a",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 16,
+            "target": "grape",
+            "predicted": "a",
+            "correct": false,
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "distance": 32,
+        "accuracy": 0.0,
+        "n_valid": 5,
+        "trials": [
+          {
+            "distance": 32,
+            "target": "apple",
+            "predicted": "a",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 32,
+            "target": "banana",
+            "predicted": "a",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 32,
+            "target": "orange",
+            "predicted": "a",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 32,
+            "target": "cherry",
+            "predicted": "a",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 32,
+            "target": "grape",
+            "predicted": "a",
+            "correct": false,
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "distance": 64,
+        "accuracy": 0.0,
+        "n_valid": 5,
+        "trials": [
+          {
+            "distance": 64,
+            "target": "apple",
+            "predicted": "a",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 64,
+            "target": "banana",
+            "predicted": "a",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 64,
+            "target": "orange",
+            "predicted": "a",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 64,
+            "target": "cherry",
+            "predicted": "a",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 64,
+            "target": "grape",
+            "predicted": "a",
+            "correct": false,
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "distance": 128,
+        "accuracy": 0.0,
+        "n_valid": 0,
+        "trials": [
+          {
+            "distance": 128,
+            "target": "apple",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 128,
+            "target": "banana",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 128,
+            "target": "orange",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 128,
+            "target": "cherry",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 128,
+            "target": "grape",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          }
+        ]
+      },
+      {
+        "distance": 256,
+        "accuracy": 0.0,
+        "n_valid": 0,
+        "trials": [
+          {
+            "distance": 256,
+            "target": "apple",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 256,
+            "target": "banana",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 256,
+            "target": "orange",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 256,
+            "target": "cherry",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 256,
+            "target": "grape",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          }
+        ]
+      },
+      {
+        "distance": 512,
+        "accuracy": 0.0,
+        "n_valid": 0,
+        "trials": [
+          {
+            "distance": 512,
+            "target": "apple",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 512,
+            "target": "banana",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 512,
+            "target": "orange",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 512,
+            "target": "cherry",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 512,
+            "target": "grape",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          }
+        ]
+      },
+      {
+        "distance": 1024,
+        "accuracy": 0.0,
+        "n_valid": 0,
+        "trials": [
+          {
+            "distance": 1024,
+            "target": "apple",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 1024,
+            "target": "banana",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 1024,
+            "target": "orange",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 1024,
+            "target": "cherry",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 1024,
+            "target": "grape",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          }
+        ]
+      },
+      {
+        "distance": 1536,
+        "accuracy": 0.0,
+        "n_valid": 0,
+        "trials": [
+          {
+            "distance": 1536,
+            "target": "apple",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 1536,
+            "target": "banana",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 1536,
+            "target": "orange",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 1536,
+            "target": "cherry",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          },
+          {
+            "distance": 1536,
+            "target": "grape",
+            "predicted": null,
+            "correct": false,
+            "skipped": true
+          }
+        ]
+      }
+    ],
+    "passkey_mean": 0.0,
+    "attn_stats": [
+      {
+        "scale_embed_abs_mean": 0.020903022959828377,
+        "scale_embed_abs_max": 0.31523945927619934,
+        "pos_bias_abs_mean": 3.7742726802825928,
+        "pos_bias_abs_max": 8.10937786102295,
+        "pos_bias_mean_per_head": [
+          -0.6528295278549194,
+          -1.9904098510742188,
+          -3.1757493019104004,
+          -4.1293110847473145,
+          -5.016626834869385,
+          -5.851855754852295,
+          -6.7597761154174805,
+          -2.541194200515747
+        ],
+        "if_gain": [
+          0.8248823285102844,
+          0.7994529008865356,
+          0.7268165349960327,
+          0.7726361751556396,
+          0.7510420083999634,
+          0.76901775598526,
+          0.7566773295402527,
+          0.8588678240776062
+        ]
+      },
+      {
+        "scale_embed_abs_mean": 0.02727583795785904,
+        "scale_embed_abs_max": 0.4088713824748993,
+        "pos_bias_abs_mean": 3.8037493228912354,
+        "pos_bias_abs_max": 8.238584518432617,
+        "pos_bias_mean_per_head": [
+          -0.8857302069664001,
+          -1.802047848701477,
+          -3.0765366554260254,
+          -4.053494453430176,
+          -4.958683490753174,
+          -6.292487621307373,
+          -6.6799635887146,
+          -2.6215219497680664
+        ],
+        "if_gain": [
+          0.8482380509376526,
+          0.835141658782959,
+          0.7708110809326172,
+          0.7685537338256836,
+          0.7429786920547485,
+          0.7375399470329285,
+          0.7429808378219604,
+          0.785257875919342
+        ]
+      },
+      {
+        "scale_embed_abs_mean": 0.0252547450363636,
+        "scale_embed_abs_max": 0.4253891110420227,
+        "pos_bias_abs_mean": 3.7261154651641846,
+        "pos_bias_abs_max": 8.751485824584961,
+        "pos_bias_mean_per_head": [
+          -0.6432856917381287,
+          -1.7854106426239014,
+          -3.1465659141540527,
+          -4.111680507659912,
+          -4.81741189956665,
+          -6.2298970222473145,
+          -6.528940200805664,
+          -2.531432867050171
+        ],
+        "if_gain": [
+          0.887725830078125,
+          0.8409777879714966,
+          0.8679780960083008,
+          0.7814644575119019,
+          0.857700765132904,
+          0.8529497981071472,
+          0.7785584330558777,
+          0.8877170085906982
+        ]
+      },
+      {
+        "scale_embed_abs_mean": 0.04202660173177719,
+        "scale_embed_abs_max": 0.5308045744895935,
+        "pos_bias_abs_mean": 3.739387273788452,
+        "pos_bias_abs_max": 8.860382080078125,
+        "pos_bias_mean_per_head": [
+          -0.6460617780685425,
+          -1.679643154144287,
+          -3.09965443611145,
+          -4.127531051635742,
+          -5.251325607299805,
+          -5.7993855476379395,
+          -6.819009780883789,
+          -2.4924850463867188
+        ],
+        "if_gain": [
+          1.2270225286483765,
+          0.9945457577705383,
+          0.8613442182540894,
+          0.8967676758766174,
+          0.8225759863853455,
+          0.7880042791366577,
+          0.845354437828064,
+          0.9531885385513306
+        ]
+      },
+      {
+        "scale_embed_abs_mean": 0.03583784028887749,
+        "scale_embed_abs_max": 0.41185998916625977,
+        "pos_bias_abs_mean": 3.7223780155181885,
+        "pos_bias_abs_max": 8.31727409362793,
+        "pos_bias_mean_per_head": [
+          -0.867415189743042,
+          -1.6640547513961792,
+          -3.187392234802246,
+          -4.1586713790893555,
+          -4.908262252807617,
+          -5.87696647644043,
+          -6.532627582550049,
+          -2.5324175357818604
+        ],
+        "if_gain": [
+          1.02329683303833,
+          0.9661812782287598,
+          0.9309424161911011,
+          0.891897439956665,
+          0.879085123538971,
+          0.834114134311676,
+          0.8126773238182068,
+          0.95726478099823
+        ]
+      },
+      {
+        "scale_embed_abs_mean": 0.02055201306939125,
+        "scale_embed_abs_max": 0.3092461824417114,
+        "pos_bias_abs_mean": 3.656947374343872,
+        "pos_bias_abs_max": 8.795844078063965,
+        "pos_bias_mean_per_head": [
+          -0.6440828442573547,
+          -1.8416976928710938,
+          -2.82417368888855,
+          -4.393810749053955,
+          -4.88964319229126,
+          -5.838969707489014,
+          -6.54653787612915,
+          -2.2696287631988525
+        ],
+        "if_gain": [
+          1.0303328037261963,
+          0.9467583298683167,
+          0.8820945024490356,
+          0.9391054511070251,
+          0.8221829533576965,
+          0.8026782274246216,
+          0.8021916151046753,
+          0.942948043346405
+        ]
+      }
+    ]
+  }
+]
