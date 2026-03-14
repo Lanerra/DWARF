@@ -300,7 +300,7 @@ class AutoresearchTransformerPhysics(nn.Module):
             if isinstance(block, DSQGBlockV6Physics) and block.interference:
                 alpha = block.ema_factor.item()
                 kdv   = block.kdv_alpha.item()
-                win   = round(1.0 / max(alpha, 1e-6))
+                win   = round(1.0 / max(alpha, EMA_FLOOR))
                 entries.append(f'b{i}: α={alpha:.4f}(w≈{win}t) kdv={kdv:.4f}')
         return '  '.join(entries)
 
