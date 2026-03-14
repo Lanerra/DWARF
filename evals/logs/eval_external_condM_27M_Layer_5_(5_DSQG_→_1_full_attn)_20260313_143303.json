@@ -1,0 +1,51 @@
+{
+  "label": "condM 27M Layer 5 (5 DSQG \u2192 1 full attn)",
+  "n_params": 26457760,
+  "timestamp": "20260313_143303",
+  "tasks": [
+    "hellaswag",
+    "piqa",
+    "arc_easy",
+    "arc_challenge",
+    "winogrande",
+    "lambada"
+  ],
+  "results": {
+    "hellaswag": {
+      "accuracy": 0.3,
+      "correct": 150,
+      "total": 500,
+      "elapsed_s": 11.580223798751831
+    },
+    "piqa": {
+      "accuracy": 0.558,
+      "correct": 279,
+      "total": 500,
+      "elapsed_s": 5.24942946434021
+    },
+    "arc_easy": {
+      "accuracy": 0.288,
+      "correct": 144,
+      "total": 500,
+      "elapsed_s": 10.379286050796509
+    },
+    "arc_challenge": {
+      "accuracy": 0.21739130434782608,
+      "correct": 65,
+      "total": 299,
+      "elapsed_s": 6.3482825756073
+    },
+    "winogrande": {
+      "accuracy": 0.52,
+      "correct": 260,
+      "total": 500,
+      "elapsed_s": 5.072786331176758
+    },
+    "lambada": {
+      "accuracy": 0.086,
+      "correct": 43,
+      "total": 500,
+      "elapsed_s": 3.59175443649292
+    }
+  }
+}

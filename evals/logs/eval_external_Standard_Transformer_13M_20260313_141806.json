@@ -1,0 +1,51 @@
+{
+  "label": "Standard Transformer 13M",
+  "n_params": 21647360,
+  "timestamp": "20260313_141806",
+  "tasks": [
+    "hellaswag",
+    "piqa",
+    "arc_easy",
+    "arc_challenge",
+    "winogrande",
+    "lambada"
+  ],
+  "results": {
+    "hellaswag": {
+      "accuracy": 0.302,
+      "correct": 151,
+      "total": 500,
+      "elapsed_s": 2.9364278316497803
+    },
+    "piqa": {
+      "accuracy": 0.524,
+      "correct": 262,
+      "total": 500,
+      "elapsed_s": 1.4002361297607422
+    },
+    "arc_easy": {
+      "accuracy": 0.29,
+      "correct": 145,
+      "total": 500,
+      "elapsed_s": 2.7793421745300293
+    },
+    "arc_challenge": {
+      "accuracy": 0.19732441471571907,
+      "correct": 59,
+      "total": 299,
+      "elapsed_s": 1.6745998859405518
+    },
+    "winogrande": {
+      "accuracy": 0.532,
+      "correct": 266,
+      "total": 500,
+      "elapsed_s": 1.3879690170288086
+    },
+    "lambada": {
+      "accuracy": 0.06,
+      "correct": 30,
+      "total": 500,
+      "elapsed_s": 0.8543682098388672
+    }
+  }
+}

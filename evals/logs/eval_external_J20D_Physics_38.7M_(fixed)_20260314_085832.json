@@ -1,0 +1,51 @@
+{
+  "label": "J20D Physics 38.7M (fixed)",
+  "n_params": 38724058,
+  "timestamp": "20260314_085832",
+  "tasks": [
+    "hellaswag",
+    "piqa",
+    "arc_easy",
+    "arc_challenge",
+    "winogrande",
+    "lambada"
+  ],
+  "results": {
+    "hellaswag": {
+      "accuracy": 0.24437363075084645,
+      "correct": 2454,
+      "total": 10042,
+      "elapsed_s": 128.3241217136383
+    },
+    "piqa": {
+      "accuracy": 0.5642002176278563,
+      "correct": 1037,
+      "total": 1838,
+      "elapsed_s": 10.606983661651611
+    },
+    "arc_easy": {
+      "accuracy": 0.3350877192982456,
+      "correct": 191,
+      "total": 570,
+      "elapsed_s": 6.517243146896362
+    },
+    "arc_challenge": {
+      "accuracy": 0.19732441471571907,
+      "correct": 59,
+      "total": 299,
+      "elapsed_s": 3.4504356384277344
+    },
+    "winogrande": {
+      "accuracy": 0.5201262825572218,
+      "correct": 659,
+      "total": 1267,
+      "elapsed_s": 7.156263828277588
+    },
+    "lambada": {
+      "accuracy": 0.09547836211915389,
+      "correct": 492,
+      "total": 5153,
+      "elapsed_s": 17.331767320632935
+    }
+  }
+}

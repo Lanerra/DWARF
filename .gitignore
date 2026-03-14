@@ -1,3 +1,7 @@
+# Rust build artifacts (math autoresearcher generates many Rust crates)
+**/target/
+**/*.module_build.log
+
 __pycache__/
 *.py[cod]
 *$py.class
@@ -38,11 +42,39 @@ outputs/
 # Local experiment artifacts
 .venv/
 *_checkpoints/
-*.json
+logs/condm_fineweb_edu_doc_cache.json
 !package.json
 !results/2048_condI_tokenizer.json
 
 # HuggingFace cache
 .cache/
 verification/target/
+
 rag/
+benchmarks/logs/condm_fineweb_edu_doc_cache.json
+logs/benchmark_cache/arc_challenge.json
+logs/benchmark_cache/arc_easy.json
+logs/benchmark_cache/hellaswag.json
+logs/benchmark_cache/lambada.json
+logs/benchmark_cache/piqa.json
+logs/benchmark_cache/winogrande.json
+# autoresearch — track source files, exclude outputs/binaries
+autoresearch/checkpoints/
+autoresearch/run.log
+autoresearch/j_run.log
+autoresearch/results.tsv
+autoresearch/j_results.tsv
+autoresearch/__pycache__/
+autoresearch/**/__pycache__/
+autoresearch/math_history.jsonl
+autoresearch/loop_*.log
+autoresearch/calibration_update.json
+autoresearch/candidates_35m_schema.md
+autoresearch/findings.md
+autoresearch/results/
+autoresearch/results_35m/
+autoresearch/runs/
+autoresearch/modules/
+autoresearch/probe*.log
+autoresearch/*.pyc
+exploration/

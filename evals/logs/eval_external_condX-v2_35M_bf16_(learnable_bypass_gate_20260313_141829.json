@@ -1,0 +1,51 @@
+{
+  "label": "condX-v2 35M bf16 (learnable bypass gate, condV physics)",
+  "n_params": 38729739,
+  "timestamp": "20260313_141829",
+  "tasks": [
+    "hellaswag",
+    "piqa",
+    "arc_easy",
+    "arc_challenge",
+    "winogrande",
+    "lambada"
+  ],
+  "results": {
+    "hellaswag": {
+      "accuracy": 0.31,
+      "correct": 155,
+      "total": 500,
+      "elapsed_s": 5.852928400039673
+    },
+    "piqa": {
+      "accuracy": 0.568,
+      "correct": 284,
+      "total": 500,
+      "elapsed_s": 2.70939564704895
+    },
+    "arc_easy": {
+      "accuracy": 0.326,
+      "correct": 163,
+      "total": 500,
+      "elapsed_s": 5.327887058258057
+    },
+    "arc_challenge": {
+      "accuracy": 0.1939799331103679,
+      "correct": 58,
+      "total": 299,
+      "elapsed_s": 3.2133283615112305
+    },
+    "winogrande": {
+      "accuracy": 0.546,
+      "correct": 273,
+      "total": 500,
+      "elapsed_s": 2.619654655456543
+    },
+    "lambada": {
+      "accuracy": 0.086,
+      "correct": 43,
+      "total": 500,
+      "elapsed_s": 1.5449166297912598
+    }
+  }
+}

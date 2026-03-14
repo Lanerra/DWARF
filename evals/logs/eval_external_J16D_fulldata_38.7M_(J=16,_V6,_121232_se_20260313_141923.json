@@ -1,0 +1,51 @@
+{
+  "label": "J16D fulldata 38.7M (J=16, V6, 121232 seqs, scale_embed_init=0.1)",
+  "n_params": 38722296,
+  "timestamp": "20260313_141923",
+  "tasks": [
+    "hellaswag",
+    "piqa",
+    "arc_easy",
+    "arc_challenge",
+    "winogrande",
+    "lambada"
+  ],
+  "results": {
+    "hellaswag": {
+      "accuracy": 0.29,
+      "correct": 145,
+      "total": 500,
+      "elapsed_s": 36.3275146484375
+    },
+    "piqa": {
+      "accuracy": 0.568,
+      "correct": 284,
+      "total": 500,
+      "elapsed_s": 2.6102051734924316
+    },
+    "arc_easy": {
+      "accuracy": 0.338,
+      "correct": 169,
+      "total": 500,
+      "elapsed_s": 5.249337673187256
+    },
+    "arc_challenge": {
+      "accuracy": 0.1806020066889632,
+      "correct": 54,
+      "total": 299,
+      "elapsed_s": 3.2178049087524414
+    },
+    "winogrande": {
+      "accuracy": 0.524,
+      "correct": 262,
+      "total": 500,
+      "elapsed_s": 2.595374345779419
+    },
+    "lambada": {
+      "accuracy": 0.074,
+      "correct": 37,
+      "total": 500,
+      "elapsed_s": 1.7053532600402832
+    }
+  }
+}

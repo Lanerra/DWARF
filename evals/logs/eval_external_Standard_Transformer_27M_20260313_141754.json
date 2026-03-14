@@ -1,0 +1,51 @@
+{
+  "label": "Standard Transformer 27M",
+  "n_params": 37971200,
+  "timestamp": "20260313_141754",
+  "tasks": [
+    "hellaswag",
+    "piqa",
+    "arc_easy",
+    "arc_challenge",
+    "winogrande",
+    "lambada"
+  ],
+  "results": {
+    "hellaswag": {
+      "accuracy": 0.32,
+      "correct": 160,
+      "total": 500,
+      "elapsed_s": 3.005938768386841
+    },
+    "piqa": {
+      "accuracy": 0.534,
+      "correct": 267,
+      "total": 500,
+      "elapsed_s": 1.4426403045654297
+    },
+    "arc_easy": {
+      "accuracy": 0.298,
+      "correct": 149,
+      "total": 500,
+      "elapsed_s": 2.849773406982422
+    },
+    "arc_challenge": {
+      "accuracy": 0.18729096989966554,
+      "correct": 56,
+      "total": 299,
+      "elapsed_s": 1.7176978588104248
+    },
+    "winogrande": {
+      "accuracy": 0.536,
+      "correct": 268,
+      "total": 500,
+      "elapsed_s": 1.4050776958465576
+    },
+    "lambada": {
+      "accuracy": 0.062,
+      "correct": 31,
+      "total": 500,
+      "elapsed_s": 0.8835363388061523
+    }
+  }
+}

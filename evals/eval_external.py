@@ -104,6 +104,15 @@ ARCH_CONFIGS = {
     # d41_35m_pure: pure DSQG (FULL_ATTN_LAYER=-1), dense=41, sparse=[48,128,384], 35M
     'd41_35m_pure': {'arch': 'd41_35m_pure', 'D': 512, 'H': 8, 'FFN': 2048, 'L': 6, 'full_layer': -1, 'interference': 3,
                      'checkpoint': os.path.join(os.path.normpath(os.path.join(SCRIPT_DIR, '..', 'checkpoints')), 'd41_35m_pure', 'best.pt')},
+    # condx_v2_35m: condX-v2 bf16, learnable bypass gate, condV physics, 38.7M
+    'condx_v2_35m': {'arch': 'condx_v2_35m', 'D': 512, 'H': 8, 'FFN': 2048, 'L': 6, 'full_layer': 5, 'interference': 3,
+                     'checkpoint': os.path.join(os.path.normpath(os.path.join(SCRIPT_DIR, '..', 'checkpoints')), 'condX_v2_35m_bf16', 'best.pt')},
+    # j16d_fulldata: J16D relay-optimal offsets, V6 kernel, 121232 seqs, scale_embed_init=0.1, 38.7M
+    'j16d_fulldata': {'arch': 'j16d_fulldata', 'D': 512, 'H': 8, 'FFN': 2048, 'L': 6, 'full_layer': 5, 'interference': 3,
+                      'checkpoint': '/tmp/dwarf-j17d/autoresearch/checkpoints/df0d435_j16d_fulldata_best.pt'},
+    # j20d_physics: J20D relay-optimal offsets, V7 kernel, 121232 seqs, condV physics (EMA+KdV+AGC), 38.7M
+    'j20d_physics': {'arch': 'j20d_physics', 'D': 512, 'H': 8, 'FFN': 2048, 'L': 6, 'full_layer': 5, 'interference': 3,
+                     'checkpoint': '/tmp/dwarf-j17d/autoresearch/checkpoints/df0d435_j20d_physics_best.pt'},
 }
 
 TASKS = ['hellaswag', 'piqa', 'arc_easy', 'arc_challenge', 'winogrande', 'lambada']
@@ -265,6 +274,57 @@ def load_model_from_arch(arch_name, checkpoint_path, device):
             interference_interval=cfg.get('interference', 3),
         ).to(device)
 
+    elif arch == 'condx_v2_35m':
+        import importlib.util
+        train_dir = os.path.normpath(os.path.join(SCRIPT_DIR, '..', 'train'))
+        sys.path.insert(0, train_dir)
+        train_script = os.path.join(train_dir, 'train_2048_35m_condX_v2_bf16.py')
+        spec = importlib.util.spec_from_file_location('condx_v2_35m_train', train_script)
+        mod  = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        model = mod.CondXTransformer(
+            vocab_size=VOCAB_SIZE, embedding_dim=D, num_layers=L,
+            num_heads=H, ffn_dim=FFN, seq_len=MAX_SEQ_LEN,
+            full_attn_layer=cfg.get('full_layer', 5),
+            interference_interval=cfg.get('interference', 3),
+        ).to(device)
+
+    elif arch == 'j16d_fulldata':
+        import importlib.util, pathlib
+        worktree = '/tmp/dwarf-j17d'
+        for _d in [os.path.join(worktree, 'kernels'), worktree]:
+            if _d not in sys.path:
+                sys.path.insert(0, _d)
+        train_script = os.path.join(worktree, 'autoresearch', 'train_j16d_fulldata.py')
+        spec = importlib.util.spec_from_file_location('j16d_fulldata_train', train_script)
+        mod  = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        model = mod.AutoresearchTransformer(
+            vocab_size=VOCAB_SIZE, embedding_dim=D, num_layers=L,
+            num_heads=H, ffn_dim=FFN, seq_len=MAX_SEQ_LEN,
+            full_attn_layer=cfg.get('full_layer', 5),
+            interference_interval=cfg.get('interference', 3),
+            scale_embed_init_val=0.1,
+        ).to(device)
+
+    elif arch == 'j20d_physics':
+        import importlib.util
+        worktree = '/tmp/dwarf-j17d'
+        for _d in [os.path.join(worktree, 'kernels'), worktree, os.path.join(worktree, 'autoresearch')]:
+            if _d not in sys.path:
+                sys.path.insert(0, _d)
+        train_script = os.path.join(worktree, 'autoresearch', 'train_j20d_physics.py')
+        spec = importlib.util.spec_from_file_location('j20d_physics_train', train_script)
+        mod  = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        model = mod.AutoresearchTransformerPhysics(
+            vocab_size=VOCAB_SIZE, embedding_dim=D, num_layers=L,
+            num_heads=H, ffn_dim=FFN, seq_len=MAX_SEQ_LEN,
+            full_attn_layer=cfg.get('full_layer', 5),
+            interference_interval=cfg.get('interference', 3),
+            scale_embed_init_val=0.1,
+        ).to(device)
+
     else:
         raise ValueError(f'Unhandled arch: {arch}')
 
@@ -274,8 +334,9 @@ def load_model_from_arch(arch_name, checkpoint_path, device):
         state = state['model_state_dict']
     # torch.compile wraps the model in _orig_mod.* — strip that prefix so
     # compiled checkpoints load into an uncompiled eval model.
-    if any(k.startswith('_orig_mod.') for k in state):
-        state = {k.replace('_orig_mod.', '', 1): v for k, v in state.items()}
+    # Handle both full-model compile (_orig_mod.* at start) and per-block compile (._orig_mod in middle)
+    if any('_orig_mod.' in k for k in state):
+        state = {k.replace('._orig_mod', '').replace('_orig_mod.', ''): v for k, v in state.items()}
     # Drop causal_mask buffers — they're recomputed at model init and may have
     # changed shape between eval_suite versions ([2048,2048] vs [1,1,2048,2048]).
     # strict=False handles any remaining missing/unexpected keys gracefully.
@@ -486,6 +547,8 @@ def main():
                         help='Tasks to run (default: all)')
     parser.add_argument('--max', type=int, default=None,
                         help='Max examples per task (for quick tests)')
+    parser.add_argument('--fast', action='store_true',
+                        help='Fast mode: 500 examples/task (~20× speedup, ~±3%% accuracy)')
     parser.add_argument('--list', action='store_true',
                         help='List available models from registry and exit')
     args = parser.parse_args()
@@ -512,8 +575,10 @@ def main():
     if torch.cuda.is_available():
         print(f'  GPU: {torch.cuda.get_device_name(0)}')
     print(f'  Tasks: {args.tasks or TASKS}')
+    if args.fast and not args.max:
+        args.max = 500
     if args.max:
-        print(f'  Max examples/task: {args.max}')
+        print(f'  Max examples/task: {args.max} ({"--fast" if args.max == 500 else "--max"})')
 
     tokenizer = load_tokenizer()
     print(f'  Tokenizer: {TOKENIZER}')

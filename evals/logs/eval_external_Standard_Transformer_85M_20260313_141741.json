@@ -1,0 +1,51 @@
+{
+  "label": "Standard Transformer 85M",
+  "n_params": 101354240,
+  "timestamp": "20260313_141741",
+  "tasks": [
+    "hellaswag",
+    "piqa",
+    "arc_easy",
+    "arc_challenge",
+    "winogrande",
+    "lambada"
+  ],
+  "results": {
+    "hellaswag": {
+      "accuracy": 0.294,
+      "correct": 147,
+      "total": 500,
+      "elapsed_s": 5.375271797180176
+    },
+    "piqa": {
+      "accuracy": 0.544,
+      "correct": 272,
+      "total": 500,
+      "elapsed_s": 2.618408203125
+    },
+    "arc_easy": {
+      "accuracy": 0.286,
+      "correct": 143,
+      "total": 500,
+      "elapsed_s": 5.172204494476318
+    },
+    "arc_challenge": {
+      "accuracy": 0.18394648829431437,
+      "correct": 55,
+      "total": 299,
+      "elapsed_s": 3.1240270137786865
+    },
+    "winogrande": {
+      "accuracy": 0.524,
+      "correct": 262,
+      "total": 500,
+      "elapsed_s": 2.531855344772339
+    },
+    "lambada": {
+      "accuracy": 0.084,
+      "correct": 42,
+      "total": 500,
+      "elapsed_s": 1.660323143005371
+    }
+  }
+}

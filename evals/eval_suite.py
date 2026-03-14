@@ -37,9 +37,9 @@ import torch.nn.functional as F
 
 # CondM-v2 architecture lives in the training script; import lazily.
 def _import_condm_v2():
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    if script_dir not in sys.path:
-        sys.path.insert(0, script_dir)
+    train_dir = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'train'))
+    if train_dir not in sys.path:
+        sys.path.insert(0, train_dir)
     from train_2048_condM_v2 import CondMV2Transformer
     return CondMV2Transformer
 
@@ -74,6 +74,27 @@ def _import_d41_35m():
     spec.loader.exec_module(mod)
     return mod.CondMTransformer
 
+def _import_condx_v2_35m():
+    """Import CondXTransformer from train_2048_35m_condX_v2_bf16.py."""
+    import importlib.util
+    train_dir = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'train'))
+    if train_dir not in sys.path:
+        sys.path.insert(0, train_dir)
+    script = os.path.join(train_dir, 'train_2048_35m_condX_v2_bf16.py')
+    spec = importlib.util.spec_from_file_location('condx_v2_35m_train', script)
+    mod  = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod.CondXTransformer
+
+def _import_j16d_fulldata():
+    """Import AutoresearchTransformer from train_j16d_fulldata.py (J16D V6 kernel, 16 offsets)."""
+    import importlib.util
+    script = '/tmp/dwarf-j17d/autoresearch/train_j16d_fulldata.py'
+    spec = importlib.util.spec_from_file_location('j16d_fulldata_train', script)
+    mod  = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod.AutoresearchTransformer
+
 def _import_d41_35m_pure():
     """Import CondMTransformer from train_2048_35m_d41_pure.py (pure DSQG, FULL_ATTN_LAYER=-1)."""
     import importlib.util
@@ -92,6 +113,19 @@ def _import_condm_periodic():
         sys.path.insert(0, script_dir)
     from train_2048_condM_periodic_13m import CondMPeriodicTransformer
     return CondMPeriodicTransformer
+
+def _import_j20d_physics():
+    """Import AutoresearchTransformerPhysics from train_j20d_physics.py (V7 kernel, J=20 offsets, condV physics)."""
+    import importlib.util
+    worktree = '/tmp/dwarf-j17d'
+    for _d in [os.path.join(worktree, 'kernels'), worktree, os.path.join(worktree, 'autoresearch')]:
+        if _d not in sys.path:
+            sys.path.insert(0, _d)
+    script = os.path.join(worktree, 'autoresearch', 'train_j20d_physics.py')
+    spec = importlib.util.spec_from_file_location('j20d_physics_train', script)
+    mod  = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod.AutoresearchTransformerPhysics
 
 # ─── Paths ────────────────────────────────────────────────────────────────────
 
@@ -259,6 +293,58 @@ MODEL_REGISTRY = {
         'checkpoint': os.path.join(CKPT_ROOT, 'd41_35m', 'best.pt'),
         'label':      'd41_35m 35M (dense=48, sparse=[96,128,384], J=52)',
         'params_ref': None,
+    },
+    # condx_v2_35m: condX-v2 bf16, 38.7M, test_ppl=38.171, passkey=96.7%
+    'condx_v2_35m': {
+        'arch':       'condx_v2_35m',
+        'D':          512, 'H': 8, 'FFN': 2048, 'L': 6, 'full_layer': 5,
+        'interference': 3,
+        'checkpoint': os.path.join(CKPT_ROOT, 'condX_v2_35m_bf16', 'best.pt'),
+        'label':      'condX-v2 35M bf16 (learnable bypass gate, condV physics)',
+        'params_ref': None,
+    },
+    # j16d_fulldata: J16D relay-optimal offsets, V6 kernel, 121232 seqs, scale_embed_init=0.1
+    'j16d_fulldata': {
+        'arch':       'j16d_fulldata',
+        'D':          512, 'H': 8, 'FFN': 2048, 'L': 6, 'full_layer': 5,
+        'interference': 3,
+        'checkpoint': '/tmp/dwarf-j17d/autoresearch/checkpoints/df0d435_j16d_fulldata_best.pt',
+        'label':      'J16D fulldata 38.7M (J=16, V6, 121232 seqs, scale_embed_init=0.1)',
+        'params_ref': None,
+    },
+    # j20d_physics: J20D relay-optimal offsets, V7 kernel, 121232 seqs, condV physics (EMA+KdV+AGC)
+    'j20d_physics_38m': {
+        'arch':       'j20d_physics',
+        'D':          512, 'H': 8, 'FFN': 2048, 'L': 6, 'full_layer': 5,
+        'interference': 3,
+        'checkpoint': '/tmp/dwarf-j17d/autoresearch/checkpoints/df0d435_j20d_physics_best.pt',
+        'label':      'J20D Physics 38.7M',
+        'params_ref': None,
+    },
+    # j20d_physics_dsqg_only: same checkpoint, block 5 full-attn NOT loaded (strip_orig_mod=False)
+    # Replicates the accidental eval_external condition: 5 DSQG layers + random-init full-attn block
+    'j20d_physics_dsqg_only': {
+        'arch':             'j20d_physics',
+        'D':                512, 'H': 8, 'FFN': 2048, 'L': 6, 'full_layer': 5,
+        'interference':     3,
+        'checkpoint':       '/tmp/dwarf-j17d/autoresearch/checkpoints/df0d435_j20d_physics_best.pt',
+        'label':            'J20D Physics 38.7M — DSQG only (no full attn)',
+        'strip_orig_mod':   False,
+        'allow_missing_keys': True,
+        'params_ref':       None,
+    },
+    # j20d_mentored_pure: mentor-hypothesis test — load J20D blocks 0-4 (co-trained with full attn)
+    # into an all-DSQG model (full_attn_layer=-1). Block 5 = random DSQG. Tests whether
+    # co-training caused DSQG layers to develop relay behavior the pure lineage lacks.
+    'j20d_mentored_pure': {
+        'arch':             'j20d_physics',
+        'D':                512, 'H': 8, 'FFN': 2048, 'L': 6, 'full_layer': -1,
+        'interference':     3,
+        'checkpoint':       '/tmp/dwarf-j17d/autoresearch/checkpoints/df0d435_j20d_physics_best.pt',
+        'label':            'J20D Mentored — pure DSQG (blocks 0-4 co-trained, block 5 random)',
+        'strip_orig_mod':   False,
+        'allow_missing_keys': True,
+        'params_ref':       None,
     },
     # d41_35m_pure: pure DSQG (FULL_ATTN_LAYER=-1), dense=41, sparse=[48,128,384], J=45, 35M (D=512)
     'd41_35m_pure': {
@@ -656,24 +742,50 @@ def build_model(cfg):
             interference_interval=cfg.get('interference', 3),
         )
     elif arch in ('d41s3', 'd41s5'):
-        CondMTransformer = _import_d41(arch)
-        return CondMTransformer(
+        _D41Cls = _import_d41(arch)
+        return _D41Cls(
             vocab_size=VOCAB_SIZE, embedding_dim=D, num_layers=L, num_heads=H,
             ffn_dim=FFN, seq_len=MAX_SEQ_LEN,
             full_attn_layer=cfg.get('full_layer', 5),
             interference_interval=cfg.get('interference', 3),
         )
     elif arch == 'd41_35m':
-        CondMTransformer = _import_d41_35m()
-        return CondMTransformer(
+        _D41_35mCls = _import_d41_35m()
+        return _D41_35mCls(
             vocab_size=VOCAB_SIZE, embedding_dim=D, num_layers=L, num_heads=H,
             ffn_dim=FFN, seq_len=MAX_SEQ_LEN,
             full_attn_layer=cfg.get('full_layer', 5),
             interference_interval=cfg.get('interference', 3),
         )
+    elif arch == 'condx_v2_35m':
+        CondXTransformer = _import_condx_v2_35m()
+        return CondXTransformer(
+            vocab_size=VOCAB_SIZE, embedding_dim=D, num_layers=L, num_heads=H,
+            ffn_dim=FFN, seq_len=MAX_SEQ_LEN,
+            full_attn_layer=cfg.get('full_layer', 5),
+            interference_interval=cfg.get('interference', 3),
+        )
+    elif arch == 'j16d_fulldata':
+        AutoresearchTransformer = _import_j16d_fulldata()
+        return AutoresearchTransformer(
+            vocab_size=VOCAB_SIZE, embedding_dim=D, num_layers=L, num_heads=H,
+            ffn_dim=FFN, seq_len=MAX_SEQ_LEN,
+            full_attn_layer=cfg.get('full_layer', 5),
+            interference_interval=cfg.get('interference', 3),
+            scale_embed_init_val=0.1,
+        )
+    elif arch == 'j20d_physics':
+        AutoresearchTransformerPhysics = _import_j20d_physics()
+        return AutoresearchTransformerPhysics(
+            vocab_size=VOCAB_SIZE, embedding_dim=D, num_layers=L, num_heads=H,
+            ffn_dim=FFN, seq_len=MAX_SEQ_LEN,
+            full_attn_layer=cfg.get('full_layer', 5),
+            interference_interval=cfg.get('interference', 3),
+            scale_embed_init_val=0.1,
+        )
     elif arch == 'd41_35m_pure':
-        CondMTransformer = _import_d41_35m_pure()
-        return CondMTransformer(
+        _D41PureCls = _import_d41_35m_pure()
+        return _D41PureCls(
             vocab_size=VOCAB_SIZE, embedding_dim=D, num_layers=L, num_heads=H,
             ffn_dim=FFN, seq_len=MAX_SEQ_LEN,
             full_attn_layer=cfg.get('full_layer', -1),
@@ -693,15 +805,21 @@ def load_model(cfg, device):
         state = state['model_state_dict']
     elif isinstance(state, dict) and 'model' in state:
         state = state['model']
-    # strict=False: standard_85m was trained with SDPA (no causal_mask buffer);
-    # all trainable weights match — only the derived buffer is absent from ckpt.
+    # Strip causal_mask from checkpoint: old checkpoints use [2048,2048],
+    # current code uses [1,1,2048,2048]. It's a derived buffer, safe to drop.
+    state = {k: v for k, v in state.items() if 'causal_mask' not in k}
+    if cfg.get('strip_orig_mod', True) and any('_orig_mod.' in k for k in state):
+        state = {k.replace('._orig_mod', ''): v for k, v in state.items()}
     missing, unexpected = model.load_state_dict(state, strict=False)
     if unexpected:
         print(f"  WARNING: unexpected keys: {unexpected}")
     causal_only = [k for k in missing if "causal_mask" in k]
     other_missing = [k for k in missing if "causal_mask" not in k]
     if other_missing:
-        raise RuntimeError(f"Missing non-buffer keys: {other_missing}")
+        if cfg.get('allow_missing_keys', False):
+            print(f"  INFO: {len(other_missing)} keys missing (random init) — intentional for ablation")
+        else:
+            raise RuntimeError(f"Missing non-buffer keys: {other_missing}")
     model = model.to(device)
     model.eval()
     n = sum(p.numel() for p in model.parameters())

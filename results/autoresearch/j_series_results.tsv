@@ -1,0 +1,10 @@
+commit	ar_score	passkey_ep3	ppl_ep3	memory_mb	status	description
+28271d2	crash	0.0	0.0	0	crash	baseline: OOM — 4090 occupied by other process, retry on 3090
+28271d2	-16.07	1.7	90.48	8191.9	keep	baseline J=44 condU-v5 14M lr_mult=1.0 (3090 run)
+7a6d61e	-10.72	6.7	89.78	8191.9	keep	J16_D + scale_embed_lr_mult=10.0 — passkey d=2/4/8/16 all 20% at ep3, relay chain forming
+d466147	12.84	18.3	65.98	9626.8	keep	J16D lr_mult=10.0 30M — FIRST POSITIVE ar_score, 11/12 distances at 20%, PPL=65.98
+54639c0	-7.39	10.0	89.79	8268.6	keep	J16D + Kalman-EMA/KdV/AGC 14M — ar_score=-7.39 (+3.33 vs pure J16D -10.72), same PPL 89.79, +2 relay distances (d=32,d=64)
+98b38ef	2.06	5.0	60.88	9882.9	drop	38.7M J16D+EMA/KdV/AGC — EMA stalled relay chain at d=32, passkey flat ep2→ep3, ar_score=+2.06 vs 30M pure +12.84
+a2e6f05	14.96	18.3	61.75	10204.2	keep	38.7M pure J16D lr_mult=15.0 — ar_score=+14.96 NEW RECORD, 11/12 distances, PPL 61.75
+8530af6	-7.52	10.0	90.03	7991.5	auto	d41-J16D-14M condV (EMA+KdV+AGC+Huygens) lr_mult=10.0 ema_floor=0.001
+43655f4	3.84	6.7	60.65	9869.5	auto	d41-J16D-14M condV (EMA+KdV+AGC+Huygens) lr_mult=15.0 ema_floor=0.001

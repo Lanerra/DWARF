@@ -1,0 +1,799 @@
+{
+  "model": "condm_v2",
+  "label": "condM-v2 13M (SwiGLU+RMSNorm+RoPE, Layer 5)",
+  "arch": "condm_v2",
+  "D": 256,
+  "H": 8,
+  "FFN": 1024,
+  "L": 6,
+  "n_params": 13439200,
+  "timestamp": "20260313_142955",
+  "device": "cuda",
+  "full_layer": 5,
+  "calibration": {
+    "per_prompt": [
+      {
+        "prompt": "The weather today is",
+        "entropy": 8.711400065901259,
+        "top1_conf": 0.07247525453567505,
+        "eff_vocab": 69.0845947265625
+      },
+      {
+        "prompt": "In the field of computer science,",
+        "entropy": 8.7809938774688,
+        "top1_conf": 0.14407654106616974,
+        "eff_vocab": 34.277587890625
+      },
+      {
+        "prompt": "Once upon a time, there lived",
+        "entropy": 6.028022181687994,
+        "top1_conf": 0.22159025073051453,
+        "eff_vocab": 13.436555862426758
+      },
+      {
+        "prompt": "The president announced that",
+        "entropy": 5.666748545979544,
+        "top1_conf": 0.3256438970565796,
+        "eff_vocab": 6.717297554016113
+      },
+      {
+        "prompt": "Scientists have discovered that",
+        "entropy": 7.927236914125042,
+        "top1_conf": 0.1788700968027115,
+        "eff_vocab": 21.837038040161133
+      },
+      {
+        "prompt": "According to recent studies,",
+        "entropy": 7.972447025453254,
+        "top1_conf": 0.2131556123495102,
+        "eff_vocab": 18.918128967285156
+      },
+      {
+        "prompt": "The stock market experienced",
+        "entropy": 7.355165519115254,
+        "top1_conf": 0.22555013000965118,
+        "eff_vocab": 16.5712833404541
+      },
+      {
+        "prompt": "In the beginning, God created",
+        "entropy": 5.110383294577152,
+        "top1_conf": 0.3037596344947815,
+        "eff_vocab": 5.768019676208496
+      },
+      {
+        "prompt": "To be or not to be,",
+        "entropy": 7.277509160875265,
+        "top1_conf": 0.09245331585407257,
+        "eff_vocab": 36.69879150390625
+      },
+      {
+        "prompt": "The quick brown fox",
+        "entropy": 8.835899682722054,
+        "top1_conf": 0.07892484217882156,
+        "eff_vocab": 53.03440856933594
+      }
+    ],
+    "aggregate": {
+      "mean_entropy": 7.3665806267905625,
+      "mean_top1_conf": 0.18564995750784874,
+      "mean_eff_vocab": 27.634370613098145
+    }
+  },
+  "distance_loss": {
+    "buckets": {
+      "0-16": {
+        "mean_loss": 6.272572259412221,
+        "ppl": 529.8385086272746,
+        "n_tokens": 289
+      },
+      "17-64": {
+        "mean_loss": 5.9545589850430245,
+        "ppl": 385.506858892298,
+        "n_tokens": 816
+      },
+      "65-256": {
+        "mean_loss": 5.678377319226617,
+        "ppl": 292.47445198804445,
+        "n_tokens": 3264
+      },
+      "257-512": {
+        "mean_loss": 5.55839047758234,
+        "ppl": 259.4049820064204,
+        "n_tokens": 4352
+      },
+      "513-1024": {
+        "mean_loss": 5.538279624124698,
+        "ppl": 254.2402342406468,
+        "n_tokens": 8704
+      },
+      "1025-2047": {
+        "mean_loss": 5.54120863953651,
+        "ppl": 254.98599945076936,
+        "n_tokens": 17374
+      }
+    },
+    "n_chunks": 17
+  },
+  "few_shot_copy": {
+    "per_test": [
+      {
+        "test": "word_copy_at_distance",
+        "target": "apple",
+        "generated": "applele\" and \"applele\" to \"applele\" and \"apple",
+        "exact_match": true,
+        "levenshtein": 5
+      },
+      {
+        "test": "word_copy_at_distance",
+        "target": "mountain",
+        "generated": "moral\" and \"moral\" is the \"moral\" of the \"moral\"",
+        "exact_match": false,
+        "levenshtein": 10
+      },
+      {
+        "test": "word_copy_at_distance",
+        "target": "river",
+        "generated": "unununununununununununununununununununun",
+        "exact_match": false,
+        "levenshtein": 10
+      },
+      {
+        "test": "word_copy_at_distance",
+        "target": "castle",
+        "generated": "manman\" and \"manman\" is the \"manman\" of the \"manma",
+        "exact_match": false,
+        "levenshtein": 10
+      },
+      {
+        "test": "word_copy_at_distance",
+        "target": "thunder",
+        "generated": "throw\" and \"throw\" is \"throw\" and \"throw\" and \"",
+        "exact_match": false,
+        "levenshtein": 8
+      },
+      {
+        "test": "number_copy",
+        "target": "42",
+        "generated": "....\n\nThe number of the number of people in the wo",
+        "exact_match": false,
+        "levenshtein": 7
+      },
+      {
+        "test": "number_copy",
+        "target": "789",
+        "generated": "....\n\nThe first number of information is 577.\n\nThe",
+        "exact_match": false,
+        "levenshtein": 8
+      },
+      {
+        "test": "number_copy",
+        "target": "13",
+        "generated": "                    ",
+        "exact_match": false,
+        "levenshtein": 2
+      },
+      {
+        "test": "number_copy",
+        "target": "256",
+        "generated": "....\n\nThe first number of the number of the total ",
+        "exact_match": false,
+        "levenshtein": 8
+      },
+      {
+        "test": "number_copy",
+        "target": "99",
+        "generated": "                    ",
+        "exact_match": false,
+        "levenshtein": 2
+      },
+      {
+        "test": "keyword_repeat",
+        "target": "banana",
+        "generated": "iced by a few of the most popular ingredients.\n\nTh",
+        "exact_match": false,
+        "levenshtein": 9
+      },
+      {
+        "test": "keyword_repeat",
+        "target": "elephant",
+        "generated": "                    ",
+        "exact_match": false,
+        "levenshtein": 8
+      },
+      {
+        "test": "keyword_repeat",
+        "target": "library",
+        "generated": "                    ",
+        "exact_match": false,
+        "levenshtein": 7
+      },
+      {
+        "test": "keyword_repeat",
+        "target": "gravity",
+        "generated": "                    ",
+        "exact_match": false,
+        "levenshtein": 7
+      },
+      {
+        "test": "keyword_repeat",
+        "target": "horizon",
+        "generated": "....\n\nThe next step is to start with the new new n",
+        "exact_match": false,
+        "levenshtein": 11
+      }
+    ],
+    "exact_match_n": 1,
+    "exact_match_pct": 0.06666666666666667,
+    "mean_levenshtein": 7.466666666666667,
+    "total_tests": 15
+  },
+  "passkey": {
+    "per_distance": [
+      {
+        "distance": 1,
+        "accuracy": 0.2,
+        "n_valid": 5,
+        "trials": [
+          {
+            "distance": 1,
+            "target": "apple",
+            "predicted": "mango",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 1,
+            "target": "banana",
+            "predicted": "mango",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 1,
+            "target": "orange",
+            "predicted": "orange",
+            "correct": true,
+            "skipped": false
+          },
+          {
+            "distance": 1,
+            "target": "cherry",
+            "predicted": "peach",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 1,
+            "target": "grape",
+            "predicted": "kiwi",
+            "correct": false,
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "distance": 2,
+        "accuracy": 0.2,
+        "n_valid": 5,
+        "trials": [
+          {
+            "distance": 2,
+            "target": "apple",
+            "predicted": "peach",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 2,
+            "target": "banana",
+            "predicted": "mango",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 2,
+            "target": "orange",
+            "predicted": "orange",
+            "correct": true,
+            "skipped": false
+          },
+          {
+            "distance": 2,
+            "target": "cherry",
+            "predicted": "peach",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 2,
+            "target": "grape",
+            "predicted": "kiwi",
+            "correct": false,
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "distance": 4,
+        "accuracy": 0.2,
+        "n_valid": 5,
+        "trials": [
+          {
+            "distance": 4,
+            "target": "apple",
+            "predicted": "peach",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 4,
+            "target": "banana",
+            "predicted": "peach",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 4,
+            "target": "orange",
+            "predicted": "orange",
+            "correct": true,
+            "skipped": false
+          },
+          {
+            "distance": 4,
+            "target": "cherry",
+            "predicted": "peach",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 4,
+            "target": "grape",
+            "predicted": "peach",
+            "correct": false,
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "distance": 8,
+        "accuracy": 0.2,
+        "n_valid": 5,
+        "trials": [
+          {
+            "distance": 8,
+            "target": "apple",
+            "predicted": "peach",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 8,
+            "target": "banana",
+            "predicted": "peach",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 8,
+            "target": "orange",
+            "predicted": "orange",
+            "correct": true,
+            "skipped": false
+          },
+          {
+            "distance": 8,
+            "target": "cherry",
+            "predicted": "peach",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 8,
+            "target": "grape",
+            "predicted": "peach",
+            "correct": false,
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "distance": 16,
+        "accuracy": 0.0,
+        "n_valid": 5,
+        "trials": [
+          {
+            "distance": 16,
+            "target": "apple",
+            "predicted": "peach",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 16,
+            "target": "banana",
+            "predicted": "peach",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 16,
+            "target": "orange",
+            "predicted": "peach",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 16,
+            "target": "cherry",
+            "predicted": "peach",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 16,
+            "target": "grape",
+            "predicted": "peach",
+            "correct": false,
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "distance": 32,
+        "accuracy": 0.0,
+        "n_valid": 5,
+        "trials": [
+          {
+            "distance": 32,
+            "target": "apple",
+            "predicted": "peach",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 32,
+            "target": "banana",
+            "predicted": "peach",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 32,
+            "target": "orange",
+            "predicted": "peach",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 32,
+            "target": "cherry",
+            "predicted": "peach",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 32,
+            "target": "grape",
+            "predicted": "peach",
+            "correct": false,
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "distance": 64,
+        "accuracy": 0.0,
+        "n_valid": 5,
+        "trials": [
+          {
+            "distance": 64,
+            "target": "apple",
+            "predicted": "peach",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 64,
+            "target": "banana",
+            "predicted": "peach",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 64,
+            "target": "orange",
+            "predicted": "peach",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 64,
+            "target": "cherry",
+            "predicted": "peach",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 64,
+            "target": "grape",
+            "predicted": "peach",
+            "correct": false,
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "distance": 128,
+        "accuracy": 0.0,
+        "n_valid": 5,
+        "trials": [
+          {
+            "distance": 128,
+            "target": "apple",
+            "predicted": "peach",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 128,
+            "target": "banana",
+            "predicted": "peach",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 128,
+            "target": "orange",
+            "predicted": "peach",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 128,
+            "target": "cherry",
+            "predicted": "peach",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 128,
+            "target": "grape",
+            "predicted": "peach",
+            "correct": false,
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "distance": 256,
+        "accuracy": 0.0,
+        "n_valid": 5,
+        "trials": [
+          {
+            "distance": 256,
+            "target": "apple",
+            "predicted": "peach",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 256,
+            "target": "banana",
+            "predicted": "peach",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 256,
+            "target": "orange",
+            "predicted": "peach",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 256,
+            "target": "cherry",
+            "predicted": "peach",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 256,
+            "target": "grape",
+            "predicted": "peach",
+            "correct": false,
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "distance": 512,
+        "accuracy": 0.0,
+        "n_valid": 5,
+        "trials": [
+          {
+            "distance": 512,
+            "target": "apple",
+            "predicted": "peach",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 512,
+            "target": "banana",
+            "predicted": "peach",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 512,
+            "target": "orange",
+            "predicted": "peach",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 512,
+            "target": "cherry",
+            "predicted": "peach",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 512,
+            "target": "grape",
+            "predicted": "peach",
+            "correct": false,
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "distance": 1024,
+        "accuracy": 0.0,
+        "n_valid": 5,
+        "trials": [
+          {
+            "distance": 1024,
+            "target": "apple",
+            "predicted": "peach",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 1024,
+            "target": "banana",
+            "predicted": "peach",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 1024,
+            "target": "orange",
+            "predicted": "peach",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 1024,
+            "target": "cherry",
+            "predicted": "peach",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 1024,
+            "target": "grape",
+            "predicted": "peach",
+            "correct": false,
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "distance": 1536,
+        "accuracy": 0.0,
+        "n_valid": 5,
+        "trials": [
+          {
+            "distance": 1536,
+            "target": "apple",
+            "predicted": "peach",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 1536,
+            "target": "banana",
+            "predicted": "peach",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 1536,
+            "target": "orange",
+            "predicted": "peach",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 1536,
+            "target": "cherry",
+            "predicted": "peach",
+            "correct": false,
+            "skipped": false
+          },
+          {
+            "distance": 1536,
+            "target": "grape",
+            "predicted": "peach",
+            "correct": false,
+            "skipped": false
+          }
+        ]
+      }
+    ],
+    "mean_accuracy": 0.06666666666666667,
+    "distances": [
+      1,
+      2,
+      4,
+      8,
+      16,
+      32,
+      64,
+      128,
+      256,
+      512,
+      1024,
+      1536
+    ]
+  },
+  "generation": {
+    "greedy": [
+      {
+        "prompt": "It was a dark and stormy",
+        "generated": ", and it was a little bit of a little bit of a little bit of a little bit of a little bit of a little bit of a little bit of a little bit of a little bit of a little bit of a little bit of a lot of people.\n\nThe fact that the fact that the fact that the fact that the fact that the fact that the fact that the fact that the fact that the fact that the fact that the fact that the fact that the fact that the fact that"
+      },
+      {
+        "prompt": "The length of the hypotenuse",
+        "generated": " of the original original original, the first of the original original, the first, the second, the second, the second, the second, the second, the second, the second, the second, the second, the second, the second, the second, the second, the second, the second, the second, the second, the second, the second, the second, the second, the second, the second, the second, the second, the second, the second, the second,"
+      },
+      {
+        "prompt": "The President of the United",
+        "generated": " States, has been in the first place since the last two years.\n\nThe president has been in the first place since the first time in the past, and he has been in the first place since the first time in the past.\n\nThe president has been in the first place since the first time in the past, and he has been in the first place since the first time in the year.\n\nThe president has been in the first place since the first time in the year,"
+      },
+      {
+        "prompt": "Once upon a time there was",
+        "generated": " a time when the time was to be made.\n\nThe first time I was in the first time I was in the first time I was in the first time I was in the first time I was in the first time I was in the first time I was in the first time I was in the first time I was in the first time I was in the first time I was in the first time I was in the first time I was in the first time I was in the first time I"
+      },
+      {
+        "prompt": "The results indicate that",
+        "generated": " the results are not the first to be the first to be the first to be the first to be the first to be the first to be the first to be the first to be the first to be the first to be the first to be the first to be the first to be the first to be the first to be the first to be the first to be the first to be the first to be the first to be the first to be the first to be the first to be the first to be"
+      }
+    ],
+    "T=0.7": [
+      {
+        "prompt": "It was a dark and stormy",
+        "generated": ".\n\nThe first thing that was to say is that it was the first thing it was. It was the first time the story was broken.\n\nThis was the first time the result of the story was updated, and it was the first time the story was set.\n\nThe story was not yet done.\n\nThe story was set up on the show in February 2015. It was released on the 2nd (and then, in the first place, it was all the way"
+      },
+      {
+        "prompt": "The length of the hypotenuse",
+        "generated": ", the two sides were seen as a \"interference\" of the first time that the \u201ctenthenthenth\u201d was the first to hold the last two years in the second half.\n\nThe first two-thirds of the vote in the first half of the year, which were considered the most significant in the series, followed by the numbers as a result of the 2000-17, and the recent 90s was the worst of the last year, as the majority of the year was at"
+      },
+      {
+        "prompt": "The President of the United",
+        "generated": " States of America is not able to create a new government.\n\nThe U.S. government is reviewing the legislation that made a decision that could allow it to keep the national security and security security security forces to proceed with the legislation. The government can also support the federal government and the federal government to do this with their own power to prevent the government and other citizens.\n\nThe legislation will be expected to proceed with the federal government.\n\n\"We will ensure that we will continue to"
+      },
+      {
+        "prompt": "Once upon a time there was",
+        "generated": " a chance of re-release the new first installment of the upcoming-game series.\n\nIn addition to the upcoming launch of the 2016-15 season, the series will be available in the first half of the year, with the 2015-10 World Series from 2010-15. The series will be released in 2014 and will be released on April 25.\n\nThe release of the series will be available at the 10th Century, with the new series to date in 2017.\n\nThe"
+      },
+      {
+        "prompt": "The results indicate that",
+        "generated": " it could be \u201csimple,\u201d because it would be a \u201csuspicious,\u201d but it has been reported that the \"ditch-stopping\" is not a \u201cget-complex\u201d or \u201cfeel-time\u201d in the case of the Chief Chief Robert Magiglu, but not a \u201ccommitted\u201d or \u201ccream-set\u201d or \u201ca\u201d \u201ccove-out\u201d that is \u201cmore a bit of \u201ccream-like\u201d \u2014 but this"
+      }
+    ]
+  }
+}
