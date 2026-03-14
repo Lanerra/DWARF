@@ -1,0 +1,23 @@
+Loading model...
+  Loaded: checkpoints/d41s3/best.pt  (val_ppl=?)
+  Sequence length: 269 tokens
+Extracting DSQG attention weights (pure Python reference)...
+  Layer 0 DSQG: alpha shape torch.Size([1, 8, 269, 45]), max=1.0000, mean=0.0222
+  Layer 1 DSQG: alpha shape torch.Size([1, 8, 269, 45]), max=1.0000, mean=0.0222
+  Layer 2 DSQG: alpha shape torch.Size([1, 8, 269, 45]), max=1.0000, mean=0.0222
+  Layer 3 DSQG: alpha shape torch.Size([1, 8, 269, 45]), max=1.0000, mean=0.0222
+  Layer 4 DSQG: alpha shape torch.Size([1, 8, 269, 45]), max=1.0000, mean=0.0222
+
+Generating visualizations in /home/dlewis3/Desktop/AI/DWARF/tools/viz_output/d41s3/
+  Saved: /home/dlewis3/Desktop/AI/DWARF/tools/viz_output/d41s3/d41s3_best_comparison.png
+  Saved: /home/dlewis3/Desktop/AI/DWARF/tools/viz_output/d41s3/d41s3_best_dsqg_layer0.png
+  Saved: /home/dlewis3/Desktop/AI/DWARF/tools/viz_output/d41s3/d41s3_best_dsqg_layer1.png
+  Saved: /home/dlewis3/Desktop/AI/DWARF/tools/viz_output/d41s3/d41s3_best_dsqg_layer2.png
+  Saved: /home/dlewis3/Desktop/AI/DWARF/tools/viz_output/d41s3/d41s3_best_dsqg_layer3.png
+  Saved: /home/dlewis3/Desktop/AI/DWARF/tools/viz_output/d41s3/d41s3_best_dsqg_layer4.png
+  Saved: /home/dlewis3/Desktop/AI/DWARF/tools/viz_output/d41s3/d41s3_best_full_attn.png
+  Saved: /home/dlewis3/Desktop/AI/DWARF/tools/viz_output/d41s3/d41s3_best_pos_bias.png
+  Saved: /home/dlewis3/Desktop/AI/DWARF/tools/viz_output/d41s3/d41s3_best_if_gains.png
+
+Done. Files in /home/dlewis3/Desktop/AI/DWARF/tools/viz_output/d41s3/
+Key file: *_comparison.png — the DSQG comb vs full attention side-by-side

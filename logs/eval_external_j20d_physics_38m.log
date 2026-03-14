@@ -1,0 +1,112 @@
+============================================================
+  DWARF External Benchmark Evaluator
+============================================================
+  GPU: NVIDIA GeForce RTX 3090
+  Tasks: ['hellaswag', 'piqa', 'arc_easy', 'arc_challenge', 'winogrande', 'lambada']
+  Tokenizer: /home/dlewis3/Desktop/AI/DWARF/results/2048_condI_tokenizer.json
+
+Loading checkpoint: /tmp/dwarf-j17d/autoresearch/checkpoints/df0d435_j20d_physics_best.pt
+Arch: j20d_physics
+  WARNING: missing learnable keys: ['blocks.5.norm1.weight', 'blocks.5.norm1.bias', 'blocks.5.norm2.weight', 'blocks.5.norm2.bias', 'blocks.5.attn.qkv_proj.weight', 'blocks.5.attn.qkv_proj.bias', 'blocks.5.attn.out_proj.weight', 'blocks.5.attn.out_proj.bias', 'blocks.5.attn.gate_proj.weight', 'blocks.5.attn.gate_proj.bias', 'blocks.5.ffn.fc1.weight', 'blocks.5.ffn.fc1.bias', 'blocks.5.ffn.fc2.weight', 'blocks.5.ffn.fc2.bias']
+  WARNING: unexpected keys: ['blocks.5._orig_mod.norm1.weight', 'blocks.5._orig_mod.norm1.bias', 'blocks.5._orig_mod.norm2.weight', 'blocks.5._orig_mod.norm2.bias', 'blocks.5._orig_mod.attn.qkv_proj.weight', 'blocks.5._orig_mod.attn.qkv_proj.bias', 'blocks.5._orig_mod.attn.out_proj.weight', 'blocks.5._orig_mod.attn.out_proj.bias', 'blocks.5._orig_mod.attn.gate_proj.weight', 'blocks.5._orig_mod.attn.gate_proj.bias', 'blocks.5._orig_mod.ffn.fc1.weight', 'blocks.5._orig_mod.ffn.fc1.bias', 'blocks.5._orig_mod.ffn.fc2.weight', 'blocks.5._orig_mod.ffn.fc2.bias']
+  Loaded 38,724,058 params from /tmp/dwarf-j17d/autoresearch/checkpoints/df0d435_j20d_physics_best.pt
+  Parameters: 38,724,058
+  Label: J20D Physics 38.7M
+
+  [hellaswag] 10,042 examples...
+    [hellaswag] 200/10042 — acc=0.275 | eta 1280s
+    [hellaswag] 400/10042 — acc=0.265 | eta 683s
+    [hellaswag] 600/10042 — acc=0.270 | eta 482s
+    [hellaswag] 800/10042 — acc=0.274 | eta 381s
+    [hellaswag] 1000/10042 — acc=0.281 | eta 320s
+    [hellaswag] 1200/10042 — acc=0.280 | eta 278s
+    [hellaswag] 1400/10042 — acc=0.271 | eta 248s
+    [hellaswag] 1600/10042 — acc=0.268 | eta 224s
+    [hellaswag] 1800/10042 — acc=0.267 | eta 205s
+    [hellaswag] 2000/10042 — acc=0.260 | eta 190s
+    [hellaswag] 2200/10042 — acc=0.259 | eta 177s
+    [hellaswag] 2400/10042 — acc=0.261 | eta 166s
+    [hellaswag] 2600/10042 — acc=0.260 | eta 156s
+    [hellaswag] 2800/10042 — acc=0.261 | eta 147s
+    [hellaswag] 3000/10042 — acc=0.264 | eta 139s
+    [hellaswag] 3200/10042 — acc=0.266 | eta 131s
+    [hellaswag] 3400/10042 — acc=0.266 | eta 125s
+    [hellaswag] 3600/10042 — acc=0.263 | eta 120s
+    [hellaswag] 3800/10042 — acc=0.263 | eta 114s
+    [hellaswag] 4000/10042 — acc=0.258 | eta 109s
+    [hellaswag] 4200/10042 — acc=0.257 | eta 105s
+    [hellaswag] 4400/10042 — acc=0.258 | eta 100s
+    [hellaswag] 4600/10042 — acc=0.253 | eta 95s
+    [hellaswag] 4800/10042 — acc=0.251 | eta 91s
+    [hellaswag] 5000/10042 — acc=0.250 | eta 87s
+    [hellaswag] 5200/10042 — acc=0.248 | eta 83s
+    [hellaswag] 5400/10042 — acc=0.248 | eta 79s
+    [hellaswag] 5600/10042 — acc=0.248 | eta 75s
+    [hellaswag] 5800/10042 — acc=0.249 | eta 71s
+    [hellaswag] 6000/10042 — acc=0.248 | eta 67s
+    [hellaswag] 6200/10042 — acc=0.249 | eta 64s
+    [hellaswag] 6400/10042 — acc=0.249 | eta 60s
+    [hellaswag] 6600/10042 — acc=0.249 | eta 56s
+    [hellaswag] 6800/10042 — acc=0.248 | eta 53s
+    [hellaswag] 7000/10042 — acc=0.248 | eta 49s
+    [hellaswag] 7200/10042 — acc=0.246 | eta 46s
+    [hellaswag] 7400/10042 — acc=0.246 | eta 42s
+    [hellaswag] 7600/10042 — acc=0.244 | eta 39s
+    [hellaswag] 7800/10042 — acc=0.243 | eta 36s
+    [hellaswag] 8000/10042 — acc=0.242 | eta 32s
+    [hellaswag] 8200/10042 — acc=0.242 | eta 29s
+    [hellaswag] 8400/10042 — acc=0.242 | eta 26s
+    [hellaswag] 8600/10042 — acc=0.241 | eta 23s
+    [hellaswag] 8800/10042 — acc=0.239 | eta 19s
+    [hellaswag] 9000/10042 — acc=0.238 | eta 16s
+    [hellaswag] 9200/10042 — acc=0.237 | eta 13s
+    [hellaswag] 9400/10042 — acc=0.237 | eta 10s
+    [hellaswag] 9600/10042 — acc=0.237 | eta 7s
+    [hellaswag] 9800/10042 — acc=0.236 | eta 4s
+    [hellaswag] 10000/10042 — acc=0.237 | eta 1s
+  [hellaswag] accuracy = 0.2365 (23.7%)  [10042 examples, 155s]
+  [piqa] 1,838 examples...
+    [piqa] 200/1838 — acc=0.565 | eta 10s
+    [piqa] 400/1838 — acc=0.550 | eta 8s
+    [piqa] 600/1838 — acc=0.563 | eta 7s
+    [piqa] 800/1838 — acc=0.542 | eta 6s
+    [piqa] 1000/1838 — acc=0.541 | eta 5s
+    [piqa] 1200/1838 — acc=0.541 | eta 4s
+    [piqa] 1400/1838 — acc=0.537 | eta 3s
+    [piqa] 1600/1838 — acc=0.543 | eta 1s
+    [piqa] 1800/1838 — acc=0.543 | eta 0s
+  [piqa] accuracy = 0.5435 (54.4%)  [1838 examples, 11s]
+  [arc_easy] 570 examples...
+    [arc_easy] 200/570 — acc=0.235 | eta 4s
+    [arc_easy] 400/570 — acc=0.282 | eta 2s
+  [arc_easy] accuracy = 0.2947 (29.5%)  [570 examples, 7s]
+  [arc_challenge] 299 examples...
+    [arc_challenge] 200/299 — acc=0.215 | eta 1s
+  [arc_challenge] accuracy = 0.2107 (21.1%)  [299 examples, 3s]
+  [winogrande] 1,267 examples...
+    [winogrande] 200/1267 — acc=0.585 | eta 6s
+    [winogrande] 400/1267 — acc=0.555 | eta 5s
+    [winogrande] 600/1267 — acc=0.545 | eta 4s
+    [winogrande] 800/1267 — acc=0.525 | eta 3s
+    [winogrande] 1000/1267 — acc=0.528 | eta 2s
+    [winogrande] 1200/1267 — acc=0.532 | eta 0s
+  [winogrande] accuracy = 0.5296 (53.0%)  [1267 examples, 7s]
+  [lambada] 5,153 examples...
+  [lambada] accuracy = 0.0000 (0.0%)  [5153 examples, 18s]
+
+============================================================
+  J20D Physics 38.7M
+============================================================
+  Task                     Accuracy       N
+  ---------------------- ----------  ------
+  hellaswag                   23.7%   10042
+  piqa                        54.4%    1838
+  arc_easy                    29.5%     570
+  arc_challenge               21.1%     299
+  winogrande                  53.0%    1267
+  lambada                      0.0%    5153
+  ---------------------- ----------  ------
+  mean (present tasks)        30.3%
+============================================================
+
+  Results -> /home/dlewis3/Desktop/AI/DWARF/evals/logs/eval_external_J20D_Physics_38.7M_20260314_074146.json

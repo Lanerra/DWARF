@@ -1,0 +1,240 @@
+======================================================================
+  DWARF condM Layer-Position Ablation
+  Full attention at layer 5 (0-indexed)  |  5 DSQG layers
+======================================================================
+  GPU: NVIDIA GeForce RTX 4090  (23.6 GB)
+  Layer stack: 5 DSQG → 1 full attn (layer 5) → 0 DSQG
+  Funnel hypothesis: layer 5 (last) should be best; layer 0 should be worst
+Loading OpenWebText (up to 100,000 docs)...
+  25,000 docs...
+  50,000 docs...
+  75,000 docs...
+  100,000 docs...
+Loaded condI BPE tokenizer from /home/dlewis3/Desktop/AI/DWARF/benchmarks/results/2048_condI_tokenizer.json
+Encoding data (max_seq_len=2048)...
+  Train: 52,716 sequences
+  Val: 1,435 sequences
+  Test: 1,459 sequences
+
+condM: 13,984,480 parameters
+  Layer types: ['DSQG', 'DSQG', 'DSQG', 'DSQG', 'DSQG', 'FULL']
+  Note: DSQG layers use condN offsets (44); layer 5 is O(N²) causal
+Running causality check...
+  Pre-10:  0.00000000  (expect 0.0)
+  Pos-10:  1.297867  (expect >0)
+  Post-10: 0.395395  (expect >0)
+  PASS
+  Step 200/1648 | Loss 6.3806
+  Step 400/1648 | Loss 5.9100
+  Step 600/1648 | Loss 5.6647
+  Step 800/1648 | Loss 5.6144
+  Step 1000/1648 | Loss 5.3522
+  Step 1200/1648 | Loss 5.4158
+  Step 1400/1648 | Loss 5.1616
+  Step 1600/1648 | Loss 5.2424
+Ep 1/10 | Train 5.1502 | Val 5.0865 PPL 161.8 * BEST | 374s
+  DSQG pos-bias: |mean|=3.5839 |max|=13.9736 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' → ', and it was a little bit of a little bit of a little bit.\n\nThe first time I was'
+    'The length of the hypotenuse' → ' of the "the most important thing to do" is that the "the most important thing t'
+    'The President of the United' → ' States, the United States, and the United States, the United States, and the Un'
+    'Once upon a time there was' → ' a lot of time.\n\nThe first time we had to get the first time we had to get the f'
+    'The results indicate that' → ' the number of people who have been involved in the same cases is not the same.\n'
+  ──
+  Step 200/1648 | Loss 5.1435
+  Step 400/1648 | Loss 4.9390
+  Step 600/1648 | Loss 4.9686
+  Step 800/1648 | Loss 4.9122
+  Step 1000/1648 | Loss 4.6454
+  Step 1200/1648 | Loss 4.6954
+  Step 1400/1648 | Loss 4.8097
+  Step 1600/1648 | Loss 4.7720
+Ep 2/10 | Train 4.7621 | Val 4.5225 PPL 92.1 * BEST | 719s
+  DSQG pos-bias: |mean|=3.5174 |max|=13.3399 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' → ', and I was a little bit of a little bit of a little bit of a bit of a bit of a '
+    'The length of the hypotenuse' → ' of the body is a bit more than a bit more than a bit more than a bit more than '
+    'The President of the United' → ' States, the United States, and the United States.\n\nThe United States, the Unite'
+    'Once upon a time there was' → ' a lot of people who had been in the house, I was in the house. I was in the hou'
+    'The results indicate that' → ' the number of people who are not involved in the study is a significant factor '
+  ──
+  Step 200/1648 | Loss 4.4654
+  Step 400/1648 | Loss 4.4521
+  Step 600/1648 | Loss 4.5899
+  Step 800/1648 | Loss 4.4638
+  Step 1000/1648 | Loss 4.4135
+  Step 1200/1648 | Loss 4.3627
+  Step 1400/1648 | Loss 4.3227
+  Step 1600/1648 | Loss 4.5177
+Ep 3/10 | Train 4.1847 | Val 4.2772 PPL 72.0 * BEST | 1055s
+  DSQG pos-bias: |mean|=3.4557 |max|=12.7930 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' → ', but it was a very difficult time to get it to the ground.\n\nThe first time I wa'
+    'The length of the hypotenuse' → ' of the body is a bit different from the body.\n\nThe body is a bit different from'
+    'The President of the United' → ' States, and the United States, the United States, and the United States, are th'
+    'Once upon a time there was' → ' a lot of time to get the time to get the time to get the time to get the time t'
+    'The results indicate that' → ' the results of the study are not the same as the previous study.\n\nThe study fou'
+  ──
+  Step 200/1648 | Loss 4.4617
+  Step 400/1648 | Loss 4.5390
+  Step 600/1648 | Loss 4.2862
+  Step 800/1648 | Loss 4.0841
+  Step 1000/1648 | Loss 4.2418
+  Step 1200/1648 | Loss 4.2301
+  Step 1400/1648 | Loss 4.3231
+  Step 1600/1648 | Loss 4.4081
+Ep 4/10 | Train 4.4337 | Val 4.1708 PPL 64.8 * BEST | 1394s
+  DSQG pos-bias: |mean|=3.3986 |max|=12.3493 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' → ", but it was a very strange time to see the world's most important, and it was a"
+    'The length of the hypotenuse' → ' of the body is the same as the body.\n\nThe body is the same as the body. The bod'
+    'The President of the United' → ' States, and the United States, are the first to be elected president of the Uni'
+    'Once upon a time there was' → ' a lot of time to get a little bit of a little bit of a little bit of a little b'
+    'The results indicate that' → ' the results of the study are not the same as the previous study.\n\nThe study fou'
+  ──
+  Step 200/1648 | Loss 4.2807
+  Step 400/1648 | Loss 4.2980
+  Step 600/1648 | Loss 4.1962
+  Step 800/1648 | Loss 4.0901
+  Step 1000/1648 | Loss 4.3999
+  Step 1200/1648 | Loss 4.1685
+  Step 1400/1648 | Loss 4.2326
+  Step 1600/1648 | Loss 4.0199
+Ep 5/10 | Train 4.0321 | Val 4.1097 PPL 60.9 * BEST | 1730s
+  DSQG pos-bias: |mean|=3.3508 |max|=12.0099 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' → ', but it was a very dark and dark place.\n\nThe first thing I saw was that the fir'
+    'The length of the hypotenuse' → ' of the body is the same as the body.\n\nThe body is the same as the body. The bod'
+    'The President of the United' → ' States, and his administration, the United States, and the United States, are n'
+    'Once upon a time there was' → ' a new way to get the game to play.\n\nThe game was a great game for the game, but'
+    'The results indicate that' → ' the results of the study are not consistent with the results of the study.\n\nThe'
+  ──
+  Step 200/1648 | Loss 4.2024
+  Step 400/1648 | Loss 4.2248
+  Step 600/1648 | Loss 4.3223
+  Step 800/1648 | Loss 4.0788
+  Step 1000/1648 | Loss 4.1819
+  Step 1200/1648 | Loss 4.0067
+  Step 1400/1648 | Loss 4.0890
+  Step 1600/1648 | Loss 4.1634
+Ep 6/10 | Train 4.0862 | Val 4.0692 PPL 58.5 * BEST | 2066s
+  DSQG pos-bias: |mean|=3.3149 |max|=11.7676 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' → ', but it was a very dark place.\n\nThe first time I saw the world, I was in the mi'
+    'The length of the hypotenuse' → ' of the body is the same as the body.\n\nThe body is the same as the body. The bod'
+    'The President of the United' → ' States, who has been in the country since the beginning of the year, has been i'
+    'Once upon a time there was' → ' a new era of the world.\n\nThe world’s most important thing is to be able to do i'
+    'The results indicate that' → ' the results of the study are not consistent with the results of the study.\n\nThe'
+  ──
+  Step 200/1648 | Loss 3.9640
+  Step 400/1648 | Loss 3.8975
+  Step 600/1648 | Loss 4.2643
+  Step 800/1648 | Loss 3.9907
+  Step 1000/1648 | Loss 4.1795
+  Step 1200/1648 | Loss 3.8933
+  Step 1400/1648 | Loss 4.0678
+  Step 1600/1648 | Loss 4.1462
+Ep 7/10 | Train 4.1994 | Val 4.0406 PPL 56.9 * BEST | 2401s
+  DSQG pos-bias: |mean|=3.2912 |max|=11.6117 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' → ', but it was a very dark and dark place.\n\nThe first thing I saw was the first ti'
+    'The length of the hypotenuse' → ' of the body is the same as the body.\n\nThe body is the same as the body. The bod'
+    'The President of the United' → ' States, who has been in the United States since the 1980s, has been in the Unit'
+    'Once upon a time there was' → ' a new way to get the best of the best of the best.\n\nThe first thing I’ve learne'
+    'The results indicate that' → ' the results of the study are not consistent with the results of the study.\n\nThe'
+  ──
+  Step 200/1648 | Loss 3.9360
+  Step 400/1648 | Loss 4.1281
+  Step 600/1648 | Loss 3.9195
+  Step 800/1648 | Loss 3.8547
+  Step 1000/1648 | Loss 3.6283
+  Step 1200/1648 | Loss 4.1165
+  Step 1400/1648 | Loss 4.0239
+  Step 1600/1648 | Loss 4.1993
+Ep 8/10 | Train 3.9958 | Val 4.0257 PPL 56.0 * BEST | 2739s
+  DSQG pos-bias: |mean|=3.2781 |max|=11.5274 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' → ', but it was a very dark and dark place.\n\nThe first time I was in the middle of '
+    'The length of the hypotenuse' → ' of the body is the same as the body.\n\nThe body is the same as the body. The bod'
+    'The President of the United' → ' States, who has been in the United States since the beginning of the year, has '
+    'Once upon a time there was' → ' a new era of the new generation of young people.\n\nThe new generation of young p'
+    'The results indicate that' → ' the results of the study are not consistent with the results of the study.\n\nThe'
+  ──
+  Step 200/1648 | Loss 4.1133
+  Step 400/1648 | Loss 4.1147
+  Step 600/1648 | Loss 4.0203
+  Step 800/1648 | Loss 3.9762
+  Step 1000/1648 | Loss 4.0200
+  Step 1200/1648 | Loss 4.0342
+  Step 1400/1648 | Loss 4.2509
+  Step 1600/1648 | Loss 4.0530
+Ep 9/10 | Train 4.2455 | Val 4.0182 PPL 55.6 * BEST | 3075s
+  DSQG pos-bias: |mean|=3.2731 |max|=11.4959 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' → ', and the people were not afraid to go to the streets.\n\nThe police were not afra'
+    'The length of the hypotenuse' → ' of the body is the same as the body.\n\nThe body is the same as the body. The bod'
+    'The President of the United' → ' States, who has been in the United States since the beginning of the year, has '
+    'Once upon a time there was' → ' a new era of the game.\n\nThe game was a game that was a game that was a game tha'
+    'The results indicate that' → ' the results of the study are not consistent with the results of the study.\n\nThe'
+  ──
+  Step 200/1648 | Loss 4.1812
+  Step 400/1648 | Loss 4.1162
+  Step 600/1648 | Loss 3.9428
+  Step 800/1648 | Loss 4.1146
+  Step 1000/1648 | Loss 3.8475
+  Step 1200/1648 | Loss 3.9473
+  Step 1400/1648 | Loss 4.1565
+  Step 1600/1648 | Loss 4.0600
+Ep 10/10 | Train 4.0646 | Val 4.0170 PPL 55.5 * BEST | 3406s
+  DSQG pos-bias: |mean|=3.2723 |max|=11.4914 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' → ', but it was a very dark and dark place.\n\nThe first time I was in the middle of '
+    'The length of the hypotenuse' → ' of the body is the same as the body.\n\nThe body is the same as the body. The bod'
+    'The President of the United' → ' States, who has been in the United States since the beginning of the year, has '
+    'Once upon a time there was' → ' a new era of the game.\n\nThe game was a game that was a game that was a game tha'
+    'The results indicate that' → ' the results of the study are not consistent with the results of the study.\n\nThe'
+  ──
+
+  condM TEST: PPL 54.5 | Loss 3.9976
+
+  ── Temperature sweep (best checkpoint) ──
+
+  [greedy]
+    'It was a dark and stormy' → ', but it was a very dark and dark place.\n\nThe first time I was in the middle of '
+    'The length of the hypotenuse' → ' of the body is the same as the body.\n\nThe body is the same as the body. The bod'
+    'The President of the United' → ' States, who has been in the United States since the beginning of the year, has '
+    'Once upon a time there was' → ' a new era of the game.\n\nThe game was a game that was a game that was a game tha'
+    'The results indicate that' → ' the results of the study are not consistent with the results of the study.\n\nThe'
+
+  [T=0.5]
+    'It was a dark and stormy' → ', but it was not a bad thing. It was a great thing to be able to do.\n\nAnd the re'
+    'The length of the hypotenuse' → ' is the same as the length of the body.\n\nThe length of the body is the same as t'
+    'The President of the United' → ' States, and the U.S. Supreme Court, which ruled that the president was not a U.'
+    'Once upon a time there was' → ' a number of different ways to make it happen.\n\nThe concept of a “Pix” is a way '
+    'The results indicate that' → ' the two-year-old was born in the United States, but he was not born in the Unit'
+
+  [T=0.7]
+    'It was a dark and stormy' → ', but the debate is still about the best way to address the question.\n\n“We have '
+    'The length of the hypotenuse' → ' of the link (it is, in fact, a sample of the time).\n\n2) The following is an imp'
+    'The President of the United' → ' States, Sen. John McCain, would be in the Senate and Senate next week.\n\n"I am i'
+    'Once upon a time there was' → ' no more than a cultural set of explanations for the trends and attitudes of the'
+    'The results indicate that' → ' the percentage of people who have voted for the election has been a solid incre'
+
+  [T=1.0]
+    'It was a dark and stormy' → ' story for us,” said Dr. Casey — who was passed by the proclamation of Judge Kev'
+    'The length of the hypotenuse' → ' of "Ditche for Action Reits" is roughly roughly 5° m− (11° m−) of sulphuride un'
+    'The President of the United' → ' States and the military leadership, who would also say that the country is a ma'
+    'Once upon a time there was' → ' no physical discussion about health security in Pakistan.\n\nMcGregory’s civil un'
+    'The results indicate that' → ' a slight increase in hydropriorus per methonyique by nearly 1% that year can pr'
+
+======================================================================
+  condM LAYER-POSITION ABLATION — full_attn @ layer 5
+======================================================================
+  Standard transformer 13M (reference)                    64.07
+  condN (pure DSQG, 44 offsets)                           ~70.7
+  condM (5 DSQG + 1 full attn, hybrid)                     54.5
+
+  condM vs condN (projected): -16.2 PPL
+  → Full attention layer provides critical global context; hybrid is the path
+
+  Results → /home/dlewis3/Desktop/AI/DWARF/benchmarks/2048_condM_layer5_results.json

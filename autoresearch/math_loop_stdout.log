@@ -1,0 +1,3031 @@
+Inferred stuck_count=47, explanation_iteration=23 (converged=True)
+============================================================
+🌊 Math Autoresearch Loop v2
+============================================================
+History: 46 entries | Best score: 0.8350
+Starting at iteration 46
+Available modules:
+  boundary_bridge_coherence_surface (ready): Module: boundary_bridge_coherence_surface
+  boundary_bridge_layer_coupling_asymmetry (ready): Module: boundary_bridge_layer_coupling_asymmetry
+  boundary_cross_regime_information_throughput (ready): Module: boundary_cross_regime_information_throughput
+  boundary_frequency_bridge_selectivity (ready): Module: boundary_frequency_bridge_selectivity
+  boundary_frequency_offset_transmission (ready): Module: boundary_frequency_offset_transmission
+  boundary_frequency_transmission_loss (ready): Module: boundary_frequency_transmission_loss
+  boundary_phase_constructive_analysis (ready): Module: boundary_phase_constructive_analysis
+  boundary_phase_offset_coherence_realization (ready): Module: boundary_phase_offset_coherence_realization
+  boundary_shift_trough_search (ready): Module: boundary_shift_trough_search
+  boundary_trough_bridge_information_leakage (ready): Module: boundary_trough_bridge_information_leakage
+  bridge_utilization_tap_frequency_selectivity (ready): Module: bridge_utilization_tap_frequency_selectivity
+  combined_regime_standing_wave (ready): Module: combined_regime_standing_wave
+  cross_regime_harmonic_analysis (ready): Module: cross_regime_harmonic_analysis
+  cross_regime_tap_offset_phase_alignment (ready): Module: cross_regime_tap_offset_phase_alignment
+  dense_tap_band_equilibration (ready): Module: dense_tap_band_equilibration
+  dense_zone_harmonic_envelope_resonance (ready): Module: dense_zone_harmonic_envelope_resonance
+  dense_zone_saturation_diagnosis (ready): Module: dense_zone_saturation_diagnosis
+  depth_head_zone_coherence_variance (ready): Module: depth_head_zone_coherence_variance
+  dilation_offset_resonance (ready): Module: dilation_offset_resonance
+  dsqg_zone_frequency_alignment (ready): Module: dsqg_zone_frequency_alignment
+  frame_resonance_boundary_coherence (ready): Module: frame_resonance_boundary_coherence
+  frequency_bridge_activation_cost (ready): Module: frequency_bridge_activation_cost
+  head_offset_allocation_asymmetry_by_layer (ready): Module: head_offset_allocation_asymmetry_by_layer
+  head_regime_specialization_asymmetry (ready): Module: head_regime_specialization_asymmetry
+  inter_zone_phase_alignment (ready): Module: inter_zone_phase_alignment
+  interference_pooling_layer_capacity (ready): Module: interference_pooling_layer_capacity
+  interference_pooling_regime_preservation (ready): Module: interference_pooling_regime_preservation
+  intermediate_regime_bridging_potential (ready): Module: intermediate_regime_bridging_potential
+  multi_zone_tap_phase_continuity (ready): Module: multi_zone_tap_phase_continuity
+  offset_frequency_projection_coverage (ready): Module: offset_frequency_projection_coverage
+  offset_reconstruction_spectrum (ready): Module: offset_reconstruction_spectrum
+  offset_regime_bridge_phase_stability (ready): Module: offset_regime_bridge_phase_stability
+  offset_trough_bridge_candidates (ready): Module: offset_trough_bridge_candidates
+  phase_coherence_depth_progression (building): Module: phase_coherence_depth_progression
+  phase_transfer_boundary_conductance (ready): Module: phase_transfer_boundary_conductance
+  realization_gap_diagnostic (ready): Module: realization_gap_diagnostic
+  regime_boundary_information_capacity (ready): Module: regime_boundary_information_capacity
+  regime_decoupled_wavelet_potential (ready): Module: regime_decoupled_wavelet_potential
+  relay_backprop_routing_asymmetry (ready): Module: relay_backprop_routing_asymmetry
+  relay_chain_multi_hop_formation (ready): Module: relay_chain_multi_hop_formation
+  relay_hop_phase_coherence (ready): Module: relay_hop_phase_coherence
+  relay_path_layer_coherence_degradation (ready): Module: relay_path_layer_coherence_degradation
+  relay_path_phase_coherence_by_depth (building): Module: relay_path_phase_coherence_by_depth
+  relay_phase_reinitialization_at_depth (ready): Module: relay_phase_reinitialization_at_depth
+  scale_embed_hop_interference_spectrum (ready): Module: scale_embed_hop_interference_spectrum
+  spectral_gap_phase_landscape (ready): Module: spectral_gap_phase_landscape
+  standing_wave_boundary_optimization (ready): Module: standing_wave_boundary_optimization
+  standing_wave_trough_depth_coherence (ready): Module: standing_wave_trough_depth_coherence
+  tap_bridge_routing_efficiency (ready): Module: tap_bridge_routing_efficiency
+  tap_phase_gradient_regime_incompatibility (ready): Module: tap_phase_gradient_regime_incompatibility
+  tap_resonance_coherence_trade (ready): Module: tap_resonance_coherence_trade
+  tap_standing_wave_phase_alignment (ready): Module: tap_standing_wave_phase_alignment
+  tap_wavelet_standing_wave_phase_alignment (ready): Module: tap_wavelet_standing_wave_phase_alignment
+  tap_zone_phase_bridge (ready): Module: tap_zone_phase_bridge
+  wavelet_angle_zone_phase_alignment (ready): Module: wavelet_angle_zone_phase_alignment
+  wavelet_delta_harmonic_resonance (ready): Module: wavelet_delta_harmonic_resonance
+  wavelet_dilation_offset_harmonic_alignment (ready): Module: wavelet_dilation_offset_harmonic_alignment
+  wavelet_distal_harmonic_resonance (ready): Module: wavelet_distal_harmonic_resonance
+  wavelet_envelope_zone_boundary_fit (ready): Module: wavelet_envelope_zone_boundary_fit
+  wavelet_filter (ready): Built-in wavelet filter evaluator (composite score from MSE, scale separation, leakage, gradient flow, DSQG coverage)
+  wavelet_frequency_log_resonance (ready): Module: wavelet_frequency_log_resonance
+  wavelet_harmonic_node_prediction (ready): Module: wavelet_harmonic_node_prediction
+  wavelet_harmonic_trough_prediction (ready): Module: wavelet_harmonic_trough_prediction
+  wavelet_offset_harmonic_resonance (ready): Module: wavelet_offset_harmonic_resonance
+  wavelet_offset_node_predictor (ready): Module: wavelet_offset_node_predictor
+  wavelet_phase_log_zone_coherence (ready): Module: wavelet_phase_log_zone_coherence
+  wavelet_regime_spectral_isolation (ready): Module: wavelet_regime_spectral_isolation
+  wavelet_tap_constructive_phase_alignment (ready): Module: wavelet_tap_constructive_phase_alignment
+  wavelet_tap_offset_interference (ready): Module: wavelet_tap_offset_interference
+  wavelet_theta_regime_commensurability (ready): Module: wavelet_theta_regime_commensurability
+  wavelet_zone_log_spacing_resonance (ready): Module: wavelet_zone_log_spacing_resonance
+  wavelet_zone_phase_continuity (ready): Module: wavelet_zone_phase_continuity
+  zone_boundary_overlap_potential (ready): Module: zone_boundary_overlap_potential
+  zone_frame_completeness_analysis (ready): Module: zone_frame_completeness_analysis
+  zone_spectral_leakage (ready): Module: zone_spectral_leakage
+
+📋 Evaluator backlog: 1 search_modes with 2+ proposals, no binary yet:
+    [3×] signal_dominant_offset_pruning
+         In signal-dominated regime (d_h>N_OFFSETS), relay chain quality depends on Q·K p
+
+  🔨 [evaluator] Building scorer for 'signal_dominant_offset_pruning' (proposed 3× without score)
+  ⏸ 1 build(s) pending, 3 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 3 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 3 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 3 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 3 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 3 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 3 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 3 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 3 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 3 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 3 unevaluated — waiting 15s
+  ✅ Evaluator 'signal_dominant_offset_pruning' build complete — binary ready
+  ✅ Evaluator(s) ready: signal_dominant_offset_pruning
+  🔁 Retroactive eval: 'signal_dominant_offset_pruning'...
+  📊 Retroactive score 'signal_dominant_offset_pruning': 0.8130
+[46] EXPLORATION MODE (expl_iter=24) — new DSQG dimension
+  search_mode=offset_redundancy_in_relay_paths | Some sparse offsets may be redundant for 1-2 hop passkey distance
+  ⚠ Module evaluator 'offset_redundancy_in_relay_paths' failed (exit 1) — score=0
+  score=0.0000 best=0.8350 +modules[20]
+
+  🔍 Running gap detection (stuck=47, iter=46)...
+  ⚠ Gap detection parse error: Expecting property name enclosed in double quotes: line 1 column 2 (char 1)
+[47] EXPLORATION MODE (expl_iter=25) — new DSQG dimension
+  search_mode=multi_hop_interference_minimization_for_d1536 | Enumerate all 2-hop relay paths to d=1536 within the current offs
+  ℹ No evaluator for search_mode 'multi_hop_interference_minimization_for_d1536' yet — score=0, will trigger build
+  score=0.0000 best=0.8350 +modules[20]
+
+  🔍 Running gap detection (stuck=47, iter=47)...
+  💡 Gap detected: Relay path phase coherence and amplitude fidelity are measured in aggregate, but
+  🔧 [module] Spawning Claude Code to build 'relay_path_quality_by_distance': Multi-hop relay paths to d=1536 suffer from phase coherence decay or amplitude l
+[48] EXPLORATION MODE (expl_iter=26) — new DSQG dimension
+  🔀 Dedup: 'relay_path_hop_efficiency_by_target_distance' → 'relay_path_phase_coherence_by_depth'
+  search_mode=relay_path_phase_coherence_by_depth | Analyze relay path efficiency (hop count, phase alignment cost) r
+  score=0.7400 best=0.8350 +modules[20]
+
+[49] EXPLORATION MODE (expl_iter=27) — new DSQG dimension
+  🔀 Dedup: 'relay_chain_multi_hop_formation' → 'relay_chain_under_ema_contraction'
+  search_mode=relay_chain_under_ema_contraction | Analyze multi-hop relay chain formation for d∈{256,512,1024,1536}
+  ⚠ Module evaluator 'relay_chain_under_ema_contraction' failed (exit 1) — score=0
+  score=0.0000 best=0.8350 +modules[20]
+
+[50] EXPLORATION MODE (expl_iter=28) — new DSQG dimension
+  search_mode=optimal_offset_set_passkey_coverage | Compare 1-2 hop relay coverage across the two sparse offset candi
+  ⚠ Module evaluator 'optimal_offset_set_passkey_coverage' failed (exit 101) — score=0
+  score=0.0000 best=0.8350 +modules[20]
+
+  ✅ Module 'relay_path_quality_by_distance' build complete — binary ready
+  🔄 Reloaded modules: relay_path_quality_by_distance now available
+[51] EXPLORATION MODE (expl_iter=29) — new DSQG dimension
+  search_mode=distal_relay_bottleneck_analysis | Diagnose why d=1536 requires physics (KdV+AGC) for 80% passkey bu
+  ℹ No evaluator for search_mode 'distal_relay_bottleneck_analysis' yet — score=0, will trigger build
+  score=0.0000 best=0.8350 +modules[25]
+
+  🔍 Running gap detection (stuck=47, iter=51)...
+  ⚠ Gap detection parse error: Expecting property name enclosed in double quotes: line 1 column 2 (char 1)
+  ⚠ Findings synthesis timed out
+  🔨 [evaluator] Building scorer for 'multi_hop_interference_minimization_for_d1536' (proposed 1× without score)
+  🔨 [evaluator] Building scorer for 'distal_relay_bottleneck_analysis' (proposed 1× without score)
+  ⏸ 2 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 2 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 2 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 2 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 2 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 2 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 2 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 2 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 2 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 2 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 2 build(s) pending, 2 unevaluated — waiting 15s
+  ✅ Evaluator 'multi_hop_interference_minimization_for_d1536' build complete — binary ready
+  ✅ Evaluator(s) ready: multi_hop_interference_minimization_for_d1536
+  🔁 Retroactive eval: 'multi_hop_interference_minimization_for_d1536'...
+  📊 Retroactive score 'multi_hop_interference_minimization_for_d1536': 0.7406
+  ⏸ 1 build(s) pending, 1 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 1 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 1 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 1 unevaluated — waiting 15s
+  ✅ Evaluator 'distal_relay_bottleneck_analysis' build complete — binary ready
+  ✅ Evaluator(s) ready: distal_relay_bottleneck_analysis
+  🔁 Retroactive eval: 'distal_relay_bottleneck_analysis'...
+  📊 Retroactive score 'distal_relay_bottleneck_analysis': 0.7094
+[52] EXPLORATION MODE (expl_iter=30) — new DSQG dimension
+  search_mode=sparse_offset_log_spacing_optimization | Current sparse offsets [48,64,96,192,512,768,1024] use irregular 
+  ℹ No evaluator for search_mode 'sparse_offset_log_spacing_optimization' yet — score=0, will trigger build
+  score=0.0000 best=0.8350 +modules[20]
+
+  🔍 Running gap detection (stuck=47, iter=52)...
+  💡 Gap detected: We know offset δ=21 is a gradient bottleneck and physics helps d=1536, but we la
+  🔧 [module] Spawning Claude Code to build 'offset_gradient_criticality_by_distance': Offset δ=384 carries disproportionately higher gradient flux for d>512 relative 
+[53] EXPLORATION MODE (expl_iter=31) — new DSQG dimension
+  search_mode=gradient_rank_relay_structure_vs_vocabulary | Decompose gradient flow through J16D into relay-structure rank (J
+  ℹ No evaluator for search_mode 'gradient_rank_relay_structure_vs_vocabulary' yet — score=0, will trigger build
+  score=0.0000 best=0.8350 +modules[20]
+
+  🔨 [evaluator] Building scorer for 'sparse_offset_log_spacing_optimization' (proposed 1× without score)
+  🔨 [evaluator] Building scorer for 'gradient_rank_relay_structure_vs_vocabulary' (proposed 1× without score)
+  ⏸ 2 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 2 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 2 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 2 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 2 build(s) pending, 2 unevaluated — waiting 15s
+  ✅ Module 'offset_gradient_criticality_by_distance' build complete — binary ready
+  🔄 Reloaded modules: offset_gradient_criticality_by_distance now available
+  ⏸ 2 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 2 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 2 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 2 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 2 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 2 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 2 build(s) pending, 2 unevaluated — waiting 15s
+  ✅ Evaluator 'sparse_offset_log_spacing_optimization' build complete — binary ready
+  ✅ Evaluator(s) ready: sparse_offset_log_spacing_optimization
+  🔁 Retroactive eval: 'sparse_offset_log_spacing_optimization'...
+  📊 Retroactive score 'sparse_offset_log_spacing_optimization': 0.3774
+  ⏸ 1 build(s) pending, 1 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 1 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 1 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 1 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 1 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 1 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 1 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 1 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 1 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 1 unevaluated — waiting 15s
+  ✅ Evaluator 'gradient_rank_relay_structure_vs_vocabulary' build complete — binary ready
+  ✅ Evaluator(s) ready: gradient_rank_relay_structure_vs_vocabulary
+  🔁 Retroactive eval: 'gradient_rank_relay_structure_vs_vocabulary'...
+  📊 Retroactive score 'gradient_rank_relay_structure_vs_vocabulary': 0.8456
+[54] EXPLORATION MODE (expl_iter=32) — new DSQG dimension
+  search_mode=passkey_distance_relay_hop_classification | Classify passkey distances as 1-hop vs 2-hop reachable via curren
+  ℹ No evaluator for search_mode 'passkey_distance_relay_hop_classification' yet — score=0, will trigger build
+  score=0.0000 best=0.8350 +modules[25]
+
+  🔍 Running gap detection (stuck=47, iter=54)...
+  💡 Gap detected: No measurement of joint wavelet-offset harmonic optimization: whether θ=1.1377 a
+  🔧 [module] Spawning Claude Code to build 'wavelet_offset_cooptimization': The distal offset δ=384 should have maximum wavelet envelope support at θ=1.1377
+[55] EXPLORATION MODE (expl_iter=33) — new DSQG dimension
+  search_mode=vocab_size_gradient_tradeoff | At 14M scale where every parameter is critical, determine the opt
+  ⚠ Module evaluator 'vocab_size_gradient_tradeoff' failed (exit 1) — score=0
+  score=0.0000 best=0.8350 +modules[20]
+
+[56] EXPLORATION MODE (expl_iter=34) — new DSQG dimension
+  🔀 Dedup: 'physics_relay_chain_coherence_distance_dependence' → 'relay_path_phase_coherence_by_depth'
+  search_mode=relay_path_phase_coherence_by_depth | Physics layers (KdV+AGC) preserve multi-hop relay phase coherence
+  score=0.7400 best=0.8350 +modules[25]
+
+  ✅ Module 'wavelet_offset_cooptimization' build complete — binary ready
+  🔄 Reloaded modules: wavelet_offset_cooptimization now available
+[57] EXPLORATION MODE (expl_iter=35) — new DSQG dimension
+  search_mode=scale_embed_threshold_j_dependence | Predict threshold τ for relay formation in signal-dominant J=16 (
+  ⚠ Module evaluator 'scale_embed_threshold_j_dependence' failed (exit 1) — score=0
+  score=0.0000 best=0.8350 +modules[20]
+
+  🔍 Running gap detection (stuck=47, iter=57)...
+  💡 Gap detected: 2-hop relay paths to long distances exist but have heterogeneous quality; d=1536
+  🔧 [module] Spawning Claude Code to build 'relay_path_quality_spectrum_by_distance': For each distance, all mathematically reachable 2-hop offset chains have differe
+  📋 Findings updated at iter 57
+  🔨 [evaluator] Building scorer for 'passkey_distance_relay_hop_classification' (proposed 1× without score)
+  ⏸ 1 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 2 unevaluated — waiting 15s
+  ❌ Module 'relay_path_quality_spectrum_by_distance' build failed — no binary produced (see /home/dlewis3/Desktop/AI/DWARF/exploration/relay_path_quality_spectrum_by_distance_module_build.log)
+  ⏸ 1 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 2 unevaluated — waiting 15s
+  ✅ Evaluator 'passkey_distance_relay_hop_classification' build complete — binary ready
+  ✅ Evaluator(s) ready: passkey_distance_relay_hop_classification
+  🔁 Retroactive eval: 'passkey_distance_relay_hop_classification'...
+  📊 Retroactive score 'passkey_distance_relay_hop_classification': 0.6304
+[58] EXPLORATION MODE (expl_iter=36) — new DSQG dimension
+  search_mode=lm_head_lr_mult_j16_reversal | Theory predicts 14M needs 2× higher lr_mult than 35M (63.9 vs 31.
+  ⚠ Module evaluator 'lm_head_lr_mult_j16_reversal' failed (exit 101) — score=0
+  score=0.0000 best=0.8350 +modules[20]
+
+  🔍 Running gap detection (stuck=47, iter=58)...
+  ⚠ Gap detection parse error: Expecting property name enclosed in double quotes: line 1 column 2 (char 1)
+  🗑 Auto-removed stale binary 'lm_head_lr_mult_j16_reversal' (2× score=0) — will rebuild
+  🗑 Auto-removed stale binary 'scale_embed_threshold_j_dependence' (2× score=0) — will rebuild
+  🔨 [evaluator] Building scorer for 'lm_head_lr_mult_j16_reversal' (proposed 4× without score)
+  🔨 [evaluator] Building scorer for 'scale_embed_threshold_j_dependence' (proposed 4× without score)
+  ⏸ 2 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 2 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 2 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 2 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 2 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 2 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 2 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 2 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 2 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 2 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 2 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 2 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 2 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 2 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 2 build(s) pending, 2 unevaluated — waiting 15s
+  ✅ Evaluator 'lm_head_lr_mult_j16_reversal' build complete — binary ready
+  ✅ Evaluator 'scale_embed_threshold_j_dependence' build complete — binary ready
+  ✅ Evaluator(s) ready: lm_head_lr_mult_j16_reversal, scale_embed_threshold_j_dependence
+  🔁 Retroactive eval: 'lm_head_lr_mult_j16_reversal'...
+  📊 Retroactive score 'lm_head_lr_mult_j16_reversal': 0.5524
+  🔁 Retroactive eval: 'scale_embed_threshold_j_dependence'...
+  📊 Retroactive score 'scale_embed_threshold_j_dependence': 0.9552
+[59] EXPLORATION MODE (expl_iter=37) — new DSQG dimension
+  🔀 Dedup: 'relay_path_efficiency_scaling' → 'relay_path_phase_coherence_by_depth'
+  search_mode=relay_path_phase_coherence_by_depth | Compute per-scale average relay hop-count and coverage efficiency
+  ⚠ Module evaluator 'relay_path_phase_coherence_by_depth' failed (exit 101) — score=0
+  score=0.0000 best=0.8350 +modules[20]
+
+  🔍 Running gap detection (stuck=47, iter=59)...
+  💡 Gap detected: Physics improves d=1536 passkey by 40pp, but we lack metrics explaining whether 
+  🔧 [module] Spawning Claude Code to build 'physics_multi_hop_gradient_conductance': KdV soliton correction + AGC improve gradient stability at LOCAL-DISTAL regime b
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ✅ Module 'physics_multi_hop_gradient_conductance' build complete — binary ready
+  🔄 Reloaded modules: physics_multi_hop_gradient_conductance now available
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  🔨 [evaluator] Building scorer for 'optimal_offset_set_passkey_coverage' (proposed 3× without score)
+  🔨 [evaluator] Building scorer for 'vocab_size_gradient_tradeoff' (proposed 2× without score)
+  ⏸ 2 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 2 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 2 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 2 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 2 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 2 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 2 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 2 build(s) pending, 2 unevaluated — waiting 15s
+  ✅ Evaluator 'optimal_offset_set_passkey_coverage' build complete — binary ready
+  ✅ Evaluator(s) ready: optimal_offset_set_passkey_coverage
+  🔁 Retroactive eval: 'optimal_offset_set_passkey_coverage'...
+  📊 Retroactive score 'optimal_offset_set_passkey_coverage': 0.5901
+  ⏸ 1 build(s) pending, 1 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 1 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 1 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 1 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 1 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 1 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 1 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 1 unevaluated — waiting 15s
+  ✅ Evaluator 'vocab_size_gradient_tradeoff' build complete — binary ready
+  ✅ Evaluator(s) ready: vocab_size_gradient_tradeoff
+  🔁 Retroactive eval: 'vocab_size_gradient_tradeoff'...
+  📊 Retroactive score 'vocab_size_gradient_tradeoff': 0.7508
+[60] EXPLORATION MODE (expl_iter=38) — new DSQG dimension
+  🔀 Dedup: 'depth_offset_gradient_specialization' → 'depth_aware_head_regime_specialization'
+  search_mode=depth_aware_head_regime_specialization | Analyze gradient flow to offset groups across DSQG layers. Hypoth
+  ⚠ Module evaluator 'depth_aware_head_regime_specialization' failed (exit 101) — score=0
+  score=0.0000 best=0.8350 +modules[25]
+
+  🔍 Running gap detection (stuck=47, iter=60)...
+  💡 Gap detected: No module measures which frequency bands form bottlenecks at regime boundaries, 
+  🔧 [module] Spawning Claude Code to build 'regime_boundary_frequency_bottleneck': Specific frequency ranges are trapped in single regimes or require expensive mul
+[61] EXPLORATION MODE (expl_iter=39) — new DSQG dimension
+  🔀 Dedup: 'physics_layer_minimal_sufficiency_analysis' → 'physics_layer_gradient_flow_asymmetry'
+  search_mode=physics_layer_gradient_flow_asymmetry | Analyze which physics layer components (Kalman-EMA, KdV, AGC) ind
+  ⚠ Module evaluator 'physics_layer_gradient_flow_asymmetry' failed (exit 1) — score=0
+  score=0.0000 best=0.8350 +modules[25]
+
+[62] EXPLORATION MODE (expl_iter=40) — new DSQG dimension
+  🔀 Dedup: 'distal_multi_hop_phase_constructive_conditions' → 'multi_hop_interference_minimization_for_d1536'
+  search_mode=multi_hop_interference_minimization_for_d1536 | For passkey d=1536 (beyond max_delta=1024), multi-hop distal-dist
+  ⚠ Module evaluator 'multi_hop_interference_minimization_for_d1536' failed (exit 101) — score=0
+  score=0.0000 best=0.8350 +modules[25]
+
+  ✅ Module 'regime_boundary_frequency_bottleneck' build complete — binary ready
+  🔄 Reloaded modules: regime_boundary_frequency_bottleneck now available
+[63] EXPLORATION MODE (expl_iter=41) — new DSQG dimension
+  search_mode=offset_routing_gradient_saturation | After LM-head suppression, ~2D active gradients distribute across
+  ℹ No evaluator for search_mode 'offset_routing_gradient_saturation' yet — score=0, will trigger build
+  score=0.0000 best=0.8350 +modules[30]
+
+  🔍 Running gap detection (stuck=47, iter=63)...
+  💡 Gap detected: No measurement of actual KdV phase correction magnitude per boundary crossing, p
+  🔧 [module] Spawning Claude Code to build 'kdv_phase_correction_by_distance': Learned KdV soliton dynamics reduce cumulative phase misalignment per relay boun
+  📋 Findings updated at iter 63
+[64] EXPLORATION MODE (expl_iter=42) — new DSQG dimension
+  🔀 Dedup: 'physics_layer_distance_regime_specificity' → 'physics_layer_gradient_flow_asymmetry'
+  search_mode=physics_layer_gradient_flow_asymmetry | Quantify spectral contribution of each physics component (Kalman-
+  ⚠ Module evaluator 'physics_layer_gradient_flow_asymmetry' failed (exit 1) — score=0
+  score=0.0000 best=0.8350 +modules[25]
+
+[65] EXPLORATION MODE (expl_iter=43) — new DSQG dimension
+  🔀 Dedup: 'scale_embed_depth_dependent_threshold' → 'scale_embed_threshold_j_dependence'
+  search_mode=scale_embed_threshold_j_dependence | Global scale_embed threshold τ≈0.45 may mask per-layer variation;
+  ⚠ Module evaluator 'scale_embed_threshold_j_dependence' failed (exit 101) — score=0
+  score=0.0000 best=0.8350 +modules[25]
+
+[66] EXPLORATION MODE (expl_iter=44) — new DSQG dimension
+  search_mode=distal_relay_bottleneck_analysis | For J=16, identify which distal offset subset {384,512,768,1024} 
+  ⚠ Module evaluator 'distal_relay_bottleneck_analysis' failed (exit 101) — score=0
+  score=0.0000 best=0.8350 +modules[25]
+
+  ✅ Module 'kdv_phase_correction_by_distance' build complete — binary ready
+  🔄 Reloaded modules: kdv_phase_correction_by_distance now available
+  🔨 [evaluator] Building scorer for 'offset_routing_gradient_saturation' (proposed 1× without score)
+  ⏸ 1 build(s) pending, 3 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 3 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 3 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 3 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 3 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 3 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 3 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 3 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 3 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 3 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 3 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 3 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 3 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 3 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 3 unevaluated — waiting 15s
+  ✅ Evaluator 'offset_routing_gradient_saturation' build complete — binary ready
+  ✅ Evaluator(s) ready: offset_routing_gradient_saturation
+  🔁 Retroactive eval: 'offset_routing_gradient_saturation'...
+  📊 Retroactive score 'offset_routing_gradient_saturation': 0.5552
+  🗑 Auto-removed stale binary 'physics_layer_gradient_flow_asymmetry' (2× score=0) — will rebuild
+  🔨 [evaluator] Building scorer for 'physics_layer_gradient_flow_asymmetry' (proposed 4× without score)
+  ⏸ 1 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 2 unevaluated — waiting 15s
+  ✅ Evaluator 'physics_layer_gradient_flow_asymmetry' build complete — binary ready
+  ✅ Evaluator(s) ready: physics_layer_gradient_flow_asymmetry
+  🔁 Retroactive eval: 'physics_layer_gradient_flow_asymmetry'...
+  📊 Retroactive score 'physics_layer_gradient_flow_asymmetry': 0.7130
+[67] EXPLORATION MODE (expl_iter=45) — new DSQG dimension
+  🔀 Dedup: 'physics_enabled_distal_relay_coherence' → 'relay_path_phase_coherence_by_depth'
+  search_mode=relay_path_phase_coherence_by_depth | Physics breakthrough: d=1536 jumps from 40% (no-physics ep3) to 8
+  score=0.7215 best=0.8350 +modules[29]
+
+  🔍 Running gap detection (stuck=47, iter=67)...
+  💡 Gap detected: Standing wave trough position drift across layers is unmeasured; realignment_sig
+  🔧 [module] Spawning Claude Code to build 'standing_wave_trough_position_by_depth': Standing wave trough position drifts layer-to-layer (not fixed at δ=384 across L
+[68] EXPLORATION MODE (expl_iter=46) — new DSQG dimension
+  🔀 Dedup: 'kdv_soliton_relay_geometry_coherence' → 'relay_path_phase_coherence_by_depth'
+  search_mode=relay_path_phase_coherence_by_depth | KdV soliton correction stabilizes multi-hop relay chains beyond m
+  score=0.7400 best=0.8350 +modules[29]
+
+[69] EXPLORATION MODE (expl_iter=47) — new DSQG dimension
+  search_mode=physics_distance_selectivity | For each passkey distance, measure which physics components (Kalm
+  ℹ No evaluator for search_mode 'physics_distance_selectivity' yet — score=0, will trigger build
+  score=0.0000 best=0.8350 +modules[29]
+
+  ✅ Module 'standing_wave_trough_position_by_depth' build complete — binary ready
+  🔄 Reloaded modules: standing_wave_trough_position_by_depth now available
+[70] EXPLORATION MODE (expl_iter=48) — new DSQG dimension
+  search_mode=multi_hop_interference_minimization_for_d1536 | For each distal offset pair forming 2-hop relay chains to d=1536,
+  ⚠ Module evaluator 'multi_hop_interference_minimization_for_d1536' failed (exit 101) — score=0
+  score=0.0000 best=0.8350 +modules[29]
+
+  🔍 Running gap detection (stuck=47, iter=70)...
+  ⚠ Gap detection parse error: Extra data: line 17 column 1 (char 2140)
+  📋 Findings updated at iter 70
+[71] EXPLORATION MODE (expl_iter=49) — new DSQG dimension
+  🔀 Dedup: 'head_specialization_scale_dependence' → 'scale_embed_threshold_j_dependence'
+  search_mode=scale_embed_threshold_j_dependence | Verify whether the 7-local:1-distal head specialization ratio is 
+  ⚠ Module evaluator 'scale_embed_threshold_j_dependence' failed (exit 101) — score=0
+  score=0.0000 best=0.8350 +modules[34]
+
+  🔍 Running gap detection (stuck=47, iter=71)...
+  ⚠ Gap detection parse error: Expecting property name enclosed in double quotes: line 1 column 2 (char 1)
+[72] EXPLORATION MODE (expl_iter=50) — new DSQG dimension
+  🔀 Dedup: 'vocabulary_size_gradient_saturation_curve' → 'vocab_size_gradient_tradeoff'
+  search_mode=vocab_size_gradient_tradeoff | Extend vocabulary size gradient advantage test to all J16D scales
+  ⚠ Module evaluator 'vocab_size_gradient_tradeoff' failed (exit 1) — score=0
+  score=0.0000 best=0.8350 +modules[29]
+
+  🔍 Running gap detection (stuck=47, iter=72)...
+  💡 Gap detected: We measure forward-pass phase coherence and amplitude fidelity across relay path
+  🔧 [module] Spawning Claude Code to build 'relay_backprop_offset_coherence': Multi-hop relay chains have excellent forward phase alignment but poor backward 
+[73] EXPLORATION MODE (expl_iter=51) — new DSQG dimension
+  search_mode=physics_distance_selectivity | KdV soliton and AGC enabled d=1536 to reach 80% passkey in physic
+  ℹ No evaluator for search_mode 'physics_distance_selectivity' yet — score=0, will trigger build
+  score=0.0000 best=0.8350 +modules[29]
+
+  ❌ Module 'relay_backprop_offset_coherence' build failed — no binary produced (see /home/dlewis3/Desktop/AI/DWARF/exploration/relay_backprop_offset_coherence_module_build.log)
+  🔨 [evaluator] Building scorer for 'physics_distance_selectivity' (proposed 2× without score)
+  ⏸ 1 build(s) pending, 3 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 3 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 3 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 3 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 3 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 3 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 3 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 3 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 3 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 3 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 3 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 3 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 3 unevaluated — waiting 15s
+  ✅ Evaluator 'physics_distance_selectivity' build complete — binary ready
+  ✅ Evaluator(s) ready: physics_distance_selectivity
+  🔁 Retroactive eval: 'physics_distance_selectivity'...
+  📊 Retroactive score 'physics_distance_selectivity': 0.5876
+[74] EXPLORATION MODE (expl_iter=52) — new DSQG dimension
+  search_mode=scale_embed_threshold_j_dependence | Quantify how J16D's sparse offset set (16 vs 44) lowers the scale
+  score=0.9552 best=0.8350 +modules[29]
+
+  🔍 Running gap detection (stuck=47, iter=74)...
+  💡 Gap detected: No module measures which frequency bands carry cross-regime attention weight; re
+  🔧 [module] Spawning Claude Code to build 'regime_frequency_band_routing_flow': The local→distal boundary is not a bottleneck in CAPACITY (spectral coverage is 
+[75] EXPLORATION MODE (expl_iter=53) — new DSQG dimension
+  🔀 Dedup: 'multi_hop_coherence_breakdown_analysis' → 'multi_hop_interference_minimization_for_d1536'
+  search_mode=multi_hop_interference_minimization_for_d1536 | Reconcile the coherence paradox: relay_distance_coherence_correla
+  ⚠ Module evaluator 'multi_hop_interference_minimization_for_d1536' failed (exit 101) — score=0
+  score=0.0000 best=0.8350 +modules[29]
+
+[76] EXPLORATION MODE (expl_iter=54) — new DSQG dimension
+  search_mode=vocab_size_gradient_tradeoff | V=8k reduces LM-head gradient suppression at 14M from 98.4% → 93.
+  ⚠ Module evaluator 'vocab_size_gradient_tradeoff' failed (exit 1) — score=0
+  score=0.0000 best=0.8350 +modules[29]
+
+[77] EXPLORATION MODE (expl_iter=55) — new DSQG dimension
+  🔀 Dedup: 'physics_multi_hop_gradient_conductance' → 'physics_layer_gradient_flow_asymmetry'
+  search_mode=physics_layer_gradient_flow_asymmetry | Measure gradient conductance through multi-hop relay chains to ex
+  ⚠ Module evaluator 'physics_layer_gradient_flow_asymmetry' failed (exit 1) — score=0
+  score=0.0000 best=0.8350 +modules[29]
+
+  ✅ Module 'regime_frequency_band_routing_flow' build complete — binary ready
+  🔄 Reloaded modules: regime_frequency_band_routing_flow now available
+[78] EXPLORATION MODE (expl_iter=56) — new DSQG dimension
+  search_mode=kdv_soliton_coherence_amplification_mechanism | KdV soliton compression of d-dimensional relay states into M<<d m
+  ℹ No evaluator for search_mode 'kdv_soliton_coherence_amplification_mechanism' yet — score=0, will trigger build
+  score=0.0000 best=0.8350 +modules[29]
+
+  🔍 Running gap detection (stuck=47, iter=78)...
+  💡 Gap detected: High cross-offset interference (96.75%) masks layerwise pairwise conflicts—we la
+  🔧 [module] Spawning Claude Code to build 'offset_pair_interference_by_layer': Certain offset pairs (likely involving offset 21 + a high-frequency offset like 
+  📋 Findings synthesis: no new findings at iter 78
+[79] EXPLORATION MODE (expl_iter=57) — new DSQG dimension
+  search_mode=optimal_offset_set_passkey_coverage | Analyze hop-count efficiency of current vs alternative J=16 offse
+  ⚠ Module evaluator 'optimal_offset_set_passkey_coverage' failed (exit 101) — score=0
+  score=0.0000 best=0.8350 +modules[29]
+
+[80] EXPLORATION MODE (expl_iter=58) — new DSQG dimension
+  search_mode=lm_head_lr_mult_j16_reversal | Resolve the empirical reversal of lr_mult ordering (14M=10, 35M=1
+  ⚠ Module evaluator 'lm_head_lr_mult_j16_reversal' failed (exit 1) — score=0
+  score=0.0000 best=0.8350 +modules[29]
+
+  ✅ Module 'offset_pair_interference_by_layer' build complete — binary ready
+  🔄 Reloaded modules: offset_pair_interference_by_layer now available
+  🔨 [evaluator] Building scorer for 'kdv_soliton_coherence_amplification_mechanism' (proposed 1× without score)
+  ⏸ 1 build(s) pending, 3 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 3 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 3 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 3 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 3 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 3 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 3 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 3 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 3 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 3 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 3 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 3 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 3 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 3 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 3 unevaluated — waiting 15s
+  ✅ Evaluator 'kdv_soliton_coherence_amplification_mechanism' build complete — binary ready
+  ✅ Evaluator(s) ready: kdv_soliton_coherence_amplification_mechanism
+  🔁 Retroactive eval: 'kdv_soliton_coherence_amplification_mechanism'...
+  📊 Retroactive score 'kdv_soliton_coherence_amplification_mechanism': 0.8373
+  🗑 Auto-removed stale binary 'multi_hop_interference_minimization_for_d1536' (3× score=0) — will rebuild
+  🔨 [evaluator] Building scorer for 'multi_hop_interference_minimization_for_d1536' (proposed 4× without score)
+  ⏸ 1 build(s) pending, 3 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 3 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 3 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 3 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 3 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 3 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 3 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 3 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 3 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 3 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 3 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 3 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 3 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 3 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 3 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 3 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 3 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 3 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 3 unevaluated — waiting 15s
+  ✅ Evaluator 'multi_hop_interference_minimization_for_d1536' build complete — binary ready
+  ✅ Evaluator(s) ready: multi_hop_interference_minimization_for_d1536
+  🔁 Retroactive eval: 'multi_hop_interference_minimization_for_d1536'...
+  📊 Retroactive score 'multi_hop_interference_minimization_for_d1536': 0.7887
+[81] EXPLORATION MODE (expl_iter=59) — new DSQG dimension
+  🔀 Dedup: 'offset_layer_routing_efficiency' → 'offset_routing_gradient_saturation'
+  search_mode=offset_routing_gradient_saturation | J=16 offsets exhibit layer-dependent routing efficiency, with off
+  ⚠ Module evaluator 'offset_routing_gradient_saturation' failed (exit 1) — score=0
+  score=0.0000 best=0.8350 +modules[29]
+
+  🔍 Running gap detection (stuck=47, iter=81)...
+  💡 Gap detected: We measure boundary bridge capacity exists but cannot measure how much gating st
+  🔧 [module] Spawning Claude Code to build 'boundary_gate_intervention_stability': The 21% unused frequency bridges at the local→distal boundary can be gated by a 
+[82] EXPLORATION MODE (expl_iter=60) — new DSQG dimension
+  🔀 Dedup: 'kdv_soliton_offset_selective_improvement' → 'kdv_soliton_coherence_amplification_mechanism'
+  search_mode=kdv_soliton_coherence_amplification_mechanism | Quantify whether KdV soliton correction improves gradient conduct
+  score=0.8373 best=0.8350 +modules[29]
+
+[83] EXPLORATION MODE (expl_iter=61) — new DSQG dimension
+  search_mode=gradient_rank_relay_structure_vs_vocabulary | Quantify whether d_h/J signal-dominance (14M:2, 35M:4, 100M:8) in
+  ⚠ Module evaluator 'gradient_rank_relay_structure_vs_vocabulary' failed (exit 101) — score=0
+  score=0.0000 best=0.8350 +modules[29]
+
+[84] EXPLORATION MODE (expl_iter=62) — new DSQG dimension
+  🔀 Dedup: 'ema_window_relay_path_resonance' → 'relay_path_phase_coherence_by_depth'
+  search_mode=relay_path_phase_coherence_by_depth | EMA window collapses to ~8 samples by ep1 across all J16D scales,
+  score=0.7400 best=0.8350 +modules[29]
+
+  ✅ Module 'boundary_gate_intervention_stability' build complete — binary ready
+  🔄 Reloaded modules: boundary_gate_intervention_stability now available
+[85] EXPLORATION MODE (expl_iter=63) — new DSQG dimension
+  search_mode=kdv_layer_boundary_effectiveness | KdV soliton enables d=1536 passkey to jump from 40% to 80% while 
+  ℹ No evaluator for search_mode 'kdv_layer_boundary_effectiveness' yet — score=0, will trigger build
+  score=0.0000 best=0.8350 +modules[29]
+
+  🔍 Running gap detection (stuck=47, iter=85)...
+  💡 Gap detected: J16D offsets lack measured role specialization—96.75% interference suggests they
+  🔧 [module] Spawning Claude Code to build 'offset_role_specialization_redundancy': Offsets naturally cluster into 3 functional groups by distance: local (3,4,13,15
+  📋 Findings synthesis: no new findings at iter 85
+  🔨 [evaluator] Building scorer for 'kdv_layer_boundary_effectiveness' (proposed 1× without score)
+  ⏸ 1 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 1 build(s) pending, 2 unevaluated — waiting 15s
+  ✅ Module 'offset_role_specialization_redundancy' build complete — binary ready
+  🔄 Reloaded modules: offset_role_specialization_redundancy now available
+  ✅ Evaluator 'kdv_layer_boundary_effectiveness' build complete — binary ready
+  ✅ Evaluator(s) ready: kdv_layer_boundary_effectiveness
+  🔁 Retroactive eval: 'kdv_layer_boundary_effectiveness'...
+  📊 Retroactive score 'kdv_layer_boundary_effectiveness': 0.8253
+[86] EXPLORATION MODE (expl_iter=64) — new DSQG dimension
+  🔀 Dedup: 'scale_embed_offset_amplitude_specialization' → 'scale_embed_threshold_j_dependence'
+  search_mode=scale_embed_threshold_j_dependence | Scale_embed specializes during training (mean↓, max↑), with relay
+  ⚠ Module evaluator 'scale_embed_threshold_j_dependence' failed (exit 101) — score=0
+  score=0.0000 best=0.8350 +modules[29]
+
+  🔍 Running gap detection (stuck=47, iter=86)...
+  💡 Gap detected: We measure relay coherence globally (0.9976) and distance correlation (0.9959) b
+  🔧 [module] Spawning Claude Code to build 'relay_hop_path_selection_by_distance': The offset set creates a bifurcated relay structure where short-to-medium distan
+  📋 Findings synthesis: no new findings at iter 86
+[87] EXPLORATION MODE (expl_iter=65) — new DSQG dimension
+  search_mode=sparse_offset_log_spacing_optimization | Optimize sparse offset log-spacing to maximize single-hop relay c
+  ⚠ Module evaluator 'sparse_offset_log_spacing_optimization' failed (exit 101) — score=0
+  score=0.0000 best=0.8350 +modules[29]
+
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ✅ Module 'relay_hop_path_selection_by_distance' build complete — binary ready
+  🔄 Reloaded modules: relay_hop_path_selection_by_distance now available
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s
+  ⏸ 0 build(s) pending, 2 unevaluated — waiting 15s

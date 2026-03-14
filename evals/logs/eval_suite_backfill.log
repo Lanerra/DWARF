@@ -1,0 +1,306 @@
+--- Running condm_layer0 ---
+
+============================================================
+  eval_suite.py — condm_layer0
+  Device: cuda
+============================================================
+
+  Model: condM 13M Layer 0 (1 full attn → 5 DSQG)
+
+  Loading tokenizer...
+  Loading model...
+Traceback (most recent call last):
+  File "/home/dlewis3/Desktop/AI/DWARF/evals/eval_suite.py", line 1163, in <module>
+    main()
+  File "/home/dlewis3/Desktop/AI/DWARF/evals/eval_suite.py", line 1094, in main
+    model, n_params = load_model(cfg, device)
+                      ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dlewis3/Desktop/AI/DWARF/evals/eval_suite.py", line 745, in load_model
+    raise FileNotFoundError(f"Checkpoint not found: {ckpt_path}")
+FileNotFoundError: Checkpoint not found: /home/dlewis3/Desktop/AI/DWARF/evals/2048_condM_layer0_checkpoints/best.pt
+--- condm_layer0 done (exit 1) ---
+--- Running condm_layer3 ---
+
+============================================================
+  eval_suite.py — condm_layer3
+  Device: cuda
+============================================================
+
+  Model: condM 13M Layer 3 (3 DSQG → 1 full attn → 2 DSQG)
+
+  Loading tokenizer...
+  Loading model...
+Traceback (most recent call last):
+  File "/home/dlewis3/Desktop/AI/DWARF/evals/eval_suite.py", line 1163, in <module>
+    main()
+  File "/home/dlewis3/Desktop/AI/DWARF/evals/eval_suite.py", line 1094, in main
+    model, n_params = load_model(cfg, device)
+                      ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dlewis3/Desktop/AI/DWARF/evals/eval_suite.py", line 745, in load_model
+    raise FileNotFoundError(f"Checkpoint not found: {ckpt_path}")
+FileNotFoundError: Checkpoint not found: /home/dlewis3/Desktop/AI/DWARF/evals/2048_condM_layer3_checkpoints/best.pt
+--- condm_layer3 done (exit 1) ---
+--- Running condp_13m ---
+
+============================================================
+  eval_suite.py — condp_13m
+  Device: cuda
+============================================================
+
+  Model: condP 13M (pure DSQG, 74 offsets)
+
+  Loading tokenizer...
+  Loading model...
+  Loaded condP 13M (pure DSQG, 74 offsets): 14,118,368 params from best.pt
+
+  [1/4] Calibration...
+    entropy=7.256 bits  top1=0.214  eff_vocab=28.1  (0.2s)
+
+  [2/4] Distance-conditioned loss (wikitext-103)...
+    Loading wikitext-103 test split...
+    Using 17 full 2048-token chunks
+    Buckets:
+    0-16          PPL= 360.93  n=  289
+    17-64         PPL= 217.14  n=  816
+    65-256        PPL= 172.46  n= 3264
+    257-512       PPL= 176.24  n= 4352
+    513-1024      PPL= 161.34  n= 8704
+    1025-2047     PPL= 157.98  n=17374
+    (3.6s)
+
+  [3/4] Few-shot string copy...
+    exact=5/15  (33.3%)  mean_lev=7.00  (2.8s)
+
+  [4/4] Passkey retrieval...
+    d=    1: accuracy=20.0%
+    d=    2: accuracy=20.0%
+    d=    4: accuracy=20.0%
+    d=    8: accuracy=20.0%
+    d=   16: accuracy=20.0%
+    d=   32: accuracy=20.0%
+    d=   64: accuracy=0.0%
+    d=  128: accuracy=0.0%
+    d=  256: accuracy=0.0%
+    d=  512: accuracy=0.0%
+    d= 1024: accuracy=0.0%
+    d= 1536: accuracy=0.0%
+    mean_accuracy=10.0%  (0.7s)
+
+  Generation samples (greedy + T=0.7)...
+
+  [greedy]
+    'It was a dark and stormy'               → ' night, and it was a little bit of a surprise.\n\n"I was a little bit of a little '
+    'The length of the hypotenuse'           → ' is a bit of a bit of a bit of a bit of a bit of a bit of a bit of a bit of a bi'
+    'The President of the United'            → ' States, who was the first to be elected president in the United States, was the'
+    'Once upon a time there was'             → ' a chance to be a new person, and the idea of a new person is to be a new person'
+    'The results indicate that'              → ' the results are not accurate.\n\nThe results are based on the results of the resu'
+
+  [T=0.7]
+    'It was a dark and stormy'               → ' storm.\n\nIt was a devastating storm. It was the same age and tragedy that ended '
+    'The length of the hypotenuse'           → ' of the jet is a very important step in which the parachute is used in the fligh'
+    'The President of the United'            → ' States and the United States, announced that he will be supporting the presiden'
+    'Once upon a time there was'             → ' a very intense effort to re-establish the order of a single person. In the end,'
+    'The results indicate that'              → ' the results are not necessarily accurate.\n\nThe results suggest that the results'
+
+  Results saved to /home/dlewis3/Desktop/AI/DWARF/evals/logs/eval_suite_condp_13m_20260313_193542.json
+============================================================
+
+--- condp_13m done (exit 0) ---
+--- Running condp_27m ---
+
+============================================================
+  eval_suite.py — condp_27m
+  Device: cuda
+============================================================
+
+  Model: condP 27M (pure DSQG, 74 offsets)
+
+  Loading tokenizer...
+  Loading model...
+  Loaded condP 27M (pure DSQG, 74 offsets): 26,781,152 params from best.ptrom
+
+  [1/4] Calibration...
+    entropy=7.103 bits  top1=0.232  eff_vocab=24.0  (0.2s)
+
+  [2/4] Distance-conditioned loss (wikitext-103)...
+    Loading wikitext-103 test split...
+    Using 17 full 2048-token chunks
+    Buckets:
+    0-16          PPL= 308.93  n=  289
+    17-64         PPL= 165.63  n=  816
+    65-256        PPL= 123.53  n= 3264
+    257-512       PPL= 134.16  n= 4352
+    513-1024      PPL= 118.28  n= 8704
+    1025-2047     PPL= 116.80  n=17374
+    (3.7s)
+
+  [3/4] Few-shot string copy...
+    exact=5/15  (33.3%)  mean_lev=6.93  (2.8s)
+
+  [4/4] Passkey retrieval...
+    d=    1: accuracy=100.0%
+    d=    2: accuracy=100.0%
+    d=    4: accuracy=40.0%
+    d=    8: accuracy=80.0%
+    d=   16: accuracy=60.0%
+    d=   32: accuracy=60.0%
+    d=   64: accuracy=0.0%
+    d=  128: accuracy=0.0%
+    d=  256: accuracy=0.0%
+    d=  512: accuracy=0.0%
+    d= 1024: accuracy=0.0%
+    d= 1536: accuracy=0.0%
+    mean_accuracy=36.7%  (0.8s)
+
+  Generation samples (greedy + T=0.7)...
+
+  [greedy]
+    'It was a dark and stormy'               → ' experience.\n\n"I was a little bit nervous about the fact that I was a little bit'
+    'The length of the hypotenuse'           → ' is a bit more complicated than the length of the card. The length of the card i'
+    'The President of the United'            → ' States, who has been a member of the United States Senate since the election, h'
+    'Once upon a time there was'             → ' a time when the time was right.\n\nThe time was right.\n\nThe time was right.\n\nThe '
+    'The results indicate that'              → ' the number of people who are in the country is more than twice as likely to be '
+
+  [T=0.7]
+    'It was a dark and stormy'               → ' day.\n\n“I felt like I was going to be there. I was going to be there and I had t'
+    'The length of the hypotenuse'           → '-bearing amalgamated anaerobic-controlled one-party system is 3-4.3-2.3-1.1.\n\n2.'
+    'The President of the United'            → ' States, Robert C. Lee, and other Democrats, both of whom had advocated for a “r'
+    'Once upon a time there was'             → ' a small, dark time for a small, and very small time. I am a writer and a writer'
+    'The results indicate that'              → ' the person in the system is a male, and that the person in the system is a male'
+
+  Results saved to /home/dlewis3/Desktop/AI/DWARF/evals/logs/eval_suite_condp_27m_20260313_193600.json
+============================================================
+
+--- condp_27m done (exit 0) ---
+--- Running condm_chinchilla_repeated ---
+
+============================================================
+  eval_suite.py — condm_chinchilla_repeated
+  Device: cuda
+============================================================
+
+  Model: condM 13M Chinchilla-Repeated (100K docs x 10 epochs)
+
+  Loading tokenizer...
+  Loading model...
+  Loaded condM 13M Chinchilla-Repeated (100K docs x 10 epochs): 13,984,480 params from best.pt
+
+  [1/4] Calibration...
+    entropy=7.159 bits  top1=0.225  eff_vocab=21.9  (0.2s)
+
+  [2/4] Distance-conditioned loss (wikitext-103)...
+    Loading wikitext-103 test split...
+    Using 17 full 2048-token chunks
+    Buckets:
+    0-16          PPL= 385.03  n=  289
+    17-64         PPL= 225.80  n=  816
+    65-256        PPL= 129.43  n= 3264
+    257-512       PPL= 115.05  n= 4352
+    513-1024      PPL=  88.31  n= 8704
+    1025-2047     PPL=  88.90  n=17374
+    (3.2s)
+
+  [3/4] Few-shot string copy...
+    exact=5/15  (33.3%)  mean_lev=7.73  (1.8s)
+
+  [4/4] Passkey retrieval...
+    d=    1: accuracy=100.0%
+    d=    2: accuracy=80.0%
+    d=    4: accuracy=80.0%
+    d=    8: accuracy=80.0%
+    d=   16: accuracy=80.0%
+    d=   32: accuracy=100.0%
+    d=   64: accuracy=100.0%
+    d=  128: accuracy=40.0%
+    d=  256: accuracy=60.0%
+    d=  512: accuracy=20.0%
+    d= 1024: accuracy=40.0%
+    d= 1536: accuracy=0.0%
+    mean_accuracy=65.0%  (0.4s)
+
+  Generation samples (greedy + T=0.7)...
+
+  [greedy]
+    'It was a dark and stormy'               → ' place.\n\nThe first thing I’ve seen is that the first thing I’ve seen is that the'
+    'The length of the hypotenuse'           → ' is a very different type of structure.\n\nThe first step is to make the final ste'
+    'The President of the United'            → ' States, who has been in the White House since the election, has been in the Whi'
+    'Once upon a time there was'             → ' a time when the people were in the middle of the night.\n\nThe first time the peo'
+    'The results indicate that'              → ' the U.S. government has been in the process of making a decision to take action'
+
+  [T=0.7]
+    'It was a dark and stormy'               → ' place. The only thing I can do is put the great energy on the other side of the'
+    'The length of the hypotenuse'           → 'ment of the ameliorate.\n\nThe case has been interpreted as a complex and non-frac'
+    'The President of the United'            → ' States.\n\nThe problem is that the White House is willing to buy the $3.2 billion'
+    'Once upon a time there was'             → ' a more detailed set of changes.\n\nWe all knew what was happening and how it happ'
+    'The results indicate that'              → ' the “charted” was going to be a game that was planned. The game was a game that'
+
+  Results saved to /home/dlewis3/Desktop/AI/DWARF/evals/logs/eval_suite_condm_chinchilla_repeated_20260313_193618.json
+============================================================
+
+--- condm_chinchilla_repeated done (exit 0) ---
+--- Running d41s5_14m ---
+
+============================================================
+  eval_suite.py — d41s5_14m
+  Device: cuda
+============================================================
+
+  Model: d41s5 14M (dense=41, sparse=[48,128,384,768,1536], J=47)
+
+  Loading tokenizer...
+  Loading model...
+  Loaded d41s5 14M (dense=41, sparse=[48,128,384,768,1536], J=47): 14,057,954 params from best.pt
+
+  [1/4] Calibration...
+    entropy=7.234 bits  top1=0.211  eff_vocab=23.4  (32.6s)
+
+  [2/4] Distance-conditioned loss (wikitext-103)...
+    Loading wikitext-103 test split...
+    Using 17 full 2048-token chunks
+    Buckets:
+    0-16          PPL= 314.38  n=  289
+    17-64         PPL= 217.35  n=  816
+    65-256        PPL= 114.30  n= 3264
+    257-512       PPL= 104.33  n= 4352
+    513-1024      PPL=  83.63  n= 8704
+    1025-2047     PPL=  82.03  n=17374
+    (19.8s)
+
+  [3/4] Few-shot string copy...
+    exact=5/15  (33.3%)  mean_lev=6.47  (0.7s)
+
+  [4/4] Passkey retrieval...
+    d=    1: accuracy=40.0%
+    d=    2: accuracy=60.0%
+    d=    4: accuracy=60.0%
+    d=    8: accuracy=60.0%
+    d=   16: accuracy=60.0%
+    d=   32: accuracy=60.0%
+    d=   64: accuracy=60.0%
+    d=  128: accuracy=60.0%
+    d=  256: accuracy=60.0%
+    d=  512: accuracy=20.0%
+    d= 1024: accuracy=0.0%
+    d= 1536: accuracy=0.0%
+    mean_accuracy=45.0%  (0.2s)
+
+  Generation samples (greedy + T=0.7)...
+
+  [greedy]
+    'It was a dark and stormy'               → ' storm that was a great storm.\nThe storm was a great storm that was a great stor'
+    'The length of the hypotenuse'           → ' is a very high frequency, and the length of the hypotenuse is a very high frequ'
+    'The President of the United'            → ' States was the first to be elected to the United States in the United States. T'
+    'Once upon a time there was'             → ' no one to do anything.\nThe first thing that was to do was to make a decision to'
+    'The results indicate that'              → ' the results of the study are not necessarily the same as those of the authors.\n'
+
+  [T=0.7]
+    'It was a dark and stormy'               → ' night that could be seen with the light. But I was not ready to see a light on '
+    'The length of the hypotenuse'           → ' of the OF is about 40 degrees. The frequency of the hypoxia is about 90 degrees'
+    'The President of the United'            → ' States was prepared to “come out” the city of the country. The president was a '
+    'Once upon a time there was'             → ' an extra chance to believe that the existence of the universe is a constant, an'
+    'The results indicate that'              → ' the last three years in the year, the last two years, have been done in the las'
+
+  Results saved to /home/dlewis3/Desktop/AI/DWARF/evals/logs/eval_suite_d41s5_14m_20260313_193631.json
+============================================================
+
+--- d41s5_14m done (exit 0) ---

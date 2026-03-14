@@ -1,0 +1,64 @@
+
+============================================================
+  eval_suite.py — standard_13m
+  Device: cuda
+============================================================
+
+  Model: Standard Transformer 13M
+
+  Loading tokenizer...
+  Loading model...
+  Loaded Standard Transformer 13M: 21,647,360 params from 13M.pt
+
+  [1/4] Calibration...
+    entropy=7.314 bits  top1=0.176  eff_vocab=26.3  (0.1s)
+
+  [2/4] Distance-conditioned loss (wikitext-103)...
+    Loading wikitext-103 test split...
+    Using 17 full 2048-token chunks
+    Buckets:
+    0-16          PPL= 487.88  n=  289
+    17-64         PPL= 259.13  n=  816
+    65-256        PPL= 156.39  n= 3264
+    257-512       PPL= 135.30  n= 4352
+    513-1024      PPL= 107.07  n= 8704
+    1025-2047     PPL= 107.06  n=17374
+    (3.4s)
+
+  [3/4] Few-shot string copy...
+    exact=5/15  (33.3%)  mean_lev=7.13  (0.5s)
+
+  [4/4] Passkey retrieval...
+    d=    1: accuracy=20.0%
+    d=    2: accuracy=20.0%
+    d=    4: accuracy=20.0%
+    d=    8: accuracy=20.0%
+    d=   16: accuracy=20.0%
+    d=   32: accuracy=20.0%
+    d=   64: accuracy=20.0%
+    d=  128: accuracy=0.0%
+    d=  256: accuracy=0.0%
+    d=  512: accuracy=0.0%
+    d= 1024: accuracy=0.0%
+    d= 1536: accuracy=0.0%
+    mean_accuracy=11.7%  (0.2s)
+
+  Generation samples (greedy + T=0.7)...
+
+  [greedy]
+    'It was a dark and stormy'               → '.\n\nThe stormy stormy stormy stormy stormy stormy stormy stormy stormy stormy sto'
+    'The length of the hypotenuse'           → ' of the function of the function of the function of the function of the function'
+    'The President of the United'            → ' States, the United States, and the United States, the United States, and the Un'
+    'Once upon a time there was'             → ' no time to get a chance to get a chance to get a chance to get a chance to get '
+    'The results indicate that'              → ' the results of the results of the results of the results of the results of the '
+
+  [T=0.7]
+    'It was a dark and stormy'               → ' after the death of the state of the state.\n\nThe state of the state of the state'
+    'The length of the hypotenuse'           → ', that is no longer that it is possible that you are not able to find a place wh'
+    'The President of the United'            → ' States, whose U.S. policy is a challenge to promote the economy, the American e'
+    'Once upon a time there was'             → ' a reference to the original design.\n\n“It’s a case that you’re just a very inter'
+    'The results indicate that'              → ' this type of variable is used in the event, which is used in a format, which is'
+
+  Results saved to /home/dlewis3/Desktop/AI/DWARF/evals/logs/eval_suite_standard_13m_20260313_142013.json
+============================================================
+

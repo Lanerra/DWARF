@@ -1,0 +1,378 @@
+[kernel] CUDA extension loaded — using compiled CUDA backward
+======================================================================
+  condU-v5 — MOVT + QK-OVT + NPCI (13M, FineWeb-Edu)
+======================================================================
+  GPU: NVIDIA GeForce RTX 4090  (23.6 GB)
+  Kernel: dsqg_attention_v5
+  Architecture: D=512, H=8, L=6, FFN=2048
+  Coupling coeff: H*D*L = 8*512*6 = 24,576 (threshold: 36,865)
+  New: MOVT(r=2 planes) + QK-OVT + NPCI (all zero-init @ start)
+  References: condU-35M-V3=38.542/85.0% | std-85M=39.447/96.7%
+Loading FineWeb-Edu from cache: benchmarks/logs/condm_fineweb_edu_doc_cache.json
+  Loaded 100,000 docs from cache
+
+Loaded condI BPE tokenizer from /home/dlewis3/Desktop/AI/DWARF/train/../results/2048_condI_tokenizer.json
+Loading pre-encoded dataset from logs/fineweb_encoded_2048.pt ...
+  train: 212,458  val: 5,582  test: 5,473 seqs
+
+condU-v5: 38,732,856 parameters
+  Layer types: ['DSQGv5', 'DSQGv5', 'DSQGv5', 'DSQGv5', 'DSQGv5', 'FULL']
+  New params per DSQGv5 layer (sparse-only MOVT — 11 global offsets):
+    phase_base  [11, 8, 2] = 176  (MOVT, nudge-init)
+    phase_gain  [11, 8, 2] = 176  (QK-OVT, zero-init)
+    query_probes [2, 64]   = 128    (QK-OVT, zero-init)
+    key_probes   [2, 64]   = 128    (QK-OVT, zero-init)
+    npci_theta_k [8]       = 8       (NPCI, zero-init)
+    npci_theta_v [8]       = 8       (NPCI, zero-init)
+  train: 52,716  val: 5,582  test: 5,473 seqs (capped to 52,716)
+Running causality check...
+  Pre-10:  0.00000000  (expect 0.0)
+  Pos-10:  1.725750  (expect >0)
+  Post-10: 0.610594  (expect >0)
+  PASS
+
+  Tokens/epoch: 107,909,652
+  Chinchilla:   774,657,120 tokens (epoch ~7.18)
+
+  Step 200/1648 | Loss 6.3409
+  Step 400/1648 | Loss 5.8015
+  Step 600/1648 | Loss 5.4125
+  Step 800/1648 | Loss 5.0529
+  Step 1000/1648 | Loss 5.0431
+  Step 1200/1648 | Loss 4.7326
+  Step 1400/1648 | Loss 4.7047
+  Step 1600/1648 | Loss 4.4704
+Ep 1/10 | Train 5.3993 | Val 4.4850 PPL 88.7 * BEST | 1818s (14%C) | ep=1749s
+  DSQG pos-bias: |mean|=3.5930 |max|=13.9843 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.0844 |max|=0.3695
+  IF gains:      h0:0.99  h1:0.98  h2:0.98  h3:1.00  h4:1.01  h5:0.98  h6:1.02  h7:1.02
+  phase_base:    |mean|=0.0176 |max|=0.1745 sparse=0.0176 plane_diff=0.0253
+  phase_base_sp: h0:0.025  h1:0.016  h2:0.017  h3:0.016  h4:0.016  h5:0.021  h6:0.015  h7:0.014
+  plane0 sparse: h0:-0.004  h1:+0.006  h2:-0.005  h3:+0.015  h4:+0.004  h5:+0.010  h6:+0.007  h7:+0.001
+  plane1 sparse: h0:-0.002  h1:+0.003  h2:-0.006  h3:-0.003  h4:-0.008  h5:+0.010  h6:+0.004  h7:-0.002
+  phase_gain:    |mean|=0.0008 |max|=0.0076 sparse=0.0008
+  phase_gain_hd: h0:0.0007  h1:0.0008  h2:0.0009  h3:0.0007  h4:0.0008  h5:0.0008  h6:0.0009  h7:0.0007
+  probe norms:   q=[0.0678,0.0696] k=[0.0832,0.0703]
+  npci_theta_k:  h0:-0.0443  h1:-0.0564  h2:-0.0377  h3:-0.0459  h4:+0.0352  h5:-0.0367  h6:+0.0423  h7:-0.0428
+  npci_theta_v:  h0:+0.0348  h1:-0.0238  h2:-0.0265  h3:-0.0216  h4:-0.0251  h5:+0.0284  h6:-0.0263  h7:-0.0280
+  -- Generation (T=0.7) --
+    'It was a dark and stormy' -> '\nNature-eastern island of Sodars and the town of the Cyrus. The inhabitants of t'
+    'The length of the hypotenuse' -> ' is not only a single reaction.\nWhen it comes to the reverse of a enzyme, it is '
+    'The President of the United' -> ' States, the U.S. Department of Health, and the U.S. Department of Health and Hu'
+    'Once upon a time there was' -> ' no doubt that the whole world could not be any other thing.\n- What a person of '
+    'The results indicate that' -> ' we can see how much the world will find the most important, but that we can fin'
+  --
+  Passkey...
+  mean=18.3%  (0/12 distances >50%)
+  d=1:20%  d=2:20%  d=4:30%  d=8:20%  d=16:20%  d=32:30%  d=64:20%  d=128:20%  d=256:10%  d=512:10%  d=1024:10%  d=1536:10%
+  Step 200/1648 | Loss 4.5649
+  Step 400/1648 | Loss 4.5044
+  Step 600/1648 | Loss 4.3101
+  Step 800/1648 | Loss 4.3019
+  Step 1000/1648 | Loss 4.0257
+  Step 1200/1648 | Loss 4.1663
+  Step 1400/1648 | Loss 4.1961
+  Step 1600/1648 | Loss 4.2699
+Ep 2/10 | Train 4.3046 | Val 4.0747 PPL 58.8 * BEST | 3599s (28%C) | ep=1710s
+  DSQG pos-bias: |mean|=3.5130 |max|=13.3638 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.1219 |max|=0.6229
+  IF gains:      h0:0.98  h1:0.96  h2:0.96  h3:0.99  h4:1.01  h5:0.95  h6:1.00  h7:0.99
+  phase_base:    |mean|=0.0230 |max|=0.2471 sparse=0.0230 plane_diff=0.0330
+  phase_base_sp: h0:0.032  h1:0.024  h2:0.024  h3:0.022  h4:0.020  h5:0.026  h6:0.021  h7:0.015
+  plane0 sparse: h0:-0.000  h1:+0.008  h2:-0.002  h3:+0.022  h4:+0.007  h5:+0.010  h6:+0.009  h7:+0.003
+  plane1 sparse: h0:-0.012  h1:+0.000  h2:-0.007  h3:-0.000  h4:-0.008  h5:+0.020  h6:+0.006  h7:-0.003
+  phase_gain:    |mean|=0.0008 |max|=0.0088 sparse=0.0008
+  phase_gain_hd: h0:0.0007  h1:0.0007  h2:0.0009  h3:0.0007  h4:0.0008  h5:0.0008  h6:0.0009  h7:0.0007
+  probe norms:   q=[0.0647,0.0664] k=[0.0794,0.0671]
+  npci_theta_k:  h0:-0.0663  h1:-0.0868  h2:-0.0665  h3:-0.0720  h4:+0.0583  h5:-0.0544  h6:+0.0717  h7:-0.0711
+  npci_theta_v:  h0:+0.0448  h1:-0.0346  h2:-0.0328  h3:-0.0249  h4:-0.0319  h5:+0.0342  h6:-0.0319  h7:-0.0330
+  -- Generation (T=0.7) --
+    'It was a dark and stormy' -> ' storm, that had been a part of the United States, and that it was the first of '
+    'The length of the hypotenuse' -> ' is the height of the temperature. In the system, the temperature of the tempera'
+    'The President of the United' -> ' States, who was the President of the United States, was also responsible for th'
+    'Once upon a time there was' -> ' no great opportunity to work in the world.\nMaimon of the day, during the reign '
+    'The results indicate that' -> ' the individual receives a particular amount of money.\nThe number of people who '
+  --
+  Passkey...
+  mean=35.8%  (4/12 distances >50%)
+  d=1:30%  d=2:30%  d=4:30%  d=8:50%  d=16:50%  d=32:70%  d=64:50%  d=128:40%  d=256:30%  d=512:20%  d=1024:20%  d=1536:10%
+  Step 200/1648 | Loss 3.9978
+  Step 400/1648 | Loss 3.8170
+  Step 600/1648 | Loss 3.9958
+  Step 800/1648 | Loss 4.2688
+  Step 1000/1648 | Loss 4.2217
+  Step 1200/1648 | Loss 4.0148
+  Step 1400/1648 | Loss 4.0618
+  Step 1600/1648 | Loss 4.0830
+Ep 3/10 | Train 4.0461 | Val 3.9227 PPL 50.5 * BEST | 5357s (42%C) | ep=1687s
+  DSQG pos-bias: |mean|=3.4310 |max|=12.8229 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.1410 |max|=0.7412
+  IF gains:      h0:0.98  h1:0.95  h2:0.94  h3:0.98  h4:1.00  h5:0.92  h6:0.98  h7:0.95
+  phase_base:    |mean|=0.0279 |max|=0.2642 sparse=0.0279 plane_diff=0.0414
+  phase_base_sp: h0:0.039  h1:0.032  h2:0.030  h3:0.028  h4:0.024  h5:0.028  h6:0.025  h7:0.016
+  plane0 sparse: h0:+0.005  h1:+0.010  h2:+0.001  h3:+0.024  h4:+0.006  h5:+0.007  h6:+0.010  h7:+0.004
+  plane1 sparse: h0:-0.017  h1:-0.004  h2:-0.008  h3:+0.003  h4:-0.005  h5:+0.024  h6:+0.005  h7:-0.005
+  phase_gain:    |mean|=0.0007 |max|=0.0087 sparse=0.0007
+  phase_gain_hd: h0:0.0007  h1:0.0007  h2:0.0008  h3:0.0007  h4:0.0007  h5:0.0007  h6:0.0008  h7:0.0006
+  probe norms:   q=[0.0621,0.0637] k=[0.0761,0.0643]
+  npci_theta_k:  h0:-0.0752  h1:-0.1001  h2:-0.0809  h3:-0.0855  h4:+0.0716  h5:-0.0648  h6:+0.0863  h7:-0.0850
+  npci_theta_v:  h0:+0.0490  h1:-0.0414  h2:-0.0353  h3:-0.0271  h4:-0.0359  h5:+0.0376  h6:-0.0351  h7:-0.0371
+  -- Generation (T=0.7) --
+    'It was a dark and stormy' -> ' man with a heart in his hand. He was silent in the hands of his followers, and '
+    'The length of the hypotenuse' -> ' is much larger than the length of the ridge, but the position of the tingling o'
+    'The President of the United' -> ' States, the President of the United States, and the American President of the U'
+    'Once upon a time there was' -> ' no place in the United States. The United States was a great place to keep the '
+    'The results indicate that' -> ' the upper portion of the upper portion of the upper portion of the upper portio'
+  --
+  Passkey...
+  mean=60.8%  (11/12 distances >50%)
+  d=1:60%  d=2:50%  d=4:60%  d=8:80%  d=16:50%  d=32:70%  d=64:70%  d=128:70%  d=256:70%  d=512:60%  d=1024:50%  d=1536:40%
+  Step 200/1648 | Loss 3.9844
+  Step 400/1648 | Loss 3.9929
+  Step 600/1648 | Loss 4.0022
+  Step 800/1648 | Loss 3.6103
+  Step 1000/1648 | Loss 3.7978
+  Step 1200/1648 | Loss 3.9547
+  Step 1400/1648 | Loss 3.7916
+  Step 1600/1648 | Loss 3.8663
+Ep 4/10 | Train 3.9109 | Val 3.8358 PPL 46.3 * BEST | 7042s (56%C) | ep=1614s
+  DSQG pos-bias: |mean|=3.3576 |max|=12.3850 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.1509 |max|=0.8616
+  IF gains:      h0:0.98  h1:0.95  h2:0.93  h3:0.97  h4:1.00  h5:0.91  h6:0.96  h7:0.92
+  phase_base:    |mean|=0.0317 |max|=0.2767 sparse=0.0317 plane_diff=0.0477
+  phase_base_sp: h0:0.045  h1:0.038  h2:0.036  h3:0.033  h4:0.027  h5:0.030  h6:0.027  h7:0.018
+  plane0 sparse: h0:+0.009  h1:+0.013  h2:+0.003  h3:+0.024  h4:+0.006  h5:+0.006  h6:+0.010  h7:+0.003
+  plane1 sparse: h0:-0.020  h1:-0.008  h2:-0.008  h3:+0.006  h4:-0.005  h5:+0.024  h6:+0.007  h7:-0.005
+  phase_gain:    |mean|=0.0007 |max|=0.0084 sparse=0.0007
+  phase_gain_hd: h0:0.0007  h1:0.0007  h2:0.0008  h3:0.0007  h4:0.0007  h5:0.0007  h6:0.0008  h7:0.0006
+  probe norms:   q=[0.0599,0.0614] k=[0.0734,0.0621]
+  npci_theta_k:  h0:-0.0811  h1:-0.1064  h2:-0.0886  h3:-0.0936  h4:+0.0812  h5:-0.0705  h6:+0.0935  h7:-0.0929
+  npci_theta_v:  h0:+0.0511  h1:-0.0466  h2:-0.0371  h3:-0.0286  h4:-0.0386  h5:+0.0397  h6:-0.0373  h7:-0.0406
+  -- Generation (T=0.7) --
+    'It was a dark and stormy' -> ' place that had the most trouble. They had a very large, irregular heart, and th'
+    'The length of the hypotenuse' -> ', the degree of the peritoneal or trout, the peritoneal peritoneal peritoneal pe'
+    'The President of the United' -> ' States is a member of the United States and is a member of the United States. T'
+    'Once upon a time there was' -> ' a general public view of the state that it was the first thing to be seen, but '
+    'The results indicate that' -> ' the group’s symptoms are similar to those of other individuals.\nThe results sug'
+  --
+  Passkey...
+  mean=84.2%  (12/12 distances >50%)
+  d=1:90%  d=2:90%  d=4:90%  d=8:90%  d=16:90%  d=32:90%  d=64:90%  d=128:80%  d=256:90%  d=512:70%  d=1024:80%  d=1536:60%
+  Step 200/1648 | Loss 3.8294
+  Step 400/1648 | Loss 3.9224
+  Step 600/1648 | Loss 3.8309
+  Step 800/1648 | Loss 4.0303
+  Step 1000/1648 | Loss 3.5858
+  Step 1200/1648 | Loss 3.9831
+  Step 1400/1648 | Loss 3.9197
+  Step 1600/1648 | Loss 3.9583
+Ep 5/10 | Train 3.8266 | Val 3.7723 PPL 43.5 * BEST | 8818s (70%C) | ep=1706s
+  DSQG pos-bias: |mean|=3.2982 |max|=12.0434 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.1562 |max|=0.9342
+  IF gains:      h0:0.98  h1:0.94  h2:0.93  h3:0.97  h4:1.00  h5:0.90  h6:0.94  h7:0.90
+  phase_base:    |mean|=0.0346 |max|=0.2914 sparse=0.0346 plane_diff=0.0527
+  phase_base_sp: h0:0.048  h1:0.041  h2:0.040  h3:0.036  h4:0.029  h5:0.034  h6:0.030  h7:0.018
+  plane0 sparse: h0:+0.011  h1:+0.014  h2:+0.006  h3:+0.024  h4:+0.006  h5:+0.004  h6:+0.009  h7:+0.003
+  plane1 sparse: h0:-0.024  h1:-0.011  h2:-0.008  h3:+0.008  h4:-0.006  h5:+0.023  h6:+0.009  h7:-0.004
+  phase_gain:    |mean|=0.0007 |max|=0.0080 sparse=0.0007
+  phase_gain_hd: h0:0.0007  h1:0.0007  h2:0.0008  h3:0.0007  h4:0.0007  h5:0.0007  h6:0.0008  h7:0.0006
+  probe norms:   q=[0.0582,0.0597] k=[0.0714,0.0603]
+  npci_theta_k:  h0:-0.0851  h1:-0.1103  h2:-0.0925  h3:-0.1003  h4:+0.0868  h5:-0.0745  h6:+0.0972  h7:-0.0973
+  npci_theta_v:  h0:+0.0521  h1:-0.0501  h2:-0.0383  h3:-0.0299  h4:-0.0401  h5:+0.0415  h6:-0.0386  h7:-0.0436
+  -- Generation (T=0.7) --
+    'It was a dark and stormy' -> ' place to begin.\n“The people of Lodhi who had a peculiar fear of God were in fac'
+    'The length of the hypotenuse' -> ' is a function of the position of the hypotenuse.\nThe end result of the aorta is'
+    'The President of the United' -> ' States has stated that the president is not a citizen of the United States, and'
+    'Once upon a time there was' -> ' no reason to think that the English were not able to settle the English, and th'
+    'The results indicate that' -> ' the American economy is an enormous problem.\nThe US economy has been the source'
+  --
+  Passkey...
+  mean=97.5%  (12/12 distances >50%)
+  d=1:100%  d=2:100%  d=4:100%  d=8:100%  d=16:100%  d=32:100%  d=64:100%  d=128:100%  d=256:100%  d=512:90%  d=1024:100%  d=1536:80%
+  Step 200/1648 | Loss 3.8234
+  Step 400/1648 | Loss 3.6816
+  Step 600/1648 | Loss 3.4707
+  Step 800/1648 | Loss 3.6381
+  Step 1000/1648 | Loss 3.7787
+  Step 1200/1648 | Loss 3.7239
+  Step 1400/1648 | Loss 3.8419
+  Step 1600/1648 | Loss 3.9977
+Ep 6/10 | Train 3.7639 | Val 3.7325 PPL 41.8 * BEST | 10571s (84%C) | ep=1682s
+  DSQG pos-bias: |mean|=3.2542 |max|=11.7969 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.1589 |max|=0.9758
+  IF gains:      h0:0.98  h1:0.94  h2:0.93  h3:0.97  h4:1.00  h5:0.90  h6:0.93  h7:0.89
+  phase_base:    |mean|=0.0365 |max|=0.3158 sparse=0.0365 plane_diff=0.0555
+  phase_base_sp: h0:0.050  h1:0.044  h2:0.044  h3:0.037  h4:0.031  h5:0.036  h6:0.031  h7:0.019
+  plane0 sparse: h0:+0.013  h1:+0.015  h2:+0.008  h3:+0.024  h4:+0.006  h5:+0.003  h6:+0.009  h7:+0.002
+  plane1 sparse: h0:-0.025  h1:-0.014  h2:-0.007  h3:+0.009  h4:-0.007  h5:+0.022  h6:+0.011  h7:-0.004
+  phase_gain:    |mean|=0.0007 |max|=0.0077 sparse=0.0007
+  phase_gain_hd: h0:0.0007  h1:0.0007  h2:0.0008  h3:0.0007  h4:0.0007  h5:0.0007  h6:0.0008  h7:0.0006
+  probe norms:   q=[0.0570,0.0584] k=[0.0699,0.0591]
+  npci_theta_k:  h0:-0.0882  h1:-0.1125  h2:-0.0947  h3:-0.1039  h4:+0.0906  h5:-0.0774  h6:+0.0990  h7:-0.1001
+  npci_theta_v:  h0:+0.0526  h1:-0.0531  h2:-0.0392  h3:-0.0308  h4:-0.0413  h5:+0.0426  h6:-0.0396  h7:-0.0460
+  -- Generation (T=0.7) --
+    'It was a dark and stormy' -> ' place. We had to be a great and wise man and the living God of the universe.\nIn'
+    'The length of the hypotenuse' -> ' is not constant, and the magnitude of the hypotenuse is constant.\nWeighing the '
+    'The President of the United' -> ' States.\nThe President of the United States, The Secretary of State, and the Sec'
+    'Once upon a time there was' -> ' a central grid.\nThe other problem was that a grid had to be built on the outsid'
+    'The results indicate that' -> ' the argument is true. However, the majority of arguments in favor of the differ'
+  --
+  Passkey...
+  mean=95.0%  (12/12 distances >50%)
+  d=1:100%  d=2:100%  d=4:100%  d=8:100%  d=16:100%  d=32:100%  d=64:100%  d=128:100%  d=256:100%  d=512:80%  d=1024:80%  d=1536:80%
+  Step 200/1648 | Loss 3.7271
+  Step 400/1648 | Loss 3.6814
+  Step 600/1648 | Loss 3.8319
+  Step 800/1648 | Loss 3.6806
+  Step 1000/1648 | Loss 3.8618
+  Step 1200/1648 | Loss 3.4643
+  Step 1400/1648 | Loss 3.6932
+  Step 1600/1648 | Loss 3.7641
+Ep 7/10 | Train 3.7152 | Val 3.7034 PPL 40.6 * BEST | 12325s (98%C) | ep=1683s
+  DSQG pos-bias: |mean|=3.2253 |max|=11.6384 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.1600 |max|=0.9985
+  IF gains:      h0:0.98  h1:0.94  h2:0.93  h3:0.97  h4:1.00  h5:0.90  h6:0.93  h7:0.88
+  phase_base:    |mean|=0.0378 |max|=0.3225 sparse=0.0378 plane_diff=0.0575
+  phase_base_sp: h0:0.051  h1:0.046  h2:0.046  h3:0.039  h4:0.032  h5:0.037  h6:0.032  h7:0.020
+  plane0 sparse: h0:+0.014  h1:+0.016  h2:+0.009  h3:+0.024  h4:+0.005  h5:+0.002  h6:+0.008  h7:+0.002
+  plane1 sparse: h0:-0.025  h1:-0.016  h2:-0.006  h3:+0.010  h4:-0.008  h5:+0.022  h6:+0.011  h7:-0.003
+  phase_gain:    |mean|=0.0007 |max|=0.0075 sparse=0.0007
+  phase_gain_hd: h0:0.0007  h1:0.0007  h2:0.0008  h3:0.0006  h4:0.0007  h5:0.0007  h6:0.0008  h7:0.0006
+  probe norms:   q=[0.0562,0.0577] k=[0.0690,0.0583]
+  npci_theta_k:  h0:-0.0904  h1:-0.1141  h2:-0.0961  h3:-0.1069  h4:+0.0932  h5:-0.0796  h6:+0.1000  h7:-0.1021
+  npci_theta_v:  h0:+0.0529  h1:-0.0551  h2:-0.0400  h3:-0.0316  h4:-0.0422  h5:+0.0434  h6:-0.0405  h7:-0.0478
+  -- Generation (T=0.7) --
+    'It was a dark and stormy' -> ' summer. The rain was the result of an unusually cold winter and a warm winter. '
+    'The length of the hypotenuse' -> ' is slightly higher than the length of the hypotenuse. This is a very short, but'
+    'The President of the United' -> ' States is on the border with France and Germany. He has been the head of the mi'
+    'Once upon a time there was' -> ' a very similar story, as the only way to prove the truth of this story was to f'
+    'The results indicate that' -> ' there are only two studies that have produced viable vaccines.\nThe first study '
+  --
+  Passkey...
+  mean=99.2%  (12/12 distances >50%)
+  d=1:100%  d=2:100%  d=4:100%  d=8:100%  d=16:100%  d=32:100%  d=64:100%  d=128:100%  d=256:100%  d=512:100%  d=1024:100%  d=1536:90%
+  Step 200/1648 | Loss 3.8498
+  Step 400/1648 | Loss 3.5545
+  Step 600/1648 | Loss 3.7527
+  Step 800/1648 | Loss 3.6248
+  Step 1000/1648 | Loss 3.5977
+  Step 1200/1648 | Loss 3.6754
+  Step 1400/1648 | Loss 3.5761
+  Step 1600/1648 | Loss 3.8171
+Ep 8/10 | Train 3.6867 | Val 3.6869 PPL 39.9 * BEST | 14078s (111%C) | ep=1683s
+  DSQG pos-bias: |mean|=3.2095 |max|=11.5563 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.1603 |max|=1.0089
+  IF gains:      h0:0.98  h1:0.94  h2:0.93  h3:0.97  h4:1.00  h5:0.90  h6:0.92  h7:0.88
+  phase_base:    |mean|=0.0385 |max|=0.3267 sparse=0.0385 plane_diff=0.0585
+  phase_base_sp: h0:0.052  h1:0.046  h2:0.048  h3:0.040  h4:0.033  h5:0.037  h6:0.032  h7:0.020
+  plane0 sparse: h0:+0.015  h1:+0.016  h2:+0.010  h3:+0.024  h4:+0.005  h5:+0.001  h6:+0.008  h7:+0.002
+  plane1 sparse: h0:-0.026  h1:-0.017  h2:-0.006  h3:+0.010  h4:-0.009  h5:+0.022  h6:+0.012  h7:-0.003
+  phase_gain:    |mean|=0.0007 |max|=0.0074 sparse=0.0007
+  phase_gain_hd: h0:0.0007  h1:0.0007  h2:0.0008  h3:0.0006  h4:0.0007  h5:0.0007  h6:0.0007  h7:0.0006
+  probe norms:   q=[0.0558,0.0572] k=[0.0685,0.0579]
+  npci_theta_k:  h0:-0.0914  h1:-0.1151  h2:-0.0966  h3:-0.1086  h4:+0.0948  h5:-0.0807  h6:+0.1003  h7:-0.1029
+  npci_theta_v:  h0:+0.0530  h1:-0.0564  h2:-0.0404  h3:-0.0321  h4:-0.0428  h5:+0.0438  h6:-0.0410  h7:-0.0490
+  -- Generation (T=0.7) --
+    'It was a dark and stormy' -> ' storm, the airy sky was filled with water, and the air was covered with a thin '
+    'The length of the hypotenuse' -> ' is equal to the length of the hypotenuse, which is the length of the hypotenuse'
+    'The President of the United' -> ' States, he was the first President of the United States to grant the Secretary '
+    'Once upon a time there was' -> ' an increasing demand for water in the South. The Government decided to put a la'
+    'The results indicate that' -> ' the majority of people who are in the U.S. are having trouble finding their own'
+  --
+  Passkey...
+  mean=98.3%  (12/12 distances >50%)
+  d=1:100%  d=2:100%  d=4:100%  d=8:100%  d=16:100%  d=32:100%  d=64:100%  d=128:100%  d=256:100%  d=512:100%  d=1024:100%  d=1536:80%
+  Step 200/1648 | Loss 3.6297
+  Step 400/1648 | Loss 3.7447
+  Step 600/1648 | Loss 3.6512
+  Step 800/1648 | Loss 3.5290
+  Step 1000/1648 | Loss 3.8141
+  Step 1200/1648 | Loss 3.6194
+  Step 1400/1648 | Loss 3.7388
+  Step 1600/1648 | Loss 3.7387
+Ep 9/10 | Train 3.6604 | Val 3.6782 PPL 39.6 * BEST | 15765s (125%C) | ep=1616s
+  DSQG pos-bias: |mean|=3.2033 |max|=11.5247 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.1604 |max|=1.0138
+  IF gains:      h0:0.98  h1:0.94  h2:0.93  h3:0.97  h4:1.00  h5:0.90  h6:0.92  h7:0.88
+  phase_base:    |mean|=0.0387 |max|=0.3284 sparse=0.0387 plane_diff=0.0589
+  phase_base_sp: h0:0.052  h1:0.047  h2:0.048  h3:0.040  h4:0.033  h5:0.038  h6:0.032  h7:0.020
+  plane0 sparse: h0:+0.015  h1:+0.016  h2:+0.010  h3:+0.024  h4:+0.005  h5:+0.001  h6:+0.008  h7:+0.002
+  plane1 sparse: h0:-0.026  h1:-0.017  h2:-0.006  h3:+0.010  h4:-0.009  h5:+0.022  h6:+0.012  h7:-0.003
+  phase_gain:    |mean|=0.0007 |max|=0.0074 sparse=0.0007
+  phase_gain_hd: h0:0.0007  h1:0.0007  h2:0.0008  h3:0.0006  h4:0.0007  h5:0.0007  h6:0.0007  h7:0.0006
+  probe norms:   q=[0.0557,0.0571] k=[0.0683,0.0577]
+  npci_theta_k:  h0:-0.0919  h1:-0.1156  h2:-0.0969  h3:-0.1095  h4:+0.0955  h5:-0.0812  h6:+0.1004  h7:-0.1032
+  npci_theta_v:  h0:+0.0531  h1:-0.0569  h2:-0.0407  h3:-0.0324  h4:-0.0430  h5:+0.0440  h6:-0.0412  h7:-0.0495
+  -- Generation (T=0.7) --
+    'It was a dark and stormy' -> ' one, but it was a very low, if not very strong, thing. The yellow, brown, and b'
+    'The length of the hypotenuse' -> ' and the length of the hypotenuse is known as the diameter of the hypotenuse. Th'
+    'The President of the United' -> ' States of America, elected in the presidential election, was elected to the pre'
+    'Once upon a time there was' -> ' a problem, it was no longer easy to see what was happening in the past. The usu'
+    'The results indicate that' -> ' the US has made the most of its attempts to correct the problem of inference. T'
+  --
+  Passkey...
+  mean=97.5%  (12/12 distances >50%)
+  d=1:100%  d=2:100%  d=4:100%  d=8:100%  d=16:100%  d=32:100%  d=64:100%  d=128:100%  d=256:100%  d=512:90%  d=1024:100%  d=1536:80%
+  Step 200/1648 | Loss 3.7896
+  Step 400/1648 | Loss 3.6603
+  Step 600/1648 | Loss 3.7184
+  Step 800/1648 | Loss 3.7747
+  Step 1000/1648 | Loss 3.7209
+  Step 1200/1648 | Loss 3.6463
+  Step 1400/1648 | Loss 3.6927
+  Step 1600/1648 | Loss 3.7003
+Ep 10/10 | Train 3.6510 | Val 3.6769 PPL 39.5 * BEST | 17543s (139%C) | ep=1708s
+  DSQG pos-bias: |mean|=3.2024 |max|=11.5201 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.1604 |max|=1.0145
+  IF gains:      h0:0.98  h1:0.94  h2:0.93  h3:0.97  h4:1.00  h5:0.90  h6:0.92  h7:0.88
+  phase_base:    |mean|=0.0388 |max|=0.3284 sparse=0.0388 plane_diff=0.0589
+  phase_base_sp: h0:0.052  h1:0.047  h2:0.048  h3:0.040  h4:0.033  h5:0.038  h6:0.032  h7:0.020
+  plane0 sparse: h0:+0.015  h1:+0.016  h2:+0.010  h3:+0.024  h4:+0.005  h5:+0.001  h6:+0.008  h7:+0.002
+  plane1 sparse: h0:-0.026  h1:-0.017  h2:-0.006  h3:+0.010  h4:-0.009  h5:+0.022  h6:+0.012  h7:-0.003
+  phase_gain:    |mean|=0.0007 |max|=0.0074 sparse=0.0007
+  phase_gain_hd: h0:0.0007  h1:0.0007  h2:0.0008  h3:0.0006  h4:0.0007  h5:0.0007  h6:0.0007  h7:0.0006
+  probe norms:   q=[0.0556,0.0571] k=[0.0682,0.0577]
+  npci_theta_k:  h0:-0.0920  h1:-0.1157  h2:-0.0969  h3:-0.1096  h4:+0.0956  h5:-0.0813  h6:+0.1004  h7:-0.1032
+  npci_theta_v:  h0:+0.0531  h1:-0.0570  h2:-0.0407  h3:-0.0325  h4:-0.0430  h5:+0.0441  h6:-0.0412  h7:-0.0496
+  -- Generation (T=0.7) --
+    'It was a dark and stormy' -> ' night. It was the last day of the year that the United States was not a full mo'
+    'The length of the hypotenuse' -> ', which is not a function of the speed of sound and/or sound. The speed of sound'
+    'The President of the United' -> ' States, the President of the United States, was elected to the Supreme Court an'
+    'Once upon a time there was' -> ' no way of knowing what was going on in the world.\nIn the early days of the Leag'
+    'The results indicate that' -> ' in a certain area, the individual should be examined by a physician for a speci'
+  --
+  Passkey...
+  mean=98.3%  (12/12 distances >50%)
+  d=1:100%  d=2:100%  d=4:100%  d=8:100%  d=16:100%  d=32:100%  d=64:100%  d=128:100%  d=256:100%  d=512:100%  d=1024:100%  d=1536:80%
+
+  condU-v5 TEST: PPL 39.998 | Loss 3.6888
+  condU V3 baseline: 52.237 PPL | delta = -12.239
+  condM 85M:         36.042 PPL | delta = +3.956
+
+  -- Temperature sweep --
+
+  [greedy]
+    'It was a dark and stormy' -> ' night.\nThe first thing that happened was the first time the sun was shining. Th'
+    'The length of the hypotenuse' -> ' is the same as the length of the hypotenuse. The hypotenuse is the same as the '
+    'The President of the United' -> ' States, the President of the United States, and the President of the United Sta'
+    'Once upon a time there was' -> ' a great deal of work in the field of medicine. The first was the use of the wor'
+    'The results indicate that' -> ' the number of people who are in the United States is not equal to the number of'
+
+  [T=0.7]
+    'It was a dark and stormy' -> ' night, and a cloud of mountains full of water and a windy sky.\nThe gloom of the'
+    'The length of the hypotenuse' -> ' in a single factor is typically determined by the amount of pressure in the sin'
+    'The President of the United' -> ' States is the president of the United States. The President is the president of'
+    'Once upon a time there was' -> ' a scanty and bloody wound on the surface of the earth. The light was as heavy a'
+    'The results indicate that' -> ' the active ingredient of the product is a “universal” ingredient.\nThe active in'
+
+  [T=1.0]
+    'It was a dark and stormy' -> ' cloud, and when in that year the United States dropped out of the drip every ni'
+    'The length of the hypotenuse' -> ' lies at the low-pressure point that occupies the primary calcium channel. The o'
+    'The President of the United' -> ' States has indicated that many new lawsuits in public and private Matters are a'
+    'Once upon a time there was' -> ' a committee of directors, managers, doctors, and others in every direction, and'
+    'The results indicate that' -> ' the overall trajectory of civilization is within consistent manner.\n- Statement'
+
+  Final passkey: mean=98.3%  (12/12 distances >50%)
+  d=1:100%  d=2:100%  d=4:100%  d=8:100%  d=16:100%  d=32:100%  d=64:100%  d=128:100%  d=256:100%  d=512:100%  d=1024:100%  d=1536:80%
+
+  Results -> logs/condU_v5_results.json

@@ -1,0 +1,64 @@
+
+============================================================
+  eval_suite.py — d41_35m
+  Device: cuda
+============================================================
+
+  Model: d41_35m 35M (dense=48, sparse=[96,128,384], J=52)
+
+  Loading tokenizer...
+  Loading model...
+  Loaded d41_35m 35M (dense=48, sparse=[96,128,384], J=52): 38,732,618 params from best.pt
+
+  [1/4] Calibration...
+    entropy=6.944 bits  top1=0.226  eff_vocab=23.4  (14.8s)
+
+  [2/4] Distance-conditioned loss (wikitext-103)...
+    Loading wikitext-103 test split...
+    Using 17 full 2048-token chunks
+    Buckets:
+    0-16          PPL= 221.87  n=  289
+    17-64         PPL= 122.57  n=  816
+    65-256        PPL=  66.30  n= 3264
+    257-512       PPL=  58.84  n= 4352
+    513-1024      PPL=  49.09  n= 8704
+    1025-2047     PPL=  46.95  n=17374
+    (3.8s)
+
+  [3/4] Few-shot string copy...
+    exact=8/15  (53.3%)  mean_lev=5.93  (0.7s)
+
+  [4/4] Passkey retrieval...
+    d=    1: accuracy=100.0%
+    d=    2: accuracy=100.0%
+    d=    4: accuracy=100.0%
+    d=    8: accuracy=100.0%
+    d=   16: accuracy=100.0%
+    d=   32: accuracy=100.0%
+    d=   64: accuracy=100.0%
+    d=  128: accuracy=100.0%
+    d=  256: accuracy=100.0%
+    d=  512: accuracy=100.0%
+    d= 1024: accuracy=80.0%
+    d= 1536: accuracy=20.0%
+    mean_accuracy=91.7%  (0.2s)
+
+  Generation samples (greedy + T=0.7)...
+
+  [greedy]
+    'It was a dark and stormy'               → ' day, and the sun was shining.\nThe sun was shining, and the sun was shining.\nThe'
+    'The length of the hypotenuse'           → ' is about 1.5 mm. The length of the hypotenuse is about 1.5 mm. The length of th'
+    'The President of the United'            → ' States, President of the United States, and President of the United States, is '
+    'Once upon a time there was'             → ' a great deal of work in the field of medicine, and the most important of these '
+    'The results indicate that'              → ' the number of people who are diagnosed with the disease is increasing.\nThe numb'
+
+  [T=0.7]
+    'It was a dark and stormy'               → ' day and all that was there was no light from the sun and there was no light fro'
+    'The length of the hypotenuse'           → ' is 1.6 m, with a minimum length of 1.5 m. The length of the hypotenuse is 1.2 m'
+    'The President of the United'            → ' States is at liberty to hold the position of President, and to preserve the fre'
+    'Once upon a time there was'             → ' a great deal of food for the young man, and the people had come to him for the '
+    'The results indicate that'              → ' the trade-offs are small and the opportunities are small. This can be challengi'
+
+  Results saved to /home/dlewis3/Desktop/AI/DWARF/evals/logs/eval_suite_d41_35m_20260310_064102.json
+============================================================
+

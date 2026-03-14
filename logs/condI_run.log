@@ -1,0 +1,248 @@
+======================================================================
+  WAVE FIELD 13M — CONDITION I
+  Causal D4 DWT + Query-Conditioned Scale Selection (Pre-Gather)
+  Testing: does per-position scale selection fix query-less gather?
+======================================================================
+
+  Device: cuda
+  GPU: NVIDIA GeForce RTX 4090
+Loading OpenWebText (up to 100,000 docs)...
+  25,000 docs...
+  50,000 docs...
+  75,000 docs...
+  100,000 docs...
+  100,000 docs | train 95,000 | val 2,500 | test 2,500
+
+Training BPE tokenizer (vocab=32000)...
+
+
+
+  Saved → /home/dlewis3/Desktop/AI/wave-field-llm/benchmarks/2048_condI_tokenizer.json
+  Vocab: 32000 tokens
+Encoding data (max_seq_len=2048)...
+  Train: 52,716 sequences
+  Val: 1,435 sequences
+  Test: 1,459 sequences
+
+Condition I: 14,117,840 params
+  (G had 14,115,728; delta = +2,112 from q_scale_proj)
+  Architecture: 6 layers × 8 heads × 256d | FFN 1024
+  q_scale_proj: head_dim(32) × n_scales(11) × 6 layers = 2,112 params
+  Wave field: G=seq_len=2048, stride=1
+  Gains: position-specific via Q (not fixed per scale/head)
+
+  Scale receptive fields:
+    j= 0: dilation=   1, RF=    4 tokens (  0.2% of context)
+    j= 1: dilation=   2, RF=    8 tokens (  0.4% of context)
+    j= 2: dilation=   4, RF=   16 tokens (  0.8% of context)
+    j= 3: dilation=   8, RF=   32 tokens (  1.6% of context)
+    j= 4: dilation=  16, RF=   64 tokens (  3.1% of context)
+    j= 5: dilation=  32, RF=  128 tokens (  6.2% of context)
+    j= 6: dilation=  64, RF=  256 tokens ( 12.5% of context)
+    j= 7: dilation= 128, RF=  512 tokens ( 25.0% of context)
+    j= 8: dilation= 256, RF= 1024 tokens ( 50.0% of context)
+    j= 9: dilation= 512, RF= 2048 tokens (100.0% of context)
+    j=10: dilation=1024, RF= 4096 tokens (200.0% of context)
+Running causality check...
+  Positions 0-4: max |diff| = 0.00000000 (expect 0.0)
+  Position 5:    max |diff| = 1.381122 (expect >0)
+  Positions 6+:  max |diff| = 0.284562 (expect >0)
+  PASS — architecture is causal
+  Step 200/1648 | Loss 6.7507
+  Step 400/1648 | Loss 5.8573
+  Step 600/1648 | Loss 5.7439
+  Step 800/1648 | Loss 5.6466
+  Step 1000/1648 | Loss 5.6787
+  Step 1200/1648 | Loss 5.3608
+  Step 1400/1648 | Loss 5.2395
+  Step 1600/1648 | Loss 5.2035
+Ep 1/10 | Train 5.3064 | Val 5.2427 PPL 189.2 * BEST | 695s
+  Scale prior (top-3): j=10 rf=4096tok gain=0.101, j=0 rf=4tok gain=0.099, j=2 rf=16tok gain=0.096
+  (Note: actual gains are position-specific via Q)
+  ── Generation samples (greedy, 150 tokens) ──
+    'It was a dark and stormy' → ', and it was a good thing.\n\nI’m not sure I’m not going to be a lot of the people'
+    'The length of the hypotenuse' → ' of the world is the most important to the world.\n\nThe first thing is that the f'
+    'The President of the United' → ' States, the United States, and the United States, and the United States, and th'
+    'Once upon a time there was' → ' a lot of time to do with the same thing.\n\nThe idea of the problem is that the s'
+    'The results indicate that' → ' the results of the results are the results of the results of the results.\n\nThe '
+  ──
+  Step 200/1648 | Loss 5.2291
+  Step 400/1648 | Loss 5.2528
+  Step 600/1648 | Loss 5.0243
+  Step 800/1648 | Loss 4.8918
+  Step 1000/1648 | Loss 5.0384
+  Step 1200/1648 | Loss 4.9996
+  Step 1400/1648 | Loss 5.2989
+  Step 1600/1648 | Loss 4.9584
+Ep 2/10 | Train 4.9362 | Val 4.9148 PPL 136.3 * BEST | 1398s
+  Scale prior (top-3): j=10 rf=4096tok gain=0.105, j=0 rf=4tok gain=0.103, j=2 rf=16tok gain=0.096
+  (Note: actual gains are position-specific via Q)
+  ── Generation samples (greedy, 150 tokens) ──
+    'It was a dark and stormy' → ', and it was a very good thing.\n\nThe first thing I was to do was that was a litt'
+    'The length of the hypotenuse' → ' of the original version of the original version of the original version of the '
+    'The President of the United' → ' States, the United States, the United States, the United States, the United Sta'
+    'Once upon a time there was' → ' no such thing to be a good thing, it was a good thing to do.\n\nThe first thing I'
+    'The results indicate that' → ' the number of people who are not involved in the situation are not the most imp'
+  ──
+  Step 200/1648 | Loss 4.8402
+  Step 400/1648 | Loss 4.8617
+  Step 600/1648 | Loss 4.9684
+  Step 800/1648 | Loss 4.8280
+  Step 1000/1648 | Loss 4.7459
+  Step 1200/1648 | Loss 4.9821
+  Step 1400/1648 | Loss 4.7909
+  Step 1600/1648 | Loss 4.9520
+Ep 3/10 | Train 4.7409 | Val 4.7681 PPL 117.7 * BEST | 2105s
+  Scale prior (top-3): j=10 rf=4096tok gain=0.106, j=0 rf=4tok gain=0.106, j=2 rf=16tok gain=0.097
+  (Note: actual gains are position-specific via Q)
+  ── Generation samples (greedy, 150 tokens) ──
+    'It was a dark and stormy' → ', and it was a very good thing.\n\nThe first thing that was the most important thi'
+    'The length of the hypotenuse' → ' is the most important part of the world.\n\nThe most important thing to do is tha'
+    'The President of the United' → ' States, the United States, and the United States, and the United States, the Un'
+    'Once upon a time there was' → ' a chance that the city would be able to get a new home, and that would be a goo'
+    'The results indicate that' → ' the number of people who have been killed in the past are not only the ones who'
+  ──
+  Step 200/1648 | Loss 4.6777
+  Step 400/1648 | Loss 4.7855
+  Step 600/1648 | Loss 4.6977
+  Step 800/1648 | Loss 5.1075
+  Step 1000/1648 | Loss 4.5938
+  Step 1200/1648 | Loss 4.9120
+  Step 1400/1648 | Loss 4.5691
+  Step 1600/1648 | Loss 4.8959
+Ep 4/10 | Train 4.7671 | Val 4.6843 PPL 108.2 * BEST | 2849s
+  Scale prior (top-3): j=0 rf=4tok gain=0.108, j=10 rf=4096tok gain=0.107, j=2 rf=16tok gain=0.097
+  (Note: actual gains are position-specific via Q)
+  ── Generation samples (greedy, 150 tokens) ──
+    'It was a dark and stormy' → ', and it was a very good thing.\n\nThe first thing that was the first time was tha'
+    'The length of the hypotenuse' → ' was the most important factor in the history of the sport.\n\nThe most important '
+    'The President of the United' → ' States, the United States, and the United States, and the United States, the Un'
+    'Once upon a time there was' → ' no such thing to be a part of the game.\n\nThe first thing that was the first tim'
+    'The results indicate that' → ' the United States is not the most likely to be the most likely to be in the Uni'
+  ──
+  Step 200/1648 | Loss 4.6940
+  Step 400/1648 | Loss 4.7158
+  Step 600/1648 | Loss 4.7839
+  Step 800/1648 | Loss 4.6471
+  Step 1000/1648 | Loss 4.6755
+  Step 1200/1648 | Loss 4.2461
+  Step 1400/1648 | Loss 4.7029
+  Step 1600/1648 | Loss 4.6109
+Ep 5/10 | Train 4.7278 | Val 4.6248 PPL 102.0 * BEST | 3620s
+  Scale prior (top-3): j=0 rf=4tok gain=0.109, j=10 rf=4096tok gain=0.107, j=2 rf=16tok gain=0.097
+  (Note: actual gains are position-specific via Q)
+  ── Generation samples (greedy, 150 tokens) ──
+    'It was a dark and stormy' → ', and it was a very good thing.\n\nThe first thing that was the first thing was th'
+    'The length of the hypotenuse' → ' is the most important factor in the number of people who are in the middle of t'
+    'The President of the United' → ' States has been a major contributor to the U.S. Department of Defense.\n\nThe U.S'
+    'Once upon a time there was' → ' no such thing as a new location, it was a very difficult time to get a little m'
+    'The results indicate that' → ' the U.S. government has been able to provide a better understanding of the worl'
+  ──
+  Step 200/1648 | Loss 4.5529
+  Step 400/1648 | Loss 4.6820
+  Step 600/1648 | Loss 4.6248
+  Step 800/1648 | Loss 4.6457
+  Step 1000/1648 | Loss 4.6712
+  Step 1200/1648 | Loss 4.4841
+  Step 1400/1648 | Loss 4.7156
+  Step 1600/1648 | Loss 4.5152
+Ep 6/10 | Train 4.6563 | Val 4.5871 PPL 98.2 * BEST | 4329s
+  Scale prior (top-3): j=0 rf=4tok gain=0.110, j=10 rf=4096tok gain=0.107, j=2 rf=16tok gain=0.097
+  (Note: actual gains are position-specific via Q)
+  ── Generation samples (greedy, 150 tokens) ──
+    'It was a dark and stormy' → ', and it was a very good thing.\n\nThe first thing that happened was the first tim'
+    'The length of the hypotenuse' → ' is the most important factor in the number of people who are in the middle of t'
+    'The President of the United' → ' States has been a major contributor to the U.S. government’s decision to make t'
+    'Once upon a time there was' → ' no such thing as a few days ago, it was a very difficult time to get a little b'
+    'The results indicate that' → ' the government is not going to be able to do so.\n\nThe government has said it wi'
+  ──
+  Step 200/1648 | Loss 4.6860
+  Step 400/1648 | Loss 4.5457
+  Step 600/1648 | Loss 4.5103
+  Step 800/1648 | Loss 4.5698
+  Step 1000/1648 | Loss 4.6427
+  Step 1200/1648 | Loss 4.5475
+  Step 1400/1648 | Loss 4.5433
+  Step 1600/1648 | Loss 4.6781
+Ep 7/10 | Train 4.4857 | Val 4.5619 PPL 95.8 * BEST | 5037s
+  Scale prior (top-3): j=0 rf=4tok gain=0.110, j=10 rf=4096tok gain=0.107, j=2 rf=16tok gain=0.097
+  (Note: actual gains are position-specific via Q)
+  ── Generation samples (greedy, 150 tokens) ──
+    'It was a dark and stormy' → ', and it was a very good thing.\n\nThe first thing that happened was the first tim'
+    'The length of the hypotenuse' → ' is the most important factor in the number of the number of the number of the n'
+    'The President of the United' → ' States, the United States, and the United States, and the United States, the Un'
+    'Once upon a time there was' → ' no such thing as a new one, a new things were made.\n\nThe first thing that was t'
+    'The results indicate that' → ' the U.S. government is not the most effective way to protect the country from t'
+  ──
+  Step 200/1648 | Loss 4.4571
+  Step 400/1648 | Loss 4.6539
+  Step 600/1648 | Loss 4.3295
+  Step 800/1648 | Loss 4.4954
+  Step 1000/1648 | Loss 4.4058
+  Step 1200/1648 | Loss 4.8170
+  Step 1400/1648 | Loss 4.3562
+  Step 1600/1648 | Loss 4.6157
+Ep 8/10 | Train 4.5305 | Val 4.5454 PPL 94.2 * BEST | 5743s
+  Scale prior (top-3): j=0 rf=4tok gain=0.110, j=10 rf=4096tok gain=0.107, j=2 rf=16tok gain=0.097
+  (Note: actual gains are position-specific via Q)
+  ── Generation samples (greedy, 150 tokens) ──
+    'It was a dark and stormy' → ', and it was a very good thing.\n\nThe first thing that was going to happen was th'
+    'The length of the hypotenuse' → ' is the most important factor in the number of cases in the number of cases.\n\nTh'
+    'The President of the United' → ' States, the United States, and the United States, and the United States, the Un'
+    'Once upon a time there was' → ' no such thing as a new one, a new things would be a little more complicated.\n\nT'
+    'The results indicate that' → ' the government is not able to provide the information that is not available to '
+  ──
+  Step 200/1648 | Loss 4.5198
+  Step 400/1648 | Loss 4.3478
+  Step 600/1648 | Loss 4.5832
+  Step 800/1648 | Loss 4.5678
+  Step 1000/1648 | Loss 4.4804
+  Step 1200/1648 | Loss 4.4913
+  Step 1400/1648 | Loss 4.4730
+  Step 1600/1648 | Loss 4.6939
+Ep 9/10 | Train 4.4407 | Val 4.5387 PPL 93.6 * BEST | 6453s
+  Scale prior (top-3): j=0 rf=4tok gain=0.110, j=10 rf=4096tok gain=0.107, j=2 rf=16tok gain=0.097
+  (Note: actual gains are position-specific via Q)
+  ── Generation samples (greedy, 150 tokens) ──
+    'It was a dark and stormy' → ', and it was a very good thing.\n\nThe first thing that was going to happen was th'
+    'The length of the hypotenuse' → ' is the most important factor in the number of people who are in the middle of t'
+    'The President of the United' → " States has been a major contributor to the U.S. government's economic and the U"
+    'Once upon a time there was' → ' no such thing as a new one, a new things would be a little more complicated.\n\nT'
+    'The results indicate that' → ' the government is not able to provide the information that is not available to '
+  ──
+  Step 200/1648 | Loss 4.6183
+  Step 400/1648 | Loss 4.2815
+  Step 600/1648 | Loss 4.5248
+  Step 800/1648 | Loss 4.5155
+  Step 1000/1648 | Loss 4.6161
+  Step 1200/1648 | Loss 4.5312
+  Step 1400/1648 | Loss 4.5234
+  Step 1600/1648 | Loss 4.6150
+Ep 10/10 | Train 4.5293 | Val 4.5376 PPL 93.5 * BEST | 7158s
+  Scale prior (top-3): j=0 rf=4tok gain=0.110, j=10 rf=4096tok gain=0.107, j=2 rf=16tok gain=0.097
+  (Note: actual gains are position-specific via Q)
+  ── Generation samples (greedy, 150 tokens) ──
+    'It was a dark and stormy' → ', and it was a very good thing.\n\nThe first thing that was going to happen was th'
+    'The length of the hypotenuse' → ' is the most important factor in the number of people who are in the middle of t'
+    'The President of the United' → ' States, the United States, has been the first to be the first to be the first A'
+    'Once upon a time there was' → ' no such thing as a new one, a new things were made.\n\nThe first thing that was t'
+    'The results indicate that' → ' the government is not going to be able to do so.\n\nThe government has been tryin'
+  ──
+
+  CONDITION I TEST: PPL 93.3 | Loss 4.5356
+  Final dominant prior scale: j=0 (RF=4 tokens)
+  Full prior gains: j0=0.110 j1=0.097 j2=0.097 j3=0.095 j4=0.094 j5=0.091 j6=0.090 j7=0.088 j8=0.079 j9=0.052 j10=0.107
+
+======================================================================
+  CONDITION I RESULTS vs. ABLATION TABLE
+======================================================================
+  Model                                                   PPL
+  ────────────────────────────────────────────────────────────
+  Standard transformer 13M baseline                      64.5
+  Wave V4 [A] (G=4096, FFT, floor=0.05)                  86.8
+  Wave V4D [B] (+ dispersion β)                          87.9
+  Wave V4 + Morlet [C] (causal wavelet)                  87.2
+  Wave V4 + KdV [D] (nonlinear)                          99.6
+  Condition G (causal D4 DWT, fixed gains)               99.4
+  Condition H (G + Q-gate post-gather)                   ~101
+  Condition I (G + Q-scale pre-gather)                   93.3

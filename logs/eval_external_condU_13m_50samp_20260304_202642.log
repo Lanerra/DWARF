@@ -1,0 +1,14 @@
+============================================================
+  DWARF External Benchmark Evaluator
+============================================================
+  GPU: NVIDIA GeForce RTX 3090
+  Tasks: ['hellaswag', 'piqa', 'arc_easy', 'arc_challenge', 'winogrande', 'lambada']
+Traceback (most recent call last):
+  File "/home/dlewis3/Desktop/AI/DWARF/evals/eval_external.py", line 491, in <module>
+    main()
+  File "/home/dlewis3/Desktop/AI/DWARF/evals/eval_external.py", line 445, in main
+    tokenizer = load_tokenizer()
+                ^^^^^^^^^^^^^^^^
+  File "/home/dlewis3/Desktop/AI/DWARF/evals/eval_external.py", line 105, in load_tokenizer
+    raise FileNotFoundError(f'Tokenizer not found: {TOKENIZER}')
+FileNotFoundError: Tokenizer not found: /home/dlewis3/Desktop/AI/DWARF/evals/results/2048_condI_tokenizer.json

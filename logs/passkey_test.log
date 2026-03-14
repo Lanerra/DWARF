@@ -1,0 +1,86 @@
+======================================================================
+  DWARF condK — Passkey Retrieval Test
+  Tests: specific content preservation vs distributional coherence
+======================================================================
+  GPU: NVIDIA GeForce RTX 4090
+Tokenizer: 32000 tokens
+condK model: 13,855,424 parameters, checkpoint: /home/dlewis3/Desktop/AI/wave-field-llm/2048_condK_checkpoints/best.pt
+  Filler sentence: 11 tokens per repeat
+  Retrieval cue: 4 tokens
+  Passkey words (20): ['apple', 'tiger', 'robot', 'ocean', 'piano']...
+
+  Token counts for passkeys:
+    "apple" → 1 token(s): [18893]
+    "tiger" → 1 token(s): [24755]
+    "robot" → 1 token(s): [8554]
+    "ocean" → 1 token(s): [8038]
+    "piano" → 1 token(s): [18342]
+
+  Running 37 distance tests...
+    Distance    Accuracy   Mean Rank     Mean LogP   Dyadic?
+  ----------------------------------------------------------
+           4      10.0%      2634.9        -9.775    D4 tap
+           5      10.0%      2564.3        -9.465    non-D4
+           8      10.0%      3362.9       -10.217    D4 tap
+          10      10.0%      4688.0       -10.863    non-D4
+          12       5.0%      3605.7       -10.356    D4 tap
+          16      10.0%      4482.9       -10.563    D4 tap
+          20      10.0%      5127.3       -10.894    non-D4
+          24      10.0%      5447.6       -11.051    D4 tap
+          32      10.0%      5398.1       -11.034    D4 tap
+          40      10.0%      6822.4       -11.497    non-D4
+          48      10.0%      6490.7       -11.346    D4 tap
+          50      10.0%      7108.1       -11.667    non-D4
+          64      10.0%      5348.6       -10.986    D4 tap
+          80      10.0%      6761.4       -11.436    non-D4
+          96      10.0%      6975.3       -11.460    D4 tap
+         100      10.0%      6307.8       -11.457    non-D4
+         128      10.0%      6294.3       -11.327    D4 tap
+         160      10.0%      7051.0       -11.729    non-D4
+         192      10.0%      7012.1       -11.700    D4 tap
+         200      10.0%      6898.1       -11.544    non-D4
+         256      10.0%      5613.8       -11.066    D4 tap
+         300      10.0%      6721.9       -11.501    non-D4
+         320      10.0%      6459.4       -11.547    non-D4
+         384      10.0%      6903.6       -11.721    D4 tap
+         500      10.0%      7038.1       -11.762    non-D4
+         512      10.0%      6500.8       -11.593    D4 tap
+         640      10.0%      6695.9       -11.541    non-D4
+         750      10.0%      6715.9       -11.535    non-D4
+         768      10.0%      6775.4       -11.683    D4 tap
+        1000      10.0%      6883.6       -11.752    non-D4
+        1024      10.0%      5919.0       -11.373    D4 tap
+        1250      10.0%      7211.5       -11.765    non-D4
+        1280      10.0%      6628.2       -11.590    non-D4
+        1500      10.0%      6657.6       -11.583    non-D4
+        1536      10.0%      7215.5       -11.781    D4 tap
+        1700      10.0%      6926.4       -11.774    non-D4
+        1850      10.0%      6608.1       -11.528    non-D4
+
+  ==========================================================
+  D4 TAP OFFSETS vs NON-D4 OFFSETS (same distance ranges)
+  ==========================================================
+  D4 tap offsets:
+    Mean accuracy: 9.7%
+    Mean rank:     5645.9
+    Mean log-prob: -11.120
+  Non-D4 offsets:
+    Mean accuracy: 10.0%
+    Mean rank:     6393.7
+    Mean log-prob: -11.421
+
+  ==========================================================
+  RANDOM BASELINE (filler only, no passkey planted)
+  ==========================================================
+  Baseline accuracy (no passkey): 10.0%  (random chance = 10.0%)
+
+  ==========================================================
+  INTERPRETATION
+  ==========================================================
+  Close range (D≤100):  9.7% accuracy
+  Far range  (D≥500):   10.0% accuracy
+
+  ✗ DWARF does not reliably retrieve specific content at distance
+    → Field preserves distributional coherence, not specific tokens
+  D4 vs non-D4 gap: -0.3%
+  ~ No significant D4 vs non-D4 gap at this scale

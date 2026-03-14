@@ -1,0 +1,101 @@
+======================================================================
+  🔬 DWARF Autoresearch — J16D Full-Dataset
+  Probe: data volume + scale_embed_init to reproduce d41_35m ep1
+======================================================================
+  GPU: NVIDIA GeForce RTX 4090
+  D=512, H=8, L=6, FFN=2048
+  IF interval=3, Full attn layer=5
+  scale_embed init=0.1, LR mult=15.0
+  MAX_TRAIN_SEQS=121232 (d41_35m matched)
+  LR=0.0003, Epochs=3
+  git=df0d435
+Loading FineWeb-Edu from cache: benchmarks/logs/condm_fineweb_edu_doc_cache.json
+  Loaded 100,000 docs from cache
+Loaded tokenizer from results/2048_condI_tokenizer.json
+Loading pre-encoded dataset from logs/fineweb_encoded_2048.pt
+  train: 121,232  val: 5,582 seqs
+Parameters: 38,722,296 (38.7M)
+  Step 200/3789 | Loss 6.1625
+  Step 400/3789 | Loss 5.8490
+  Step 600/3789 | Loss 5.5800
+  Step 800/3789 | Loss 5.3142
+  Step 1000/3789 | Loss 4.9952
+  Step 1200/3789 | Loss 4.9321
+  Step 1400/3789 | Loss 4.7049
+  Step 1600/3789 | Loss 4.5971
+  Step 1800/3789 | Loss 4.4408
+  Step 2000/3789 | Loss 4.3799
+  Step 2200/3789 | Loss 4.2390
+  Step 2400/3789 | Loss 4.1904
+  Step 2600/3789 | Loss 4.0735
+  Step 2800/3789 | Loss 4.4413
+  Step 3000/3789 | Loss 4.1548
+  Step 3200/3789 | Loss 4.1274
+  Step 3400/3789 | Loss 4.2589
+  Step 3600/3789 | Loss 4.2574
+Ep 1/3 | Val PPL 56.66 *
+  scale_embed |mean|=0.4070 |max|=2.0418
+  Passkey mean=40.8%
+  d=1:60%  d=2:40%  d=4:40%  d=8:40%  d=16:40%  d=32:70%  d=64:50%  d=128:40%  d=256:40%  d=512:10%  d=1024:50%  d=1536:10%
+  Step 200/3789 | Loss 4.1089
+  Step 400/3789 | Loss 4.3233
+  Step 600/3789 | Loss 3.9541
+  Step 800/3789 | Loss 3.9224
+  Step 1000/3789 | Loss 4.0419
+  Step 1200/3789 | Loss 4.0263
+  Step 1400/3789 | Loss 3.9585
+  Step 1600/3789 | Loss 4.0356
+  Step 1800/3789 | Loss 3.9157
+  Step 2000/3789 | Loss 3.9873
+  Step 2200/3789 | Loss 4.2072
+  Step 2400/3789 | Loss 4.0494
+  Step 2600/3789 | Loss 3.7649
+  Step 2800/3789 | Loss 3.8987
+  Step 3000/3789 | Loss 3.9116
+  Step 3200/3789 | Loss 4.0165
+  Step 3400/3789 | Loss 3.9066
+  Step 3600/3789 | Loss 4.1081
+Ep 2/3 | Val PPL 46.00 *
+  scale_embed |mean|=0.3738 |max|=2.2196
+  Passkey mean=73.3%
+  d=1:100%  d=2:90%  d=4:70%  d=8:90%  d=16:70%  d=32:90%  d=64:70%  d=128:60%  d=256:70%  d=512:60%  d=1024:80%  d=1536:30%
+  Step 200/3789 | Loss 3.7647
+  Step 400/3789 | Loss 3.8483
+  Step 600/3789 | Loss 3.9427
+  Step 800/3789 | Loss 3.9980
+  Step 1000/3789 | Loss 3.7678
+  Step 1200/3789 | Loss 3.6155
+  Step 1400/3789 | Loss 4.0294
+  Step 1600/3789 | Loss 4.0275
+  Step 1800/3789 | Loss 3.8466
+  Step 2000/3789 | Loss 4.0139
+  Step 2200/3789 | Loss 3.9392
+  Step 2400/3789 | Loss 3.8466
+  Step 2600/3789 | Loss 3.7623
+  Step 2800/3789 | Loss 3.8395
+  Step 3000/3789 | Loss 3.8370
+  Step 3200/3789 | Loss 3.9704
+  Step 3400/3789 | Loss 3.7605
+  Step 3600/3789 | Loss 3.8821
+Ep 3/3 | Val PPL 44.04 *
+  scale_embed |mean|=0.3647 |max|=2.1918
+  Passkey mean=75.8%
+  d=1:100%  d=2:100%  d=4:80%  d=8:90%  d=16:80%  d=32:90%  d=64:70%  d=128:60%  d=256:70%  d=512:60%  d=1024:70%  d=1536:40%
+
+---
+passkey_ep1:    40.8
+passkey_ep2:    73.3
+passkey_ep3:    75.8
+ppl_ep1:        56.66
+ppl_ep2:        46.00
+ppl_ep3:        44.04
+ar_score:       57.53
+memory_mb:      10201.4
+elapsed_s:      10300.8
+num_params_M:   38.7
+num_layers:     6
+num_offsets:    16
+scale_embed_lr_mult: 15.0
+max_train_seqs: 121232
+scale_embed_init: 0.1
+description:    J16D fulldata probe — 38.7M, MAX_TRAIN_SEQS=121232, scale_embed_init=0.1

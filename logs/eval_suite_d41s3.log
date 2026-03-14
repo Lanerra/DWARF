@@ -1,0 +1,64 @@
+
+============================================================
+  eval_suite.py — d41s3_14m
+  Device: cuda
+============================================================
+
+  Model: d41s3 14M (dense=41, sparse=[48,128,384], J=44)
+
+  Loading tokenizer...
+  Loading model...
+  Loaded d41s3 14M (dense=41, sparse=[48,128,384], J=44): 14,057,554 params from best.pt
+
+  [1/4] Calibration...
+    entropy=7.205 bits  top1=0.206  eff_vocab=21.0  (30.8s)
+
+  [2/4] Distance-conditioned loss (wikitext-103)...
+    Loading wikitext-103 test split...
+    Using 17 full 2048-token chunks
+    Buckets:
+    0-16          PPL= 330.18  n=  289
+    17-64         PPL= 226.63  n=  816
+    65-256        PPL= 119.63  n= 3264
+    257-512       PPL= 102.00  n= 4352
+    513-1024      PPL=  84.98  n= 8704
+    1025-2047     PPL=  81.19  n=17374
+    (19.0s)
+
+  [3/4] Few-shot string copy...
+    exact=5/15  (33.3%)  mean_lev=6.67  (0.7s)
+
+  [4/4] Passkey retrieval...
+    d=    1: accuracy=100.0%
+    d=    2: accuracy=80.0%
+    d=    4: accuracy=80.0%
+    d=    8: accuracy=100.0%
+    d=   16: accuracy=80.0%
+    d=   32: accuracy=100.0%
+    d=   64: accuracy=100.0%
+    d=  128: accuracy=80.0%
+    d=  256: accuracy=100.0%
+    d=  512: accuracy=60.0%
+    d= 1024: accuracy=40.0%
+    d= 1536: accuracy=40.0%
+    mean_accuracy=80.0%  (0.2s)
+
+  Generation samples (greedy + T=0.7)...
+
+  [greedy]
+    'It was a dark and stormy'               → ' night.\nThe first day of the day, the night was a day of the day. The night was '
+    'The length of the hypotenuse'           → ' is a very small amount of the hypotenuse. The hypotenuse is a very small amount'
+    'The President of the United'            → ' States, the United States, and the United States, would be the first to be the '
+    'Once upon a time there was'             → ' a time when the first person was to be given a time to study the history of the'
+    'The results indicate that'              → ' the number of people who are in the United States is not as high as the number '
+
+  [T=0.7]
+    'It was a dark and stormy'               → ' day. For the new life of the American men, it was so late that they were able t'
+    'The length of the hypotenuse'           → ', the length of the hypnotized (e.g., the end of the brain) is the time of the h'
+    'The President of the United'            → ' States (US) and President of the United States (US), and the United States (US)'
+    'Once upon a time there was'             → ' a new cause. It is said that if the word of the word is to be used as a word fo'
+    'The results indicate that'              → ' the first results are a complete explanation of the differences between the two'
+
+  Results saved to /home/dlewis3/Desktop/AI/DWARF/evals/logs/eval_suite_d41s3_14m_20260308_221836.json
+============================================================
+

@@ -1,0 +1,64 @@
+
+============================================================
+  eval_suite.py — condm_periodic_13m
+  Device: cuda
+============================================================
+
+  Model: condM-periodic 13M [3:1:3:1] (2x DSQG3+Full)
+
+  Loading tokenizer...
+  Loading model...
+  Loaded condM-periodic 13M [3:1:3:1] (2x DSQG3+Full): 13,075,648 params from best.pt
+
+  [1/4] Calibration...
+    entropy=7.650 bits  top1=0.191  eff_vocab=36.3  (0.5s)
+
+  [2/4] Distance-conditioned loss (wikitext-103)...
+    Loading wikitext-103 test split...
+    Using 17 full 2048-token chunks
+    Buckets:
+    0-16          PPL= 387.28  n=  289
+    17-64         PPL= 231.54  n=  816
+    65-256        PPL= 138.07  n= 3264
+    257-512       PPL= 116.65  n= 4352
+    513-1024      PPL=  92.10  n= 8704
+    1025-2047     PPL=  92.76  n=17374
+    (3.8s)
+
+  [3/4] Few-shot string copy...
+    exact=5/15  (33.3%)  mean_lev=7.73  (2.3s)
+
+  [4/4] Passkey retrieval...
+    d=    1: accuracy=80.0%
+    d=    2: accuracy=40.0%
+    d=    4: accuracy=60.0%
+    d=    8: accuracy=20.0%
+    d=   16: accuracy=20.0%
+    d=   32: accuracy=80.0%
+    d=   64: accuracy=80.0%
+    d=  128: accuracy=60.0%
+    d=  256: accuracy=60.0%
+    d=  512: accuracy=40.0%
+    d= 1024: accuracy=20.0%
+    d= 1536: accuracy=20.0%
+    mean_accuracy=48.3%  (0.5s)
+
+  Generation samples (greedy + T=0.7)...
+
+  [greedy]
+    'It was a dark and stormy'               → ', and it was a very dark, dark, and a very dark, dark, and a very dark, dark, an'
+    'The length of the hypotenuse'           → ' of the body, and the length of the body, the length of the body, the length of '
+    'The President of the United'            → ' States, and the president of the United States, the United States, and the Unit'
+    'Once upon a time there was'             → ' a time when the first thing was to do with the game was to be done.\n\nThe game w'
+    'The results indicate that'              → ' the number of people who are in the workforce is not the same as the number of '
+
+  [T=0.7]
+    'It was a dark and stormy'               → ', in the original era of the Western Empire and the Russians. The game was origi'
+    'The length of the hypotenuse'           → ' of a major barrier, and the smaller side of the river, so the remaining layer i'
+    'The President of the United'            → ' Nations, and who has called for a ban on human rights, the United States has be'
+    'Once upon a time there was'             → ' a new human being that would give you a life without being a human.\n\n“I’m not a'
+    'The results indicate that'              → ' it’s an interesting test of whether it’s a study or a study. The best of all, t'
+
+  Results saved to /home/dlewis3/Desktop/AI/DWARF/benchmarks/logs/eval_suite_condm_periodic_13m_20260228_181832.json
+============================================================
+

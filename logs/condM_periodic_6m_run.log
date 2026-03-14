@@ -1,0 +1,152 @@
+=================================================================
+  condM-periodic 6.84M -- [DSQG, DSQG, DSQG, Full]
+  D=160 H=8 L=4 FFN=640
+  Full attention at layers: [3]
+=================================================================
+  GPU: NVIDIA GeForce RTX 4090 (23.6 GB)
+Loading OpenWebText (100,000 docs)...
+  25,000...
+  50,000...
+  75,000...
+  100,000...
+  Train: 52,716 sequences
+  Val: 1,435 sequences
+  Test: 1,459 sequences
+
+  Params: 6,841,376
+  Layers: ['DSQG', 'DSQG', 'DSQG', 'FULL']
+  Interference at: [2]
+  Causality: PASS  (pre-10 max: 0.00000000)
+  Step 200/1648 | Loss 6.5839
+  Step 400/1648 | Loss 6.3479
+  Step 600/1648 | Loss 5.8784
+  Step 800/1648 | Loss 5.5185
+  Step 1000/1648 | Loss 5.7627
+  Step 1200/1648 | Loss 5.4725
+  Step 1400/1648 | Loss 5.5200
+  Step 1600/1648 | Loss 5.5473
+Ep 1/10 | Train 5.6497 | Val 5.3759 PPL 216.1 * BEST | 748s
+  pos-bias: |mean|=3.5928 most-local=h7 most-global=h0
+  -- greedy --
+    'It was a dark and stormy'          -> '.\n\nThe man was a man who was a man who was a man.\n\nThe man was a man who wa'
+    'The length of the hypotenuse'      -> ' of the same time, and the most of the most important-term-term-term-term-t'
+    'The President of the United'       -> ' States, and the United States, and the United States, and the United State'
+    'Once upon a time there was'        -> ' a lot of people who were in the world.\n\nThe first time I had a lot of peop'
+    'The results indicate that'         -> ' the number of the number of the number of the number of the number of the '
+  Step 200/1648 | Loss 5.5296
+  Step 400/1648 | Loss 5.2318
+  Step 600/1648 | Loss 5.2748
+  Step 800/1648 | Loss 5.1019
+  Step 1000/1648 | Loss 5.2452
+  Step 1200/1648 | Loss 5.1061
+  Step 1400/1648 | Loss 4.5968
+  Step 1600/1648 | Loss 5.0367
+Ep 2/10 | Train 5.0191 | Val 4.9896 PPL 146.9 * BEST | 1502s
+  pos-bias: |mean|=3.5281 most-local=h7 most-global=h0
+  -- greedy --
+    'It was a dark and stormy'          -> ', and it was a little bit of a little bit of a little bit.\n\nThe man was a l'
+    'The length of the hypotenuse'      -> ' of the surface of the surface of the surface.\n\nThe first time the surface '
+    'The President of the United'       -> ' States, the president of the United States, and the United States, the Uni'
+    'Once upon a time there was'        -> ' a lot of time to get a lot of time to get a lot of time to get a lot of ti'
+    'The results indicate that'         -> ' the results are not likely to be found in the study.\n\nThe study found that'
+  Step 200/1648 | Loss 4.9731
+  Step 400/1648 | Loss 4.8190
+  Step 600/1648 | Loss 4.9490
+  Step 800/1648 | Loss 4.8911
+  Step 1000/1648 | Loss 4.7714
+  Step 1200/1648 | Loss 4.7081
+  Step 1400/1648 | Loss 4.7700
+  Step 1600/1648 | Loss 4.6873
+Ep 3/10 | Train 4.5599 | Val 4.6565 PPL 105.3 * BEST | 2261s
+  pos-bias: |mean|=3.4758 most-local=h7 most-global=h0
+  -- greedy --
+    'It was a dark and stormy'          -> ' thing.\n\n“I’m not going to be a big guy,” he said. “I’m going to be a big g'
+    'The length of the hypotenuse'      -> ' of the original version of the original version of the original version of'
+    'The President of the United'       -> ' States, and the United States, the United States, and the United States, a'
+    'Once upon a time there was'        -> ' a little bit of a bit of a bit of a bit of a bit of a bit of a bit of a bi'
+    'The results indicate that'         -> ' the results are not the result of the results.\n\nThe results are the result'
+  Step 200/1648 | Loss 4.8833
+  Step 400/1648 | Loss 4.7376
+  Step 600/1648 | Loss 4.8490
+  Step 800/1648 | Loss 4.5957
+  Step 1000/1648 | Loss 4.6465
+  Step 1200/1648 | Loss 4.6977
+  Step 1400/1648 | Loss 4.5235
+  Step 1600/1648 | Loss 4.5573
+Ep 4/10 | Train 4.5888 | Val 4.4946 PPL 89.5 * BEST | 3005s
+  pos-bias: |mean|=3.4247 most-local=h7 most-global=h0
+  -- greedy --
+    'It was a dark and stormy'          -> ' thing.\n\nThe first thing I’ve been in the past is that I’m not going to be '
+    'The length of the hypotenuse'      -> ' of the original version of the original version of the original version of'
+    'The President of the United'       -> ' States, and the United States, and the United States, and the United State'
+    'Once upon a time there was'        -> ' a lot of time, I was able to get a lot of time to get a lot of time to get'
+    'The results indicate that'         -> ' the number of people who have been in the past is a bit more likely to be '
+  Step 200/1648 | Loss 4.7586
+  Step 400/1648 | Loss 4.5127
+  Step 600/1648 | Loss 4.6516
+  Step 800/1648 | Loss 4.6339
+  Step 1000/1648 | Loss 4.5445
+  Step 1200/1648 | Loss 4.5392
+  Step 1400/1648 | Loss 4.4263
+  Step 1600/1648 | Loss 4.3118
+Ep 5/10 | Train 4.5559 | Val 4.4256 PPL 83.6 * BEST | 3747s
+  pos-bias: |mean|=3.3803 most-local=h7 most-global=h0
+  -- greedy --
+    'It was a dark and stormy'          -> ' storm.\n\nThe storm was a bit of a storm.\n\nThe storm was a storm of the stor'
+    'The length of the hypotenuse'      -> ' of the original version of the original version of the original version of'
+    'The President of the United'       -> ' States, and the United States, the United States, and the United States, a'
+    'Once upon a time there was'        -> ' a lot of time, I was able to get a lot of time to get a lot of time to get'
+    'The results indicate that'         -> ' the number of people who are in the country is a very different way to the'
+  Step 200/1648 | Loss 4.5531
+  Step 400/1648 | Loss 4.5968
+  Step 600/1648 | Loss 4.3697
+  Step 800/1648 | Loss 4.3871
+  Step 1000/1648 | Loss 4.5643
+  Step 1200/1648 | Loss 4.4552
+  Step 1400/1648 | Loss 4.5532
+  Step 1600/1648 | Loss 4.5657
+Ep 6/10 | Train 4.1257 | Val 4.3804 PPL 79.9 * BEST | 4485s
+  pos-bias: |mean|=3.3469 most-local=h7 most-global=h0
+  -- greedy --
+    'It was a dark and stormy'          -> ' storm.\n\nThe storm was a little more than a week after the storm.\n\nThe stor'
+    'The length of the hypotenuse'      -> ' of the original, and the most important thing that the original version of'
+    'The President of the United'       -> ' States, the United States and the United States, and the United States, th'
+    'Once upon a time there was'        -> ' a lot of time to get a lot of time to get a lot of time to get a lot of ti'
+    'The results indicate that'         -> ' the number of people who are in the same period are not the same as the nu'
+  Step 200/1648 | Loss 4.5048
+  Step 400/1648 | Loss 4.5253
+  Step 600/1648 | Loss 4.4716
+  Step 800/1648 | Loss 4.1436
+  Step 1000/1648 | Loss 4.3472
+  Step 1200/1648 | Loss 4.4046
+  Step 1400/1648 | Loss 4.4350
+  Step 1600/1648 | Loss 4.4160
+Ep 7/10 | Train 3.5398 | Val 4.3554 PPL 77.9 * BEST | 5230s
+  pos-bias: |mean|=3.3249 most-local=h7 most-global=h0
+  -- greedy --
+    'It was a dark and stormy'          -> ' storm.\n\nThe storm was a storm of the storm.\n\nThe storm was a storm of the '
+    'The length of the hypotenuse'      -> ' is a bit more than a little bit more than a little bit.\n\nThe first thing I'
+    'The President of the United'       -> ' States, and the United States, the United States, and the United States, a'
+    'Once upon a time there was'        -> ' a lot of time to get a lot of time to get a lot of time to get a lot of ti'
+    'The results indicate that'         -> ' the results are not the same as the results of the results.\n\nThe results a'
+  Step 200/1648 | Loss 4.4323
+  Step 400/1648 | Loss 4.4286
+  Step 600/1648 | Loss 4.4146
+  Step 800/1648 | Loss 4.3327
+  Step 1000/1648 | Loss 4.4610
+  Step 1200/1648 | Loss 4.3918
+  Step 1400/1648 | Loss 4.3513
+  Step 1600/1648 | Loss 4.4536
+Ep 8/10 | Train 4.2252 | Val 4.3409 PPL 76.8 * BEST | 5987s
+  pos-bias: |mean|=3.3129 most-local=h7 most-global=h0
+  -- greedy --
+    'It was a dark and stormy'          -> ' storm.\n\nThe storm was a storm of the storm.\n\nThe storm was a storm of the '
+    'The length of the hypotenuse'      -> ' is a bit more than a few times.\n\nThe first time the first time the first t'
+    'The President of the United'       -> ' States, and the United States, the United States, and the United States, a'
+    'Once upon a time there was'        -> ' a lot of time to get a lot of time to get a lot of time to get a lot of ti'
+    'The results indicate that'         -> ' the results are not the same as the results of the results.\n\nThe results a'
+  Step 200/1648 | Loss 4.4638
+  Step 400/1648 | Loss 4.3992
+  Step 600/1648 | Loss 4.4373
+  Step 800/1648 | Loss 4.3974
+  Step 1000/1648 | Loss 4.4444

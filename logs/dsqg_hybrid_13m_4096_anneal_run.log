@@ -1,0 +1,205 @@
+======================================================================
+  Run A — DSQG Hybrid 13M @ N=4096 — Near-Zero pos_bias Init
+  D=256, H=8, L=6, FFN=1024, N=4096
+  Key change: pos_bias init = zeros+0.001 (energy-conserving start)
+======================================================================
+Loading encoded dataset from benchmarks/logs/fineweb_encoded_4096.pt...
+  train: 26,358  val: 2,791  test: 2,736
+  Parameters: 14,582,240
+  Causality: pre=0.00e+00 pos=1.1339 post=0.2411 PASS
+  Compiling model (torch.compile mode=default)...
+  Compile done.
+  Tokens/epoch: 107,936,010  Chinchilla: ~ep 2.70
+  Step 200/824 | Loss 6.5364
+  Step 400/824 | Loss 6.1417
+  Step 600/824 | Loss 5.6533
+  Step 800/824 | Loss 5.5343
+Ep 1/10 | Train 6.2717 | Val 5.4436 PPL 231.3 * BEST | 361s (37%C)
+  DSQG pos-bias: |mean|=0.1106 |max|=0.2353 most-local=h4 most-global=h5
+  scale_embed: |mean|=0.1171 |max|=0.2286
+  IF gains: h0:0.998  h1:0.995  h2:1.013  h3:1.000  h4:1.007  h5:0.996  h6:0.999  h7:1.006
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ', and the other hand, and the other hand, and the other hand, the world, and the'
+    'The length of the hypotenuse' -> ' of the same time of the same time. The same time is the same time. The same tim'
+    'The President of the United' -> ' States, and the United States, the United States, and the United States, and th'
+    'Once upon a time there was' -> ' no longer than the time of the world.\nThe first time of the world is the same t'
+    'The results indicate that' -> ' the results of the data are not the results of the data. The results of the dat'
+  --
+  Passkey...
+W0303 20:47:27.619000 796037 torch/_dynamo/convert_frame.py:906] [1/8] torch._dynamo hit config.cache_size_limit (8)
+W0303 20:47:27.619000 796037 torch/_dynamo/convert_frame.py:906] [1/8]    function: 'forward' (/home/dlewis3/Desktop/AI/DWARF/train/dsqg_hybrid_13m_4096_anneal.py:209)
+W0303 20:47:27.619000 796037 torch/_dynamo/convert_frame.py:906] [1/8]    last reason: 1/1: len(L['self']._modules) == 8                                
+W0303 20:47:27.619000 796037 torch/_dynamo/convert_frame.py:906] [1/8] To log all recompilation reasons, use TORCH_LOGS="recompiles".
+W0303 20:47:27.619000 796037 torch/_dynamo/convert_frame.py:906] [1/8] To diagnose recompilation issues, see https://pytorch.org/docs/main/torch.compiler_troubleshooting.html.
+  mean=0.0%  (0/14 distances >50%)
+  d=1:0%  d=2:0%  d=4:0%  d=8:0%  d=16:0%  d=32:0%  d=64:0%  d=128:0%  d=256:0%  d=512:0%  d=1024:0%  d=1536:0%  d=2048:0%  d=3072:0%
+  Step 200/824 | Loss 5.3095
+  Step 400/824 | Loss 5.2648
+  Step 600/824 | Loss 5.1813
+  Step 800/824 | Loss 4.9276
+Ep 2/10 | Train 5.2155 | Val 4.9128 PPL 136.0 * BEST | 702s (74%C)
+  DSQG pos-bias: |mean|=0.1533 |max|=0.4209 most-local=h4 most-global=h5
+  scale_embed: |mean|=0.1755 |max|=0.4297
+  IF gains: h0:1.008  h1:1.005  h2:1.040  h3:1.016  h4:1.014  h5:0.993  h6:1.010  h7:1.021
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ', and it was a great deal of life.\nThe first time of the time, the time of the t'
+    'The length of the hypotenuse' -> ' of the pearle. The length of the pearle is the first of the first time. The sec'
+    'The President of the United' -> ' States, the United States, and the United States, the United States, and the Un'
+    'Once upon a time there was' -> ' a lot of time, it was a lot of time to be a lot of time.\nThe first time of the '
+    'The results indicate that' -> ' the results are not only the same.\nThe results are not only the same.\nThe resul'
+  --
+  Passkey...
+  mean=0.0%  (0/14 distances >50%)
+  d=1:0%  d=2:0%  d=4:0%  d=8:0%  d=16:0%  d=32:0%  d=64:0%  d=128:0%  d=256:0%  d=512:0%  d=1024:0%  d=1536:0%  d=2048:0%  d=3072:0%
+  Step 200/824 | Loss 4.9309
+  Step 400/824 | Loss 4.9336
+  Step 600/824 | Loss 4.7017
+  Step 800/824 | Loss 4.8190
+Ep 3/10 | Train 4.7905 | Val 4.4727 PPL 87.6 * BEST | 1036s (111%C)
+  DSQG pos-bias: |mean|=0.1784 |max|=0.5481 most-local=h4 most-global=h5
+  scale_embed: |mean|=0.2077 |max|=0.5845
+  IF gains: h0:1.008  h1:1.007  h2:1.042  h3:1.020  h4:1.013  h5:0.984  h6:1.007  h7:1.023
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ', and the sun was a very cold, and the sun was a very cold, and the sun was a ve'
+    'The length of the hypotenuse' -> ', the number of symptoms of the symptoms of the symptoms of the symptoms of the '
+    'The President of the United' -> ' States, the United States, and the United States.\nThe United States, the United'
+    'Once upon a time there was' -> ' a lot of time, and the time it was a time when it was a time.\nThe time it was a'
+    'The results indicate that' -> ' the results are not the same.\nThe results are not the same.\nThe results are not'
+  --
+  Passkey...
+  mean=0.0%  (0/14 distances >50%)
+  d=1:0%  d=2:0%  d=4:0%  d=8:0%  d=16:0%  d=32:0%  d=64:0%  d=128:0%  d=256:0%  d=512:0%  d=1024:0%  d=1536:0%  d=2048:0%  d=3072:0%
+  Step 200/824 | Loss 4.5367
+  Step 400/824 | Loss 4.4396
+  Step 600/824 | Loss 4.3866
+  Step 800/824 | Loss 4.2656
+Ep 4/10 | Train 4.4448 | Val 4.2771 PPL 72.0 * BEST | 1369s (148%C)
+  DSQG pos-bias: |mean|=0.1941 |max|=0.6387 most-local=h2 most-global=h5
+  scale_embed: |mean|=0.2282 |max|=0.6941
+  IF gains: h0:1.013  h1:1.016  h2:1.045  h3:1.024  h4:1.014  h5:0.986  h6:1.010  h7:1.029
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ', and the weather was a very cold, and the weather was a very cold.\nThe weather '
+    'The length of the hypotenuse' -> ', the body is a small amount of oxygen, and the body is a small amount of oxygen'
+    'The President of the United' -> ' States, the United States, and the United States, the United States, and the Un'
+    'Once upon a time there was' -> ' a lot of time, and the time it was a time.\nThe first time it was to be a time w'
+    'The results indicate that' -> ' the first two years of the year were the first to be found in the first year.\nT'
+  --
+  Passkey...
+  mean=0.0%  (0/14 distances >50%)
+  d=1:0%  d=2:0%  d=4:0%  d=8:0%  d=16:0%  d=32:0%  d=64:0%  d=128:0%  d=256:0%  d=512:0%  d=1024:0%  d=1536:0%  d=2048:0%  d=3072:0%
+  Step 200/824 | Loss 4.3254
+  Step 400/824 | Loss 4.2896
+  Step 600/824 | Loss 4.4260
+  Step 800/824 | Loss 4.0781
+Ep 5/10 | Train 4.3050 | Val 4.1777 PPL 65.2 * BEST | 1701s (185%C)
+  DSQG pos-bias: |mean|=0.2032 |max|=0.7060 most-local=h2 most-global=h5
+  scale_embed: |mean|=0.2403 |max|=0.7674
+  IF gains: h0:1.017  h1:1.024  h2:1.049  h3:1.027  h4:1.016  h5:0.990  h6:1.013  h7:1.035
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ' storm.\nThe storm was a stormy storm. The storm was a stormy storm. The storm wa'
+    'The length of the hypotenuse' -> ' of the body is a very important factor in the body’s ability to function. The b'
+    'The President of the United' -> ' States, the United States, and the United States, the United States, and the Un'
+    'Once upon a time there was' -> ' a great deal of time, and the time was the time of the day.\nThe day was the day'
+    'The results indicate that' -> ' the first two-thirds of the population were the first to be considered as the f'
+  --
+  Passkey...
+  mean=0.0%  (0/14 distances >50%)
+  d=1:0%  d=2:0%  d=4:0%  d=8:0%  d=16:0%  d=32:0%  d=64:0%  d=128:0%  d=256:0%  d=512:0%  d=1024:0%  d=1536:0%  d=2048:0%  d=3072:0%
+  Step 200/824 | Loss 4.3531
+  Step 400/824 | Loss 4.0815
+  Step 600/824 | Loss 4.1292
+  Step 800/824 | Loss 4.2726
+Ep 6/10 | Train 4.2284 | Val 4.1247 PPL 61.9 * BEST | 2031s (222%C)
+  DSQG pos-bias: |mean|=0.2083 |max|=0.7462 most-local=h2 most-global=h5
+  scale_embed: |mean|=0.2471 |max|=0.8130
+  IF gains: h0:1.019  h1:1.030  h2:1.052  h3:1.030  h4:1.018  h5:0.993  h6:1.015  h7:1.039
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ' weather.\nThe weather was a very cold weather. The weather was a cold weather. T'
+    'The length of the hypotenuse' -> ' is a very important factor in the severity of the symptoms.\nThe most important '
+    'The President of the United' -> ' States, the United States, and the United States, the United States, and the Un'
+    'Once upon a time there was' -> ' a great deal of time, and the people were not able to get the money to the peop'
+    'The results indicate that' -> ' the first two-thirds of the population are the most common in the population.\nT'
+  --
+  Passkey...
+  mean=0.0%  (0/14 distances >50%)
+  d=1:0%  d=2:0%  d=4:0%  d=8:0%  d=16:0%  d=32:0%  d=64:0%  d=128:0%  d=256:0%  d=512:0%  d=1024:0%  d=1536:0%  d=2048:0%  d=3072:0%
+  Step 200/824 | Loss 4.0878
+  Step 400/824 | Loss 4.1640
+  Step 600/824 | Loss 4.0997
+  Step 800/824 | Loss 4.0996
+Ep 7/10 | Train 4.1797 | Val 4.0892 PPL 59.7 * BEST | 2363s (259%C)
+  DSQG pos-bias: |mean|=0.2109 |max|=0.7711 most-local=h2 most-global=h5
+  scale_embed: |mean|=0.2504 |max|=0.8416
+  IF gains: h0:1.021  h1:1.034  h2:1.054  h3:1.032  h4:1.019  h5:0.995  h6:1.017  h7:1.042
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ' storm.\nThe storm was a stormy storm. The storm was a stormy storm. The storm wa'
+    'The length of the hypotenuse' -> ' is a very important factor in the severity of the symptoms.\nThe most important '
+    'The President of the United' -> ' States, the United States, and the United States, the United States, and the Un'
+    'Once upon a time there was' -> ' a great deal of interest in the future.\nThe first thing that the first thing wa'
+    'The results indicate that' -> ' the two main components of the system are the same.\nThe main components of the '
+  --
+  Passkey...
+  mean=0.0%  (0/14 distances >50%)
+  d=1:0%  d=2:0%  d=4:0%  d=8:0%  d=16:0%  d=32:0%  d=64:0%  d=128:0%  d=256:0%  d=512:0%  d=1024:0%  d=1536:0%  d=2048:0%  d=3072:0%
+  Step 200/824 | Loss 4.0472
+  Step 400/824 | Loss 4.2261
+  Step 600/824 | Loss 4.1756
+  Step 800/824 | Loss 4.1595
+Ep 8/10 | Train 4.1419 | Val 4.0698 PPL 58.5 * BEST | 2695s (296%C)
+  DSQG pos-bias: |mean|=0.2120 |max|=0.7836 most-local=h2 most-global=h5
+  scale_embed: |mean|=0.2519 |max|=0.8570
+  IF gains: h0:1.022  h1:1.036  h2:1.055  h3:1.033  h4:1.020  h5:0.997  h6:1.018  h7:1.044
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ' weather.\nThe weather was a very cold weather. The weather was a cold weather. T'
+    'The length of the hypotenuse' -> ' is a very important factor in the severity of the symptoms.\nThe most important '
+    'The President of the United' -> ' States, the United States, and the United States, the United States, and the Un'
+    'Once upon a time there was' -> ' a great deal of time, and the people were not so much more likely to be able to'
+    'The results indicate that' -> ' the first two years of the year, the first year of the year, was the first year'
+  --
+  Passkey...
+  mean=0.0%  (0/14 distances >50%)
+  d=1:0%  d=2:0%  d=4:0%  d=8:0%  d=16:0%  d=32:0%  d=64:0%  d=128:0%  d=256:0%  d=512:0%  d=1024:0%  d=1536:0%  d=2048:0%  d=3072:0%
+  Step 200/824 | Loss 4.1229
+  Step 400/824 | Loss 4.1597
+  Step 600/824 | Loss 4.0394
+  Step 800/824 | Loss 4.0539
+Ep 9/10 | Train 4.1314 | Val 4.0611 PPL 58.0 * BEST | 3032s (333%C)
+  DSQG pos-bias: |mean|=0.2124 |max|=0.7877 most-local=h2 most-global=h5
+  scale_embed: |mean|=0.2523 |max|=0.8620
+  IF gains: h0:1.022  h1:1.037  h2:1.055  h3:1.034  h4:1.020  h5:0.998  h6:1.019  h7:1.045
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ' weather.\nThe weather was a very cold weather. The weather was a cold weather. T'
+    'The length of the hypotenuse' -> ' is a very important factor in the severity of the symptoms.\nThe most important '
+    'The President of the United' -> ' States, the United States, and the United States, the United States, and the Un'
+    'Once upon a time there was' -> ' a great deal of time, and the people were not able to get the money to the peop'
+    'The results indicate that' -> ' the first two years of the year, the first year of the year, was the first year'
+  --
+  Passkey...
+  mean=0.0%  (0/14 distances >50%)
+  d=1:0%  d=2:0%  d=4:0%  d=8:0%  d=16:0%  d=32:0%  d=64:0%  d=128:0%  d=256:0%  d=512:0%  d=1024:0%  d=1536:0%  d=2048:0%  d=3072:0%
+  Step 200/824 | Loss 4.1671
+  Step 400/824 | Loss 4.0030
+  Step 600/824 | Loss 4.2368
+  Step 800/824 | Loss 4.1785
+Ep 10/10 | Train 4.1246 | Val 4.0599 PPL 58.0 * BEST | 3368s (370%C)
+  DSQG pos-bias: |mean|=0.2124 |max|=0.7882 most-local=h2 most-global=h5
+  scale_embed: |mean|=0.2524 |max|=0.8627
+  IF gains: h0:1.022  h1:1.037  h2:1.055  h3:1.034  h4:1.020  h5:0.998  h6:1.019  h7:1.045
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ' weather.\nThe weather was a very cold weather. The weather was a cold weather. T'
+    'The length of the hypotenuse' -> ' is a very important factor in the severity of the symptoms.\nThe most important '
+    'The President of the United' -> ' States, the United States, and the United States, the United States, and the Un'
+    'Once upon a time there was' -> ' a great deal of time, and the people were not so much more likely to be able to'
+    'The results indicate that' -> ' the first two groups of groups are the same.\nThe first group of groups is the g'
+  --
+  Passkey...
+  mean=0.0%  (0/14 distances >50%)
+  d=1:0%  d=2:0%  d=4:0%  d=8:0%  d=16:0%  d=32:0%  d=64:0%  d=128:0%  d=256:0%  d=512:0%  d=1024:0%  d=1536:0%  d=2048:0%  d=3072:0%
+
+  Run A (anneal) TEST PPL: 58.716
+  condU 13M 4096 baseline: pending (Run A is the first 4096 run)
+  condU 13M 2048 ref:      52.206 PPL  delta=+6.510
+  Final passkey: mean=0.0%
+  d=1:0%  d=2:0%  d=4:0%  d=8:0%  d=16:0%  d=32:0%  d=64:0%  d=128:0%  d=256:0%  d=512:0%  d=1024:0%  d=1536:0%  d=2048:0%  d=3072:0%
+
+  Results -> logs/dsqg_hybrid_13m_4096_anneal_results.json

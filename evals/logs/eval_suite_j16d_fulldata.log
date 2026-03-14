@@ -1,0 +1,64 @@
+
+============================================================
+  eval_suite.py — j16d_fulldata
+  Device: cuda
+============================================================
+
+  Model: J16D fulldata 38.7M (J=16, V6, 121232 seqs, scale_embed_init=0.1)
+
+  Loading tokenizer...
+  Loading model...
+  Loaded J16D fulldata 38.7M (J=16, V6, 121232 seqs, scale_embed_init=0.1): 38,722,296 params from df0d435_j16d_fulldata_best.pt
+
+  [1/4] Calibration...
+    entropy=7.077 bits  top1=0.211  eff_vocab=22.0  (0.4s)
+
+  [2/4] Distance-conditioned loss (wikitext-103)...
+    Loading wikitext-103 test split...
+    Using 17 full 2048-token chunks
+    Buckets:
+    0-16          PPL= 263.79  n=  289
+    17-64         PPL= 165.47  n=  816
+    65-256        PPL=  90.28  n= 3264
+    257-512       PPL=  78.74  n= 4352
+    513-1024      PPL=  65.17  n= 8704
+    1025-2047     PPL=  63.14  n=17374
+    (10.9s)
+
+  [3/4] Few-shot string copy...
+    exact=5/15  (33.3%)  mean_lev=6.53  (8.8s)
+
+  [4/4] Passkey retrieval...
+    d=    1: accuracy=100.0%
+    d=    2: accuracy=80.0%
+    d=    4: accuracy=80.0%
+    d=    8: accuracy=80.0%
+    d=   16: accuracy=60.0%
+    d=   32: accuracy=80.0%
+    d=   64: accuracy=40.0%
+    d=  128: accuracy=60.0%
+    d=  256: accuracy=60.0%
+    d=  512: accuracy=40.0%
+    d= 1024: accuracy=60.0%
+    d= 1536: accuracy=40.0%
+    mean_accuracy=65.0%  (0.2s)
+
+  Generation samples (greedy + T=0.7)...
+
+  [greedy]
+    'It was a dark and stormy'               → ' day.\nThe first time the sun was in the sun, the sun was in the sun, and the sun'
+    'The length of the hypotenuse'           → ' is the same as that of the other two.\nThe first is the length of the hypotenuse'
+    'The President of the United'            → ' States, the United States, and the United States, the United States, and the Un'
+    'Once upon a time there was'             → ' a great deal of excitement, and the people of the city were not ready to go to '
+    'The results indicate that'              → ' the use of the word "phenomenon" is used to describe the use of the word "pheno'
+
+  [T=0.7]
+    'It was a dark and stormy'               → ' night. The air was dry, and the air was dry, and the air had melted.\nAt first t'
+    'The length of the hypotenuse'           → ' and the hypotenuse are small in size. The extent of the hypotenuse is approxima'
+    'The President of the United'            → ' States was a great political leader and was a great influence in the United Sta'
+    'Once upon a time there was'             → ' a sign of a strait of a man. He had the intention of seeing him as an interpret'
+    'The results indicate that'              → ' the CO2 is a highly toxic chemical, and the resulting CO2 is a carcinogen in th'
+
+  Results saved to /home/dlewis3/Desktop/AI/DWARF/evals/logs/eval_suite_j16d_fulldata_20260313_113109.json
+============================================================
+

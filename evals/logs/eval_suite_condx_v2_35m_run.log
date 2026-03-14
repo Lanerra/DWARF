@@ -1,0 +1,64 @@
+
+============================================================
+  eval_suite.py — condx_v2_35m
+  Device: cuda
+============================================================
+
+  Model: condX-v2 35M bf16 (learnable bypass gate, condV physics)
+
+  Loading tokenizer...
+  Loading model...
+  Loaded condX-v2 35M bf16 (learnable bypass gate, condV physics): 38,729,739 params from best.pt
+
+  [1/4] Calibration...
+    entropy=7.067 bits  top1=0.229  eff_vocab=25.6  (53.5s)
+
+  [2/4] Distance-conditioned loss (wikitext-103)...
+    Loading wikitext-103 test split...
+    Using 17 full 2048-token chunks
+    Buckets:
+    0-16          PPL= 256.13  n=  289
+    17-64         PPL= 138.07  n=  816
+    65-256        PPL=  77.08  n= 3264
+    257-512       PPL=  66.74  n= 4352
+    513-1024      PPL=  55.80  n= 8704
+    1025-2047     PPL=  53.34  n=17374
+    (29.8s)
+
+  [3/4] Few-shot string copy...
+    exact=6/15  (40.0%)  mean_lev=6.93  (0.9s)
+
+  [4/4] Passkey retrieval...
+    d=    1: accuracy=100.0%
+    d=    2: accuracy=100.0%
+    d=    4: accuracy=100.0%
+    d=    8: accuracy=100.0%
+    d=   16: accuracy=100.0%
+    d=   32: accuracy=100.0%
+    d=   64: accuracy=100.0%
+    d=  128: accuracy=100.0%
+    d=  256: accuracy=100.0%
+    d=  512: accuracy=100.0%
+    d= 1024: accuracy=100.0%
+    d= 1536: accuracy=60.0%
+    mean_accuracy=96.7%  (0.3s)
+
+  Generation samples (greedy + T=0.7)...
+
+  [greedy]
+    'It was a dark and stormy'               → ' day, and the sun was shining. The sun was shining, and the sun was shining. The'
+    'The length of the hypotenuse'           → ' is approximately 1.5 mm. The hypotenuse is the most common hypotenuse in the Un'
+    'The President of the United'            → ' States, the President of the United States, and the President of the United Sta'
+    'Once upon a time there was'             → ' a great deal of confusion and confusion between the two. The first was that the'
+    'The results indicate that'              → ' the study was conducted in a small sample of the population of the United State'
+
+  [T=0.7]
+    'It was a dark and stormy'               → ' night in the sun. The sky was warm and the sun was cold.\nThe sun was cold, and '
+    'The length of the hypotenuse'           → ' was 3.5 million tons, and it was estimated that it was about 5.5 million tons, '
+    'The President of the United'            → ' States, Mr. Henry P. Holt, Mr. P. C. C. C.\n- As a result of the "first and last'
+    'Once upon a time there was'             → ' a certain time in which the Indians were taken to a nearby village. The Indians'
+    'The results indicate that'              → ' the optimum or desired optimum design of a stone is a continuous variable, whic'
+
+  Results saved to /home/dlewis3/Desktop/AI/DWARF/evals/logs/eval_suite_condx_v2_35m_20260313_135449.json
+============================================================
+

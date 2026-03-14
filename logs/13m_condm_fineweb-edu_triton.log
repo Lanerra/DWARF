@@ -1,0 +1,298 @@
+========================================================================
+  condM 13M -- FineWeb-Edu (>=2048 tok/doc, document-aware encoding)
+========================================================================
+  GPU: NVIDIA GeForce RTX 4090  (23.6 GB)
+  Dataset:        HuggingFaceFW/fineweb-edu/sample-10BT
+  Min doc tokens: 2048  |  Num docs: 100,000
+  Encoding:       packed (identical to OWT baseline — direct comparison)
+  Architecture:   5 DSQG + 1 FullAttn (layer 5) | Triton kernel
+
+Loaded condI BPE tokenizer from /home/dlewis3/Desktop/AI/DWARF/benchmarks/results/2048_condI_tokenizer.json
+Loading FineWeb-Edu (sample-10BT) — seeking 100,000 docs with >= 2048 tokens...
+  Pre-filter: >= 5,000 chars before tokenizing
+  Will cache results to: benchmarks/logs/condm_fineweb_edu_doc_cache.json
+  10,000 qualifying docs (examined 103,617, pass-rate 9.7%)
+  20,000 qualifying docs (examined 210,813, pass-rate 9.5%)
+  30,000 qualifying docs (examined 318,196, pass-rate 9.4%)
+  40,000 qualifying docs (examined 421,369, pass-rate 9.5%)
+  50,000 qualifying docs (examined 523,606, pass-rate 9.5%)
+  60,000 qualifying docs (examined 627,288, pass-rate 9.6%)
+  70,000 qualifying docs (examined 730,034, pass-rate 9.6%)
+  80,000 qualifying docs (examined 836,374, pass-rate 9.6%)
+  90,000 qualifying docs (examined 943,570, pass-rate 9.5%)
+  100,000 qualifying docs (examined 1,051,086, pass-rate 9.5%)
+  Done. 100,000 qualifying docs from 1,051,086 examined (9.5% pass-rate)
+  Cached to benchmarks/logs/condm_fineweb_edu_doc_cache.json (2046.9 MB)
+
+Encoding data (document-aware, max_seq_len=2048)...
+  Train: 212,458 sequences
+  Capped to 52,716 train sequences (OWT iso-compute)
+  Val: 5,582 sequences
+  Test: 5,473 sequences
+
+condM (FineWeb-Edu): 13,984,480 parameters
+  Layer types: ['DSQG', 'DSQG', 'DSQG', 'DSQG', 'DSQG', 'FULL']
+Running causality check...
+  Pre-10:  0.00000000  (expect 0.0)
+  Pos-10:  0.768299  (expect >0)
+  Post-10: 0.417249  (expect >0)
+  PASS
+
+  Train sequences: 52,716
+  Tokens/epoch:    107,909,652
+  Chinchilla:      279,689,600 tokens (epoch ~2.59)
+
+  Step 200/1648 | Loss 6.5107
+  Step 400/1648 | Loss 6.0237
+  Step 600/1648 | Loss 5.9243
+  Step 800/1648 | Loss 5.6290
+  Step 1000/1648 | Loss 5.4594
+  Step 1200/1648 | Loss 5.1075
+  Step 1400/1648 | Loss 5.1604
+  Step 1600/1648 | Loss 5.1437
+Ep 1/10 | Train 5.0354 | Val 5.0516 PPL 156.3 * BEST | 352s (39%C)
+  DSQG pos-bias: |mean|=3.5764 |max|=13.9877 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' -> ', and the most beautiful, the most beautiful, and the most beautiful, the most b'
+    'The length of the hypotenuse' -> ' of the pests of the pests of the pests of the pests of the pests of the pests o'
+    'The President of the United' -> ' States, the United States, and the United States, the United States, and the Un'
+    'Once upon a time there was' -> ' a time to be a time to be a time to be a time to be a time to be a time to be a'
+    'The results indicate that' -> ' the results are not only in the case of the study.\nThe results of the study are'
+  ──
+  Passkey...
+  mean=0.0%  (0/12 distances >50%)
+  d=1:0%  d=2:0%  d=4:0%  d=8:0%  d=16:0%  d=32:0%  d=64:0%  d=128:0%  d=256:0%  d=512:0%  d=1024:0%  d=1536:0%
+  Step 200/1648 | Loss 4.9356
+  Step 400/1648 | Loss 5.0658
+  Step 600/1648 | Loss 5.0785
+  Step 800/1648 | Loss 4.7990
+  Step 1000/1648 | Loss 4.6644
+  Step 1200/1648 | Loss 4.8176
+  Step 1400/1648 | Loss 4.6684
+  Step 1600/1648 | Loss 4.7113
+Ep 2/10 | Train 4.6153 | Val 4.4263 PPL 83.6 * BEST | 713s (77%C)
+  DSQG pos-bias: |mean|=3.5058 |max|=13.3690 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' -> ', and it was a great way to see the sun.\nThe sun was a great place in the sun.\nT'
+    'The length of the hypotenuse' -> ' of the body is a very high level of the body. The body is a very high level of '
+    'The President of the United' -> ' States, the United States, and the United States, the United States, and the Un'
+    'Once upon a time there was' -> ' a great deal of time, the people were not able to do so.\nThe first time the peo'
+    'The results indicate that' -> ' the number of individuals who are not in the same way as the number of individu'
+  ──
+  Passkey...
+  mean=0.0%  (0/12 distances >50%)
+  d=1:0%  d=2:0%  d=4:0%  d=8:0%  d=16:0%  d=32:0%  d=64:0%  d=128:0%  d=256:0%  d=512:0%  d=1024:0%  d=1536:0%
+  Step 200/1648 | Loss 4.3812
+  Step 400/1648 | Loss 4.4099
+  Step 600/1648 | Loss 4.3742
+  Step 800/1648 | Loss 4.3807
+  Step 1000/1648 | Loss 4.3930
+  Step 1200/1648 | Loss 4.3952
+  Step 1400/1648 | Loss 4.2774
+  Step 1600/1648 | Loss 4.3946
+Ep 3/10 | Train 4.4493 | Val 4.2224 PPL 68.2 * BEST | 1072s (116%C)
+  DSQG pos-bias: |mean|=3.4375 |max|=12.8323 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' -> ', and it was a great way to get it out.\nThe first thing I had was to do was to g'
+    'The length of the hypotenuse' -> ' is the same as the frequency of the electrode. The frequency of the electrode i'
+    'The President of the United' -> ' States, the President of the United States, and the President of the United Sta'
+    'Once upon a time there was' -> ' no doubt that the first time the first time the first time the first time the f'
+    'The results indicate that' -> ' the results of the study were not fully understood.\nThe results of the study we'
+  ──
+  Passkey...
+  mean=0.0%  (0/12 distances >50%)
+  d=1:0%  d=2:0%  d=4:0%  d=8:0%  d=16:0%  d=32:0%  d=64:0%  d=128:0%  d=256:0%  d=512:0%  d=1024:0%  d=1536:0%
+  Step 200/1648 | Loss 4.2513
+  Step 400/1648 | Loss 4.1875
+  Step 600/1648 | Loss 4.2224
+  Step 800/1648 | Loss 4.1683
+  Step 1000/1648 | Loss 4.0038
+  Step 1200/1648 | Loss 4.3097
+  Step 1400/1648 | Loss 4.0236
+  Step 1600/1648 | Loss 4.1750
+Ep 4/10 | Train 4.2975 | Val 4.1219 PPL 61.7 * BEST | 1432s (154%C)
+  DSQG pos-bias: |mean|=3.3751 |max|=12.3958 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' -> ' storm.\nThe storm was a great storm, and the storm was a great storm.\nThe storm '
+    'The length of the hypotenuse' -> ' is approximately 1.5 mm, and the length of the pulse is approximately 1.5 mm. T'
+    'The President of the United' -> ' States, the President of the United States, and the President of the United Sta'
+    'Once upon a time there was' -> ' no doubt that the first time the first time the first time the first time the f'
+    'The results indicate that' -> ' the number of people in the world is more than one million. The number of peopl'
+  ──
+  Passkey...
+  mean=1.7%  (0/12 distances >50%)
+  d=1:0%  d=2:0%  d=4:0%  d=8:0%  d=16:0%  d=32:20%  d=64:0%  d=128:0%  d=256:0%  d=512:0%  d=1024:0%  d=1536:0%
+  Step 200/1648 | Loss 3.8847
+  Step 400/1648 | Loss 4.0825
+  Step 600/1648 | Loss 4.3868
+  Step 800/1648 | Loss 4.1494
+  Step 1000/1648 | Loss 4.1616
+  Step 1200/1648 | Loss 4.1144
+  Step 1400/1648 | Loss 4.4020
+  Step 1600/1648 | Loss 4.1259
+Ep 5/10 | Train 4.4517 | Val 4.0636 PPL 58.2 * BEST | 1794s (193%C)
+  DSQG pos-bias: |mean|=3.3236 |max|=12.0554 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' -> ' storm.\nThe storm was a storm, and the storm was a storm. The storm was a storm,'
+    'The length of the hypotenuse' -> ' is usually between 1.5 and 2.5. The length of the hypotenuse is between 1.5 and'
+    'The President of the United' -> ' States, and the President of the United States, was the President of the United'
+    'Once upon a time there was' -> ' no doubt that the first time the first time the first time the first time the f'
+    'The results indicate that' -> ' the results of the study are not consistent with the results of the study.\nThe '
+  ──
+  Passkey...
+  mean=28.3%  (0/12 distances >50%)
+  d=1:20%  d=2:20%  d=4:20%  d=8:20%  d=16:20%  d=32:40%  d=64:40%  d=128:40%  d=256:40%  d=512:40%  d=1024:40%  d=1536:0%
+  Step 200/1648 | Loss 4.0806
+  Step 400/1648 | Loss 4.1253
+  Step 600/1648 | Loss 3.8695
+  Step 800/1648 | Loss 4.4477
+  Step 1000/1648 | Loss 4.0676
+  Step 1200/1648 | Loss 3.8812
+  Step 1400/1648 | Loss 4.2269
+  Step 1600/1648 | Loss 3.9601
+Ep 6/10 | Train 4.0904 | Val 4.0232 PPL 55.9 * BEST | 2156s (231%C)
+  DSQG pos-bias: |mean|=3.2856 |max|=11.8155 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' -> ' storm.\nThe stormy storm was a stormy storm that was a storm that was a storm th'
+    'The length of the hypotenuse' -> ' is approximately 1.5 cm. The length of the hypotenuse is approximately 1.5 cm. '
+    'The President of the United' -> ' States, and the President of the United States, was the President of the United'
+    'Once upon a time there was' -> ' no need to be done.\nThe first step in the process is to make a new process. The'
+    'The results indicate that' -> ' the results are not consistent with the results.\nThe results are consistent wit'
+  ──
+  Passkey...
+  mean=31.7%  (0/12 distances >50%)
+  d=1:20%  d=2:20%  d=4:20%  d=8:20%  d=16:40%  d=32:40%  d=64:40%  d=128:40%  d=256:40%  d=512:40%  d=1024:40%  d=1536:20%
+  Step 200/1648 | Loss 3.8429
+  Step 400/1648 | Loss 4.1040
+  Step 600/1648 | Loss 4.2665
+  Step 800/1648 | Loss 4.1446
+  Step 1000/1648 | Loss 4.1108
+  Step 1200/1648 | Loss 4.0894
+  Step 1400/1648 | Loss 3.9309
+  Step 1600/1648 | Loss 3.9428
+Ep 7/10 | Train 3.7808 | Val 3.9954 PPL 54.3 * BEST | 2518s (270%C)
+  DSQG pos-bias: |mean|=3.2605 |max|=11.6624 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' -> ' storm.\nThe storm was a great storm, and the storm was a great storm.\nThe storm '
+    'The length of the hypotenuse' -> ' is about 1.5 cm. The length of the hypotenuse is about 1.5 cm. The length of th'
+    'The President of the United' -> ' States, the President of the United States, and the President of the United Sta'
+    'Once upon a time there was' -> ' no need to be a good deal of money.\nThe first thing that was to be done was to '
+    'The results indicate that' -> ' the results of the study are not consistent with the results of the study.\nThe '
+  ──
+  Passkey...
+  mean=36.7%  (1/12 distances >50%)
+  d=1:20%  d=2:20%  d=4:20%  d=8:40%  d=16:40%  d=32:40%  d=64:40%  d=128:40%  d=256:60%  d=512:40%  d=1024:40%  d=1536:40%
+  Step 200/1648 | Loss 4.2900
+  Step 400/1648 | Loss 4.0270
+  Step 600/1648 | Loss 4.2311
+  Step 800/1648 | Loss 3.8760
+  Step 1000/1648 | Loss 4.0864
+  Step 1200/1648 | Loss 3.9410
+  Step 1400/1648 | Loss 4.1117
+  Step 1600/1648 | Loss 4.0161
+Ep 8/10 | Train 4.1357 | Val 3.9773 PPL 53.4 * BEST | 2895s (309%C)
+  DSQG pos-bias: |mean|=3.2469 |max|=11.5820 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' -> ' storm.\nThe storm was a storm that was a storm that was a storm that was a storm'
+    'The length of the hypotenuse' -> ' is approximately 1.5 cm. The length of the hypotenuse is about 1.5 cm. The leng'
+    'The President of the United' -> ' States, the President of the United States, and the President of the United Sta'
+    'Once upon a time there was' -> ' no doubt that the first time the first time the first time the first time the f'
+    'The results indicate that' -> ' the results of the study are not statistically significant.\nThe results of this'
+  ──
+  Passkey...
+  mean=36.7%  (1/12 distances >50%)
+  d=1:20%  d=2:20%  d=4:20%  d=8:40%  d=16:40%  d=32:40%  d=64:40%  d=128:40%  d=256:60%  d=512:40%  d=1024:40%  d=1536:40%
+  Step 200/1648 | Loss 4.0206
+  Step 400/1648 | Loss 4.1546
+  Step 600/1648 | Loss 3.8057
+  Step 800/1648 | Loss 3.8670
+  Step 1000/1648 | Loss 4.0734
+  Step 1200/1648 | Loss 4.0590
+  Step 1400/1648 | Loss 3.8912
+  Step 1600/1648 | Loss 4.2476
+Ep 9/10 | Train 3.8971 | Val 3.9717 PPL 53.1 * BEST | 3258s (347%C)
+  DSQG pos-bias: |mean|=3.2416 |max|=11.5507 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' -> ' storm.\nThe storm was a great storm, and the storm was a great storm.\nThe storm '
+    'The length of the hypotenuse' -> ' is approximately 1.5 cm. The length of the hypotenuse is about 1.5 cm. The leng'
+    'The President of the United' -> ' States, the President of the United States, and the President of the United Sta'
+    'Once upon a time there was' -> ' no need to be done.\nThe first step in the process is to make a new way to make '
+    'The results indicate that' -> ' the results of the study are not statistically significant.\nThe results of the '
+  ──
+  Passkey...
+  mean=38.3%  (1/12 distances >50%)
+  d=1:20%  d=2:20%  d=4:40%  d=8:40%  d=16:40%  d=32:40%  d=64:40%  d=128:40%  d=256:60%  d=512:40%  d=1024:40%  d=1536:40%
+  Step 200/1648 | Loss 4.1967
+  Step 400/1648 | Loss 3.9830
+  Step 600/1648 | Loss 3.9324
+  Step 800/1648 | Loss 3.9246
+  Step 1000/1648 | Loss 3.9632
+  Step 1200/1648 | Loss 4.0417
+  Step 1400/1648 | Loss 4.0428
+  Step 1600/1648 | Loss 3.7694
+Ep 10/10 | Train 4.0164 | Val 3.9698 PPL 53.0 * BEST | 3618s (386%C)
+  DSQG pos-bias: |mean|=3.2408 |max|=11.5463 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' -> ' storm.\nThe storm was a great storm, and the storm was a great storm.\nThe storm '
+    'The length of the hypotenuse' -> ' is approximately 1.5 cm. The length of the hypotenuse is about 1.5 cm. The leng'
+    'The President of the United' -> ' States, the President of the United States, and the President of the United Sta'
+    'Once upon a time there was' -> ' no need to be done.\nThe first step in the process is to make a new way to make '
+    'The results indicate that' -> ' the results of the study are not consistent with the results of the study.\nThe '
+  ──
+  Passkey...
+  mean=38.3%  (1/12 distances >50%)
+  d=1:20%  d=2:20%  d=4:40%  d=8:40%  d=16:40%  d=32:40%  d=64:40%  d=128:40%  d=256:60%  d=512:40%  d=1024:40%  d=1536:40%
+
+  condM (FineWeb-Edu) TEST: PPL 53.629 | Loss 3.9821
+
+  ── Temperature sweep (best checkpoint) ──
+
+  [greedy]
+    'It was a dark and stormy' -> ' storm.\nThe storm was a great storm, and the storm was a great storm.\nThe storm '
+    'The length of the hypotenuse' -> ' is approximately 1.5 cm. The length of the hypotenuse is about 1.5 cm. The leng'
+    'The President of the United' -> ' States, the President of the United States, and the President of the United Sta'
+    'Once upon a time there was' -> ' no need to be done.\nThe first step in the process is to make a new way to make '
+    'The results indicate that' -> ' the results of the study are not consistent with the results of the study.\nThe '
+
+  [T=0.5]
+    'It was a dark and stormy' -> ' man. The storm, which was the most severe storm in the country, was the most da'
+    'The length of the hypotenuse' -> ' is not sufficient to be measured. The accuracy of this measurement is determine'
+    'The President of the United' -> ' States, the President of the United States, and the President of the United Sta'
+    'Once upon a time there was' -> ' no need to bring the world out of the world, the world was not in the world.\nTh'
+    'The results indicate that' -> ' the specificity of the genome is not the same as the sequence of the genome.\nTh'
+
+  [T=0.7]
+    'It was a dark and stormy' -> ' earthquake, and it was the greatest event that was last. This was a very rich e'
+    'The length of the hypotenuse' -> ' may be between 1.2 to 3.5 mm, which may occur in the lower laryngeal region. Th'
+    'The President of the United' -> ' States had been the first to address the problems of the American War. He was o'
+    'Once upon a time there was' -> ' no trace of the record of the memory.\nThe most important part of the book is th'
+    'The results indicate that' -> ' the United States has a comprehensive vaccine-based approach to treatment with '
+
+  [T=1.0]
+    'It was a dark and stormy' -> ' food-filled water, it’s very easy to get into.\n- Ress. Have been preserved for '
+    'The length of the hypotenuse' -> ' is one in which most women are paid to and who are not given every two (the fou'
+    'The President of the United' -> ' States, about 30 years ago, would have passed through the establishment of a "G'
+    'Once upon a time there was' -> ' no age, no small population in the business system could have been the cause of'
+    'The results indicate that' -> ' if a consumer item had a nocturnal quality, the manufacturer decided to conside'
+
+  Final passkey (best ckpt): mean=38.3%  (1/12 distances >50%)
+  d=1:20%  d=2:20%  d=4:40%  d=8:40%  d=16:40%  d=32:40%  d=64:40%  d=128:40%  d=256:60%  d=512:40%  d=1024:40%  d=1536:40%
+
+========================================================================
+  condM 13M -- FineWeb-Edu Emergence (packed encoding, direct OWT comparison)
+  Chinchilla epoch ~2.59  |  OWT reference: 54.529 PPL / 83.3% passkey
+========================================================================
+  Ep     Tokens   %Chin   ValPPL   Passkey
+  1       107M      39%    156.3      0.0%
+  2       215M      77%     83.6      0.0% <- ~CHINCHILLA
+  3       323M     116%     68.2      0.0% <- ~CHINCHILLA
+  4       431M     154%     61.7      1.7%
+  5       539M     193%     58.2     28.3%
+  6       647M     231%     55.9     31.7%
+  7       755M     270%     54.3     36.7%
+  8       863M     309%     53.4     36.7%
+  9       971M     347%     53.1     38.3%
+  10     1079M     386%     53.0     38.3%
+========================================================================
+
+  Results -> benchmarks/logs/condm_fineweb_edu_results.json

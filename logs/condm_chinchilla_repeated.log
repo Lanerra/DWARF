@@ -1,0 +1,287 @@
+======================================================================
+  condM 13M — Chinchilla-Repeated Emergence Experiment
+======================================================================
+  GPU: NVIDIA GeForce RTX 4090  (23.6 GB)
+  Architecture: 5 DSQG → 1 full attn (layer 5) — condM canonical
+  Chinchilla target: 280M tokens (20 × 13.98M params)
+Loading OpenWebText (up to 100,000 docs)...
+  25,000 docs...
+  50,000 docs...
+  75,000 docs...
+  100,000 docs...
+Loaded condI BPE tokenizer from /home/dlewis3/Desktop/AI/DWARF/benchmarks/results/2048_condI_tokenizer.json
+Encoding data (max_seq_len=2048)...
+  Train: 52,716 sequences
+  Val: 1,435 sequences
+  Test: 1,459 sequences
+
+condM: 13,984,480 parameters
+  Layer types: ['DSQG', 'DSQG', 'DSQG', 'DSQG', 'DSQG', 'FULL']
+  Note: DSQG layers use condN offsets (44); layer 5 is O(N²) causal
+Running causality check...
+  Pre-10:  0.00000000  (expect 0.0)
+  Pos-10:  0.931034  (expect >0)
+  Post-10: 0.428083  (expect >0)
+  PASS
+  Step 200/1648 | Loss 6.4783
+  Step 400/1648 | Loss 6.2689
+  Step 600/1648 | Loss 5.6702
+  Step 800/1648 | Loss 5.4453
+  Step 1000/1648 | Loss 5.5506
+  Step 1200/1648 | Loss 5.2684
+  Step 1400/1648 | Loss 5.2704
+  Step 1600/1648 | Loss 5.1192
+Ep 1/10 | Train 5.0408 | Val 5.0863 PPL 161.8 * BEST | 340s (39%C)
+  DSQG pos-bias: |mean|=3.5805 |max|=13.9768 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' → ', and it was a very good thing.\n\nThe first thing I was in the world, I was a gre'
+    'The length of the hypotenuse' → ' of the entire world.\n\nThe first time the world’s most important part of the wor'
+    'The President of the United' → ' States, and the United States, the United States, and the United States, the Un'
+    'Once upon a time there was' → ' a lot of time to make it easier to make it easier to make it easier for the bes'
+    'The results indicate that' → ' the results are not the same.\n\nThe results are not the same as the results of t'
+  ──
+  Passkey...
+  mean=0.0%  (0/12 distances >50%)
+  d=1:0%  d=2:0%  d=4:0%  d=8:0%  d=16:0%  d=32:0%  d=64:0%  d=128:0%  d=256:0%  d=512:0%  d=1024:0%  d=1536:0%
+  Step 200/1648 | Loss 5.0100
+  Step 400/1648 | Loss 5.0893
+  Step 600/1648 | Loss 4.7730
+  Step 800/1648 | Loss 5.0166
+  Step 1000/1648 | Loss 4.7855
+  Step 1200/1648 | Loss 4.6990
+  Step 1400/1648 | Loss 4.3843
+  Step 1600/1648 | Loss 4.5607
+Ep 2/10 | Train 4.5048 | Val 4.5184 PPL 91.7 * BEST | 681s ← ~CHINCHILLA
+  DSQG pos-bias: |mean|=3.5135 |max|=13.3422 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' → ', and it was a very good thing.\n\nThe first thing I was doing was the same thing.'
+    'The length of the hypotenuse' → ' of the world is a very different way.\n\nThe first time the world is in the world'
+    'The President of the United' → ' States, the U.S. and the United States, the United States, and the United State'
+    'Once upon a time there was' → ' a new project.\n\nThe new project was designed to create a new project, which was'
+    'The results indicate that' → ' the current number of people are not being able to be able to get a new number '
+  ──
+  Passkey...
+  mean=0.0%  (0/12 distances >50%)
+  d=1:0%  d=2:0%  d=4:0%  d=8:0%  d=16:0%  d=32:0%  d=64:0%  d=128:0%  d=256:0%  d=512:0%  d=1024:0%  d=1536:0%
+  Step 200/1648 | Loss 4.5266
+  Step 400/1648 | Loss 4.3937
+  Step 600/1648 | Loss 4.3509
+  Step 800/1648 | Loss 4.4528
+  Step 1000/1648 | Loss 4.3200
+  Step 1200/1648 | Loss 4.4032
+  Step 1400/1648 | Loss 4.3974
+  Step 1600/1648 | Loss 4.3861
+Ep 3/10 | Train 4.0292 | Val 4.2812 PPL 72.3 * BEST | 1036s ← ~CHINCHILLA
+  DSQG pos-bias: |mean|=3.4514 |max|=12.7898 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' → ', and it was a very good thing.\n\nThe first thing I had to do was to get a little'
+    'The length of the hypotenuse' → ' is a very simple, very simple, and very simple.\n\nThe first thing I’ve seen is t'
+    'The President of the United' → ' States, who has been in the hands of the United States, has been in the hands o'
+    'Once upon a time there was' → ' a new version of the new version.\n\nThe new version of the new version of the ne'
+    'The results indicate that' → ' the company is not going to be able to get the same information.\n\nThe company h'
+  ──
+  Passkey...
+  mean=1.7%  (0/12 distances >50%)
+  d=1:0%  d=2:0%  d=4:0%  d=8:0%  d=16:0%  d=32:20%  d=64:0%  d=128:0%  d=256:0%  d=512:0%  d=1024:0%  d=1536:0%
+  Step 200/1648 | Loss 4.1495
+  Step 400/1648 | Loss 4.3365
+  Step 600/1648 | Loss 4.4708
+  Step 800/1648 | Loss 4.3538
+  Step 1000/1648 | Loss 4.6113
+  Step 1200/1648 | Loss 4.3808
+  Step 1400/1648 | Loss 4.3821
+  Step 1600/1648 | Loss 4.1538
+Ep 4/10 | Train 4.4085 | Val 4.1693 PPL 64.7 * BEST | 1391s (154%C)
+  DSQG pos-bias: |mean|=3.3927 |max|=12.3403 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' → ', and it was a little bit of a surprise.\n\nThe first thing I was thinking about w'
+    'The length of the hypotenuse' → ' is a very different type of structure.\n\nThe first step is to create a new struc'
+    'The President of the United' → ' States, who has been in the White House since the election.\n\nThe president of t'
+    'Once upon a time there was' → ' a new study.\n\nThe study was conducted by the University of California, and the '
+    'The results indicate that' → ' the results are not the same.\n\nThe results are not the same.\n\nThe results are n'
+  ──
+  Passkey...
+  mean=20.0%  (1/12 distances >50%)
+  d=1:40%  d=2:60%  d=4:20%  d=8:20%  d=16:20%  d=32:20%  d=64:20%  d=128:20%  d=256:20%  d=512:0%  d=1024:0%  d=1536:0%
+  Step 200/1648 | Loss 4.1882
+  Step 400/1648 | Loss 4.2592
+  Step 600/1648 | Loss 4.3658
+  Step 800/1648 | Loss 4.1841
+  Step 1000/1648 | Loss 4.0053
+  Step 1200/1648 | Loss 3.8866
+  Step 1400/1648 | Loss 4.1953
+  Step 1600/1648 | Loss 4.1461
+Ep 5/10 | Train 4.2451 | Val 4.1107 PPL 61.0 * BEST | 1727s (193%C)
+  DSQG pos-bias: |mean|=3.3441 |max|=11.9931 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' → ' place.\n\nThe first thing I’ve seen is that the first thing I’ve seen is that the'
+    'The length of the hypotenuse' → ' is a very different type of structure. The first is the length of the body, whi'
+    'The President of the United' → ' States, who has been in the White House since the election, has been in the Whi'
+    'Once upon a time there was' → ' a chance that the world would be able to get into the world.\n\nThe world is now '
+    'The results indicate that' → ' the U.S. government has been working with the U.S. to provide a comprehensive a'
+  ──
+  Passkey...
+  mean=50.0%  (6/12 distances >50%)
+  d=1:80%  d=2:80%  d=4:80%  d=8:80%  d=16:80%  d=32:80%  d=64:40%  d=128:20%  d=256:40%  d=512:20%  d=1024:0%  d=1536:0%
+  Step 200/1648 | Loss 4.1869
+  Step 400/1648 | Loss 4.1159
+  Step 600/1648 | Loss 4.2117
+  Step 800/1648 | Loss 4.1602
+  Step 1000/1648 | Loss 4.1136
+  Step 1200/1648 | Loss 4.2405
+  Step 1400/1648 | Loss 4.1568
+  Step 1600/1648 | Loss 4.0074
+Ep 6/10 | Train 4.1165 | Val 4.0692 PPL 58.5 * BEST | 2061s (232%C)
+  DSQG pos-bias: |mean|=3.3078 |max|=11.7476 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' → ' place.\n\nThe first time I was in the middle of the night, I was in the middle of'
+    'The length of the hypotenuse' → ', the first time the first time the first time the first time the first time the'
+    'The President of the United' → ' States, who has been in the White House since the election, has been in the Whi'
+    'Once upon a time there was' → ' a time when the world was in the middle of the world.\n\nThe world was in the mid'
+    'The results indicate that' → ' the U.S. government has been in the process of making a decision to take action'
+  ──
+  Passkey...
+  mean=55.0%  (7/12 distances >50%)
+  d=1:80%  d=2:80%  d=4:80%  d=8:80%  d=16:80%  d=32:80%  d=64:80%  d=128:40%  d=256:40%  d=512:0%  d=1024:20%  d=1536:0%
+  Step 200/1648 | Loss 4.0339
+  Step 400/1648 | Loss 4.0074
+  Step 600/1648 | Loss 4.0701
+  Step 800/1648 | Loss 4.1983
+  Step 1000/1648 | Loss 4.2759
+  Step 1200/1648 | Loss 3.8995
+  Step 1400/1648 | Loss 3.9059
+  Step 1600/1648 | Loss 4.2319
+Ep 7/10 | Train 4.1345 | Val 4.0427 PPL 57.0 * BEST | 2399s (270%C)
+  DSQG pos-bias: |mean|=3.2838 |max|=11.5913 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' → ' night.\n\nThe first day of the day, the first day of the day, the first day of th'
+    'The length of the hypotenuse' → ', the length of the body, the length of the body, the length of the body, the le'
+    'The President of the United' → ' States, who has been in the White House since the election, has been in the Whi'
+    'Once upon a time there was' → ' a time when the people were in the middle of the day.\n\nThe first time the peopl'
+    'The results indicate that' → ' the U.S. government has been in the process of making a decision to take action'
+  ──
+  Passkey...
+  mean=50.0%  (6/12 distances >50%)
+  d=1:80%  d=2:80%  d=4:80%  d=8:80%  d=16:80%  d=32:80%  d=64:40%  d=128:40%  d=256:40%  d=512:0%  d=1024:0%  d=1536:0%
+  Step 200/1648 | Loss 4.1161
+  Step 400/1648 | Loss 4.0847
+  Step 600/1648 | Loss 4.0792
+  Step 800/1648 | Loss 4.0991
+  Step 1000/1648 | Loss 3.9464
+  Step 1200/1648 | Loss 3.8521
+  Step 1400/1648 | Loss 4.0368
+  Step 1600/1648 | Loss 3.9809
+Ep 8/10 | Train 3.9796 | Val 4.0275 PPL 56.1 * BEST | 2732s (309%C)
+  DSQG pos-bias: |mean|=3.2707 |max|=11.5074 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' → ' night.\n\nThe first day of the day, the first day of the day, the first day of th'
+    'The length of the hypotenuse' → ', the length of the body, the length of the body, the length of the body, the le'
+    'The President of the United' → ' States, who has been in the White House since the election, has been in the Whi'
+    'Once upon a time there was' → ' a time when the world was so much more than a year ago.\n\nThe first time I was a'
+    'The results indicate that' → ' the U.S. is not the only country to be able to get the U.S. to be able to get t'
+  ──
+  Passkey...
+  mean=58.3%  (7/12 distances >50%)
+  d=1:80%  d=2:80%  d=4:80%  d=8:80%  d=16:80%  d=32:100%  d=64:80%  d=128:40%  d=256:40%  d=512:20%  d=1024:20%  d=1536:0%
+  Step 200/1648 | Loss 4.0678
+  Step 400/1648 | Loss 3.9520
+  Step 600/1648 | Loss 4.2415
+  Step 800/1648 | Loss 4.0937
+  Step 1000/1648 | Loss 3.9037
+  Step 1200/1648 | Loss 3.8759
+  Step 1400/1648 | Loss 4.2545
+  Step 1600/1648 | Loss 4.2689
+Ep 9/10 | Train 4.1171 | Val 4.0205 PPL 55.7 * BEST | 3071s (348%C)
+  DSQG pos-bias: |mean|=3.2656 |max|=11.4758 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' → ' place.\n\nThe first thing I’ve seen is that the first thing I’ve seen is that the'
+    'The length of the hypotenuse' → ', the length of the body, the length of the body, the length of the body, the le'
+    'The President of the United' → ' States, who has been in the White House since the election, has been in the Whi'
+    'Once upon a time there was' → ' a time when the people were in the middle of the night.\n\nThe first time the peo'
+    'The results indicate that' → ' the U.S. government has been in the process of making a decision to take action'
+  ──
+  Passkey...
+  mean=63.3%  (8/12 distances >50%)
+  d=1:100%  d=2:80%  d=4:80%  d=8:80%  d=16:80%  d=32:100%  d=64:100%  d=128:40%  d=256:60%  d=512:20%  d=1024:20%  d=1536:0%
+  Step 200/1648 | Loss 4.1213
+  Step 400/1648 | Loss 3.9016
+  Step 600/1648 | Loss 4.0829
+  Step 800/1648 | Loss 4.2049
+  Step 1000/1648 | Loss 4.0517
+  Step 1200/1648 | Loss 3.9167
+  Step 1400/1648 | Loss 3.9525
+  Step 1600/1648 | Loss 3.9691
+Ep 10/10 | Train 3.8998 | Val 4.0189 PPL 55.6 * BEST | 3406s (386%C)
+  DSQG pos-bias: |mean|=3.2648 |max|=11.4712 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' → ' place.\n\nThe first thing I’ve seen is that the first thing I’ve seen is that the'
+    'The length of the hypotenuse' → ' is a very different type of structure.\n\nThe first step is to make the final ste'
+    'The President of the United' → ' States, who has been in the White House since the election, has been in the Whi'
+    'Once upon a time there was' → ' a time when the people were in the middle of the night.\n\nThe first time the peo'
+    'The results indicate that' → ' the U.S. government has been in the process of making a decision to take action'
+  ──
+  Passkey...
+  mean=65.0%  (8/12 distances >50%)
+  d=1:100%  d=2:80%  d=4:80%  d=8:80%  d=16:80%  d=32:100%  d=64:100%  d=128:40%  d=256:60%  d=512:20%  d=1024:40%  d=1536:0%
+
+  condM TEST: PPL 54.5 | Loss 3.9988
+
+  ── Temperature sweep (best checkpoint) ──
+
+  [greedy]
+    'It was a dark and stormy' → ' place.\n\nThe first thing I’ve seen is that the first thing I’ve seen is that the'
+    'The length of the hypotenuse' → ' is a very different type of structure.\n\nThe first step is to make the final ste'
+    'The President of the United' → ' States, who has been in the White House since the election, has been in the Whi'
+    'Once upon a time there was' → ' a time when the people were in the middle of the night.\n\nThe first time the peo'
+    'The results indicate that' → ' the U.S. government has been in the process of making a decision to take action'
+
+  [T=0.5]
+    'It was a dark and stormy' → ' night.\n\n"I had a lot of fun with the last couple of years, and I was always gla'
+    'The length of the hypotenuse' → ' is more than half a century old. The first study of the first half of the twent'
+    'The President of the United' → ' States is now in charge of the U.S. Supreme Court, the Supreme Court is current'
+    'Once upon a time there was' → ' a lot of work to do with the job. I was thinking about the job, and I wanted to'
+    'The results indicate that' → ' the higher levels of the higher levels of the higher levels of the higher level'
+
+  [T=0.7]
+    'It was a dark and stormy' → ' night for a month. We have been a little bit overwhelmed with the support of th'
+    'The length of the hypotenuse' → ', which is a big part of the architecture. In the case of the underlying idea of'
+    'The President of the United' → ' States and the United States in a joint statement, The Washington Post reported'
+    'Once upon a time there was' → ' a time when the windows were torn apart. This was a good thing for many people '
+    'The results indicate that' → ' the demand for the annual domestic violence force is not adequate.\n\nThe report,'
+
+  [T=1.0]
+    'It was a dark and stormy' → ' moment in Lake Shawan earlier this week. Sitting in its head beside the Big Mar'
+    'The length of the hypotenuse' → ' process is the purpose of creating an altered Ixma alphabet in the system in wh'
+    'The President of the United' → ' States has agreed to pay for certain occupations such as sterilization, medical'
+    'Once upon a time there was' → ' a reunion like “Hey. We look at The Female Friends.” This was one of the few ke'
+    'The results indicate that' → ' if people face legal needs and attorneys repeatedly, they will find it easier t'
+
+======================================================================
+  condM LAYER-POSITION ABLATION — full_attn @ layer 5
+======================================================================
+  Standard transformer 13M (reference)                    64.07
+  condN (pure DSQG, 44 offsets)                           ~70.7
+  condM (5 DSQG + 1 full attn, hybrid)                     54.5
+
+  condM vs condN (projected): -16.2 PPL
+  → Full attention layer provides critical global context; hybrid is the path
+
+========================================================================
+  condM 13M — Chinchilla-Repeated Emergence
+  Chinchilla epoch ≈ 2.6 | Reference: 10-ep = 54.529 PPL / 83.3% passkey
+========================================================================
+   Ep    Tokens   %Chin    ValPPL   Passkey
+    1      108M     39%     161.8      0.0%  
+    2      216M     77%      91.7      0.0% ←
+    3      324M    116%      72.3      1.7% ←
+    4      432M    154%      64.7     20.0%  
+    5      540M    193%      61.0     50.0%  
+    6      648M    232%      58.5     55.0%  
+    7      756M    270%      57.0     50.0%  
+    8      864M    309%      56.1     58.3%  
+    9      972M    348%      55.7     63.3%  
+   10     1080M    386%      55.6     65.0%  
+========================================================================
+  Results → benchmarks/logs/condm_chinchilla_repeated_results.json
+
+  Final results → benchmarks/logs/condm_chinchilla_repeated_final.json

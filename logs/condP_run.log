@@ -1,0 +1,219 @@
+======================================================================
+  DWARF condP — Dense-64 Local + Dyadic Long-Range DSQG
+  Softmax over 74 unique offsets with ALiBi per-head bias init
+======================================================================
+  GPU: NVIDIA GeForce RTX 4090  (23.6 GB)
+  Offset set: {0..64} ∪ {96,128,...,1536} = 74 offsets
+  Coverage: dense-32 (condN) filled to dense-64 (condP)
+  Structural gap filled: positions 33–47 (condN gap between dense and δ=48)
+  Compute overhead vs condN: ~+70% memory for K_all/V_all stack (+30 offsets)
+  Interference pooling: every 3rd layer (condN style)
+Loading OpenWebText (up to 100,000 docs)...
+  25,000 docs...
+  50,000 docs...
+  75,000 docs...
+  100,000 docs...
+  100,000 docs | train 95,000 | val 2,500 | test 2,500
+Loaded condI BPE tokenizer (shared vocabulary for comparability)
+  Vocab: 32000 tokens
+Encoding data (max_seq_len=2048)...
+  Train: 52,716 sequences
+  Val: 1,435 sequences
+  Test: 1,459 sequences
+
+condP: 14,118,368 parameters
+  n_offsets:           74
+  Interference blocks: [2, 5]
+  Initial pos_bias range: [-14.675, -0.000]
+  (ALiBi: 0.0 at δ=0, negative elsewhere, steeper for local-head)
+Running causality check...
+  Pre-10:  0.00000000  (expect 0.0)
+  Pos-10:  0.841920  (expect >0)
+  Post-10: 0.397700  (expect >0)
+  PASS — architecture is causal
+  Step 200/1648 | Loss 6.4075
+  Step 400/1648 | Loss 5.8710
+  Step 600/1648 | Loss 5.5026
+  Step 800/1648 | Loss 5.3428
+  Step 1000/1648 | Loss 5.3964
+  Step 1200/1648 | Loss 5.3167
+  Step 1400/1648 | Loss 5.0043
+  Step 1600/1648 | Loss 5.1077
+Ep 1/10 | Train 4.9764 | Val 5.0835 PPL 161.3 * BEST | 2675s
+  Pos-bias: |mean|=3.8081 |max|=13.9840 most-local=h7 most-global=h0
+  ── Generation samples ──
+    'It was a dark and stormy' → ', and it was a very good thing. It was a little bit of a little bit of a little '
+    'The length of the hypotenuse' → ' of the cagl. The only one of the most important things that the most important '
+    'The President of the United' → ' States, and the United States, and the United States.\n\nThe United States, which'
+    'Once upon a time there was' → ' no idea that the idea of the idea was to be a good idea.\n\nThe idea of the idea '
+    'The results indicate that' → ' the results of the results were not the result of the results.\n\nThe results of '
+  ──
+  Step 200/1648 | Loss 5.0222
+  Step 400/1648 | Loss 4.8020
+  Step 600/1648 | Loss 4.8366
+  Step 800/1648 | Loss 4.9582
+  Step 1000/1648 | Loss 4.8665
+  Step 1200/1648 | Loss 4.5652
+  Step 1400/1648 | Loss 4.5792
+  Step 1600/1648 | Loss 4.5397
+Ep 2/10 | Train 4.6344 | Val 4.6537 PPL 105.0 * BEST | 5365s
+  Pos-bias: |mean|=3.7086 |max|=13.3650 most-local=h7 most-global=h0
+  ── Generation samples ──
+    'It was a dark and stormy' → ', and it was a very good thing to do with it. It was a very good thing to do wit'
+    'The length of the hypotenuse' → '.\n\nThe first time the first time the first time the first time the first time th'
+    'The President of the United' → ' States, the United States, and the United States.\n\nThe United States, the Unite'
+    'Once upon a time there was' → ' no way to get a little more than a few hours before the first day of the day.\n\n'
+    'The results indicate that' → ' the results are not necessarily true.\n\nThe results are not the first to be publ'
+  ──
+  Step 200/1648 | Loss 4.6162
+  Step 400/1648 | Loss 4.6306
+  Step 600/1648 | Loss 4.6064
+  Step 800/1648 | Loss 4.6723
+  Step 1000/1648 | Loss 4.4912
+  Step 1200/1648 | Loss 4.5683
+  Step 1400/1648 | Loss 4.3212
+  Step 1600/1648 | Loss 4.4949
+Ep 3/10 | Train 4.5682 | Val 4.4461 PPL 85.3 * BEST | 8065s
+  Pos-bias: |mean|=3.6134 |max|=12.8186 most-local=h7 most-global=h0
+  ── Generation samples ──
+    'It was a dark and stormy' → ', and it was a little bit of a bit of a bit of a bit of a bit of a bit of a bit '
+    'The length of the hypotenuse' → '. The length of the tube is the length of the tube. The length of the tube is th'
+    'The President of the United' → ' States, said that the U.S. is "a very different country."\n\nThe U.S. has been a '
+    'Once upon a time there was' → ' a chance to get a chance to get a chance to get a chance.\n\nThe first time I was'
+    'The results indicate that' → ' the results are not the same.\n\nThe results are based on the results of the resu'
+  ──
+  Step 200/1648 | Loss 4.3870
+  Step 400/1648 | Loss 4.4604
+  Step 600/1648 | Loss 4.4708
+  Step 800/1648 | Loss 4.3200
+  Step 1000/1648 | Loss 4.3544
+  Step 1200/1648 | Loss 4.3295
+  Step 1400/1648 | Loss 4.4618
+  Step 1600/1648 | Loss 4.4727
+Ep 4/10 | Train 4.4212 | Val 4.3445 PPL 77.1 * BEST | 10755s
+  Pos-bias: |mean|=3.5307 |max|=12.3782 most-local=h7 most-global=h0
+  ── Generation samples ──
+    'It was a dark and stormy' → ', and it was a little more than a week before.\n\nThe first thing that happened wa'
+    'The length of the hypotenuse' → ' is a bit of a bit of a bit of a bit of a bit of a bit of a bit of a bit of a bi'
+    'The President of the United' → ' States, is a member of the United States, and the United States is a member of '
+    'Once upon a time there was' → ' a chance to get a chance to get a chance to get a chance to get a chance to get'
+    'The results indicate that' → ' the results are not accurate.\n\nThe results are based on the results of the resu'
+  ──
+  Step 200/1648 | Loss 4.4234
+  Step 400/1648 | Loss 4.3949
+  Step 600/1648 | Loss 4.4416
+  Step 800/1648 | Loss 4.3540
+  Step 1000/1648 | Loss 4.4697
+  Step 1200/1648 | Loss 4.0146
+  Step 1400/1648 | Loss 4.4530
+  Step 1600/1648 | Loss 4.1900
+Ep 5/10 | Train 4.3226 | Val 4.2831 PPL 72.5 * BEST | 13441s
+  Pos-bias: |mean|=3.4654 |max|=12.0317 most-local=h7 most-global=h0
+  ── Generation samples ──
+    'It was a dark and stormy' → ' night.\n\n"I was a little bit surprised by the fact that I was a little bit surpr'
+    'The length of the hypotenuse' → ' is a bit more than a bit more than a bit more than a bit more than a bit more t'
+    'The President of the United' → ' States, the United States, and the United States, are the only countries in the'
+    'Once upon a time there was' → ' a chance to be a chance to be a chance to be a chance to be a chance to be a ch'
+    'The results indicate that' → ' the results of the study are not necessarily accurate.\n\nThe results are based o'
+  ──
+  Step 200/1648 | Loss 4.1913
+  Step 400/1648 | Loss 4.3869
+  Step 600/1648 | Loss 4.2452
+  Step 800/1648 | Loss 4.3323
+  Step 1000/1648 | Loss 4.0922
+  Step 1200/1648 | Loss 4.1407
+  Step 1400/1648 | Loss 4.1696
+  Step 1600/1648 | Loss 4.0663
+Ep 6/10 | Train 4.1299 | Val 4.2382 PPL 69.3 * BEST | 16115s
+  Pos-bias: |mean|=3.4184 |max|=11.7902 most-local=h7 most-global=h0
+  ── Generation samples ──
+    'It was a dark and stormy' → ' night, and it was a little bit of a surprise.\n\nThe night was a little bit of a '
+    'The length of the hypotenuse' → ' is not the same as the length of the hypotenuse. The length of the hypotenuse i'
+    'The President of the United' → ' States, who was elected president of the United States, was elected president o'
+    'Once upon a time there was' → ' a chance to get a chance to get a chance to get a chance to get a chance to get'
+    'The results indicate that' → ' the results are not accurate.\n\nThe results are based on the results of the resu'
+  ──
+  Step 200/1648 | Loss 4.3629
+  Step 400/1648 | Loss 4.1843
+  Step 600/1648 | Loss 4.1442
+  Step 800/1648 | Loss 4.2318
+  Step 1000/1648 | Loss 4.1983
+  Step 1200/1648 | Loss 4.1078
+  Step 1400/1648 | Loss 4.1855
+  Step 1600/1648 | Loss 4.3891
+Ep 7/10 | Train 4.2909 | Val 4.2157 PPL 67.7 * BEST | 18795s
+  Pos-bias: |mean|=3.3882 |max|=11.6308 most-local=h7 most-global=h0
+  ── Generation samples ──
+    'It was a dark and stormy' → ', and it was a little bit of a surprise.\n\n"I was a little bit of a little bit of'
+    'The length of the hypotenuse' → ' is a bit of a bit of a bit of a bit of a bit of a bit of a bit of a bit of a bi'
+    'The President of the United' → ' States, who has been in the U.S., has been in the U.S., and has been in the U.S'
+    'Once upon a time there was' → ' a chance to be a new person, and the idea of a new person is to be a new person'
+    'The results indicate that' → ' the results of the study are not accurate.\n\nThe results suggest that the result'
+  ──
+  Step 200/1648 | Loss 4.0661
+  Step 400/1648 | Loss 4.2242
+  Step 600/1648 | Loss 4.1819
+  Step 800/1648 | Loss 4.1356
+  Step 1000/1648 | Loss 4.1235
+  Step 1200/1648 | Loss 4.3049
+  Step 1400/1648 | Loss 4.2585
+  Step 1600/1648 | Loss 4.3031
+Ep 8/10 | Train 4.3252 | Val 4.1990 PPL 66.6 * BEST | 21489s
+  Pos-bias: |mean|=3.3717 |max|=11.5476 most-local=h7 most-global=h0
+  ── Generation samples ──
+    'It was a dark and stormy' → ' night, and it was a little bit of a surprise.\n\n"I was a little bit of a little '
+    'The length of the hypotenuse' → ' is a bit of a bit of a bit of a bit of a bit of a bit of a bit of a bit of a bi'
+    'The President of the United' → ' States, who was the first to be elected president in the United States, was ele'
+    'Once upon a time there was' → ' a chance to be a new person, and that’s what I’m going to do.\n\nI’m not sure if '
+    'The results indicate that' → ' the results are not accurate.\n\nThe results are based on the results of the resu'
+  ──
+  Step 200/1648 | Loss 4.1972
+  Step 400/1648 | Loss 4.4661
+  Step 600/1648 | Loss 4.0888
+  Step 800/1648 | Loss 4.2656
+  Step 1000/1648 | Loss 4.2281
+  Step 1200/1648 | Loss 4.1762
+  Step 1400/1648 | Loss 4.0589
+  Step 1600/1648 | Loss 4.2797
+Ep 9/10 | Train 4.1605 | Val 4.1918 PPL 66.1 * BEST | 24201s
+  Pos-bias: |mean|=3.3654 |max|=11.5158 most-local=h7 most-global=h0
+  ── Generation samples ──
+    'It was a dark and stormy' → ' night, and it was a little bit of a surprise.\n\n"I was a little bit of a little '
+    'The length of the hypotenuse' → ' is a bit of a bit of a bit of a bit of a bit of a bit of a bit of a bit of a bi'
+    'The President of the United' → ' States, who was the first to be elected president in the United States, was the'
+    'Once upon a time there was' → ' a chance to be a new person, and the idea of a new person is to be a new person'
+    'The results indicate that' → ' the results of the study are not accurate.\n\nThe results of the study are based '
+  ──
+  Step 200/1648 | Loss 4.1123
+  Step 400/1648 | Loss 4.1929
+  Step 600/1648 | Loss 4.3089
+  Step 800/1648 | Loss 4.1883
+  Step 1000/1648 | Loss 4.2164
+  Step 1200/1648 | Loss 4.2394
+  Step 1400/1648 | Loss 4.3690
+  Step 1600/1648 | Loss 4.2590
+Ep 10/10 | Train 3.8927 | Val 4.1905 PPL 66.1 * BEST | 26915s
+  Pos-bias: |mean|=3.3645 |max|=11.5112 most-local=h7 most-global=h0
+  ── Generation samples ──
+    'It was a dark and stormy' → ' night, and it was a little bit of a surprise.\n\n"I was a little bit of a little '
+    'The length of the hypotenuse' → ' is a bit of a bit of a bit of a bit of a bit of a bit of a bit of a bit of a bi'
+    'The President of the United' → ' States, who was the first to be elected president in the United States, was the'
+    'Once upon a time there was' → ' a chance to be a new person, and the idea of a new person is to be a new person'
+    'The results indicate that' → ' the results are not accurate.\n\nThe results are based on the results of the resu'
+  ──
+
+  condP TEST: PPL 65.1 | Loss 4.1753
+
+======================================================================
+  condP ABLATION SUMMARY
+======================================================================
+  Standard transformer 13M (reference)                       65.4
+  DWARF condK+RP (D4 wave field, best wave)                  83.3
+  DWARF condN (dense-32 + dyadic DSQG)                       70.1
+  condP (dense-64 + dyadic DSQG)                             65.1
+
+  Interpretation (condP vs condN):
+    vs standard transformer: -0.4 PPL
+    vs condN:                -5.0 PPL
+    → Dense coverage gap (positions 33–47) was significant.
+      Coverage density is a meaningful architectural lever.

@@ -1,0 +1,245 @@
+======================================================================
+  Run E — DSQG Hybrid 13M @ N=2048 — Dense 1-39 + Octave Blocks (J=79)
+  D=256, H=8, L=6, N=2048
+  Offsets (79): sparse 0-31 | dense 32-39,64-71,128-135,256-263,512-519 | sparse tail
+  Init: near-zero pos_bias (global heads compete from ep1)
+======================================================================
+Loading encoded dataset from benchmarks/logs/fineweb_encoded_2048.pt...
+  train: 52,716  val: 5,582  test: 5,473
+  Parameters: 14,064,352
+  Causality: PASS
+  Compiling model (torch.compile mode=default)...
+  Step 200/1648 | Loss 6.6847
+  Step 400/1648 | Loss 6.2423
+  Step 600/1648 | Loss 5.9156
+  Step 800/1648 | Loss 5.5760
+  Step 1000/1648 | Loss 5.4657
+  Step 1200/1648 | Loss 5.3162
+  Step 1400/1648 | Loss 5.2122
+  Step 1600/1648 | Loss 5.3389
+Ep 1/10 | Train 5.8641 | Val 5.0454 PPL 155.3 * BEST | 512s (38%C)
+  DSQG pos-bias: |mean|=0.1505 |max|=0.3928 most-local=h5 most-global=h4
+  scale_embed:   |mean|=0.1681 |max|=0.3935
+  IF gains: h0:0.997  h1:1.004  h2:0.995  h3:1.011  h4:0.994  h5:1.002  h6:0.980  h7:1.017
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ', and it was a great deal of the world.\nThe world was the world of the world, an'
+    'The length of the hypotenuse' -> ' of the light of the light, the light of the light is the light of the light. Th'
+    'The President of the United' -> ' States, the United States, and the United States, the United States, and the Un'
+    'Once upon a time there was' -> ' a lot of time, it was a lot of time to be done.\nThe next day was the time of th'
+    'The results indicate that' -> ' the results of the results were not shown in the study.\nThe results of the resu'
+  --
+  Passkey...
+W0304 11:30:03.154000 1281855 torch/_dynamo/convert_frame.py:906] [1/8] torch._dynamo hit config.cache_size_limit (8)
+W0304 11:30:03.154000 1281855 torch/_dynamo/convert_frame.py:906] [1/8]    function: 'forward' (/home/dlewis3/Desktop/AI/DWARF/train/dsqg_hybrid_13m_2048_rune.py:224)
+W0304 11:30:03.154000 1281855 torch/_dynamo/convert_frame.py:906] [1/8]    last reason: 1/1: len(L['self']._modules) == 8                                
+W0304 11:30:03.154000 1281855 torch/_dynamo/convert_frame.py:906] [1/8] To log all recompilation reasons, use TORCH_LOGS="recompiles".
+W0304 11:30:03.154000 1281855 torch/_dynamo/convert_frame.py:906] [1/8] To diagnose recompilation issues, see https://pytorch.org/docs/main/torch.compiler_troubleshooting.html.
+  mean=0.0%  (0/12 distances >50%)
+  d=1:0%  d=2:0%  d=4:0%  d=8:0%  d=16:0%  d=32:0%  d=64:0%  d=128:0%  d=256:0%  d=512:0%  d=1024:0%  d=1536:0%
+  Step 200/1648 | Loss 5.0600
+  Step 400/1648 | Loss 4.8919
+  Step 600/1648 | Loss 4.8012
+  Step 800/1648 | Loss 4.6497
+  Step 1000/1648 | Loss 4.7934
+  Step 1200/1648 | Loss 4.3694
+  Step 1400/1648 | Loss 4.4407
+  Step 1600/1648 | Loss 4.3692
+Ep 2/10 | Train 4.7678 | Val 4.4007 PPL 81.5 * BEST | 989s (77%C)
+  DSQG pos-bias: |mean|=0.1979 |max|=0.6545 most-local=h5 most-global=h4
+  scale_embed:   |mean|=0.2282 |max|=0.6198
+  IF gains: h0:0.973  h1:1.004  h2:0.991  h3:1.004  h4:1.001  h5:1.013  h6:0.959  h7:1.031
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ', and it was a cold, and it was a cold, and it was a cold, and it was a cold.\nTh'
+    'The length of the hypotenuse' -> ' is a very different type of pain. The most common type of pain is the most comm'
+    'The President of the United' -> ' States, the United States, the United States, and the United States, the United'
+    'Once upon a time there was' -> ' a time to get a lot of time.\nThe first time the time the time the time the time'
+    'The results indicate that' -> ' the results of the study were not statistically significant.\nThe study was cond'
+  --
+  Passkey...
+  mean=0.0%  (0/12 distances >50%)
+  d=1:0%  d=2:0%  d=4:0%  d=8:0%  d=16:0%  d=32:0%  d=64:0%  d=128:0%  d=256:0%  d=512:0%  d=1024:0%  d=1536:0%
+  Step 200/1648 | Loss 4.4623
+  Step 400/1648 | Loss 4.3970
+  Step 600/1648 | Loss 4.3097
+  Step 800/1648 | Loss 4.3376
+  Step 1000/1648 | Loss 4.2757
+  Step 1200/1648 | Loss 4.5018
+  Step 1400/1648 | Loss 4.4224
+  Step 1600/1648 | Loss 4.1103
+Ep 3/10 | Train 4.3687 | Val 4.1958 PPL 66.4 * BEST | 1348s (115%C)
+  DSQG pos-bias: |mean|=0.2229 |max|=0.8353 most-local=h5 most-global=h4
+  scale_embed:   |mean|=0.2597 |max|=0.7639
+  IF gains: h0:0.971  h1:1.005  h2:0.988  h3:1.000  h4:1.014  h5:1.017  h6:0.956  h7:1.039
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ' storm.\nThe storm was a storm, and the storm was a storm. The storm was a storm,'
+    'The length of the hypotenuse' -> ' is a small amount of time.\nThe first step is to make the first step in the firs'
+    'The President of the United' -> ' States, the United States, and the United States, the United States, and the Un'
+    'Once upon a time there was' -> ' a new time.\nThe first time the new time was to be completed, the first time the'
+    'The results indicate that' -> ' the first time the first time the first time was the first time the first time '
+  --
+  Passkey...
+  mean=0.0%  (0/12 distances >50%)
+  d=1:0%  d=2:0%  d=4:0%  d=8:0%  d=16:0%  d=32:0%  d=64:0%  d=128:0%  d=256:0%  d=512:0%  d=1024:0%  d=1536:0%
+  Step 200/1648 | Loss 4.2419
+  Step 400/1648 | Loss 4.2185
+  Step 600/1648 | Loss 4.4310
+  Step 800/1648 | Loss 4.2203
+  Step 1000/1648 | Loss 4.3131
+  Step 1200/1648 | Loss 4.2747
+  Step 1400/1648 | Loss 4.2039
+  Step 1600/1648 | Loss 4.1367
+Ep 4/10 | Train 4.2243 | Val 4.0962 PPL 60.1 * BEST | 1706s (153%C)
+  DSQG pos-bias: |mean|=0.2362 |max|=0.9471 most-local=h5 most-global=h4
+  scale_embed:   |mean|=0.2768 |max|=0.8556
+  IF gains: h0:0.971  h1:1.007  h2:0.984  h3:0.996  h4:1.022  h5:1.017  h6:0.955  h7:1.044
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ' storm.\nThe storm was a very dark and dark, dark, dark, dark, dark, dark, dark, '
+    'The length of the hypotenuse' -> ', the most common form of the term is the "native" or "native" (the "native" or '
+    'The President of the United' -> ' States, the United States, and the United States, and the United States, and th'
+    'Once upon a time there was' -> ' a great deal of time.\nThe first thing that the first thing was to be done is to'
+    'The results indicate that' -> ' the results of the results are not statistically significant.\nThe results are n'
+  --
+  Passkey...
+  mean=11.7%  (0/12 distances >50%)
+  d=1:0%  d=2:20%  d=4:0%  d=8:20%  d=16:20%  d=32:20%  d=64:20%  d=128:20%  d=256:20%  d=512:0%  d=1024:0%  d=1536:0%
+  Step 200/1648 | Loss 4.1787
+  Step 400/1648 | Loss 4.0882
+  Step 600/1648 | Loss 3.9879
+  Step 800/1648 | Loss 4.2141
+  Step 1000/1648 | Loss 4.0524
+  Step 1200/1648 | Loss 4.2398
+  Step 1400/1648 | Loss 3.9323
+  Step 1600/1648 | Loss 4.3441
+Ep 5/10 | Train 4.1361 | Val 4.0398 PPL 56.8 * BEST | 2074s (192%C)
+  DSQG pos-bias: |mean|=0.2431 |max|=1.0156 most-local=h5 most-global=h4
+  scale_embed:   |mean|=0.2857 |max|=0.9203
+  IF gains: h0:0.971  h1:1.008  h2:0.979  h3:0.993  h4:1.028  h5:1.015  h6:0.955  h7:1.047
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ' storm.\nThe storm was a dark, dark, dark, dark, dark, dark, dark, dark, dark, da'
+    'The length of the hypotenuse' -> ' is the same as the length of the hypotenuse.\nThe first step is to determine the'
+    'The President of the United' -> ' States, the President of the United States, and the President of the United Sta'
+    'Once upon a time there was' -> ' a great deal of time.\nThe first time the first time was the first time the firs'
+    'The results indicate that' -> ' the results of the results are not statistically significant.\nThe results of th'
+  --
+  Passkey...
+  mean=20.0%  (0/12 distances >50%)
+  d=1:20%  d=2:20%  d=4:20%  d=8:20%  d=16:20%  d=32:40%  d=64:20%  d=128:20%  d=256:20%  d=512:20%  d=1024:20%  d=1536:0%
+  Step 200/1648 | Loss 4.1933
+  Step 400/1648 | Loss 4.0257
+  Step 600/1648 | Loss 4.0643
+  Step 800/1648 | Loss 4.3284
+  Step 1000/1648 | Loss 4.0651
+  Step 1200/1648 | Loss 4.0257
+  Step 1400/1648 | Loss 4.1162
+  Step 1600/1648 | Loss 4.0917
+Ep 6/10 | Train 4.0860 | Val 3.9968 PPL 54.4 * BEST | 2437s (230%C)
+  DSQG pos-bias: |mean|=0.2465 |max|=1.0539 most-local=h5 most-global=h4
+  scale_embed:   |mean|=0.2901 |max|=0.9575
+  IF gains: h0:0.973  h1:1.009  h2:0.976  h3:0.990  h4:1.030  h5:1.013  h6:0.956  h7:1.048
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ' day.\nThe first day of the day was the first day of the day. The first day was t'
+    'The length of the hypotenuse' -> ' is about 1.5 cm. The length of the hypotenuse is about 1.5 cm. The length of th'
+    'The President of the United' -> ' States, the President of the United States, the President of the United States,'
+    'Once upon a time there was' -> ' a great deal of time in the world.\nThe first time in the world, the first time '
+    'The results indicate that' -> ' the results of the experiment were not statistically significant.\nThe results o'
+  --
+  Passkey...
+  mean=16.7%  (0/12 distances >50%)
+  d=1:20%  d=2:20%  d=4:20%  d=8:20%  d=16:20%  d=32:20%  d=64:20%  d=128:20%  d=256:20%  d=512:20%  d=1024:0%  d=1536:0%
+  Step 200/1648 | Loss 4.0607
+  Step 400/1648 | Loss 3.8834
+  Step 600/1648 | Loss 3.9748
+  Step 800/1648 | Loss 4.0268
+  Step 1000/1648 | Loss 4.0627
+  Step 1200/1648 | Loss 3.9597
+  Step 1400/1648 | Loss 3.8675
+  Step 1600/1648 | Loss 3.8433
+Ep 7/10 | Train 4.0428 | Val 3.9712 PPL 53.0 * BEST | 2803s (269%C)
+  DSQG pos-bias: |mean|=0.2478 |max|=1.0740 most-local=h5 most-global=h4
+  scale_embed:   |mean|=0.2918 |max|=0.9793
+  IF gains: h0:0.974  h1:1.010  h2:0.974  h3:0.989  h4:1.031  h5:1.013  h6:0.957  h7:1.050
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ' day.\nThe first day of the day was the first day of the day. The first day was t'
+    'The length of the hypotenuse' -> ' is the same as the length of the hypotenuse is the same as the length of the hy'
+    'The President of the United' -> ' States, the President of the United States, and the President of the United Sta'
+    'Once upon a time there was' -> ' a great deal of time in the world.\nThe first time in the world, the first time '
+    'The results indicate that' -> ' the results are not statistically significant.\nThe results are not statisticall'
+  --
+  Passkey...
+  mean=20.0%  (0/12 distances >50%)
+  d=1:20%  d=2:20%  d=4:20%  d=8:20%  d=16:20%  d=32:20%  d=64:40%  d=128:20%  d=256:20%  d=512:20%  d=1024:20%  d=1536:0%
+  Step 200/1648 | Loss 4.0597
+  Step 400/1648 | Loss 4.0793
+  Step 600/1648 | Loss 4.0673
+  Step 800/1648 | Loss 4.0644
+  Step 1000/1648 | Loss 4.1755
+  Step 1200/1648 | Loss 3.9966
+  Step 1400/1648 | Loss 4.1141
+  Step 1600/1648 | Loss 3.9429
+Ep 8/10 | Train 4.0217 | Val 3.9578 PPL 52.3 * BEST | 3172s (307%C)
+  DSQG pos-bias: |mean|=0.2481 |max|=1.0832 most-local=h5 most-global=h4
+  scale_embed:   |mean|=0.2922 |max|=0.9895
+  IF gains: h0:0.975  h1:1.011  h2:0.973  h3:0.988  h4:1.031  h5:1.013  h6:0.958  h7:1.050
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ' day.\nThe first day of the day was the first day of the day. The first day was t'
+    'The length of the hypotenuse' -> ' is the same as the length of the hypotenuse is the same as the length of the hy'
+    'The President of the United' -> ' States, the President of the United States, and the President of the United Sta'
+    'Once upon a time there was' -> ' a great deal of time in the world.\nThe first time in the world was the first ti'
+    'The results indicate that' -> ' the results are not statistically significant.\nThe results are not statisticall'
+  --
+  Passkey...
+  mean=28.3%  (1/12 distances >50%)
+  d=1:20%  d=2:20%  d=4:20%  d=8:20%  d=16:40%  d=32:60%  d=64:40%  d=128:40%  d=256:40%  d=512:20%  d=1024:20%  d=1536:0%
+  Step 200/1648 | Loss 4.0065
+  Step 400/1648 | Loss 3.7497
+  Step 600/1648 | Loss 3.9621
+  Step 800/1648 | Loss 4.0247
+  Step 1000/1648 | Loss 4.1178
+  Step 1200/1648 | Loss 4.1368
+  Step 1400/1648 | Loss 3.8111
+  Step 1600/1648 | Loss 4.0775
+Ep 9/10 | Train 3.9998 | Val 3.9480 PPL 51.8 * BEST | 3539s (345%C)
+  DSQG pos-bias: |mean|=0.2481 |max|=1.0863 most-local=h5 most-global=h4
+  scale_embed:   |mean|=0.2923 |max|=0.9937
+  IF gains: h0:0.975  h1:1.011  h2:0.973  h3:0.988  h4:1.032  h5:1.013  h6:0.958  h7:1.051
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ' day.\nThe first day of the day was the first day of the day. The first day was t'
+    'The length of the hypotenuse' -> ' is the same as the length of the hypotenuse is the same as the length of the hy'
+    'The President of the United' -> ' States, the President of the United States, and the President of the United Sta'
+    'Once upon a time there was' -> ' a great deal of time in the world.\nThe first time in the world was the first ti'
+    'The results indicate that' -> ' the results are not statistically significant.\nThe results are not statisticall'
+  --
+  Passkey...
+  mean=23.3%  (0/12 distances >50%)
+  d=1:20%  d=2:20%  d=4:20%  d=8:20%  d=16:20%  d=32:40%  d=64:40%  d=128:20%  d=256:40%  d=512:20%  d=1024:20%  d=1536:0%
+  Step 200/1648 | Loss 4.0080
+  Step 400/1648 | Loss 3.9077
+  Step 600/1648 | Loss 3.9860
+  Step 800/1648 | Loss 3.9666
+  Step 1000/1648 | Loss 4.1815
+  Step 1200/1648 | Loss 4.0160
+  Step 1400/1648 | Loss 4.2882
+  Step 1600/1648 | Loss 4.2669
+Ep 10/10 | Train 4.0034 | Val 3.9475 PPL 51.8 * BEST | 3901s (384%C)
+  DSQG pos-bias: |mean|=0.2481 |max|=1.0866 most-local=h5 most-global=h4
+  scale_embed:   |mean|=0.2923 |max|=0.9943
+  IF gains: h0:0.975  h1:1.011  h2:0.972  h3:0.988  h4:1.032  h5:1.013  h6:0.958  h7:1.051
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ' day.\nThe first day of the day was the first day of the day. The first day was t'
+    'The length of the hypotenuse' -> ' is the same as the length of the hypotenuse is the same as the length of the hy'
+    'The President of the United' -> ' States, the President of the United States, and the President of the United Sta'
+    'Once upon a time there was' -> ' a great deal of time in the world.\nThe first time in the world, the first time '
+    'The results indicate that' -> ' the results are not statistically significant.\nThe results are not statisticall'
+  --
+  Passkey...
+  mean=25.0%  (0/12 distances >50%)
+  d=1:20%  d=2:20%  d=4:20%  d=8:20%  d=16:20%  d=32:40%  d=64:40%  d=128:40%  d=256:40%  d=512:20%  d=1024:20%  d=1536:0%
+
+  Run D (octave scaffolding) TEST PPL: 52.442
+  condU 13M 2048 baseline:             52.206 PPL  delta=+0.236
+  Run C (interleaved, linspace):       ~52 PPL est (in progress)
+  Final passkey: mean=25.0%
+  d=1:20%  d=2:20%  d=4:20%  d=8:20%  d=16:20%  d=32:40%  d=64:40%  d=128:40%  d=256:40%  d=512:20%  d=1024:20%  d=1536:0%
+  condU 13M 2048 baseline pk: 43.3%
+
+  Results -> benchmarks/logs/dsqg_hybrid_13m_2048_rune_results.json

@@ -1,0 +1,449 @@
+Traceback (most recent call last):
+  File "/home/dlewis3/Desktop/AI/DWARF/train/train_2048_14m_d48_optimal.py", line 86, in <module>
+    assert len(_COND_N_OFFSETS) == 51
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
+======================================================================
+  d48_optimal_14m — d48 Optimal Synthesis (14M, FineWeb-Edu)
+======================================================================
+  GPU: NVIDIA GeForce RTX 4090  (23.6 GB)
+  Kernel: dsqg_attention_v3 (UNCHANGED)
+  Offset set: d48 dense + [96, 128, 384] = J=52
+  Two-regime pos_bias: ENABLED (δ=384 init flipped, threshold=200)
+  Scale_embed reg:     ENABLED (lambda=0.0001, max_abs=1.0)
+  ISO-COMPUTE CAP:     MAX_TRAIN_SEQS=52,716
+  Retained: Q-weighted scale gains, IF amplifier, Huygens K/V inject
+  Retained: Kalman-EMA + KdV soliton + AGC (interference)
+  Architecture: INTERFERENCE=3, gate=0, 1 FullAttn @ layer 5
+  References: condU=52.206/43.3% | I3G0=52.948/53.3% | condM=54.529/83.3%
+Loading FineWeb-Edu from cache: benchmarks/logs/condm_fineweb_edu_doc_cache.json
+  Loaded 100,000 docs from cache
+
+Loaded condI BPE tokenizer from /home/dlewis3/Desktop/AI/DWARF/train/../results/2048_condI_tokenizer.json
+Encoding data (max_seq_len=2048)...
+  Train: 121,232 sequences
+  Capped to 52,716 train sequences (iso-compute)
+  Val: 2,923 sequences
+  Test: 3,464 sequences
+
+d48_optimal_14m: 14,058,954 parameters
+  Layer types: ['DSQG', 'DSQG', 'DSQG', 'DSQG', 'DSQG', 'FULL']
+Running causality check...
+Traceback (most recent call last):
+  File "/home/dlewis3/Desktop/AI/DWARF/train/train_2048_14m_d48_optimal.py", line 845, in <module>
+    main()
+  File "/home/dlewis3/Desktop/AI/DWARF/train/train_2048_14m_d48_optimal.py", line 838, in main
+    if not causality_check(model, device):
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dlewis3/Desktop/AI/DWARF/train/train_2048_14m_d48_optimal.py", line 513, in causality_check
+    out1, out2 = model(x1), model(x2)
+                 ^^^^^^^^^
+  File "/home/dlewis3/Desktop/AI/DWARF/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dlewis3/Desktop/AI/DWARF/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dlewis3/Desktop/AI/DWARF/train/train_2048_14m_d48_optimal.py", line 377, in forward
+    x = block(x)
+        ^^^^^^^^
+  File "/home/dlewis3/Desktop/AI/DWARF/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dlewis3/Desktop/AI/DWARF/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dlewis3/Desktop/AI/DWARF/train/train_2048_14m_d48_optimal.py", line 304, in forward
+    x = x + self.attn(self.norm1(x), kv_inject=kv_inject)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dlewis3/Desktop/AI/DWARF/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dlewis3/Desktop/AI/DWARF/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dlewis3/Desktop/AI/DWARF/train/train_2048_14m_d48_optimal.py", line 161, in forward
+    out = dsqg_attention_v3(q, k, v, self.pos_bias, self.scale_embed)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dlewis3/Desktop/AI/DWARF/kernels/dsqg_attention_d41s3.py", line 453, in dsqg_attention_v3
+    out = _DSQGFnV3.apply(q, k, v, pos_bias.float(), scale_embed.float())
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dlewis3/Desktop/AI/DWARF/.venv/lib/python3.12/site-packages/torch/autograd/function.py", line 575, in apply
+    return super().apply(*args, **kwargs)  # type: ignore[misc]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dlewis3/Desktop/AI/DWARF/kernels/dsqg_attention_d41s3.py", line 362, in forward
+    assert pos_bias.shape    == (45, H)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
+======================================================================
+  d48_optimal_14m — d48 Optimal Synthesis (14M, FineWeb-Edu)
+======================================================================
+  GPU: NVIDIA GeForce RTX 4090  (23.6 GB)
+  Kernel: dsqg_attention_v3 (UNCHANGED)
+  Offset set: d48 dense + [96, 128, 384] = J=52
+  Two-regime pos_bias: ENABLED (δ=384 init flipped, threshold=200)
+  Scale_embed reg:     ENABLED (lambda=0.0001, max_abs=1.0)
+  ISO-COMPUTE CAP:     MAX_TRAIN_SEQS=52,716
+  Retained: Q-weighted scale gains, IF amplifier, Huygens K/V inject
+  Retained: Kalman-EMA + KdV soliton + AGC (interference)
+  Architecture: INTERFERENCE=3, gate=0, 1 FullAttn @ layer 5
+  References: condU=52.206/43.3% | I3G0=52.948/53.3% | condM=54.529/83.3%
+Loading FineWeb-Edu from cache: benchmarks/logs/condm_fineweb_edu_doc_cache.json
+  Loaded 100,000 docs from cache
+
+Loaded condI BPE tokenizer from /home/dlewis3/Desktop/AI/DWARF/train/../results/2048_condI_tokenizer.json
+Encoding data (max_seq_len=2048)...
+======================================================================
+  d48_optimal_14m — d48 Optimal Synthesis (14M, FineWeb-Edu)
+======================================================================
+  GPU: NVIDIA GeForce RTX 4090  (23.6 GB)
+  Kernel: dsqg_probe_d48_s96_128_384 (52-offset d48 kernel)
+  Offset set: d48 dense + [96, 128, 384] = J=52
+  Two-regime pos_bias: ENABLED (δ=384 init flipped, threshold=200)
+  Scale_embed reg:     ENABLED (lambda=0.0001, max_abs=1.0)
+  ISO-COMPUTE CAP:     MAX_TRAIN_SEQS=52,716
+  Retained: Q-weighted scale gains, IF amplifier, Huygens K/V inject
+  Retained: Kalman-EMA + KdV soliton + AGC (interference)
+  Architecture: INTERFERENCE=3, gate=0, PURE DSQG (FULL_ATTN_LAYER=-1)
+  References: condU=52.206/43.3% | I3G0=52.948/53.3% | condM=54.529/83.3%
+Loading FineWeb-Edu from cache: benchmarks/logs/condm_fineweb_edu_doc_cache.json
+  Loaded 100,000 docs from cache
+
+Loaded condI BPE tokenizer from /home/dlewis3/Desktop/AI/DWARF/train/../results/2048_condI_tokenizer.json
+Encoding data (max_seq_len=2048)...
+  Train: 121,232 sequences
+  Capped to 52,716 train sequences (iso-compute)
+  Val: 2,923 sequences
+  Test: 3,464 sequences
+
+d48_optimal_14m: 14,258,932 parameters
+  Layer types: ['DSQG', 'DSQG', 'DSQG', 'DSQG', 'DSQG', 'DSQG']
+Running causality check...
+Traceback (most recent call last):
+  File "/home/dlewis3/Desktop/AI/DWARF/train/train_2048_14m_d48_optimal.py", line 845, in <module>
+    main()
+  File "/home/dlewis3/Desktop/AI/DWARF/train/train_2048_14m_d48_optimal.py", line 838, in main
+    if not causality_check(model, device):
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dlewis3/Desktop/AI/DWARF/train/train_2048_14m_d48_optimal.py", line 513, in causality_check
+    out1, out2 = model(x1), model(x2)
+                 ^^^^^^^^^
+  File "/home/dlewis3/Desktop/AI/DWARF/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dlewis3/Desktop/AI/DWARF/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dlewis3/Desktop/AI/DWARF/train/train_2048_14m_d48_optimal.py", line 377, in forward
+    x = block(x)
+        ^^^^^^^^
+  File "/home/dlewis3/Desktop/AI/DWARF/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dlewis3/Desktop/AI/DWARF/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dlewis3/Desktop/AI/DWARF/train/train_2048_14m_d48_optimal.py", line 304, in forward
+    x = x + self.attn(self.norm1(x), kv_inject=kv_inject)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dlewis3/Desktop/AI/DWARF/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dlewis3/Desktop/AI/DWARF/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dlewis3/Desktop/AI/DWARF/train/train_2048_14m_d48_optimal.py", line 161, in forward
+    out = dsqg_attention_v3(q, k, v, self.pos_bias, self.scale_embed)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dlewis3/Desktop/AI/DWARF/kernels/dsqg_attention_d41s3.py", line 453, in dsqg_attention_v3
+    out = _DSQGFnV3.apply(q, k, v, pos_bias.float(), scale_embed.float())
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dlewis3/Desktop/AI/DWARF/.venv/lib/python3.12/site-packages/torch/autograd/function.py", line 575, in apply
+    return super().apply(*args, **kwargs)  # type: ignore[misc]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dlewis3/Desktop/AI/DWARF/kernels/dsqg_attention_d41s3.py", line 362, in forward
+    assert pos_bias.shape    == (45, H)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
+  Train: 121,232 sequences
+  Capped to 52,716 train sequences (iso-compute)
+  Val: 2,923 sequences
+  Test: 3,464 sequences
+
+d48_optimal_14m: 14,258,932 parameters
+  Layer types: ['DSQG', 'DSQG', 'DSQG', 'DSQG', 'DSQG', 'DSQG']
+Running causality check...
+  Pre-10:  0.00000000  (expect 0.0)
+  Pos-10:  1.251283  (expect >0)
+  Post-10: 0.328447  (expect >0)
+  PASS
+
+  Tokens/epoch: 107,909,652
+  Chinchilla:   285,178,640 tokens (epoch ~2.64)
+
+  Step 200/1648 | Loss 6.7251
+  Step 400/1648 | Loss 6.1826
+  Step 600/1648 | Loss 5.8748
+  Step 800/1648 | Loss 5.6855
+  Step 1000/1648 | Loss 5.4189
+  Step 1200/1648 | Loss 5.3708
+  Step 1400/1648 | Loss 5.3228
+  Step 1600/1648 | Loss 5.1502
+Ep 1/10 | Train 5.8785 | Val 5.0328 PPL 153.4 * BEST | 652s (38%C)
+  DSQG pos-bias: |mean|=3.2215 |max|=11.4066 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.1103 |max|=0.4590
+  IF gains:      h0:1.05  h1:1.02  h2:0.95  h3:0.94  h4:0.91  h5:0.91  h6:0.85  h7:0.81
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> '.\nThe first time the first time the first time was to be the first time.\nThe fir'
+    'The length of the hypotenuse' -> ' of the light of the light of the light of the light of the light of the light o'
+    'The President of the United' -> ' States, the United States, and the United States, the United States, and the Un'
+    'Once upon a time there was' -> ' a good idea of the world, it was a great way to make it a good way to make it e'
+    'The results indicate that' -> ' the results of the results were not available.\nThe results of the study found t'
+  --
+  Passkey...
+  mean=0.0%  (0/12 distances >50%)
+  d=1:0%  d=2:0%  d=4:0%  d=8:0%  d=16:0%  d=32:0%  d=64:0%  d=128:0%  d=256:0%  d=512:0%  d=1024:0%  d=1536:0%
+  Step 200/1648 | Loss 5.1005
+  Step 400/1648 | Loss 5.0070
+  Step 600/1648 | Loss 4.7108
+  Step 800/1648 | Loss 4.8979
+  Step 1000/1648 | Loss 4.7035
+  Step 1200/1648 | Loss 4.6988
+  Step 1400/1648 | Loss 4.7397
+  Step 1600/1648 | Loss 4.5156
+Ep 2/10 | Train 4.8734 | Val 4.5593 PPL 95.5 * BEST | 1307s (76%C)
+  DSQG pos-bias: |mean|=3.0622 |max|=10.8360 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.1455 |max|=0.8458
+  IF gains:      h0:1.08  h1:1.05  h2:0.97  h3:0.94  h4:0.92  h5:0.90  h6:0.86  h7:0.76
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ' season.\nThe first time the night was the night of the night. The night was the '
+    'The length of the hypotenuse' -> ' is a very high-density, and the length of the length of the length of the lengt'
+    'The President of the United' -> ' States, the United States, and the United States, the United States, and the Un'
+    'Once upon a time there was' -> ' a great deal of peace and peace.\nThe first thing to do is to do is to do this i'
+    'The results indicate that' -> ' the results of the results of the results of the results of the results of the '
+  --
+  Passkey...
+  mean=5.0%  (0/12 distances >50%)
+  d=1:0%  d=2:20%  d=4:20%  d=8:20%  d=16:0%  d=32:0%  d=64:0%  d=128:0%  d=256:0%  d=512:0%  d=1024:0%  d=1536:0%
+  Step 200/1648 | Loss 4.6176
+  Step 400/1648 | Loss 4.6749
+  Step 600/1648 | Loss 4.5456
+  Step 800/1648 | Loss 4.4130
+  Step 1000/1648 | Loss 4.6676
+  Step 1200/1648 | Loss 4.3783
+  Step 1400/1648 | Loss 4.5502
+  Step 1600/1648 | Loss 4.4297
+Ep 3/10 | Train 4.5509 | Val 4.3493 PPL 77.4 * BEST | 1968s (114%C)
+  DSQG pos-bias: |mean|=2.9336 |max|=10.2665 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.1671 |max|=1.0578
+  IF gains:      h0:1.09  h1:1.05  h2:1.01  h3:0.96  h4:0.94  h5:0.91  h6:0.89  h7:0.76
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ' day.\nThe first time the first time the first time the first time the first time'
+    'The length of the hypotenuse' -> ' is about 1.5 cm. The length of the body is about 1.5 cm. The length of the body'
+    'The President of the United' -> ' States, the President of the United States, and the President of the United Sta'
+    'Once upon a time there was' -> ' a lot of time to get to the point of view of the time.\nThe first thing that we '
+    'The results indicate that' -> ' the results of the study are not statistically significant.\nThe results of the '
+  --
+  Passkey...
+  mean=6.7%  (0/12 distances >50%)
+  d=1:20%  d=2:20%  d=4:20%  d=8:20%  d=16:0%  d=32:0%  d=64:0%  d=128:0%  d=256:0%  d=512:0%  d=1024:0%  d=1536:0%
+  Step 200/1648 | Loss 4.3640
+  Step 400/1648 | Loss 4.2926
+  Step 600/1648 | Loss 4.4295
+  Step 800/1648 | Loss 4.4847
+  Step 1000/1648 | Loss 4.4142
+  Step 1200/1648 | Loss 4.3945
+  Step 1400/1648 | Loss 4.3433
+  Step 1600/1648 | Loss 4.4591
+Ep 4/10 | Train 4.3992 | Val 4.2453 PPL 69.8 * BEST | 2627s (151%C)
+  DSQG pos-bias: |mean|=2.8279 |max|=9.8331 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.1788 |max|=1.0849
+  IF gains:      h0:1.10  h1:1.06  h2:1.03  h3:0.97  h4:0.95  h5:0.92  h6:0.92  h7:0.78
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ' day. The storm was a storm, and the storm was a storm. The storm was a storm, a'
+    'The length of the hypotenuse' -> ' is about 1.5 cm (1.5 cm) and is about 1.5 cm (2.5 cm) and is about 1.5 cm (2.5 '
+    'The President of the United' -> ' States is a member of the United States of America.\nThe President of the United'
+    'Once upon a time there was' -> ' a time when the people were not able to get the right information.\nThe first ti'
+    'The results indicate that' -> ' the average temperature of the Earth is about 1.5 degrees Fahrenheit (2.5 degre'
+  --
+  Passkey...
+  mean=10.0%  (0/12 distances >50%)
+  d=1:20%  d=2:20%  d=4:20%  d=8:20%  d=16:20%  d=32:20%  d=64:0%  d=128:0%  d=256:0%  d=512:0%  d=1024:0%  d=1536:0%
+  Step 200/1648 | Loss 4.4425
+  Step 400/1648 | Loss 4.2553
+  Step 600/1648 | Loss 4.5520
+  Step 800/1648 | Loss 4.2725
+  Step 1000/1648 | Loss 4.4340
+  Step 1200/1648 | Loss 4.4417
+  Step 1400/1648 | Loss 4.2703
+  Step 1600/1648 | Loss 4.1427
+Ep 5/10 | Train 4.3169 | Val 4.1790 PPL 65.3 * BEST | 3301s (189%C)
+  DSQG pos-bias: |mean|=2.7465 |max|=9.4568 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.1855 |max|=1.0978
+  IF gains:      h0:1.11  h1:1.05  h2:1.03  h3:0.98  h4:0.96  h5:0.93  h6:0.93  h7:0.80
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ' day. It was a very cold winter, and it was a cold winter. It was a cold winter,'
+    'The length of the hypotenuse' -> ' is about 1.5 cm (1.5 cm) and the length of the length of the body is about 1.5 '
+    'The President of the United' -> ' States, the President of the United States, and the President of the United Sta'
+    'Once upon a time there was' -> ' a great deal of confusion, and the time was very high.\nThe first time I was in '
+    'The results indicate that' -> ' the presence of a large amount of water in the body is a significant factor in '
+  --
+  Passkey...
+  mean=6.7%  (0/12 distances >50%)
+  d=1:20%  d=2:20%  d=4:20%  d=8:20%  d=16:0%  d=32:0%  d=64:0%  d=128:0%  d=256:0%  d=512:0%  d=1024:0%  d=1536:0%
+  Step 200/1648 | Loss 4.2935
+  Step 400/1648 | Loss 4.1014
+  Step 600/1648 | Loss 4.1402
+  Step 800/1648 | Loss 4.1532
+  Step 1000/1648 | Loss 4.3393
+  Step 1200/1648 | Loss 4.3584
+  Step 1400/1648 | Loss 4.2845
+  Step 1600/1648 | Loss 4.3350
+Ep 6/10 | Train 4.2612 | Val 4.1393 PPL 62.8 * BEST | 3960s (227%C)
+  DSQG pos-bias: |mean|=2.6884 |max|=9.1741 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.1885 |max|=1.0957
+  IF gains:      h0:1.11  h1:1.05  h2:1.04  h3:0.98  h4:0.97  h5:0.93  h6:0.94  h7:0.81
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ' day.\nThe first time the storm was in the morning of the morning, the storm was '
+    'The length of the hypotenuse' -> ' is about 1.5 mm. The length of the hypotenuse is about 1.5 mm. The length of th'
+    'The President of the United' -> ' States, the President of the United States, and the President of the United Sta'
+    'Once upon a time there was' -> ' a great deal of excitement and excitement in the field.\nThe first time I was in'
+    'The results indicate that' -> ' the most common causes of the disease are:\n- The presence of a disease in the b'
+  --
+  Passkey...
+  mean=8.3%  (0/12 distances >50%)
+  d=1:20%  d=2:20%  d=4:20%  d=8:20%  d=16:20%  d=32:0%  d=64:0%  d=128:0%  d=256:0%  d=512:0%  d=1024:0%  d=1536:0%
+  Step 200/1648 | Loss 4.2545
+  Step 400/1648 | Loss 4.2451
+  Step 600/1648 | Loss 4.2585
+  Step 800/1648 | Loss 4.1284
+  Step 1000/1648 | Loss 4.3502
+  Step 1200/1648 | Loss 4.3205
+  Step 1400/1648 | Loss 4.2130
+  Step 1600/1648 | Loss 4.0514
+Ep 7/10 | Train 4.2272 | Val 4.1105 PPL 61.0 * BEST | 4616s (265%C)
+  DSQG pos-bias: |mean|=2.6511 |max|=8.9965 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.1897 |max|=1.0864
+  IF gains:      h0:1.11  h1:1.05  h2:1.04  h3:0.99  h4:0.97  h5:0.94  h6:0.95  h7:0.82
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ' day.\nThe first time the storm was in the middle of the night, the storm was in '
+    'The length of the hypotenuse' -> ' is about 1.5 mm. The length of the hypotenuse is about 1.5 mm. The length of th'
+    'The President of the United' -> ' States, the President of the United States, and the President of the United Sta'
+    'Once upon a time there was' -> ' a great deal of excitement and excitement, and the time was very high.\nThe firs'
+    'The results indicate that' -> ' the results of the study are not statistically significant.\nThe results of the '
+  --
+  Passkey...
+  mean=6.7%  (0/12 distances >50%)
+  d=1:20%  d=2:20%  d=4:20%  d=8:20%  d=16:0%  d=32:0%  d=64:0%  d=128:0%  d=256:0%  d=512:0%  d=1024:0%  d=1536:0%
+  Step 200/1648 | Loss 4.2322
+  Step 400/1648 | Loss 4.2629
+  Step 600/1648 | Loss 4.1644
+  Step 800/1648 | Loss 4.2720
+  Step 1000/1648 | Loss 4.3896
+  Step 1200/1648 | Loss 4.2759
+  Step 1400/1648 | Loss 4.3454
+  Step 1600/1648 | Loss 4.0224
+Ep 8/10 | Train 4.1971 | Val 4.0942 PPL 60.0 * BEST | 5286s (303%C)
+  DSQG pos-bias: |mean|=2.6310 |max|=8.8983 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.1900 |max|=1.0803
+  IF gains:      h0:1.11  h1:1.05  h2:1.04  h3:0.99  h4:0.97  h5:0.94  h6:0.95  h7:0.83
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ' day.\nThe first time the sun was in the sun, the sun was in the sun. The sun was'
+    'The length of the hypotenuse' -> ' is about 1.5 mm. The length of the hypotenuse is about 1.5 mm. The length of th'
+    'The President of the United' -> ' States, the President of the United States, and the President of the United Sta'
+    'Once upon a time there was' -> ' a great deal of excitement and excitement.\nThe first time I was in the town of '
+    'The results indicate that' -> ' the results of the study are not statistically significant.\nThe results of the '
+  --
+  Passkey...
+  mean=10.0%  (0/12 distances >50%)
+  d=1:40%  d=2:20%  d=4:20%  d=8:20%  d=16:20%  d=32:0%  d=64:0%  d=128:0%  d=256:0%  d=512:0%  d=1024:0%  d=1536:0%
+  Step 200/1648 | Loss 4.4157
+  Step 400/1648 | Loss 4.3178
+  Step 600/1648 | Loss 4.1282
+  Step 800/1648 | Loss 4.2957
+  Step 1000/1648 | Loss 4.0863
+  Step 1200/1648 | Loss 4.2695
+  Step 1400/1648 | Loss 4.4229
+  Step 1600/1648 | Loss 3.8927
+Ep 9/10 | Train 4.1822 | Val 4.0869 PPL 59.6 * BEST | 5934s (341%C)
+  DSQG pos-bias: |mean|=2.6233 |max|=8.8611 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.1900 |max|=1.0767
+  IF gains:      h0:1.11  h1:1.05  h2:1.04  h3:0.99  h4:0.98  h5:0.94  h6:0.96  h7:0.83
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ' day.\nThe first time I was in the morning, I was in the morning and I was in the'
+    'The length of the hypotenuse' -> ' is about 1.5 mm. The length of the hypotenuse is about 1.5 mm. The length of th'
+    'The President of the United' -> ' States, the President of the United States, and the President of the United Sta'
+    'Once upon a time there was' -> ' a great deal of interest in the history of the world.\nThe history of the world '
+    'The results indicate that' -> ' the results of the study are not statistically significant.\nThe results of the '
+  --
+  Passkey...
+  mean=8.3%  (0/12 distances >50%)
+  d=1:40%  d=2:20%  d=4:20%  d=8:20%  d=16:0%  d=32:0%  d=64:0%  d=128:0%  d=256:0%  d=512:0%  d=1024:0%  d=1536:0%
+  Step 200/1648 | Loss 4.0606
+  Step 400/1648 | Loss 4.2895
+  Step 600/1648 | Loss 4.2242
+  Step 800/1648 | Loss 4.1510
+  Step 1000/1648 | Loss 4.0221
+  Step 1200/1648 | Loss 4.2834
+  Step 1400/1648 | Loss 4.1581
+  Step 1600/1648 | Loss 4.0454
+Ep 10/10 | Train 4.1732 | Val 4.0855 PPL 59.5 * BEST | 6581s (378%C)
+  DSQG pos-bias: |mean|=2.6222 |max|=8.8555 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.1900 |max|=1.0762
+  IF gains:      h0:1.11  h1:1.05  h2:1.04  h3:0.99  h4:0.98  h5:0.94  h6:0.96  h7:0.83
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ' day.\nThe first time I was in the morning, I was in the morning and I was in the'
+    'The length of the hypotenuse' -> ' is about 1.5 mm. The length of the hypotenuse is about 1.5 mm. The length of th'
+    'The President of the United' -> ' States, the President of the United States, and the President of the United Sta'
+    'Once upon a time there was' -> ' a great deal of controversy about the history of the ancient world.\nThe first t'
+    'The results indicate that' -> ' the results of the study are not statistically significant.\nThe results of the '
+  --
+  Passkey...
+  mean=8.3%  (0/12 distances >50%)
+  d=1:40%  d=2:20%  d=4:20%  d=8:20%  d=16:0%  d=32:0%  d=64:0%  d=128:0%  d=256:0%  d=512:0%  d=1024:0%  d=1536:0%
+
+  d48_optimal_14m TEST: PPL 64.241 | Loss 4.1626
+  I3G0 reference:  52.948 PPL | delta = +11.293
+  condM reference: 54.529 PPL | delta = +9.712
+
+  -- Temperature sweep (best checkpoint) --
+
+  [greedy]
+    'It was a dark and stormy' -> ' day.\nThe first time I was in the morning, I was in the morning and I was in the'
+    'The length of the hypotenuse' -> ' is about 1.5 mm. The length of the hypotenuse is about 1.5 mm. The length of th'
+    'The President of the United' -> ' States, the President of the United States, and the President of the United Sta'
+    'Once upon a time there was' -> ' a great deal of controversy about the history of the ancient world.\nThe first t'
+    'The results indicate that' -> ' the results of the study are not statistically significant.\nThe results of the '
+
+  [T=0.5]
+    'It was a dark and stormy' -> ', but it was a very hot and cold winter.\nIt was the first time that the first of'
+    'The length of the hypotenuse' -> ' is about 1.5 meters. The length of the hypotenuse is about 3.5 meters. The leng'
+    'The President of the United' -> ' States, and the United States, has been a member of the United States Congress,'
+    'Once upon a time there was' -> ' a great deal of time for the Government to build a new building. The government'
+    'The results indicate that' -> ' the real-world scenario is a good example of the impact of the global warming o'
+
+  [T=0.7]
+    'It was a dark and stormy' -> ' day. The storm was very warm, but it was not the only storm.\nThe storm was warm'
+    'The length of the hypotenuse' -> ' is 20 mm, the length of the height is a somewhat more complicated, especially i'
+    'The President of the United' -> ' States has signed the treaty with the President of the United States, and the P'
+    'Once upon a time there was' -> ' a military invasion in an area where the French were forced to retreat. The Ger'
+    'The results indicate that' -> ' the presence of the electrolyte in the blood is the best way to monitor the blo'
+
+  [T=1.0]
+    'It was a dark and stormy' -> ' winter in May. It killed nearly 400 people in his hat, and the last winter was '
+    'The length of the hypotenuse' -> ' is high. We can assume that somewhere in the north they will share only about 2'
+    'The President of the United' -> ' States has not met with the Governor of Texas but, according to a spokesperson,'
+    'Once upon a time there was' -> ' no touching in a stand, it had to act over the barriers. It became known that o'
+    'The results indicate that' -> " we're really not trying to represent a comparison of we are considering our ori"
+
+  Final passkey: mean=8.3%  (0/12 distances >50%)
+  d=1:40%  d=2:20%  d=4:20%  d=8:20%  d=16:0%  d=32:0%  d=64:0%  d=128:0%  d=256:0%  d=512:0%  d=1024:0%  d=1536:0%
+  I3G0 reference:  53.3% passkey
+  condM reference: 83.3% passkey
+
+  Final IF gains: h0:1.115  h1:1.049  h2:1.045  h3:0.990  h4:0.976  h5:0.941  h6:0.956  h7:0.828
+  Final scale_embed: |mean|=0.1900 |max|=1.0762
+  Final EMA factors:  b0:0.0031  b1:0.5000   (window≈319t)
+  Final KdV alphas:   b0:0.1675  b1:-0.0010
+
+  Results -> benchmarks/logs/d48_optimal_14m_results.json

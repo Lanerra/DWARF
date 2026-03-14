@@ -1,0 +1,302 @@
+======================================================================
+  condU 35M — Q-Weighted Scale Gains + IF Amplifier + Huygens K/V
+  D=512, H=8, d_head=64, L=6, FFN=2048
+  Full attention at layer 5 (0-indexed)
+======================================================================
+  GPU: NVIDIA GeForce RTX 4090  (23.6 GB)
+  Kernel: dsqg_attention_v3 (HD=64, BLOCK_HD=64, scale_embed [44,64])
+  Physics: QW scale gains + IF amplifier + Huygens K/V injection
+  Architecture: INTERFERENCE=3, gate=0, 1 FullAttn @ layer 5
+  References: condM_27M=44.500/83.3%pk | condU_13M=52.206/43.3%pk | Standard_13M=64.070
+Loading FineWeb-Edu from cache: benchmarks/logs/condm_fineweb_edu_doc_cache.json
+  Loaded 100,000 docs from cache
+
+Loaded condI BPE tokenizer from /home/dlewis3/Desktop/AI/DWARF/benchmarks/results/2048_condI_tokenizer.json
+Loading pre-encoded dataset from benchmarks/logs/fineweb_encoded_2048.pt ...
+  train: 52,716  val: 5,582  test: 5,473 seqs (from cache)
+
+condU 27M: 38,729,736 parameters
+  Layer types: ['DSQG', 'DSQG', 'DSQG+INT', 'DSQG', 'DSQG', 'FULL']
+Running causality check...
+  Pre-10:  0.00000000  (expect 0.0)
+  Pos-10:  1.754508  (expect >0)
+  Post-10: 0.607747  (expect >0)
+  PASS
+  Compiling model with torch.compile (mode=reduce-overhead)...
+  Compile done.
+
+  Tokens/epoch: 107,909,652
+  Chinchilla:   774,594,720 tokens (epoch ~7.18)
+
+  Step 200/1648 | Loss 6.0911
+  Step 400/1648 | Loss 5.6616
+  Step 600/1648 | Loss 5.4506
+  Step 800/1648 | Loss 5.0910
+  Step 1000/1648 | Loss 5.1936
+  Step 1200/1648 | Loss 4.9432
+  Step 1400/1648 | Loss 4.7367
+  Step 1600/1648 | Loss 4.3460
+/home/dlewis3/Desktop/AI/DWARF/.venv/lib/python3.12/site-packages/torch/_inductor/compile_fx.py:194: UserWarning: TensorFloat32 tensor cores for float32 matrix multiplication available but not enabled. Consider setting `torch.set_float32_matmul_precision('high')` for better performance.
+  warnings.warn(
+Ep 1/10 | Train 5.3395 | Val 4.4079 PPL 82.1 * BEST | 1463s (14%C)
+  DSQG pos-bias: |mean|=3.5632 |max|=13.9892 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.1187 |max|=0.3438
+  IF gains:      h0:1.010  h1:0.980  h2:0.995  h3:1.000  h4:0.984  h5:0.995  h6:1.009  h7:0.996
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> '.\nThe first of the world’s most famous, but the world’s most famous, most famous'
+    'The length of the hypotenuse' -> ' of the blood vessels, the blood vessels, and the blood vessels, the blood vesse'
+    'The President of the United' -> ' States, the United States, and the United States.\nThe United States has been a '
+    'Once upon a time there was' -> ' a lot of time in the world.\nThe first time the world was in the world, the worl'
+    'The results indicate that' -> ' the presence of the two-thirds of the population is not the same as the other p'
+  --
+  Passkey...
+W0303 09:10:49.726000 415733 torch/_dynamo/convert_frame.py:906] [1/8] torch._dynamo hit config.cache_size_limit (8)
+W0303 09:10:49.726000 415733 torch/_dynamo/convert_frame.py:906] [1/8]    function: 'forward' (/home/dlewis3/Desktop/AI/DWARF/benchmarks/train_2048_27m_condU.py:256)
+W0303 09:10:49.726000 415733 torch/_dynamo/convert_frame.py:906] [1/8]    last reason: 1/1: len(L['self']._modules) == 8                                
+W0303 09:10:49.726000 415733 torch/_dynamo/convert_frame.py:906] [1/8] To log all recompilation reasons, use TORCH_LOGS="recompiles".
+W0303 09:10:49.726000 415733 torch/_dynamo/convert_frame.py:906] [1/8] To diagnose recompilation issues, see https://pytorch.org/docs/main/torch.compiler_troubleshooting.html.
+  mean=5.0%  (0/12 distances >50%)
+  d=1:0%  d=2:0%  d=4:20%  d=8:0%  d=16:20%  d=32:20%  d=64:0%  d=128:0%  d=256:0%  d=512:0%  d=1024:0%  d=1536:0%
+  Step 200/1648 | Loss 4.5227
+  Step 400/1648 | Loss 4.2695
+  Step 600/1648 | Loss 4.3240
+  Step 800/1648 | Loss 4.4768
+  Step 1000/1648 | Loss 4.2297
+  Step 1200/1648 | Loss 4.3788
+  Step 1400/1648 | Loss 4.2055
+  Step 1600/1648 | Loss 3.8195
+Ep 2/10 | Train 4.2412 | Val 4.0230 PPL 55.9 * BEST | 2946s (28%C)
+  DSQG pos-bias: |mean|=3.4324 |max|=13.3601 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.1650 |max|=0.5266
+  IF gains:      h0:1.030  h1:0.965  h2:0.991  h3:0.994  h4:0.968  h5:0.965  h6:0.981  h7:0.972
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ' day.\nThe first day of the day was the first day of the day. The day was the fir'
+    'The length of the hypotenuse' -> ' is measured by the degree of the degree of the degree of the degree of the degr'
+    'The President of the United' -> ' States, the United States, and the United States, the United States, and the Un'
+    'Once upon a time there was' -> ' no time to go to the hospital.\nThe hospital was a hospital, and the hospital wa'
+    'The results indicate that' -> ' the number of people who have been diagnosed with cancer is higher than the num'
+  --
+  Passkey...
+  mean=30.0%  (0/12 distances >50%)
+  d=1:40%  d=2:40%  d=4:40%  d=8:40%  d=16:20%  d=32:40%  d=64:40%  d=128:20%  d=256:40%  d=512:20%  d=1024:20%  d=1536:0%
+  Step 200/1648 | Loss 4.0963
+  Step 400/1648 | Loss 4.0410
+  Step 600/1648 | Loss 4.1193
+  Step 800/1648 | Loss 3.9096
+  Step 1000/1648 | Loss 3.9029
+  Step 1200/1648 | Loss 3.8420
+  Step 1400/1648 | Loss 4.1199
+  Step 1600/1648 | Loss 3.9266
+Ep 3/10 | Train 3.9887 | Val 3.8781 PPL 48.3 * BEST | 4375s (42%C)
+  DSQG pos-bias: |mean|=3.3099 |max|=12.8105 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.1888 |max|=0.6903
+  IF gains:      h0:1.046  h1:0.956  h2:0.988  h3:0.978  h4:0.954  h5:0.939  h6:0.948  h7:0.944
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ' day.\nThe first thing that was happening was that the first thing that was happe'
+    'The length of the hypotenuse' -> ' is determined by the amount of the hypotenuse. The rate of the hypotenuse is de'
+    'The President of the United' -> ' States, the President of the United States, and the President of the United Sta'
+    'Once upon a time there was' -> ' a great deal of money to pay for.\nThe first thing that the world had to do was '
+    'The results indicate that' -> ' the majority of the population in the United States is in the United States.\nTh'
+  --
+  Passkey...
+  mean=41.7%  (7/12 distances >50%)
+  d=1:60%  d=2:60%  d=4:60%  d=8:60%  d=16:60%  d=32:60%  d=64:60%  d=128:40%  d=256:40%  d=512:0%  d=1024:0%  d=1536:0%
+  Step 200/1648 | Loss 3.9602
+  Step 400/1648 | Loss 3.5615
+  Step 600/1648 | Loss 4.0853
+  Step 800/1648 | Loss 3.7396
+  Step 1000/1648 | Loss 4.0934
+  Step 1200/1648 | Loss 3.7342
+  Step 1400/1648 | Loss 3.8305
+  Step 1600/1648 | Loss 3.8726
+Ep 4/10 | Train 3.8653 | Val 3.7913 PPL 44.3 * BEST | 5866s (56%C)
+  DSQG pos-bias: |mean|=3.2074 |max|=12.3627 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.2026 |max|=0.7975
+  IF gains:      h0:1.050  h1:0.953  h2:0.985  h3:0.966  h4:0.944  h5:0.918  h6:0.922  h7:0.922
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ' day.\nThe first time the American Indians were in the woods, the Indians were in'
+    'The length of the hypotenuse' -> ' is determined by the degree of the hypotenuse. The hypotenuse is the most commo'
+    'The President of the United' -> ' States, the President of the United States, and the President of the United Sta'
+    'Once upon a time there was' -> ' a great deal of confusion.\nThe first thing that was done was to make sure that '
+    'The results indicate that' -> ' the majority of the population is in the minority.\nThe majority of the populati'
+  --
+  Passkey...
+  mean=50.0%  (6/12 distances >50%)
+  d=1:100%  d=2:100%  d=4:80%  d=8:80%  d=16:80%  d=32:40%  d=64:60%  d=128:40%  d=256:20%  d=512:0%  d=1024:0%  d=1536:0%
+  Step 200/1648 | Loss 3.7688
+  Step 400/1648 | Loss 3.8916
+  Step 600/1648 | Loss 3.6613
+  Step 800/1648 | Loss 3.7616
+  Step 1000/1648 | Loss 3.9254
+  Step 1200/1648 | Loss 3.6566
+  Step 1400/1648 | Loss 3.7393
+  Step 1600/1648 | Loss 3.7865
+Ep 5/10 | Train 3.7756 | Val 3.7321 PPL 41.8 * BEST | 7358s (70%C)
+  DSQG pos-bias: |mean|=3.1271 |max|=12.0186 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.2103 |max|=0.8654
+  IF gains:      h0:1.050  h1:0.953  h2:0.984  h3:0.957  h4:0.938  h5:0.904  h6:0.905  h7:0.908
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ' night, and the sun was not too hot. The sun was too hot, and the sun was too ho'
+    'The length of the hypotenuse' -> ' is determined by the number of the hypotenuse and the number of the hypotenuse.'
+    'The President of the United' -> ' States, the President of the United States, and the President of the United Sta'
+    'Once upon a time there was' -> ' a great deal of work in the field.\nThe first thing that was done was to make th'
+    'The results indicate that' -> ' the average annual annual annual annual annual annual annual annual annual annu'
+  --
+  Passkey...
+  mean=75.0%  (10/12 distances >50%)
+  d=1:100%  d=2:100%  d=4:80%  d=8:100%  d=16:100%  d=32:100%  d=64:100%  d=128:80%  d=256:60%  d=512:60%  d=1024:20%  d=1536:0%
+  Step 200/1648 | Loss 3.7796
+  Step 400/1648 | Loss 3.6487
+  Step 600/1648 | Loss 3.6301
+  Step 800/1648 | Loss 3.7384
+  Step 1000/1648 | Loss 3.8847
+  Step 1200/1648 | Loss 3.6876
+  Step 1400/1648 | Loss 3.9381
+  Step 1600/1648 | Loss 3.6291
+Ep 6/10 | Train 3.7164 | Val 3.6937 PPL 40.2 * BEST | 8849s (84%C)
+  DSQG pos-bias: |mean|=3.0689 |max|=11.7693 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.2143 |max|=0.9073
+  IF gains:      h0:1.049  h1:0.954  h2:0.983  h3:0.953  h4:0.936  h5:0.896  h6:0.894  h7:0.899
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ' night, and the sun was not too hot. The sun was too hot, and the sun was too ho'
+    'The length of the hypotenuse' -> ' is determined by the number of the hypotenuse points in the hypotenuse. The hyp'
+    'The President of the United' -> ' States, John W. Kennedy, was the President of the United States. He was the Pre'
+    'Once upon a time there was' -> ' a great deal of money in the country.\nThe people of the country were not only t'
+    'The results indicate that' -> ' the majority of the population in the United States is in the United States.\nTh'
+  --
+  Passkey...
+  mean=75.0%  (10/12 distances >50%)
+  d=1:100%  d=2:100%  d=4:100%  d=8:100%  d=16:100%  d=32:100%  d=64:80%  d=128:80%  d=256:60%  d=512:60%  d=1024:20%  d=1536:0%
+  Step 200/1648 | Loss 3.5805
+  Step 400/1648 | Loss 3.7113
+  Step 600/1648 | Loss 3.7383
+  Step 800/1648 | Loss 3.5354
+  Step 1000/1648 | Loss 3.3152
+  Step 1200/1648 | Loss 3.7163
+  Step 1400/1648 | Loss 3.6367
+  Step 1600/1648 | Loss 3.5583
+Ep 7/10 | Train 3.6691 | Val 3.6670 PPL 39.1 * BEST | 10341s (98%C)
+  DSQG pos-bias: |mean|=3.0310 |max|=11.6123 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.2160 |max|=0.9337
+  IF gains:      h0:1.048  h1:0.955  h2:0.984  h3:0.950  h4:0.935  h5:0.891  h6:0.888  h7:0.893
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ' night.\nThe first thing to do was to make sure that the people were not going to'
+    'The length of the hypotenuse' -> ' is determined by the number of the hypotenuse and the number of the hypotenuse.'
+    'The President of the United' -> ' States, the President of the United States, and the President of the United Sta'
+    'Once upon a time there was' -> ' a great deal of work in the field. The first thing that was done was to make th'
+    'The results indicate that' -> ' the average annual income of the United States is about $1.5 per year.\nThe aver'
+  --
+  Passkey...
+  mean=83.3%  (10/12 distances >50%)
+  d=1:100%  d=2:100%  d=4:100%  d=8:100%  d=16:100%  d=32:100%  d=64:100%  d=128:100%  d=256:100%  d=512:60%  d=1024:40%  d=1536:0%
+  Step 200/1648 | Loss 3.6082
+  Step 400/1648 | Loss 3.6211
+  Step 600/1648 | Loss 3.8135
+  Step 800/1648 | Loss 3.5950
+  Step 1000/1648 | Loss 3.8637
+  Step 1200/1648 | Loss 3.6502
+  Step 1400/1648 | Loss 3.6326
+  Step 1600/1648 | Loss 3.4785
+Ep 8/10 | Train 3.6441 | Val 3.6497 PPL 38.5 * BEST | 11838s (111%C)
+  DSQG pos-bias: |mean|=3.0104 |max|=11.5283 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.2166 |max|=0.9458
+  IF gains:      h0:1.047  h1:0.957  h2:0.984  h3:0.950  h4:0.935  h5:0.889  h6:0.884  h7:0.890
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ' night.\nThe next day, the sun was shining.\nThe sun was shining.\nThe sun was shin'
+    'The length of the hypotenuse' -> ' is determined by the number of the hypotenuse and the number of the hypotenuse.'
+    'The President of the United' -> ' States, John W. Bush, was the first president to be elected president of the Un'
+    'Once upon a time there was' -> ' a great deal of work in the field. The first thing that was done was to make a '
+    'The results indicate that' -> ' the average annual rainfall is about 1.5 inches (0.5 inches) in the United Stat'
+  --
+  Passkey...
+  mean=83.3%  (10/12 distances >50%)
+  d=1:100%  d=2:100%  d=4:100%  d=8:100%  d=16:100%  d=32:100%  d=64:100%  d=128:100%  d=256:100%  d=512:60%  d=1024:40%  d=1536:0%
+  Step 200/1648 | Loss 3.7948
+  Step 400/1648 | Loss 3.8275
+  Step 600/1648 | Loss 3.4552
+  Step 800/1648 | Loss 3.6737
+  Step 1000/1648 | Loss 3.8654
+  Step 1200/1648 | Loss 3.6476
+  Step 1400/1648 | Loss 3.6145
+  Step 1600/1648 | Loss 3.5966
+Ep 9/10 | Train 3.6145 | Val 3.6411 PPL 38.1 * BEST | 13338s (125%C)
+  DSQG pos-bias: |mean|=3.0025 |max|=11.4963 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.2167 |max|=0.9492
+  IF gains:      h0:1.047  h1:0.957  h2:0.985  h3:0.949  h4:0.934  h5:0.888  h6:0.883  h7:0.889
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ' night.\nThe next day, the men were on the way to the camp.\nThe men were on the w'
+    'The length of the hypotenuse' -> ' is determined by the number of the hypotenuse and the number of the hypotenuse.'
+    'The President of the United' -> ' States, John W. Bush, has been a member of the United States Congress since the'
+    'Once upon a time there was' -> ' a great deal of work in the field. The first thing that was done was to make a '
+    'The results indicate that' -> ' the average annual income of the United States is about $1,000,000.\nThe average'
+  --
+  Passkey...
+  mean=85.0%  (10/12 distances >50%)
+  d=1:100%  d=2:100%  d=4:100%  d=8:100%  d=16:100%  d=32:100%  d=64:100%  d=128:100%  d=256:100%  d=512:80%  d=1024:40%  d=1536:0%
+  Step 200/1648 | Loss 3.6738
+  Step 400/1648 | Loss 3.5607
+  Step 600/1648 | Loss 3.7719
+  Step 800/1648 | Loss 3.5749
+  Step 1000/1648 | Loss 3.3230
+  Step 1200/1648 | Loss 3.4002
+  Step 1400/1648 | Loss 3.4009
+  Step 1600/1648 | Loss 3.5445
+Ep 10/10 | Train 3.6072 | Val 3.6396 PPL 38.1 * BEST | 14839s (139%C)
+  DSQG pos-bias: |mean|=3.0013 |max|=11.4917 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.2167 |max|=0.9497
+  IF gains:      h0:1.047  h1:0.958  h2:0.985  h3:0.949  h4:0.934  h5:0.888  h6:0.883  h7:0.889
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ' night, and the sun was still in the sky. The sun was still in the sky, and the '
+    'The length of the hypotenuse' -> ' is determined by the number of the hypotenuse and the number of the hypotenuse.'
+    'The President of the United' -> ' States, John W. Bush, has been a member of the United States Congress since the'
+    'Once upon a time there was' -> ' a great deal of work in the field. The first thing that was done was to make a '
+    'The results indicate that' -> ' the average annual income of the United States is about $1,000,000.\nThe average'
+  --
+  Passkey...
+  mean=85.0%  (10/12 distances >50%)
+  d=1:100%  d=2:100%  d=4:100%  d=8:100%  d=16:100%  d=32:100%  d=64:100%  d=128:100%  d=256:100%  d=512:80%  d=1024:40%  d=1536:0%
+
+  condU 35M TEST: PPL 38.542 | Loss 3.6517
+  condM 27M reference: 44.500 PPL | delta = -5.958
+  condU 13M reference: 52.206 PPL | delta = -13.664
+  Standard 13M ref:    64.070 PPL | delta = -25.528
+
+  -- Temperature sweep (best checkpoint) --
+
+  [greedy]
+    'It was a dark and stormy' -> ' night, and the sun was still in the sky. The sun was still in the sky, and the '
+    'The length of the hypotenuse' -> ' is determined by the number of the hypotenuse and the number of the hypotenuse.'
+    'The President of the United' -> ' States, John W. Bush, has been a member of the United States Congress since the'
+    'Once upon a time there was' -> ' a great deal of work in the field. The first thing that was done was to make a '
+    'The results indicate that' -> ' the average annual income of the United States is about $1,000,000.\nThe average'
+
+  [T=0.5]
+    'It was a dark and stormy' -> ' place.\nThe most beautiful place in the world was the one in the south. The sky '
+    'The length of the hypotenuse' -> ' is determined by the degree of the hypotenuse.\nThe hypotenuse is a measure of t'
+    'The President of the United' -> ' States, Dr. Robert E. Lee, the Secretary of the Interior, and Dr. Robert E. Lee'
+    'Once upon a time there was' -> ' a shortage of food, and the food was scarce. The government was reluctant to ac'
+    'The results indicate that' -> ' the NFZ and the PFZ are the same as the PFZ.\nThe results of the study suggest t'
+
+  [T=0.7]
+    'It was a dark and stormy' -> ' day, and the Jews were alive.\nToday, we hear that the Jews had not always been '
+    'The length of the hypotenuse' -> ' was calculated as a calculated displacement of the hypotenuse in the same inter'
+    'The President of the United' -> ' States and the President of the United States.\nThe President of the United Stat'
+    'Once upon a time there was' -> ' a day when all of us would go to the hills. But it was like we were about to ge'
+    'The results indicate that' -> ' the average value of the international trade was 5.4%.\nIn addition to the parti'
+
+  [T=1.0]
+    'It was a dark and stormy' -> ' place among Scandinavians. The garden is thriving.\nSunday, August 26, 2010\nRese'
+    'The length of the hypotenuse' -> ' enters in water by a heat intermitter. In the distal spaces, the membrane is mo'
+    'The President of the United' -> ' States sent the National Security Council in March 1952 to bring the Secretary '
+    'Once upon a time there was' -> ' no doubt, a huge Roman caliph and many Bishops, there was little evidence of a '
+    'The results indicate that' -> ' direct contact with a recipient with deceased children is likely to reduce the '
+
+  Final passkey: mean=85.0%  (10/12 distances >50%)
+  d=1:100%  d=2:100%  d=4:100%  d=8:100%  d=16:100%  d=32:100%  d=64:100%  d=128:100%  d=256:100%  d=512:80%  d=1024:40%  d=1536:0%
+  condM 27M reference: 83.3% passkey
+  condU 13M reference: 43.3% passkey
+
+  Final IF gains: h0:1.047  h1:0.958  h2:0.985  h3:0.949  h4:0.934  h5:0.888  h6:0.883  h7:0.889
+  Final scale_embed: |mean|=0.2167 |max|=0.9497
+
+  Results -> benchmarks/logs/condU_35m_results.json

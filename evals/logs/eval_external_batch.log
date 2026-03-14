@@ -1,0 +1,15 @@
+>>> Starting eval_external: standard_85m
+>>> Done: standard_85m
+>>> Starting eval_external: standard_27m
+>>> Done: standard_27m
+>>> Starting eval_external: standard_13m
+>>> Done: standard_13m
+>>> Starting eval_external: condx_v2_35m
+>>> Done: condx_v2_35m
+>>> Starting eval_external: j16d_fulldata
+>>> Done: j16d_fulldata
+>>> Starting eval_external: condm_27m
+>>> Done: condm_27m
+>>> Starting eval_external: condm_layer5
+>>> Done: condm_layer5
+ALL EXTERNAL EVALS DONE

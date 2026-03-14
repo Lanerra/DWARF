@@ -1,0 +1,64 @@
+
+============================================================
+  eval_suite.py — condm_layer5
+  Device: cuda
+============================================================
+
+  Model: condM 13M Layer 5 (5 DSQG → 1 full attn)
+
+  Loading tokenizer...
+  Loading model...
+  Loaded condM 13M Layer 5 (5 DSQG → 1 full attn): 13,984,480 params from 13M.pt
+
+  [1/4] Calibration...
+    entropy=7.092 bits  top1=0.223  eff_vocab=25.9  (0.2s)
+
+  [2/4] Distance-conditioned loss (wikitext-103)...
+    Loading wikitext-103 test split...
+    Using 17 full 2048-token chunks
+    Buckets:
+    0-16          PPL= 382.99  n=  289
+    17-64         PPL= 218.07  n=  816
+    65-256        PPL= 132.90  n= 3264
+    257-512       PPL= 115.92  n= 4352
+    513-1024      PPL=  91.64  n= 8704
+    1025-2047     PPL=  92.10  n=17374
+    (3.5s)
+
+  [3/4] Few-shot string copy...
+    exact=5/15  (33.3%)  mean_lev=7.27  (1.8s)
+
+  [4/4] Passkey retrieval...
+    d=    1: accuracy=100.0%
+    d=    2: accuracy=100.0%
+    d=    4: accuracy=100.0%
+    d=    8: accuracy=100.0%
+    d=   16: accuracy=100.0%
+    d=   32: accuracy=100.0%
+    d=   64: accuracy=100.0%
+    d=  128: accuracy=80.0%
+    d=  256: accuracy=100.0%
+    d=  512: accuracy=60.0%
+    d= 1024: accuracy=40.0%
+    d= 1536: accuracy=20.0%
+    mean_accuracy=83.3%  (0.4s)
+
+  Generation samples (greedy + T=0.7)...
+
+  [greedy]
+    'It was a dark and stormy'               → ' night.\n\nThe first time I was in the room, I was in the room. I was in the room.'
+    'The length of the hypotenuse'           → ' is a bit more complicated than the length of the length of the length of the le'
+    'The President of the United'            → ' States, who has been in the works for years, has been a major contributor to th'
+    'Once upon a time there was'             → ' no way to get the ball.\n\nThe first thing that happened was that the ball was a '
+    'The results indicate that'              → ' the results of the study are not statistically significant.\n\nThe study is based'
+
+  [T=0.7]
+    'It was a dark and stormy'               → " day.\n\nThe U.S. has the highest level of air and is the world's most powerful mi"
+    'The length of the hypotenuse'           → ' can be a "lazy" sentence that can be used to make a similar sentence. But this '
+    'The President of the United'            → ' States, and the former president of the United States, James Pugh, told the Was'
+    'Once upon a time there was'             → ' an emotional breakdown.\n\n“We had a hard time feeling like we were trying to get'
+    'The results indicate that'              → ' the least significant risk of cancer is expected to be over the next four years'
+
+  Results saved to /home/dlewis3/Desktop/AI/DWARF/evals/logs/eval_suite_condm_layer5_20260313_142414.json
+============================================================
+

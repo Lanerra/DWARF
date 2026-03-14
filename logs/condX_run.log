@@ -1,0 +1,303 @@
+======================================================================
+  condW — Pure-DSQG Receiver-Chain Interference (13M, FineWeb-Edu)
+======================================================================
+  GPU: NVIDIA GeForce RTX 4090  (23.6 GB)
+  Kernel: dsqg_attention_v3 (unchanged)
+  Architecture: 6×DSQG (pure), INTERFERENCE=3 → layers 2+5
+  Gate init: -3.0 (sigmoid≈0.047)
+  Optimizer: 3-group AdamW (decay / no-decay / physics@3e-05)
+  Passkey: 50 trials, 6-way, words=['apple', 'banana', 'orange', 'cherry', 'lemon', 'plum']
+  EMA: kernel_len=N (exact; condV used fixed 256)
+  References: condV=52.207/36.7% | condU=52.206/43.3% | I3G0=52.948/53.3% | condM=54.529/83.3%
+Loading FineWeb-Edu from cache: benchmarks/logs/condm_fineweb_edu_doc_cache.json
+  Loaded 100,000 docs from cache
+
+Loaded condI BPE tokenizer from /home/dlewis3/Desktop/AI/DWARF/benchmarks/results/2048_condI_tokenizer.json
+Loading pre-encoded dataset from benchmarks/logs/fineweb_encoded_2048.pt ...
+  train: 52,716  val: 5,582  test: 5,473 seqs (from cache)
+
+condW: 14,257,526 parameters
+  Layer types: ['DSQG', 'DSQG', 'DSQG+INT', 'DSQG', 'DSQG', 'DSQG+INT']
+  Interference at layers: [2, 5]
+Running causality check...
+  Pre-10:  0.00000000  (expect 0.0)
+  Pos-10:  1.224162  (expect >0)
+  Post-10: 0.033772  (expect >0)
+  PASS
+  Optimizer param groups:
+    decay    :  40 tensors  14,222,336 params  lr=0.0003  wd=0.1
+    no_decay :  86 tensors     35,186 params  lr=0.0003  wd=0
+    physics  :   4 tensors          4 params  lr=3e-05  wd=0
+
+  Tokens/epoch: 107,909,652
+  Chinchilla:   285,150,520 tokens (epoch ~2.64)
+
+  Step 200/1648 | Loss 6.5686
+  Step 400/1648 | Loss 6.0957
+  Step 600/1648 | Loss 5.8449
+  Step 800/1648 | Loss 5.5785
+  Step 1000/1648 | Loss 5.3578
+  Step 1200/1648 | Loss 5.2866
+  Step 1400/1648 | Loss 5.2903
+  Step 1600/1648 | Loss 5.1031
+Ep 1/10 | Train 5.8010 | Val 5.0256 PPL 152.3 * BEST | 404s (38%C)
+  DSQG pos-bias: |mean|=3.7255 |max|=14.6797 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.1100 |max|=0.3369
+  IF gains:      h0:1.092  h1:1.106  h2:1.112  h3:1.119  h4:1.120  h5:1.119  h6:1.115  h7:1.099
+  EMA factors:   b0:0.0365  b1:-0.0044   (windows: 27t, -225t)
+  KdV alphas:    b0:-0.0025  b1:0.0036
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ', and it was a very important part of the world.\nThe first time of the world was'
+    'The length of the hypotenuse' -> ' is the most common part of the body. The first time the body is to be able to m'
+    'The President of the United' -> ' States, and the United States, the United States, and the United States.\nThe Un'
+    'Once upon a time there was' -> ' a lot of time to see the same thing.\nThe first time the time of the time was to'
+    'The results indicate that' -> ' the results of the study were not only about the time of the study.\nThe study o'
+  --
+  Passkey... (50 trials, 6-way, chance=16.7%)
+  mean=16.0%  (0/12 distances >50%)
+  d=1:16%  d=2:16%  d=4:16%  d=8:16%  d=16:16%  d=32:16%  d=64:16%  d=128:16%  d=256:16%  d=512:16%  d=1024:16%  d=1536:16%
+  Step 200/1648 | Loss 5.0771
+  Step 400/1648 | Loss 4.8570
+  Step 600/1648 | Loss 4.8297
+  Step 800/1648 | Loss 4.8566
+  Step 1000/1648 | Loss 4.8379
+  Step 1200/1648 | Loss 4.7554
+  Step 1400/1648 | Loss 4.6776
+  Step 1600/1648 | Loss 4.6411
+Ep 2/10 | Train 4.8590 | Val 4.6052 PPL 100.0 * BEST | 788s (76%C)
+  DSQG pos-bias: |mean|=3.7418 |max|=14.6837 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.1539 |max|=0.5361
+  IF gains:      h0:1.171  h1:1.188  h2:1.190  h3:1.179  h4:1.190  h5:1.187  h6:1.185  h7:1.153
+  EMA factors:   b0:0.0584  b1:-0.0435   (windows: 17t, -23t)
+  KdV alphas:    b0:-0.0055  b1:0.0036
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ' event. It was a very small and small event that was a very small event. It was '
+    'The length of the hypotenuse' -> ' is the most common cause of the pain. The most common cause of the pain is the '
+    'The President of the United' -> ' States, the United States, and the United States, is the first to be elected to'
+    'Once upon a time there was' -> ' a lot of time to get a lot of time to get a lot of time.\nThe first time the fir'
+    'The results indicate that' -> ' the results of the study were not limited.\nThe results of the study were not li'
+  --
+  Passkey... (50 trials, 6-way, chance=16.7%)
+  mean=16.0%  (0/12 distances >50%)
+  d=1:16%  d=2:16%  d=4:16%  d=8:16%  d=16:16%  d=32:16%  d=64:16%  d=128:16%  d=256:16%  d=512:16%  d=1024:16%  d=1536:16%
+  Step 200/1648 | Loss 4.7742
+  Step 400/1648 | Loss 4.6323
+  Step 600/1648 | Loss 4.4351
+  Step 800/1648 | Loss 4.5585
+  Step 1000/1648 | Loss 4.4954
+  Step 1200/1648 | Loss 4.6478
+  Step 1400/1648 | Loss 4.5177
+  Step 1600/1648 | Loss 4.4385
+Ep 3/10 | Train 4.5651 | Val 4.4075 PPL 82.1 * BEST | 1160s (114%C)
+  DSQG pos-bias: |mean|=3.7482 |max|=14.6780 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.1785 |max|=0.6574
+  IF gains:      h0:1.233  h1:1.246  h2:1.247  h3:1.216  h4:1.232  h5:1.228  h6:1.223  h7:1.188
+  EMA factors:   b0:0.0754  b1:-0.0810   (windows: 13t, -12t)
+  KdV alphas:    b0:-0.0059  b1:0.0053
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ' storm. The storm was a storm, and the storm was a storm. The storm was a storm.'
+    'The length of the hypotenuse' -> ' is the most common cause of the pain. The most common cause of the pain is the '
+    'The President of the United' -> ' States, the President of the United States, and the President of the United Sta'
+    'Once upon a time there was' -> ' a lot of time to get to the school.\nThe school was a very good place to get a l'
+    'The results indicate that' -> ' the results of the study were not statistically significant.\nThe results of the'
+  --
+  Passkey... (50 trials, 6-way, chance=16.7%)
+  mean=16.0%  (0/12 distances >50%)
+  d=1:16%  d=2:16%  d=4:16%  d=8:16%  d=16:16%  d=32:16%  d=64:16%  d=128:16%  d=256:16%  d=512:16%  d=1024:16%  d=1536:16%
+  Step 200/1648 | Loss 4.3894
+  Step 400/1648 | Loss 4.5819
+  Step 600/1648 | Loss 4.5315
+  Step 800/1648 | Loss 4.3578
+  Step 1000/1648 | Loss 4.4003
+  Step 1200/1648 | Loss 4.4036
+  Step 1400/1648 | Loss 4.4616
+  Step 1600/1648 | Loss 4.3404
+Ep 4/10 | Train 4.4190 | Val 4.3059 PPL 74.1 * BEST | 1533s (151%C)
+  DSQG pos-bias: |mean|=3.7504 |max|=14.6815 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.1935 |max|=0.7221
+  IF gains:      h0:1.273  h1:1.290  h2:1.283  h3:1.242  h4:1.259  h5:1.255  h6:1.248  h7:1.212
+  EMA factors:   b0:0.0838  b1:-0.1136   (windows: 12t, -9t)
+  KdV alphas:    b0:-0.0064  b1:0.0054
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ' storm.\nThe storm was a storm.\nThe storm was a storm.\nThe storm was a storm.\nThe'
+    'The length of the hypotenuse' -> ' is the most common cause of the pain.\nThe pain is the most common cause of pain'
+    'The President of the United' -> ' States, the President of the United States, and the President of the United Sta'
+    'Once upon a time there was' -> ' a very large number of people who had been in the area of the area.\nThe first t'
+    'The results indicate that' -> ' the first step in the development of the new technology is to develop the new t'
+  --
+  Passkey... (50 trials, 6-way, chance=16.7%)
+  mean=16.0%  (0/12 distances >50%)
+  d=1:16%  d=2:16%  d=4:16%  d=8:16%  d=16:16%  d=32:16%  d=64:16%  d=128:16%  d=256:16%  d=512:16%  d=1024:16%  d=1536:16%
+  Step 200/1648 | Loss 4.3179
+  Step 400/1648 | Loss 4.3033
+  Step 600/1648 | Loss 4.2772
+  Step 800/1648 | Loss 4.3495
+  Step 1000/1648 | Loss 4.3647
+  Step 1200/1648 | Loss 4.4239
+  Step 1400/1648 | Loss 4.3026
+  Step 1600/1648 | Loss 4.3005
+Ep 5/10 | Train 4.3339 | Val 4.2438 PPL 69.7 * BEST | 1907s (189%C)
+  DSQG pos-bias: |mean|=3.7506 |max|=14.6781 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.2028 |max|=0.7535
+  IF gains:      h0:1.301  h1:1.320  h2:1.309  h3:1.259  h4:1.277  h5:1.273  h6:1.264  h7:1.230
+  EMA factors:   b0:0.0888  b1:-0.1400   (windows: 11t, -7t)
+  KdV alphas:    b0:-0.0071  b1:0.0052
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ' storm. The storm was a storm, and the storm was a storm. The storm was a storm,'
+    'The length of the hypotenuse' -> ' is the most common cause of the arterial arterial arterial arteries. The arteri'
+    'The President of the United' -> ' States, the President of the United States, and the President of the United Sta'
+    'Once upon a time there was' -> ' a great deal of time in the past, and the people who had been in the past had b'
+    'The results indicate that' -> ' the first step in the development of the first step is to develop a new model o'
+  --
+  Passkey... (50 trials, 6-way, chance=16.7%)
+  mean=20.5%  (0/12 distances >50%)
+  d=1:34%  d=2:34%  d=4:34%  d=8:16%  d=16:16%  d=32:16%  d=64:16%  d=128:16%  d=256:16%  d=512:16%  d=1024:16%  d=1536:16%
+  Step 200/1648 | Loss 4.3802
+  Step 400/1648 | Loss 4.2724
+  Step 600/1648 | Loss 4.3027
+  Step 800/1648 | Loss 4.3075
+  Step 1000/1648 | Loss 4.3537
+  Step 1200/1648 | Loss 4.2151
+  Step 1400/1648 | Loss 4.3056
+  Step 1600/1648 | Loss 4.2725
+Ep 6/10 | Train 4.2778 | Val 4.2017 PPL 66.8 * BEST | 2281s (227%C)
+  DSQG pos-bias: |mean|=3.7498 |max|=14.6741 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.2081 |max|=0.7709
+  IF gains:      h0:1.319  h1:1.340  h2:1.326  h3:1.270  h4:1.288  h5:1.285  h6:1.275  h7:1.241
+  EMA factors:   b0:0.0917  b1:-0.1594   (windows: 11t, -6t)
+  KdV alphas:    b0:-0.0075  b1:0.0046
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ' storm. The storm was a storm, and the storm was so cold. The storm was a storm,'
+    'The length of the hypotenuse' -> ' is the most common cause of the arthritis. The arthritis is the most common cau'
+    'The President of the United' -> ' States, the President of the United States, and the President of the United Sta'
+    'Once upon a time there was' -> ' a large number of people who had been in the past. The people who had been in t'
+    'The results indicate that' -> ' the first step in the development of the new model is to develop the model.\nThe'
+  --
+  Passkey... (50 trials, 6-way, chance=16.7%)
+  mean=20.5%  (0/12 distances >50%)
+  d=1:34%  d=2:34%  d=4:34%  d=8:16%  d=16:16%  d=32:16%  d=64:16%  d=128:16%  d=256:16%  d=512:16%  d=1024:16%  d=1536:16%
+  Step 200/1648 | Loss 4.1772
+  Step 400/1648 | Loss 4.2145
+  Step 600/1648 | Loss 4.2938
+  Step 800/1648 | Loss 4.2323
+  Step 1000/1648 | Loss 4.3786
+  Step 1200/1648 | Loss 4.2816
+  Step 1400/1648 | Loss 4.1924
+  Step 1600/1648 | Loss 4.2639
+Ep 7/10 | Train 4.2387 | Val 4.1742 PPL 65.0 * BEST | 2655s (265%C)
+  DSQG pos-bias: |mean|=3.7488 |max|=14.6743 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.2110 |max|=0.7798
+  IF gains:      h0:1.330  h1:1.353  h2:1.336  h3:1.277  h4:1.294  h5:1.293  h6:1.282  h7:1.248
+  EMA factors:   b0:0.0935  b1:-0.1721   (windows: 11t, -6t)
+  KdV alphas:    b0:-0.0074  b1:0.0042
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ' storm.\nThe storm was a great storm, and the storm was so cold.\nThe storm was a '
+    'The length of the hypotenuse' -> ' is the most common cause of the hypotenuse. The most common cause of the hypote'
+    'The President of the United' -> ' States, the President of the United States, and the President of the United Sta'
+    'Once upon a time there was' -> ' a large number of people who had been forced to leave the country. The people w'
+    'The results indicate that' -> ' the first step in the development of the first step is to develop a new model o'
+  --
+  Passkey... (50 trials, 6-way, chance=16.7%)
+  mean=17.5%  (0/12 distances >50%)
+  d=1:34%  d=2:16%  d=4:16%  d=8:16%  d=16:16%  d=32:16%  d=64:16%  d=128:16%  d=256:16%  d=512:16%  d=1024:16%  d=1536:16%
+  Step 200/1648 | Loss 4.1819
+  Step 400/1648 | Loss 4.1863
+  Step 600/1648 | Loss 4.0363
+  Step 800/1648 | Loss 4.1896
+  Step 1000/1648 | Loss 4.1280
+  Step 1200/1648 | Loss 4.2137
+  Step 1400/1648 | Loss 4.2625
+  Step 1600/1648 | Loss 4.2004
+Ep 8/10 | Train 4.2120 | Val 4.1588 PPL 64.0 * BEST | 3029s (303%C)
+  DSQG pos-bias: |mean|=3.7480 |max|=14.6736 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.2123 |max|=0.7829
+  IF gains:      h0:1.335  h1:1.359  h2:1.341  h3:1.281  h4:1.297  h5:1.296  h6:1.285  h7:1.251
+  EMA factors:   b0:0.0944  b1:-0.1791   (windows: 11t, -6t)
+  KdV alphas:    b0:-0.0074  b1:0.0040
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ' storm.\nThe storm was a very hot storm, and the storm was not so hot. The storm '
+    'The length of the hypotenuse' -> ' is the most common cause of the arterial arteries. The arteries are the most co'
+    'The President of the United' -> ' States, the President of the United States, and the President of the United Sta'
+    'Once upon a time there was' -> ' a large number of people who had been forced to leave the country.\nThe first ti'
+    'The results indicate that' -> ' the first step in the development of the model is to develop the model.\nThe mod'
+  --
+  Passkey... (50 trials, 6-way, chance=16.7%)
+  mean=20.5%  (0/12 distances >50%)
+  d=1:34%  d=2:34%  d=4:34%  d=8:16%  d=16:16%  d=32:16%  d=64:16%  d=128:16%  d=256:16%  d=512:16%  d=1024:16%  d=1536:16%
+  Step 200/1648 | Loss 4.1665
+  Step 400/1648 | Loss 4.2827
+  Step 600/1648 | Loss 4.1904
+  Step 800/1648 | Loss 4.2026
+  Step 1000/1648 | Loss 4.1419
+  Step 1200/1648 | Loss 4.2327
+  Step 1400/1648 | Loss 4.1801
+  Step 1600/1648 | Loss 4.1970
+Ep 9/10 | Train 4.1950 | Val 4.1510 PPL 63.5 * BEST | 3403s (341%C)
+  DSQG pos-bias: |mean|=3.7476 |max|=14.6736 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.2127 |max|=0.7835
+  IF gains:      h0:1.337  h1:1.361  h2:1.343  h3:1.282  h4:1.298  h5:1.298  h6:1.287  h7:1.253
+  EMA factors:   b0:0.0947  b1:-0.1817   (windows: 11t, -6t)
+  KdV alphas:    b0:-0.0075  b1:0.0040
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ' storm.\nThe storm was a great storm, and the storm was a great storm. The storm '
+    'The length of the hypotenuse' -> ' is the most common cause of the arterial arteries. The arteries are the most co'
+    'The President of the United' -> ' States, the President of the United States, and the President of the United Sta'
+    'Once upon a time there was' -> ' a large number of people who had been forced to leave the country.\nThe first ti'
+    'The results indicate that' -> ' the first step in the development of the new technology is to develop new techn'
+  --
+  Passkey... (50 trials, 6-way, chance=16.7%)
+  mean=17.5%  (0/12 distances >50%)
+  d=1:34%  d=2:16%  d=4:16%  d=8:16%  d=16:16%  d=32:16%  d=64:16%  d=128:16%  d=256:16%  d=512:16%  d=1024:16%  d=1536:16%
+  Step 200/1648 | Loss 4.1705
+  Step 400/1648 | Loss 4.3069
+  Step 600/1648 | Loss 4.1970
+  Step 800/1648 | Loss 4.3150
+  Step 1000/1648 | Loss 4.1133
+  Step 1200/1648 | Loss 4.2714
+  Step 1400/1648 | Loss 4.0866
+  Step 1600/1648 | Loss 4.2238
+Ep 10/10 | Train 4.1866 | Val 4.1500 PPL 63.4 * BEST | 3777s (378%C)
+  DSQG pos-bias: |mean|=3.7476 |max|=14.6736 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.2128 |max|=0.7836
+  IF gains:      h0:1.338  h1:1.362  h2:1.344  h3:1.283  h4:1.299  h5:1.298  h6:1.287  h7:1.253
+  EMA factors:   b0:0.0947  b1:-0.1821   (windows: 11t, -5t)
+  KdV alphas:    b0:-0.0075  b1:0.0040
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ' storm.\nThe storm was a great storm, and the storm was a great storm. The storm '
+    'The length of the hypotenuse' -> ' is the most common cause of the arterial arteries. The arteries are the most co'
+    'The President of the United' -> ' States, the President of the United States, and the President of the United Sta'
+    'Once upon a time there was' -> ' a large number of people who had been forced to leave the country.\nThe first ti'
+    'The results indicate that' -> ' the first step in the development of the new technology is to develop new techn'
+  --
+  Passkey... (50 trials, 6-way, chance=16.7%)
+  mean=17.5%  (0/12 distances >50%)
+  d=1:34%  d=2:16%  d=4:16%  d=8:16%  d=16:16%  d=32:16%  d=64:16%  d=128:16%  d=256:16%  d=512:16%  d=1024:16%  d=1536:16%
+
+  condW TEST: PPL 64.450 | Loss 4.1659
+  condV reference: 52.207 PPL | delta = +12.243
+  condU reference: 52.206 PPL | delta = +12.244
+  I3G0 reference:  52.948 PPL | delta = +11.502
+  condM reference: 54.529 PPL | delta = +9.921
+
+  -- Temperature sweep (best checkpoint) --
+
+  [greedy]
+    'It was a dark and stormy' -> ' storm.\nThe storm was a great storm, and the storm was a great storm. The storm '
+    'The length of the hypotenuse' -> ' is the most common cause of the arterial arteries. The arteries are the most co'
+    'The President of the United' -> ' States, the President of the United States, and the President of the United Sta'
+    'Once upon a time there was' -> ' a large number of people who had been forced to leave the country.\nThe first ti'
+    'The results indicate that' -> ' the first step in the development of the new technology is to develop new techn'
+
+  [T=0.5]
+Traceback (most recent call last):
+  File "/home/dlewis3/Desktop/AI/DWARF/benchmarks/train_2048_condX.py", line 865, in <module>
+    main()
+  File "/home/dlewis3/Desktop/AI/DWARF/benchmarks/train_2048_condX.py", line 861, in main
+    train(model, train_data, val_data, test_data, tokenizer, device=device)
+  File "/home/dlewis3/Desktop/AI/DWARF/benchmarks/train_2048_condX.py", line 723, in train
+    gens = generate(model, tokenizer, GEN_PROMPTS, device,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dlewis3/Desktop/AI/DWARF/benchmarks/train_2048_condX.py", line 512, in generate
+    ids = torch.cat([ids, next_id.view(1, 1)], dim=1)
+                          ^^^^^^^^^^^^^^^^^^
+RuntimeError: shape '[1, 1]' is invalid for input of size 32000

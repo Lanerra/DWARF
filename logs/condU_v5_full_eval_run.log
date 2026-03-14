@@ -1,0 +1,427 @@
+=======================================================
+=======================================================
+  condU_v5 35M — Full Eval Suite
+  condU_v5 35M — Full Eval Suite
+  Started: Wed Mar 11 07:52:11 PM PDT 2026
+  Started: Wed Mar 11 07:52:11 PM PDT 2026
+  Checkpoint: checkpoints/condU_v5/best.pt
+  Checkpoint: checkpoints/condU_v5/best.pt
+=======================================================
+=======================================================
+
+
+>>> eval_suite.py (PPL, passkey, generation)
+>>> eval_suite.py (PPL, passkey, generation)
+
+============================================================
+  eval_suite.py — condu_v5_38m
+  Device: cuda
+============================================================
+
+  Model: condU-v5 38M (MOVT+QK-OVT+NPCI, D=512)
+
+  Loading tokenizer...
+  Loading model...
+[kernel] CUDA extension loaded — using compiled CUDA backward
+  Loaded condU-v5 38M (MOVT+QK-OVT+NPCI, D=512): 38,732,856 params from best.pt
+
+  [1/4] Calibration...
+    entropy=6.987 bits  top1=0.234  eff_vocab=24.5  (0.2s)
+
+  [2/4] Distance-conditioned loss (wikitext-103)...
+    Loading wikitext-103 test split...
+    Using 17 full 2048-token chunks
+    Buckets:
+    0-16          PPL= 280.61  n=  289
+    17-64         PPL= 159.87  n=  816
+    65-256        PPL=  80.66  n= 3264
+    257-512       PPL=  70.49  n= 4352
+    513-1024      PPL=  59.82  n= 8704
+    1025-2047     PPL=  56.05  n=17374
+    (3.4s)
+
+  [3/4] Few-shot string copy...
+    exact=6/15  (40.0%)  mean_lev=6.80  (0.8s)
+
+  [4/4] Passkey retrieval...
+    d=    1: accuracy=100.0%
+    d=    2: accuracy=100.0%
+    d=    4: accuracy=100.0%
+    d=    8: accuracy=100.0%
+    d=   16: accuracy=100.0%
+    d=   32: accuracy=100.0%
+    d=   64: accuracy=100.0%
+    d=  128: accuracy=100.0%
+    d=  256: accuracy=100.0%
+    d=  512: accuracy=80.0%
+    d= 1024: accuracy=100.0%
+    d= 1536: accuracy=80.0%
+    mean_accuracy=96.7%  (0.3s)
+
+  Generation samples (greedy + T=0.7)...
+
+  [greedy]
+    'It was a dark and stormy'               → ' night.\nThe first thing that happened was the first time the sun was shining. Th'
+    'The length of the hypotenuse'           → ' is the same as the length of the hypotenuse. The hypotenuse is the same as the '
+    'The President of the United'            → ' States, the President of the United States, and the President of the United Sta'
+    'Once upon a time there was'             → ' a great deal of work in the field of medicine. The first was the use of the wor'
+    'The results indicate that'              → ' the number of people who are in the United States is not equal to the number of'
+
+  [T=0.7]
+    'It was a dark and stormy'               → ', drought, and a good climate. The water was strong, and the climate was strong.'
+    'The length of the hypotenuse'           → ' in the form of the bending. The amount of a bending of the hypotenuse. The bend'
+    'The President of the United'            → ' States, President Barack Obama, also called for the removal of an amendment to '
+    'Once upon a time there was'             → ' no hope of a future, but a new one was to be discovered in the midst of the sun'
+    'The results indicate that'              → ' the highest concentration of bile is found in the small intestine, and that the'
+
+  Results saved to /home/dlewis3/Desktop/AI/DWARF/evals/logs/eval_suite_condu_v5_38m_20260311_195213.json
+============================================================
+
+
+============================================================
+  eval_suite.py — condu_v5_38m
+  Device: cuda
+============================================================
+
+  Model: condU-v5 38M (MOVT+QK-OVT+NPCI, D=512)
+
+  Loading tokenizer...
+  Loading model...
+[kernel] CUDA extension loaded — using compiled CUDA backward
+  Loaded condU-v5 38M (MOVT+QK-OVT+NPCI, D=512): 38,732,856 params from best.pt
+
+  [1/4] Calibration...
+    entropy=6.987 bits  top1=0.234  eff_vocab=24.5  (0.2s)
+
+  [2/4] Distance-conditioned loss (wikitext-103)...
+    Loading wikitext-103 test split...
+    Using 17 full 2048-token chunks
+    Buckets:
+    0-16          PPL= 280.61  n=  289
+    17-64         PPL= 159.87  n=  816
+    65-256        PPL=  80.66  n= 3264
+    257-512       PPL=  70.49  n= 4352
+    513-1024      PPL=  59.82  n= 8704
+    1025-2047     PPL=  56.05  n=17374
+    (3.4s)
+
+  [3/4] Few-shot string copy...
+    exact=6/15  (40.0%)  mean_lev=6.80  (0.8s)
+
+  [4/4] Passkey retrieval...
+    d=    1: accuracy=100.0%
+    d=    2: accuracy=100.0%
+    d=    4: accuracy=100.0%
+    d=    8: accuracy=100.0%
+    d=   16: accuracy=100.0%
+    d=   32: accuracy=100.0%
+    d=   64: accuracy=100.0%
+    d=  128: accuracy=100.0%
+    d=  256: accuracy=100.0%
+    d=  512: accuracy=80.0%
+    d= 1024: accuracy=100.0%
+    d= 1536: accuracy=80.0%
+    mean_accuracy=96.7%  (0.3s)
+
+  Generation samples (greedy + T=0.7)...
+
+  [greedy]
+    'It was a dark and stormy'               → ' night.\nThe first thing that happened was the first time the sun was shining. Th'
+    'The length of the hypotenuse'           → ' is the same as the length of the hypotenuse. The hypotenuse is the same as the '
+    'The President of the United'            → ' States, the President of the United States, and the President of the United Sta'
+    'Once upon a time there was'             → ' a great deal of work in the field of medicine. The first was the use of the wor'
+    'The results indicate that'              → ' the number of people who are in the United States is not equal to the number of'
+
+  [T=0.7]
+    'It was a dark and stormy'               → ', drought, and a good climate. The water was strong, and the climate was strong.'
+    'The length of the hypotenuse'           → ' in the form of the bending. The amount of a bending of the hypotenuse. The bend'
+    'The President of the United'            → ' States, President Barack Obama, also called for the removal of an amendment to '
+    'Once upon a time there was'             → ' no hope of a future, but a new one was to be discovered in the midst of the sun'
+    'The results indicate that'              → ' the highest concentration of bile is found in the small intestine, and that the'
+
+  Results saved to /home/dlewis3/Desktop/AI/DWARF/evals/logs/eval_suite_condu_v5_38m_20260311_195213.json
+============================================================
+
+
+
+>>> eval_external.py (HellaSwag, PIQA, ARC-E, ARC-C, Lambada, Winogrande)
+>>> eval_external.py (HellaSwag, PIQA, ARC-E, ARC-C, Lambada, Winogrande)
+============================================================
+  DWARF External Benchmark Evaluator
+============================================================
+  GPU: NVIDIA GeForce RTX 3090
+  Tasks: ['hellaswag', 'piqa', 'arc_easy', 'arc_challenge', 'winogrande', 'lambada']
+  Tokenizer: /home/dlewis3/Desktop/AI/DWARF/results/2048_condI_tokenizer.json
+
+Loading from registry: condu_v5_38m
+[kernel] CUDA extension loaded — using compiled CUDA backward
+  Loaded condU-v5 38M (MOVT+QK-OVT+NPCI, D=512): 38,732,856 params from best.pt
+  Parameters: 38,732,856
+  Label: condU-v5 38M (MOVT+QK-OVT+NPCI, D=512)
+
+  [hellaswag] 10,042 examples...
+============================================================
+  DWARF External Benchmark Evaluator
+============================================================
+  GPU: NVIDIA GeForce RTX 3090
+  Tasks: ['hellaswag', 'piqa', 'arc_easy', 'arc_challenge', 'winogrande', 'lambada']
+  Tokenizer: /home/dlewis3/Desktop/AI/DWARF/results/2048_condI_tokenizer.json
+
+Loading from registry: condu_v5_38m
+[kernel] CUDA extension loaded — using compiled CUDA backward
+  Loaded condU-v5 38M (MOVT+QK-OVT+NPCI, D=512): 38,732,856 params from best.pt
+  Parameters: 38,732,856
+  Label: condU-v5 38M (MOVT+QK-OVT+NPCI, D=512)
+
+  [hellaswag] 10,042 examples...
+    [hellaswag] 200/10042 — acc=0.280 | eta 98s
+    [hellaswag] 400/10042 — acc=0.282 | eta 92s
+    [hellaswag] 600/10042 — acc=0.290 | eta 88s
+    [hellaswag] 800/10042 — acc=0.289 | eta 86s
+    [hellaswag] 1000/10042 — acc=0.294 | eta 83s
+    [hellaswag] 1200/10042 — acc=0.302 | eta 81s
+    [hellaswag] 1400/10042 — acc=0.296 | eta 79s
+    [hellaswag] 1600/10042 — acc=0.297 | eta 77s
+    [hellaswag] 1800/10042 — acc=0.288 | eta 75s
+    [hellaswag] 2000/10042 — acc=0.283 | eta 73s
+    [hellaswag] 2200/10042 — acc=0.280 | eta 71s
+    [hellaswag] 2400/10042 — acc=0.281 | eta 69s
+    [hellaswag] 2600/10042 — acc=0.280 | eta 67s
+    [hellaswag] 2800/10042 — acc=0.281 | eta 65s
+    [hellaswag] 3000/10042 — acc=0.284 | eta 64s
+    [hellaswag] 3200/10042 — acc=0.287 | eta 62s
+    [hellaswag] 3400/10042 — acc=0.285 | eta 61s
+    [hellaswag] 3600/10042 — acc=0.282 | eta 60s
+    [hellaswag] 3800/10042 — acc=0.280 | eta 59s
+    [hellaswag] 4000/10042 — acc=0.274 | eta 58s
+    [hellaswag] 4200/10042 — acc=0.272 | eta 57s
+    [hellaswag] 4400/10042 — acc=0.270 | eta 56s
+    [hellaswag] 4600/10042 — acc=0.268 | eta 54s
+    [hellaswag] 4800/10042 — acc=0.266 | eta 53s
+    [hellaswag] 5000/10042 — acc=0.265 | eta 51s
+    [hellaswag] 5200/10042 — acc=0.262 | eta 49s
+    [hellaswag] 5400/10042 — acc=0.260 | eta 48s
+    [hellaswag] 5600/10042 — acc=0.261 | eta 46s
+    [hellaswag] 5800/10042 — acc=0.260 | eta 44s
+    [hellaswag] 6000/10042 — acc=0.259 | eta 42s
+    [hellaswag] 6200/10042 — acc=0.258 | eta 40s
+    [hellaswag] 6400/10042 — acc=0.258 | eta 38s
+    [hellaswag] 6600/10042 — acc=0.259 | eta 36s
+    [hellaswag] 6800/10042 — acc=0.257 | eta 34s
+    [hellaswag] 7000/10042 — acc=0.255 | eta 32s
+    [hellaswag] 7200/10042 — acc=0.253 | eta 30s
+    [hellaswag] 7400/10042 — acc=0.253 | eta 28s
+    [hellaswag] 7600/10042 — acc=0.253 | eta 26s
+    [hellaswag] 7800/10042 — acc=0.253 | eta 24s
+    [hellaswag] 8000/10042 — acc=0.252 | eta 22s
+    [hellaswag] 8200/10042 — acc=0.252 | eta 20s
+    [hellaswag] 8400/10042 — acc=0.252 | eta 18s
+    [hellaswag] 8600/10042 — acc=0.251 | eta 16s
+    [hellaswag] 8800/10042 — acc=0.249 | eta 14s
+    [hellaswag] 9000/10042 — acc=0.249 | eta 11s
+    [hellaswag] 9200/10042 — acc=0.250 | eta 9s
+    [hellaswag] 9400/10042 — acc=0.250 | eta 7s
+    [hellaswag] 9600/10042 — acc=0.249 | eta 5s
+    [hellaswag] 9800/10042 — acc=0.248 | eta 3s
+    [hellaswag] 10000/10042 — acc=0.248 | eta 0s
+  [hellaswag] accuracy = 0.2474 (24.7%)  [10042 examples, 112s]
+  [piqa] 1,838 examples...
+    [hellaswag] 200/10042 — acc=0.280 | eta 98s
+    [hellaswag] 400/10042 — acc=0.282 | eta 92s
+    [hellaswag] 600/10042 — acc=0.290 | eta 88s
+    [hellaswag] 800/10042 — acc=0.289 | eta 86s
+    [hellaswag] 1000/10042 — acc=0.294 | eta 83s
+    [hellaswag] 1200/10042 — acc=0.302 | eta 81s
+    [hellaswag] 1400/10042 — acc=0.296 | eta 79s
+    [hellaswag] 1600/10042 — acc=0.297 | eta 77s
+    [hellaswag] 1800/10042 — acc=0.288 | eta 75s
+    [hellaswag] 2000/10042 — acc=0.283 | eta 73s
+    [hellaswag] 2200/10042 — acc=0.280 | eta 71s
+    [hellaswag] 2400/10042 — acc=0.281 | eta 69s
+    [hellaswag] 2600/10042 — acc=0.280 | eta 67s
+    [hellaswag] 2800/10042 — acc=0.281 | eta 65s
+    [hellaswag] 3000/10042 — acc=0.284 | eta 64s
+    [hellaswag] 3200/10042 — acc=0.287 | eta 62s
+    [hellaswag] 3400/10042 — acc=0.285 | eta 61s
+    [hellaswag] 3600/10042 — acc=0.282 | eta 60s
+    [hellaswag] 3800/10042 — acc=0.280 | eta 59s
+    [hellaswag] 4000/10042 — acc=0.274 | eta 58s
+    [hellaswag] 4200/10042 — acc=0.272 | eta 57s
+    [hellaswag] 4400/10042 — acc=0.270 | eta 56s
+    [hellaswag] 4600/10042 — acc=0.268 | eta 54s
+    [hellaswag] 4800/10042 — acc=0.266 | eta 53s
+    [hellaswag] 5000/10042 — acc=0.265 | eta 51s
+    [hellaswag] 5200/10042 — acc=0.262 | eta 49s
+    [hellaswag] 5400/10042 — acc=0.260 | eta 48s
+    [hellaswag] 5600/10042 — acc=0.261 | eta 46s
+    [hellaswag] 5800/10042 — acc=0.260 | eta 44s
+    [hellaswag] 6000/10042 — acc=0.259 | eta 42s
+    [hellaswag] 6200/10042 — acc=0.258 | eta 40s
+    [hellaswag] 6400/10042 — acc=0.258 | eta 38s
+    [hellaswag] 6600/10042 — acc=0.259 | eta 36s
+    [hellaswag] 6800/10042 — acc=0.257 | eta 34s
+    [hellaswag] 7000/10042 — acc=0.255 | eta 32s
+    [hellaswag] 7200/10042 — acc=0.253 | eta 30s
+    [hellaswag] 7400/10042 — acc=0.253 | eta 28s
+    [hellaswag] 7600/10042 — acc=0.253 | eta 26s
+    [hellaswag] 7800/10042 — acc=0.253 | eta 24s
+    [hellaswag] 8000/10042 — acc=0.252 | eta 22s
+    [hellaswag] 8200/10042 — acc=0.252 | eta 20s
+    [hellaswag] 8400/10042 — acc=0.252 | eta 18s
+    [hellaswag] 8600/10042 — acc=0.251 | eta 16s
+    [hellaswag] 8800/10042 — acc=0.249 | eta 14s
+    [hellaswag] 9000/10042 — acc=0.249 | eta 11s
+    [hellaswag] 9200/10042 — acc=0.250 | eta 9s
+    [hellaswag] 9400/10042 — acc=0.250 | eta 7s
+    [hellaswag] 9600/10042 — acc=0.249 | eta 5s
+    [hellaswag] 9800/10042 — acc=0.248 | eta 3s
+    [hellaswag] 10000/10042 — acc=0.248 | eta 0s
+  [hellaswag] accuracy = 0.2474 (24.7%)  [10042 examples, 112s]
+  [piqa] 1,838 examples...
+    [piqa] 200/1838 — acc=0.585 | eta 7s
+    [piqa] 400/1838 — acc=0.590 | eta 7s
+    [piqa] 600/1838 — acc=0.578 | eta 6s
+    [piqa] 800/1838 — acc=0.566 | eta 5s
+    [piqa] 1000/1838 — acc=0.563 | eta 4s
+    [piqa] 1200/1838 — acc=0.568 | eta 3s
+    [piqa] 1400/1838 — acc=0.566 | eta 2s
+    [piqa] 1600/1838 — acc=0.569 | eta 1s
+    [piqa] 1800/1838 — acc=0.572 | eta 0s
+  [piqa] accuracy = 0.5718 (57.2%)  [1838 examples, 8s]
+  [arc_easy] 570 examples...
+    [piqa] 200/1838 — acc=0.585 | eta 7s
+    [piqa] 400/1838 — acc=0.590 | eta 7s
+    [piqa] 600/1838 — acc=0.578 | eta 6s
+    [piqa] 800/1838 — acc=0.566 | eta 5s
+    [piqa] 1000/1838 — acc=0.563 | eta 4s
+    [piqa] 1200/1838 — acc=0.568 | eta 3s
+    [piqa] 1400/1838 — acc=0.566 | eta 2s
+    [piqa] 1600/1838 — acc=0.569 | eta 1s
+    [piqa] 1800/1838 — acc=0.572 | eta 0s
+  [piqa] accuracy = 0.5718 (57.2%)  [1838 examples, 8s]
+  [arc_easy] 570 examples...
+    [arc_easy] 200/570 — acc=0.340 | eta 3s
+    [arc_easy] 400/570 — acc=0.360 | eta 1s
+  [arc_easy] accuracy = 0.3684 (36.8%)  [570 examples, 5s]
+  [arc_challenge] 299 examples...
+    [arc_easy] 200/570 — acc=0.340 | eta 3s
+    [arc_easy] 400/570 — acc=0.360 | eta 1s
+  [arc_easy] accuracy = 0.3684 (36.8%)  [570 examples, 5s]
+  [arc_challenge] 299 examples...
+    [arc_challenge] 200/299 — acc=0.215 | eta 1s
+  [arc_challenge] accuracy = 0.2107 (21.1%)  [299 examples, 3s]
+  [winogrande] 1,267 examples...
+    [arc_challenge] 200/299 — acc=0.215 | eta 1s
+  [arc_challenge] accuracy = 0.2107 (21.1%)  [299 examples, 3s]
+  [winogrande] 1,267 examples...
+    [winogrande] 200/1267 — acc=0.560 | eta 5s
+    [winogrande] 400/1267 — acc=0.527 | eta 4s
+    [winogrande] 600/1267 — acc=0.522 | eta 3s
+    [winogrande] 800/1267 — acc=0.517 | eta 2s
+    [winogrande] 1000/1267 — acc=0.527 | eta 1s
+    [winogrande] 1200/1267 — acc=0.522 | eta 0s
+  [winogrande] accuracy = 0.5225 (52.2%)  [1267 examples, 5s]
+  [lambada] 5,153 examples...
+    [winogrande] 200/1267 — acc=0.560 | eta 5s
+    [winogrande] 400/1267 — acc=0.527 | eta 4s
+    [winogrande] 600/1267 — acc=0.522 | eta 3s
+    [winogrande] 800/1267 — acc=0.517 | eta 2s
+    [winogrande] 1000/1267 — acc=0.527 | eta 1s
+    [winogrande] 1200/1267 — acc=0.522 | eta 0s
+  [winogrande] accuracy = 0.5225 (52.2%)  [1267 examples, 5s]
+  [lambada] 5,153 examples...
+  [lambada] accuracy = 0.1036 (10.4%)  [5153 examples, 15s]
+
+============================================================
+  condU-v5 38M (MOVT+QK-OVT+NPCI, D=512)
+============================================================
+  Task                     Accuracy       N
+  ---------------------- ----------  ------
+  hellaswag                   24.7%   10042
+  piqa                        57.2%    1838
+  arc_easy                    36.8%     570
+  arc_challenge               21.1%     299
+  winogrande                  52.2%    1267
+  lambada                     10.4%    5153
+  ---------------------- ----------  ------
+  mean (present tasks)        33.7%
+============================================================
+
+  Results -> /home/dlewis3/Desktop/AI/DWARF/evals/logs/eval_external_condU-v5_38M_(MOVT+QK-OVT+NPCI,_D=512)_20260311_195450.json
+  [lambada] accuracy = 0.1036 (10.4%)  [5153 examples, 15s]
+
+============================================================
+  condU-v5 38M (MOVT+QK-OVT+NPCI, D=512)
+============================================================
+  Task                     Accuracy       N
+  ---------------------- ----------  ------
+  hellaswag                   24.7%   10042
+  piqa                        57.2%    1838
+  arc_easy                    36.8%     570
+  arc_challenge               21.1%     299
+  winogrande                  52.2%    1267
+  lambada                     10.4%    5153
+  ---------------------- ----------  ------
+  mean (present tasks)        33.7%
+============================================================
+
+  Results -> /home/dlewis3/Desktop/AI/DWARF/evals/logs/eval_external_condU-v5_38M_(MOVT+QK-OVT+NPCI,_D=512)_20260311_195450.json
+
+
+=======================================================
+=======================================================
+  COMPLETE: Wed Mar 11 07:54:50 PM PDT 2026
+  COMPLETE: Wed Mar 11 07:54:50 PM PDT 2026
+=======================================================
+=======================================================
+
+
+>>> bench_v5_cuda_vs_triton.py (CUDA extension vs Triton throughput)
+>>> bench_v5_cuda_vs_triton.py (CUDA extension vs Triton throughput)
+======================================================================
+  V5 CUDA extension vs Triton — condU_v5 kernel benchmark
+  GPU: NVIDIA GeForce RTX 3090  (25.3 GB)
+  B=2, N=2048, H=8, HD=64, J=44
+======================================================================
+[kernel] CUDA extension loaded — will benchmark both
+
+Triton kernel:
+Traceback (most recent call last):
+  File "/home/dlewis3/Desktop/AI/DWARF/benchmarks/bench_v5_cuda_vs_triton.py", line 109, in <module>
+======================================================================
+  V5 CUDA extension vs Triton — condU_v5 kernel benchmark
+  GPU: NVIDIA GeForce RTX 3090  (25.3 GB)
+  B=2, N=2048, H=8, HD=64, J=44
+======================================================================
+[kernel] CUDA extension loaded — will benchmark both
+
+Triton kernel:
+Traceback (most recent call last):
+  File "/home/dlewis3/Desktop/AI/DWARF/benchmarks/bench_v5_cuda_vs_triton.py", line 109, in <module>
+    layer_triton = DSQGAttentionV5(D, H, J, OFFSETS).to(DEVICE).to(torch.bfloat16)
+    layer_triton = DSQGAttentionV5(D, H, J, OFFSETS).to(DEVICE).to(torch.bfloat16)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dlewis3/Desktop/AI/DWARF/kernels/dsqg_attention_v5.py", line 835, in __init__
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dlewis3/Desktop/AI/DWARF/kernels/dsqg_attention_v5.py", line 835, in __init__
+    self.dropout = nn.Dropout(dropout)
+                   ^^^^^^^^^^^^^^^^^^^
+  File "/home/dlewis3/Desktop/AI/DWARF/.venv/lib/python3.12/site-packages/torch/nn/modules/dropout.py", line 24, in __init__
+    self.dropout = nn.Dropout(dropout)
+                   ^^^^^^^^^^^^^^^^^^^
+  File "/home/dlewis3/Desktop/AI/DWARF/.venv/lib/python3.12/site-packages/torch/nn/modules/dropout.py", line 24, in __init__
+    if p < 0 or p > 1:
+       ^^^^^
+    if p < 0 or p > 1:
+       ^^^^^
+TypeError: '<' not supported between instances of 'list' and 'int'
+TypeError: '<' not supported between instances of 'list' and 'int'
+
+
+=======================================================
+=======================================================
+  COMPLETE: Wed Mar 11 07:54:51 PM PDT 2026
+  COMPLETE: Wed Mar 11 07:54:51 PM PDT 2026
+=======================================================
+=======================================================
+ok

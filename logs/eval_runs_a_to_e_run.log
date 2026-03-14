@@ -1,0 +1,287 @@
+============================================================
+  DWARF External Benchmarks — Runs A through E
+  Device: cuda  Tasks: ['hellaswag', 'piqa', 'arc_easy', 'arc_challenge', 'winogrande', 'lambada']
+  Runs:   ['condu_4096', 'a', 'b', 'c', 'd', 'e']
+============================================================
+
+Loading tokenizer...
+
+Loading benchmarks: ['hellaswag', 'piqa', 'arc_easy', 'arc_challenge', 'winogrande', 'lambada']
+  hellaswag: 10,042 examples
+  piqa: 1,838 examples
+  arc_easy: 570 examples
+  arc_challenge: 299 examples
+  winogrande: 1,267 examples
+  lambada: 5,153 examples
+
+  Loading condU 13M N=4096 (baseline)
+  Script:     train/dsqg_hybrid_13m_4096_anneal.py
+  Checkpoint: checkpoints/2048_condU_13m_4096_checkpoints/best.pt
+  Params: 14,582,240 | seq_len=4096 | PPL=58.617 | passkey=0%
+
+============================================================
+  Evaluating: condU 13M N=4096 (baseline)
+============================================================
+  [hellaswag] n=10042 ...    [hellaswag] 500/10042 acc=0.274 eta=1051s
+    [hellaswag] 1000/10042 acc=0.274 eta=542s
+    [hellaswag] 1500/10042 acc=0.273 eta=369s
+    [hellaswag] 2000/10042 acc=0.259 eta=280s
+    [hellaswag] 2500/10042 acc=0.256 eta=225s
+    [hellaswag] 3000/10042 acc=0.261 eta=186s
+    [hellaswag] 3500/10042 acc=0.261 eta=158s
+    [hellaswag] 4000/10042 acc=0.255 eta=135s
+    [hellaswag] 4500/10042 acc=0.254 eta=116s
+    [hellaswag] 5000/10042 acc=0.253 eta=100s
+    [hellaswag] 5500/10042 acc=0.249 eta=86s
+    [hellaswag] 6000/10042 acc=0.249 eta=74s
+    [hellaswag] 6500/10042 acc=0.246 eta=62s
+    [hellaswag] 7000/10042 acc=0.246 eta=52s
+    [hellaswag] 7500/10042 acc=0.245 eta=42s
+    [hellaswag] 8000/10042 acc=0.243 eta=33s
+    [hellaswag] 8500/10042 acc=0.243 eta=24s
+    [hellaswag] 9000/10042 acc=0.241 eta=16s
+    [hellaswag] 9500/10042 acc=0.242 eta=8s
+    [hellaswag] 10000/10042 acc=0.241 eta=1s
+ acc=24.1%  (2423/10042)  150s
+  [piqa] n=1838 ...    [piqa] 500/1838 acc=0.548 eta=6s
+    [piqa] 1000/1838 acc=0.541 eta=4s
+    [piqa] 1500/1838 acc=0.549 eta=2s
+ acc=54.7%  (1005/1838)  9s
+  [arc_easy] n=570 ...    [arc_easy] 500/570 acc=0.320 eta=1s
+ acc=32.1%  (183/570)  5s
+  [arc_challenge] n=299 ... acc=19.1%  (57/299)  3s
+  [winogrande] n=1267 ...    [winogrande] 500/1267 acc=0.502 eta=4s
+    [winogrande] 1000/1267 acc=0.492 eta=1s
+ acc=49.5%  (627/1267)  6s
+  [lambada] n=5153 ... acc=4.7%  (243/5153)  13s
+  Mean: 30.7%
+  Saved: benchmarks/logs/eval_external_runcondu_4096_20260304_123532.json
+
+  Loading Run A — N=4096, near-zero init, no dispersive
+  Script:     train/dsqg_hybrid_13m_4096_anneal.py
+  Checkpoint: checkpoints/4096_dsqg_hybrid_13m_anneal/best.pt
+  Params: 14,582,240 | seq_len=4096 | PPL=58.716 | passkey=0%
+
+============================================================
+  Evaluating: Run A — N=4096, near-zero init, no dispersive
+============================================================
+  [hellaswag] n=10042 ...    [hellaswag] 500/10042 acc=0.260 eta=92s
+    [hellaswag] 1000/10042 acc=0.273 eta=88s
+    [hellaswag] 1500/10042 acc=0.271 eta=83s
+    [hellaswag] 2000/10042 acc=0.260 eta=78s
+    [hellaswag] 2500/10042 acc=0.258 eta=73s
+    [hellaswag] 3000/10042 acc=0.262 eta=68s
+    [hellaswag] 3500/10042 acc=0.266 eta=64s
+    [hellaswag] 4000/10042 acc=0.258 eta=59s
+    [hellaswag] 4500/10042 acc=0.256 eta=55s
+    [hellaswag] 5000/10042 acc=0.252 eta=50s
+    [hellaswag] 5500/10042 acc=0.250 eta=45s
+    [hellaswag] 6000/10042 acc=0.251 eta=41s
+    [hellaswag] 6500/10042 acc=0.249 eta=36s
+    [hellaswag] 7000/10042 acc=0.248 eta=31s
+    [hellaswag] 7500/10042 acc=0.247 eta=26s
+    [hellaswag] 8000/10042 acc=0.245 eta=21s
+    [hellaswag] 8500/10042 acc=0.245 eta=16s
+    [hellaswag] 9000/10042 acc=0.243 eta=10s
+    [hellaswag] 9500/10042 acc=0.245 eta=5s
+    [hellaswag] 10000/10042 acc=0.244 eta=0s
+ acc=24.3%  (2444/10042)  101s
+  [piqa] n=1838 ...    [piqa] 500/1838 acc=0.566 eta=6s
+    [piqa] 1000/1838 acc=0.546 eta=4s
+    [piqa] 1500/1838 acc=0.547 eta=2s
+ acc=55.3%  (1017/1838)  9s
+  [arc_easy] n=570 ...    [arc_easy] 500/570 acc=0.330 eta=1s
+ acc=33.9%  (193/570)  5s
+  [arc_challenge] n=299 ... acc=21.4%  (64/299)  3s
+  [winogrande] n=1267 ...    [winogrande] 500/1267 acc=0.530 eta=4s
+    [winogrande] 1000/1267 acc=0.519 eta=1s
+ acc=51.6%  (654/1267)  6s
+  [lambada] n=5153 ... acc=4.7%  (242/5153)  13s
+  Mean: 31.9%
+  Saved: benchmarks/logs/eval_external_runa_20260304_123532.json
+
+  Loading Run B — N=4096, dispersive kernel, near-zero init
+  Script:     train/dsqg_hybrid_13m_4096_disp_anneal.py
+  Checkpoint: checkpoints/4096_dsqg_hybrid_13m_disp_anneal/best.pt
+  Params: 14,582,280 | seq_len=4096 | PPL=58.557 | passkey=10%
+
+============================================================
+  Evaluating: Run B — N=4096, dispersive kernel, near-zero init
+============================================================
+  [hellaswag] n=10042 ...    [hellaswag] 500/10042 acc=0.280 eta=93s
+    [hellaswag] 1000/10042 acc=0.284 eta=88s
+    [hellaswag] 1500/10042 acc=0.287 eta=83s
+    [hellaswag] 2000/10042 acc=0.273 eta=78s
+    [hellaswag] 2500/10042 acc=0.268 eta=74s
+    [hellaswag] 3000/10042 acc=0.273 eta=69s
+    [hellaswag] 3500/10042 acc=0.274 eta=64s
+    [hellaswag] 4000/10042 acc=0.267 eta=60s
+    [hellaswag] 4500/10042 acc=0.264 eta=56s
+    [hellaswag] 5000/10042 acc=0.259 eta=51s
+    [hellaswag] 5500/10042 acc=0.255 eta=46s
+    [hellaswag] 6000/10042 acc=0.254 eta=41s
+    [hellaswag] 6500/10042 acc=0.252 eta=36s
+    [hellaswag] 7000/10042 acc=0.250 eta=31s
+    [hellaswag] 7500/10042 acc=0.248 eta=26s
+    [hellaswag] 8000/10042 acc=0.246 eta=21s
+    [hellaswag] 8500/10042 acc=0.246 eta=16s
+    [hellaswag] 9000/10042 acc=0.244 eta=11s
+    [hellaswag] 9500/10042 acc=0.245 eta=6s
+    [hellaswag] 10000/10042 acc=0.243 eta=0s
+ acc=24.3%  (2443/10042)  103s
+  [piqa] n=1838 ...    [piqa] 500/1838 acc=0.554 eta=6s
+    [piqa] 1000/1838 acc=0.545 eta=4s
+    [piqa] 1500/1838 acc=0.553 eta=2s
+ acc=55.7%  (1023/1838)  9s
+  [arc_easy] n=570 ...    [arc_easy] 500/570 acc=0.316 eta=1s
+ acc=31.9%  (182/570)  6s
+  [arc_challenge] n=299 ... acc=19.7%  (59/299)  3s
+  [winogrande] n=1267 ...    [winogrande] 500/1267 acc=0.522 eta=4s
+    [winogrande] 1000/1267 acc=0.504 eta=1s
+ acc=50.7%  (642/1267)  6s
+  [lambada] n=5153 ... acc=5.0%  (256/5153)  13s
+  Mean: 31.2%
+  Saved: benchmarks/logs/eval_external_runb_20260304_123532.json
+
+  Loading Run C — N=2048, interleaved J=40, linspace init
+  Script:     train/dsqg_hybrid_13m_2048_interleaved.py
+  Checkpoint: checkpoints/2048_dsqg_hybrid_13m_interleaved/best.pt
+  Params: 14,056,552 | seq_len=2048 | PPL=52.857 | passkey=45%
+
+============================================================
+  Evaluating: Run C — N=2048, interleaved J=40, linspace init
+============================================================
+  [hellaswag] n=10042 ...    [hellaswag] 500/10042 acc=0.290 eta=685s
+    [hellaswag] 1000/10042 acc=0.297 eta=367s
+    [hellaswag] 1500/10042 acc=0.288 eta=259s
+    [hellaswag] 2000/10042 acc=0.272 eta=202s
+    [hellaswag] 2500/10042 acc=0.270 eta=166s
+    [hellaswag] 3000/10042 acc=0.274 eta=141s
+    [hellaswag] 3500/10042 acc=0.274 eta=121s
+    [hellaswag] 4000/10042 acc=0.266 eta=106s
+    [hellaswag] 4500/10042 acc=0.262 eta=92s
+    [hellaswag] 5000/10042 acc=0.258 eta=81s
+    [hellaswag] 5500/10042 acc=0.256 eta=71s
+    [hellaswag] 6000/10042 acc=0.256 eta=61s
+    [hellaswag] 6500/10042 acc=0.254 eta=52s
+    [hellaswag] 7000/10042 acc=0.251 eta=44s
+    [hellaswag] 7500/10042 acc=0.250 eta=36s
+    [hellaswag] 8000/10042 acc=0.248 eta=28s
+    [hellaswag] 8500/10042 acc=0.248 eta=21s
+    [hellaswag] 9000/10042 acc=0.247 eta=14s
+    [hellaswag] 9500/10042 acc=0.247 eta=7s
+    [hellaswag] 10000/10042 acc=0.245 eta=1s
+ acc=24.5%  (2462/10042)  132s
+  [piqa] n=1838 ...    [piqa] 500/1838 acc=0.566 eta=6s
+    [piqa] 1000/1838 acc=0.547 eta=4s
+    [piqa] 1500/1838 acc=0.556 eta=2s
+ acc=55.2%  (1014/1838)  9s
+  [arc_easy] n=570 ...    [arc_easy] 500/570 acc=0.336 eta=1s
+ acc=34.0%  (194/570)  5s
+  [arc_challenge] n=299 ... acc=21.7%  (65/299)  3s
+  [winogrande] n=1267 ...    [winogrande] 500/1267 acc=0.510 eta=4s
+    [winogrande] 1000/1267 acc=0.497 eta=1s
+ acc=50.7%  (642/1267)  6s
+  [lambada] n=5153 ... acc=7.3%  (376/5153)  13s
+  Mean: 32.2%
+  Saved: benchmarks/logs/eval_external_runc_20260304_123532.json
+
+  Loading Run D — N=2048, octave blocks J=53, near-zero init
+  Script:     train/dsqg_hybrid_13m_2048_rund.py
+  Checkpoint: checkpoints/2048_dsqg_hybrid_13m_rund/best.pt
+  Params: 14,059,152 | seq_len=2048 | PPL=55.488 | passkey=35%
+
+============================================================
+  Evaluating: Run D — N=2048, octave blocks J=53, near-zero init
+============================================================
+  [hellaswag] n=10042 ...    [hellaswag] 500/10042 acc=0.296 eta=1298s
+    [hellaswag] 1000/10042 acc=0.299 eta=659s
+    [hellaswag] 1500/10042 acc=0.293 eta=442s
+    [hellaswag] 2000/10042 acc=0.278 eta=332s
+    [hellaswag] 2500/10042 acc=0.276 eta=264s
+    [hellaswag] 3000/10042 acc=0.276 eta=216s
+    [hellaswag] 3500/10042 acc=0.274 eta=182s
+    [hellaswag] 4000/10042 acc=0.266 eta=154s
+    [hellaswag] 4500/10042 acc=0.263 eta=132s
+    [hellaswag] 5000/10042 acc=0.258 eta=113s
+    [hellaswag] 5500/10042 acc=0.257 eta=97s
+    [hellaswag] 6000/10042 acc=0.255 eta=83s
+    [hellaswag] 6500/10042 acc=0.252 eta=70s
+    [hellaswag] 7000/10042 acc=0.251 eta=58s
+    [hellaswag] 7500/10042 acc=0.249 eta=47s
+    [hellaswag] 8000/10042 acc=0.247 eta=37s
+    [hellaswag] 8500/10042 acc=0.247 eta=27s
+    [hellaswag] 9000/10042 acc=0.244 eta=18s
+    [hellaswag] 9500/10042 acc=0.245 eta=9s
+    [hellaswag] 10000/10042 acc=0.245 eta=1s
+ acc=24.5%  (2458/10042)  164s
+  [piqa] n=1838 ...    [piqa] 500/1838 acc=0.526 eta=7s
+    [piqa] 1000/1838 acc=0.530 eta=4s
+    [piqa] 1500/1838 acc=0.537 eta=2s
+ acc=54.0%  (993/1838)  9s
+  [arc_easy] n=570 ...    [arc_easy] 500/570 acc=0.340 eta=1s
+ acc=34.2%  (195/570)  5s
+  [arc_challenge] n=299 ... acc=20.7%  (62/299)  3s
+  [winogrande] n=1267 ...    [winogrande] 500/1267 acc=0.518 eta=4s
+    [winogrande] 1000/1267 acc=0.504 eta=1s
+ acc=50.4%  (638/1267)  6s
+  [lambada] n=5153 ... acc=6.7%  (346/5153)  13s
+  Mean: 31.8%
+  Saved: benchmarks/logs/eval_external_rund_20260304_123532.json
+
+  Loading Run E — N=2048, dense 1-39 J=79, near-zero init
+  Script:     train/dsqg_hybrid_13m_2048_rune.py
+  Checkpoint: checkpoints/2048_dsqg_hybrid_13m_rune/best.pt
+  Params: 14,064,352 | seq_len=2048 | PPL=52.442 | passkey=25%
+
+============================================================
+  Evaluating: Run E — N=2048, dense 1-39 J=79, near-zero init
+============================================================
+  [hellaswag] n=10042 ...    [hellaswag] 500/10042 acc=0.284 eta=3729s
+    [hellaswag] 1000/10042 acc=0.294 eta=1811s
+    [hellaswag] 1500/10042 acc=0.290 eta=1168s
+    [hellaswag] 2000/10042 acc=0.278 eta=844s
+    [hellaswag] 2500/10042 acc=0.274 eta=648s
+    [hellaswag] 3000/10042 acc=0.277 eta=516s
+    [hellaswag] 3500/10042 acc=0.279 eta=420s
+    [hellaswag] 4000/10042 acc=0.270 eta=347s
+    [hellaswag] 4500/10042 acc=0.266 eta=289s
+    [hellaswag] 5000/10042 acc=0.262 eta=242s
+    [hellaswag] 5500/10042 acc=0.258 eta=203s
+    [hellaswag] 6000/10042 acc=0.259 eta=169s
+    [hellaswag] 6500/10042 acc=0.257 eta=139s
+    [hellaswag] 7000/10042 acc=0.253 eta=113s
+    [hellaswag] 7500/10042 acc=0.251 eta=90s
+    [hellaswag] 8000/10042 acc=0.250 eta=69s
+    [hellaswag] 8500/10042 acc=0.249 eta=50s
+    [hellaswag] 9000/10042 acc=0.248 eta=33s
+    [hellaswag] 9500/10042 acc=0.248 eta=16s
+    [hellaswag] 10000/10042 acc=0.248 eta=1s
+ acc=24.7%  (2483/10042)  293s
+  [piqa] n=1838 ...    [piqa] 500/1838 acc=0.556 eta=7s
+    [piqa] 1000/1838 acc=0.541 eta=4s
+    [piqa] 1500/1838 acc=0.549 eta=2s
+ acc=54.7%  (1005/1838)  9s
+  [arc_easy] n=570 ...    [arc_easy] 500/570 acc=0.320 eta=1s
+ acc=32.6%  (186/570)  6s
+  [arc_challenge] n=299 ... acc=20.1%  (60/299)  3s
+  [winogrande] n=1267 ...    [winogrande] 500/1267 acc=0.528 eta=4s
+    [winogrande] 1000/1267 acc=0.507 eta=1s
+ acc=51.1%  (648/1267)  6s
+  [lambada] n=5153 ... acc=7.5%  (388/5153)  13s
+  Mean: 31.8%
+  Saved: benchmarks/logs/eval_external_rune_20260304_123532.json
+
+======================================================================
+  SUMMARY — External Benchmarks
+======================================================================
+  Run                      PPL     PK      HS     PQ     AE     AC     WG     LB    Mean
+  ------------------------------------------------------------------
+  condU 13M N=4096 (ba  58.617     0%   24.1%  54.7%  32.1%  19.1%  49.5%   4.7%   30.7%
+  Run A — N=4096, near  58.716     0%   24.3%  55.3%  33.9%  21.4%  51.6%   4.7%   31.9%
+  Run B — N=4096, disp  58.557    10%   24.3%  55.7%  31.9%  19.7%  50.7%   5.0%   31.2%
+  Run C — N=2048, inte  52.857    45%   24.5%  55.2%  34.0%  21.7%  50.7%   7.3%   32.2%
+  Run D — N=2048, octa  55.488    35%   24.5%  54.0%  34.2%  20.7%  50.4%   6.7%   31.8%
+  Run E — N=2048, dens  52.442    25%   24.7%  54.7%  32.6%  20.1%  51.1%   7.5%   31.8%
+
+  Combined results -> benchmarks/logs/eval_external_runs_a_to_e_20260304_123532.json

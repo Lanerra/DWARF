@@ -1,0 +1,13 @@
+======================================================================
+  condX 35M — Huygens Bypass, Scaled (FineWeb-Edu)
+======================================================================
+  GPU: NVIDIA GeForce RTX 4090  (23.6 GB)
+  Kernel:    dsqg_attention_v3
+  Base arch: condV (Kalman-EMA + KdV + AGC) + condX Q-bypass, D=512
+  Scaling:   condX 13M→35M; hypothesis: d=64 cliff dissolves at 35M scale
+  Target:    condU 35M = 38.293 PPL / 90.0% passkey
+Loading FineWeb-Edu from cache: benchmarks/logs/condm_fineweb_edu_doc_cache.json
+  Loaded 100,000 docs from cache
+
+Loaded condI BPE tokenizer from /home/dlewis3/Desktop/AI/DWARF/results/2048_condI_tokenizer.json
+Encoding data (max_seq_len=2048)...

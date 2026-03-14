@@ -1,0 +1,154 @@
+[kernel] Loading dsqg_attention_v5...
+[kernel] CUDA extension loaded
+======================================================================
+  Residual Stream Profiler — condU-v5 38M
+======================================================================
+  GPU: NVIDIA GeForce RTX 3090  (25.3 GB)
+  Checkpoint: /home/dlewis3/Desktop/AI/DWARF/checkpoints/condU_v5/best.pt
+  Tokenizer: /home/dlewis3/Desktop/AI/DWARF/results/2048_condI_tokenizer.json
+  Loaded: 38,732,856 parameters
+  Layers: L0:DSQG | L1:DSQG | L2:DSQG+INT | L3:DSQG | L4:DSQG | L5:FULL
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  MEASUREMENT 1: Per-layer residual delta norms
+  (||h_{l+1} - h_l|| at passkey/query/control positions)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Residual deltas (d=1):
+  Layer    passkey_pos   query_pos     control   pk/ctrl ratio
+  L0            7.3316      7.2121      5.3525            1.37x
+  L1            5.1643      5.1273      5.4800            0.94x
+  L2            6.1247      6.7571      5.0175            1.22x
+  L3            6.2519      5.5352      5.3049            1.18x
+  L4            8.0263      6.4330      8.3947            0.96x
+  L5 [FULL]       24.3515     16.8473     24.2958            1.00x
+
+  Residual deltas (d=32):
+  Layer    passkey_pos   query_pos     control   pk/ctrl ratio
+  L0            7.3316      4.7952      5.4746            1.34x
+  L1            5.1643      4.2730      6.9600            0.74x
+  L2            6.1247      5.0928      8.1553            0.75x
+  L3            6.2519      5.3302      7.0764            0.88x
+  L4            8.0264      8.2792      9.2133            0.87x
+  L5 [FULL]       24.3517     25.0164     25.9667            0.94x
+
+  Residual deltas (d=256):
+  Layer    passkey_pos   query_pos     control   pk/ctrl ratio
+  L0            7.3316      4.7897      8.5435            0.86x
+  L1            5.1643      3.7397      5.8478            0.88x
+  L2            6.1249      5.5704      6.9161            0.89x
+  L3            6.2518      5.8117      7.8148            0.80x
+  L4            8.0265      8.6949      6.6733            1.20x
+  L5 [FULL]       24.3531     27.6286     24.1466            1.01x
+
+  Residual deltas (d=1024):
+  Layer    passkey_pos   query_pos     control   pk/ctrl ratio
+  L0            7.3316      5.0914      4.5823            1.60x
+  L1            5.1643      3.6636      3.8738            1.33x
+  L2            6.1248      6.2490      7.9868            0.77x
+  L3            6.2519      4.6279      5.5758            1.12x
+  L4            8.0264      6.1222      7.4128            1.08x
+  L5 [FULL]       24.3506     34.0681     38.2845            0.64x
+
+  Residual deltas (d=1536):
+  Layer    passkey_pos   query_pos     control   pk/ctrl ratio
+  L0            7.3316      5.2108      6.9577            1.05x
+  L1            5.1643      4.9140      5.0578            1.02x
+  L2            6.1248      7.1384      5.5127            1.11x
+  L3            6.2518      5.8014      6.4752            0.97x
+  L4            8.0270      6.2276      9.8607            0.81x
+  L5 [FULL]       24.3511     37.2699     33.9601            0.72x
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  MEASUREMENT 2: Full-attention weight profile
+  (what does layer 5 attend to at the passkey query position?)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Full-attn weight profile (d=1):
+    Attention mass at query position — averaged over 5 trials, 8 heads:
+      → passkey region: 0.8153
+      → filler region:  0.0125
+      → cue region:     0.1722
+    Passkey pos in top-5 attended: 100% of trials
+    Per-head attn → passkey pos: h0:0.003  h1:0.012  h2:0.308  h3:0.117  h4:0.020  h5:0.163  h6:0.114  h7:0.003
+
+  Full-attn weight profile (d=32):
+    Attention mass at query position — averaged over 5 trials, 8 heads:
+      → passkey region: 0.3493
+      → filler region:  0.6442
+      → cue region:     0.0065
+    Passkey pos in top-5 attended: 0% of trials
+    Per-head attn → passkey pos: h0:0.001  h1:0.002  h2:0.059  h3:0.027  h4:0.006  h5:0.024  h6:0.022  h7:0.002
+
+  Full-attn weight profile (d=256):
+    Attention mass at query position — averaged over 5 trials, 8 heads:
+      → passkey region: 0.0440
+      → filler region:  0.9501
+      → cue region:     0.0058
+    Passkey pos in top-5 attended: 0% of trials
+    Per-head attn → passkey pos: h0:0.000  h1:0.000  h2:0.012  h3:0.008  h4:0.000  h5:0.001  h6:0.001  h7:0.000
+
+  Full-attn weight profile (d=1024):
+    Attention mass at query position — averaged over 5 trials, 8 heads:
+      → passkey region: 0.0221
+      → filler region:  0.9607
+      → cue region:     0.0172
+    Passkey pos in top-5 attended: 0% of trials
+    Per-head attn → passkey pos: h0:0.000  h1:0.000  h2:0.006  h3:0.002  h4:0.000  h5:0.000  h6:0.000  h7:0.000
+
+  Full-attn weight profile (d=1536):
+    Attention mass at query position — averaged over 5 trials, 8 heads:
+      → passkey region: 0.0041
+      → filler region:  0.9953
+      → cue region:     0.0007
+    Passkey pos in top-5 attended: 0% of trials
+    Per-head attn → passkey pos: h0:0.000  h1:0.000  h2:0.002  h3:0.000  h4:0.000  h5:0.000  h6:0.000  h7:0.000
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  MEASUREMENT 3: Surgical ablation (zero attn output per layer)
+  (which layers are causally necessary for passkey retrieval?)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Ablation: BASELINE (no ablation)
+    mean=98.3%  (12/12 >50%)  [1s]
+    d=1:100%  d=2:100%  d=4:100%  d=8:100%  d=16:100%  d=32:100%  d=64:100%  d=128:100%  d=256:100%  d=512:100%  d=1024:100%  d=1536:80%
+
+  Ablation: Layer 0 [DSQG]
+    mean=100.0%  (12/12 >50%)  [Δ=+1.7pp vs baseline]  [0s]
+    d=1:100%  d=2:100%  d=4:100%  d=8:100%  d=16:100%  d=32:100%  d=64:100%  d=128:100%  d=256:100%  d=512:100%  d=1024:100%  d=1536:100%
+
+  Ablation: Layer 1 [DSQG]
+    mean=93.3%  (12/12 >50%)  [Δ=-5.0pp vs baseline]  [0s]
+    d=1:100%  d=2:100%  d=4:100%  d=8:100%  d=16:100%  d=32:100%  d=64:100%  d=128:100%  d=256:100%  d=512:80%  d=1024:80%  d=1536:60%
+
+  Ablation: Layer 2 [DSQG+INT]
+    mean=87.5%  (12/12 >50%)  [Δ=-10.8pp vs baseline]  [1s]
+    d=1:100%  d=2:100%  d=4:100%  d=8:100%  d=16:100%  d=32:100%  d=64:100%  d=128:80%  d=256:90%  d=512:80%  d=1024:50%  d=1536:50%
+
+  Ablation: Layer 3 [DSQG]
+    mean=90.0%  (11/12 >50%)  [Δ=-8.3pp vs baseline]  [0s]
+    d=1:100%  d=2:100%  d=4:100%  d=8:100%  d=16:100%  d=32:100%  d=64:100%  d=128:100%  d=256:100%  d=512:70%  d=1024:70%  d=1536:40%
+
+  Ablation: Layer 4 [DSQG]
+    mean=50.0%  (6/12 >50%)  [Δ=-48.3pp vs baseline]  [1s]
+    d=1:100%  d=2:100%  d=4:100%  d=8:100%  d=16:60%  d=32:50%  d=64:20%  d=128:20%  d=256:20%  d=512:10%  d=1024:10%  d=1536:10%
+
+  Ablation: Layer 5 [FULL]
+    mean=11.7%  (0/12 >50%)  [Δ=-86.7pp vs baseline]  [0s]
+    d=1:20%  d=2:20%  d=4:10%  d=8:10%  d=16:10%  d=32:10%  d=64:10%  d=128:10%  d=256:10%  d=512:10%  d=1024:10%  d=1536:10%
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  ABLATION SUMMARY (mean passkey accuracy when each layer is zeroed)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Layer                 Mean passkey   Δ vs baseline  Verdict
+  --------------------  ------------  --------------  ------------------------------
+  baseline (none)              98.3%               —
+  L0 [DSQG]                     100.0%           +1.7pp  ~ negligible
+  L1 [DSQG]                      93.3%           -5.0pp  * marginal (3-10pp drop)
+  L2 [DSQG+INT]                      87.5%          -10.8pp  ** important (10-20pp drop)
+  L3 [DSQG]                      90.0%           -8.3pp  * marginal (3-10pp drop)
+  L4 [DSQG]                      50.0%          -48.3pp  *** CRITICAL (>20pp drop)
+  L5 [FULL]                      11.7%          -86.7pp  *** CRITICAL (>20pp drop)
+
+  Results → /home/dlewis3/Desktop/AI/DWARF/benchmarks/logs/residual_profile.json
+  Done.

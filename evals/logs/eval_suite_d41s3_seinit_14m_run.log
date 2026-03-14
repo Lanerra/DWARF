@@ -1,0 +1,64 @@
+
+============================================================
+  eval_suite.py — d41s3_seinit_14m
+  Device: cuda
+============================================================
+
+  Model: d41s3_seinit 14M (EMA init=0.005, passkey=43.3%)
+
+  Loading tokenizer...
+  Loading model...
+  Loaded d41s3_seinit 14M (EMA init=0.005, passkey=43.3%): 14,057,554 params from best.pt
+
+  [1/4] Calibration...
+    entropy=7.266 bits  top1=0.208  eff_vocab=23.1  (29.5s)
+
+  [2/4] Distance-conditioned loss (wikitext-103)...
+    Loading wikitext-103 test split...
+    Using 17 full 2048-token chunks
+    Buckets:
+    0-16          PPL= 366.95  n=  289
+    17-64         PPL= 222.22  n=  816
+    65-256        PPL= 116.05  n= 3264
+    257-512       PPL= 103.40  n= 4352
+    513-1024      PPL=  85.32  n= 8704
+    1025-2047     PPL=  82.18  n=17374
+    (17.8s)
+
+  [3/4] Few-shot string copy...
+    exact=5/15  (33.3%)  mean_lev=7.27  (0.7s)
+
+  [4/4] Passkey retrieval...
+    d=    1: accuracy=40.0%
+    d=    2: accuracy=40.0%
+    d=    4: accuracy=60.0%
+    d=    8: accuracy=60.0%
+    d=   16: accuracy=60.0%
+    d=   32: accuracy=100.0%
+    d=   64: accuracy=80.0%
+    d=  128: accuracy=40.0%
+    d=  256: accuracy=40.0%
+    d=  512: accuracy=20.0%
+    d= 1024: accuracy=0.0%
+    d= 1536: accuracy=0.0%
+    mean_accuracy=45.0%  (0.1s)
+
+  Generation samples (greedy + T=0.7)...
+
+  [greedy]
+    'It was a dark and stormy'               → ', and it was a very cold, and it was a very cold, and it was a very cold, and it'
+    'The length of the hypotenuse'           → ' is the same as the length of the hypotenuse.\nThe length of the hypotenuse is th'
+    'The President of the United'            → ' States, the President of the United States, and the President of the United Sta'
+    'Once upon a time there was'             → ' a need for a new system, the new system would be able to be able to be able to '
+    'The results indicate that'              → ' the data is not being used to determine the data.\nThe data is not being used to'
+
+  [T=0.7]
+    'It was a dark and stormy'               → ' day and the man, who had been at the camp, was in a light of his fellow people.'
+    'The length of the hypotenuse'           → ' is around 6 inches (16 inches) in diameter. It can be seen in the following pic'
+    'The President of the United'            → ' States in the face of the crisis, and the state’s anti-Americans and the women '
+    'Once upon a time there was'             → ' no such an event, no one had to explain it. In fact, the Roots of the Act of 18'
+    'The results indicate that'              → ' the body of the body has a strong, positive, and strong immune system.\nThis is '
+
+  Results saved to /home/dlewis3/Desktop/AI/DWARF/evals/logs/eval_suite_d41s3_seinit_14m_20260313_143009.json
+============================================================
+

@@ -1,0 +1,103 @@
+======================================================================
+  🔬 DWARF Autoresearch — J16D Full-Dataset + Physics
+  condV: Kalman-EMA (α₀=0.003) + KdV (zero-init) + AGC
+======================================================================
+  GPU: NVIDIA GeForce RTX 4090
+  D=512, H=8, L=6, FFN=2048
+  IF interval=3, Full attn layer=5
+  scale_embed init=0.1, LR mult=15.0
+  EMA α₀=0.003 (window≈333t), floor=0.0003
+  MAX_TRAIN_SEQS=121232, LR=0.0003, Epochs=3
+  git=df0d435
+Loading FineWeb-Edu from cache: benchmarks/logs/condm_fineweb_edu_doc_cache.json
+  Loaded 100,000 docs from cache
+Loaded tokenizer from results/2048_condI_tokenizer.json
+Loading pre-encoded dataset from logs/fineweb_encoded_2048.pt
+  train: 121,232  val: 5,582 seqs
+Parameters: 38,722,298 (38.7M)
+  Step 200/3789 | Loss 6.3573
+  Step 400/3789 | Loss 5.8317
+  Step 600/3789 | Loss 5.4108
+  Step 800/3789 | Loss 5.1747
+  Step 1000/3789 | Loss 5.1176
+  Step 1200/3789 | Loss 4.8178
+  Step 1400/3789 | Loss 4.8275
+  Step 1600/3789 | Loss 4.7610
+  Step 1800/3789 | Loss 4.7597
+  Step 2000/3789 | Loss 4.2655
+  Step 2200/3789 | Loss 4.2344
+  Step 2400/3789 | Loss 4.4279
+  Step 2600/3789 | Loss 4.1189
+  Step 2800/3789 | Loss 4.4000
+  Step 3000/3789 | Loss 4.1995
+  Step 3200/3789 | Loss 4.3686
+  Step 3400/3789 | Loss 4.1674
+  Step 3600/3789 | Loss 4.4038
+Ep 1/3 | Val PPL 56.10 *
+  scale_embed |mean|=0.3923 |max|=2.0080
+  Physics: b2: α=0.1199(w≈8t) kdv=-0.0000
+  Passkey mean=55.8%
+  d=1:70%  d=2:60%  d=4:50%  d=8:50%  d=16:50%  d=32:70%  d=64:70%  d=128:50%  d=256:80%  d=512:40%  d=1024:50%  d=1536:30%
+  Step 200/3789 | Loss 4.2512
+  Step 400/3789 | Loss 4.0496
+  Step 600/3789 | Loss 4.0603
+  Step 800/3789 | Loss 4.1343
+  Step 1000/3789 | Loss 4.0580
+  Step 1200/3789 | Loss 4.0443
+  Step 1400/3789 | Loss 4.1787
+  Step 1600/3789 | Loss 4.1430
+  Step 1800/3789 | Loss 3.8831
+  Step 2000/3789 | Loss 3.9212
+  Step 2200/3789 | Loss 4.0255
+  Step 2400/3789 | Loss 4.0451
+  Step 2600/3789 | Loss 3.9125
+  Step 2800/3789 | Loss 3.9098
+  Step 3000/3789 | Loss 3.8023
+  Step 3200/3789 | Loss 3.7610
+  Step 3400/3789 | Loss 3.7532
+  Step 3600/3789 | Loss 3.8326
+Ep 2/3 | Val PPL 45.38 *
+  scale_embed |mean|=0.3540 |max|=1.7073
+  Physics: b2: α=0.1301(w≈8t) kdv=-0.0000
+  Passkey mean=76.7%
+  d=1:90%  d=2:90%  d=4:70%  d=8:70%  d=16:50%  d=32:90%  d=64:70%  d=128:80%  d=256:80%  d=512:70%  d=1024:80%  d=1536:80%
+  Step 200/3789 | Loss 3.9588
+  Step 400/3789 | Loss 3.8314
+  Step 600/3789 | Loss 3.8473
+  Step 800/3789 | Loss 3.7748
+  Step 1000/3789 | Loss 3.6722
+  Step 1200/3789 | Loss 3.5832
+  Step 1400/3789 | Loss 3.9379
+  Step 1600/3789 | Loss 3.9765
+  Step 1800/3789 | Loss 3.8908
+  Step 2000/3789 | Loss 3.8799
+  Step 2200/3789 | Loss 3.8148
+  Step 2400/3789 | Loss 3.9820
+  Step 2600/3789 | Loss 3.5069
+  Step 2800/3789 | Loss 3.8988
+  Step 3000/3789 | Loss 3.8759
+  Step 3200/3789 | Loss 4.0049
+  Step 3400/3789 | Loss 3.6541
+  Step 3600/3789 | Loss 3.7462
+Ep 3/3 | Val PPL 43.46 *
+  scale_embed |mean|=0.3445 |max|=1.6596
+  Physics: b2: α=0.1299(w≈8t) kdv=-0.0000
+  Passkey mean=80.0%
+  d=1:90%  d=2:90%  d=4:70%  d=8:80%  d=16:60%  d=32:90%  d=64:80%  d=128:80%  d=256:80%  d=512:80%  d=1024:80%  d=1536:80%
+
+---
+passkey_ep1:    55.8
+passkey_ep2:    76.7
+passkey_ep3:    80.0
+ppl_ep1:        56.10
+ppl_ep2:        45.38
+ppl_ep3:        43.46
+ar_score:       61.70
+memory_mb:      10356.4
+elapsed_s:      13224.7
+num_params_M:   38.7
+num_layers:     6
+num_offsets:    16
+scale_embed_lr_mult: 15.0
+ema_init:       0.003
+description:    J16D physics — 38.7M, V6+condV, EMA_α₀=0.003, 121232 seqs, scale_embed_init=0.1

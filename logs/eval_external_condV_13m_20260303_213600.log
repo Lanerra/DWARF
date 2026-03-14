@@ -1,0 +1,46 @@
+============================================================
+  DWARF External Benchmark Evaluator
+============================================================
+  GPU: NVIDIA GeForce RTX 3090
+  Tasks: ['hellaswag', 'piqa', 'arc_easy', 'arc_challenge', 'winogrande', 'lambada']
+  Tokenizer: /home/dlewis3/Desktop/AI/DWARF/benchmarks/results/2048_condI_tokenizer.json
+
+Loading checkpoint: checkpoints/condV/best.pt
+Arch: condv_13m
+  WARNING: missing learnable keys: ['blocks.2.ema_factor', 'blocks.2.kdv_alpha', 'blocks.2.inter_norm.weight', 'blocks.2.inter_norm.bias', 'blocks.2.inter_gate.weight', 'blocks.2.inter_gate.bias', 'blocks.2.inter_k_proj.weight', 'blocks.2.inter_k_proj.bias', 'blocks.2.inter_v_proj.weight', 'blocks.2.inter_v_proj.bias']
+  WARNING: unexpected keys: ['blocks.1.ema_factor', 'blocks.1.kdv_alpha', 'blocks.1.inter_norm.weight', 'blocks.1.inter_norm.bias', 'blocks.1.inter_gate.weight', 'blocks.1.inter_gate.bias', 'blocks.1.inter_k_proj.weight', 'blocks.1.inter_k_proj.bias', 'blocks.1.inter_v_proj.weight', 'blocks.1.inter_v_proj.bias', 'blocks.3.ema_factor', 'blocks.3.kdv_alpha', 'blocks.3.inter_norm.weight', 'blocks.3.inter_norm.bias', 'blocks.3.inter_gate.weight', 'blocks.3.inter_gate.bias', 'blocks.3.inter_k_proj.weight', 'blocks.3.inter_k_proj.bias', 'blocks.3.inter_v_proj.weight', 'blocks.3.inter_v_proj.bias']
+  Loaded 14,057,354 params from checkpoints/condV/best.pt
+  Parameters: 14,057,354
+  Label: condv_13m (best.pt)
+
+  [hellaswag] 10,042 examples...
+    [hellaswag] 200/10042 — acc=0.260 | eta 100s
+    [hellaswag] 400/10042 — acc=0.247 | eta 88s
+    [hellaswag] 600/10042 — acc=0.255 | eta 82s
+    [hellaswag] 800/10042 — acc=0.265 | eta 79s
+    [hellaswag] 1000/10042 — acc=0.271 | eta 76s
+    [hellaswag] 1200/10042 — acc=0.278 | eta 74s
+    [hellaswag] 1400/10042 — acc=0.274 | eta 72s
+    [hellaswag] 1600/10042 — acc=0.275 | eta 70s
+    [hellaswag] 1800/10042 — acc=0.267 | eta 68s
+    [hellaswag] 2000/10042 — acc=0.262 | eta 66s
+    [hellaswag] 2200/10042 — acc=0.263 | eta 64s
+    [hellaswag] 2400/10042 — acc=0.261 | eta 63s
+    [hellaswag] 2600/10042 — acc=0.263 | eta 61s
+    [hellaswag] 2800/10042 — acc=0.265 | eta 59s
+    [hellaswag] 3000/10042 — acc=0.269 | eta 58s
+    [hellaswag] 3200/10042 — acc=0.271 | eta 56s
+    [hellaswag] 3400/10042 — acc=0.272 | eta 55s
+    [hellaswag] 3600/10042 — acc=0.270 | eta 53s
+    [hellaswag] 3800/10042 — acc=0.268 | eta 52s
+    [hellaswag] 4000/10042 — acc=0.262 | eta 50s
+    [hellaswag] 4200/10042 — acc=0.261 | eta 49s
+    [hellaswag] 4400/10042 — acc=0.260 | eta 47s
+    [hellaswag] 4600/10042 — acc=0.259 | eta 46s
+    [hellaswag] 4800/10042 — acc=0.256 | eta 44s
+    [hellaswag] 5000/10042 — acc=0.257 | eta 42s
+    [hellaswag] 5200/10042 — acc=0.255 | eta 41s
+    [hellaswag] 5400/10042 — acc=0.253 | eta 39s
+    [hellaswag] 5600/10042 — acc=0.253 | eta 38s
+    [hellaswag] 5800/10042 — acc=0.253 | eta 36s
+    [hellaswag] 6000/10042 — acc=0.253 | eta 34s

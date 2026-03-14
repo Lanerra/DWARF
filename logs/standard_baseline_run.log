@@ -1,0 +1,205 @@
+======================================================================
+  STANDARD TRANSFORMER 13M — FORMAL BASELINE
+  Establishing documented reference for DWARF ablation series
+======================================================================
+  GPU: NVIDIA GeForce RTX 4090  (23.6 GB)
+Loading OpenWebText (up to 100,000 docs)...
+  25,000 docs...
+  50,000 docs...
+  75,000 docs...
+  100,000 docs...
+  100,000 docs | train 95,000 | val 2,500 | test 2,500
+Loaded condI BPE tokenizer (shared vocabulary for comparability)
+  Vocab: 32000 tokens
+Encoding data (max_seq_len=2048)...
+  Train: 52,716 sequences
+  Val: 1,435 sequences
+  Test: 1,459 sequences
+
+Standard Transformer: 13,455,360 parameters
+  Architecture: 6 layers × (d=256, h=8, ffn=1024)
+  Tied input/output embeddings: yes
+  Position encoding: learned (2048 positions)
+Running causality check...
+  Pre-10:  0.00000000  (expect 0.0)
+  Pos-10:  0.621459  (expect >0)
+  Post-10: 0.276377  (expect >0)
+  PASS — architecture is causal
+  Step 200/1648 | Loss 6.4309
+  Step 400/1648 | Loss 6.3112
+  Step 600/1648 | Loss 5.9346
+  Step 800/1648 | Loss 6.1110
+  Step 1000/1648 | Loss 5.8324
+  Step 1200/1648 | Loss 5.6789
+  Step 1400/1648 | Loss 5.3552
+  Step 1600/1648 | Loss 5.4355
+Ep 1/10 | Train 5.1982 | Val 5.4023 PPL 221.9 * BEST | 2281s
+  ── Generation samples ──
+    'It was a dark and stormy' → '.\n\nThe first time, the first time, the first time, the first time, the first tim'
+    'The length of the hypotenuse' → ', and the same-in-in-in-in-a-a-a-a-a-a-a-a-a-a-a-a-a-a-a-a-a-a-a-a-a-a-a-a-a-a-a'
+    'The President of the United' → ' States, the United States, and the United States, and the United States, and th'
+    'Once upon a time there was' → ' a little bit of the time.\n\nThe first time, the first time, the first time, the '
+    'The results indicate that' → ' the number of the number of the number of the number of the number of the numbe'
+  ──
+  Step 200/1648 | Loss 5.3564
+  Step 400/1648 | Loss 5.3293
+  Step 600/1648 | Loss 5.1708
+  Step 800/1648 | Loss 5.0884
+  Step 1000/1648 | Loss 4.9977
+  Step 1200/1648 | Loss 5.0196
+  Step 1400/1648 | Loss 4.9943
+  Step 1600/1648 | Loss 5.0348
+Ep 2/10 | Train 4.8377 | Val 4.8936 PPL 133.4 * BEST | 4616s
+  ── Generation samples ──
+    'It was a dark and stormy' → ', and the city of the city, and the city of the city, and the city, and the city'
+    'The length of the hypotenuse' → ', and the same as the result of the “s” of the “s” of the “s” of the “s” of the '
+    'The President of the United' → ' States, and the United States, and the United States, and the United States, an'
+    'Once upon a time there was' → ' a time to be a time to be a time to be a time to be a time to be a time to be a'
+    'The results indicate that' → ' the results are not to be a significant difference between the data.\n\nThe resul'
+  ──
+  Step 200/1648 | Loss 4.9804
+  Step 400/1648 | Loss 4.7730
+  Step 600/1648 | Loss 4.8825
+  Step 800/1648 | Loss 4.6947
+  Step 1000/1648 | Loss 4.7905
+  Step 1200/1648 | Loss 4.7495
+  Step 1400/1648 | Loss 4.7089
+  Step 1600/1648 | Loss 4.6748
+Ep 3/10 | Train 4.4434 | Val 4.5355 PPL 93.3 * BEST | 7001s
+  ── Generation samples ──
+    'It was a dark and stormy' → ' and a few miles away from the sun.\n\nThe sun was a bit of a few miles away from '
+    'The length of the hypotenuse' → ', the two-dimensional, and the two-dimensional, and the two-dimensional, and the'
+    'The President of the United' → ' States, the United States, and the United States, and the United States, and th'
+    'Once upon a time there was' → ' a time to be a time to be a time to be a time to be a time to be a time to be a'
+    'The results indicate that' → ' the results are not to be the same.\n\nThe results are not to be the same.\n\nThe r'
+  ──
+  Step 200/1648 | Loss 4.5707
+  Step 400/1648 | Loss 4.4698
+  Step 600/1648 | Loss 4.4287
+  Step 800/1648 | Loss 4.5293
+  Step 1000/1648 | Loss 4.4187
+  Step 1200/1648 | Loss 4.5296
+  Step 1400/1648 | Loss 4.4461
+  Step 1600/1648 | Loss 4.5455
+Ep 4/10 | Train 4.4226 | Val 4.3701 PPL 79.1 * BEST | 9322s
+  ── Generation samples ──
+    'It was a dark and stormy' → '.\n\nThe first time the storm was the first time to see the storm.\n\nThe storm was '
+    'The length of the hypotenuse' → ', the first time of the first time of the first time of the first time of the fi'
+    'The President of the United' → ' States, the United States, and the United States, the United States, and the Un'
+    'Once upon a time there was' → ' a time to get a chance to get a chance to get a chance to get a chance to get a'
+    'The results indicate that' → ' the results of the results of the results of the results of the results of the '
+  ──
+  Step 200/1648 | Loss 4.5178
+  Step 400/1648 | Loss 4.6229
+  Step 600/1648 | Loss 4.4363
+  Step 800/1648 | Loss 4.3946
+  Step 1000/1648 | Loss 4.3396
+  Step 1200/1648 | Loss 4.3794
+  Step 1400/1648 | Loss 4.4297
+  Step 1600/1648 | Loss 4.4966
+Ep 5/10 | Train 4.5840 | Val 4.2944 PPL 73.3 * BEST | 11518s
+  ── Generation samples ──
+    'It was a dark and stormy' → '.\n\nThe first time the storm was the first storm of the storm, and the storm was '
+    'The length of the hypotenuse' → ' of the primary and the primary of the primary of the primary of the primary of '
+    'The President of the United' → ' States, the United States, the United States, and the United States, the United'
+    'Once upon a time there was' → ' a time to get a chance to get a chance to get a chance to get a chance to get a'
+    'The results indicate that' → ' the results of the results of the results of the results of the results of the '
+  ──
+  Step 200/1648 | Loss 4.2750
+  Step 400/1648 | Loss 4.3570
+  Step 600/1648 | Loss 4.2128
+  Step 800/1648 | Loss 4.2794
+  Step 1000/1648 | Loss 4.5381
+  Step 1200/1648 | Loss 4.2744
+  Step 1400/1648 | Loss 4.2791
+  Step 1600/1648 | Loss 4.2833
+Ep 6/10 | Train 4.4228 | Val 4.2459 PPL 69.8 * BEST | 13715s
+  ── Generation samples ──
+    'It was a dark and stormy' → '.\n\nThe stormy stormy stormy stormy stormy stormy stormy stormy stormy stormy sto'
+    'The length of the hypotenuse' → ', the length of the length of the length of the length of the length of the leng'
+    'The President of the United' → ' States, the United States, and the United States, the United States, and the Un'
+    'Once upon a time there was' → ' no time to get to the hospital.\n\nThe hospital was also able to get to the hospi'
+    'The results indicate that' → ' the results are not possible.\n\nThe results are not possible.\n\nThe results are n'
+  ──
+  Step 200/1648 | Loss 4.3844
+  Step 400/1648 | Loss 4.2865
+  Step 600/1648 | Loss 4.3419
+  Step 800/1648 | Loss 4.3643
+  Step 1000/1648 | Loss 4.2606
+  Step 1200/1648 | Loss 4.2062
+  Step 1400/1648 | Loss 4.0656
+  Step 1600/1648 | Loss 4.2947
+Ep 7/10 | Train 4.2990 | Val 4.2090 PPL 67.3 * BEST | 15912s
+  ── Generation samples ──
+    'It was a dark and stormy' → '.\n\nThe stormy stormy stormy stormy stormy stormy stormy stormy stormy stormy sto'
+    'The length of the hypotenuse' → ', the length of the length of the length of the length of the length of the leng'
+    'The President of the United' → ' States, the United States, and the United States, the United States, and the Un'
+    'Once upon a time there was' → ' no time to get a chance to get a chance to get a chance to get a chance to get '
+    'The results indicate that' → ' the results of the results of the results of the results of the results of the '
+  ──
+  Step 200/1648 | Loss 4.2162
+  Step 400/1648 | Loss 3.9584
+  Step 600/1648 | Loss 4.3846
+  Step 800/1648 | Loss 4.2249
+  Step 1000/1648 | Loss 4.2036
+  Step 1200/1648 | Loss 4.3356
+  Step 1400/1648 | Loss 4.1676
+  Step 1600/1648 | Loss 4.3145
+Ep 8/10 | Train 4.2731 | Val 4.1919 PPL 66.1 * BEST | 18109s
+  ── Generation samples ──
+    'It was a dark and stormy' → '.\n\nThe stormy stormy stormy stormy stormy stormy stormy stormy stormy stormy sto'
+    'The length of the hypotenuse' → ' of the function.\n\nThe function of the function of the function of the function '
+    'The President of the United' → ' States, the United States, and the United States, the United States, and the Un'
+    'Once upon a time there was' → ' a time when the game was not a game.\n\nThe game was a game game game game game g'
+    'The results indicate that' → ' the results of the results of the results of the results of the results of the '
+  ──
+  Step 200/1648 | Loss 4.1730
+  Step 400/1648 | Loss 4.0916
+  Step 600/1648 | Loss 4.5079
+  Step 800/1648 | Loss 4.2491
+  Step 1000/1648 | Loss 3.6565
+  Step 1200/1648 | Loss 4.0743
+  Step 1400/1648 | Loss 4.0333
+  Step 1600/1648 | Loss 4.2685
+Ep 9/10 | Train 4.4007 | Val 4.1818 PPL 65.5 * BEST | 20307s
+  ── Generation samples ──
+    'It was a dark and stormy' → '.\n\nThe stormy stormy stormy stormy stormy stormy stormy stormy stormy stormy sto'
+    'The length of the hypotenuse' → ' of the function.\n\nThe function of the function is the function of the function '
+    'The President of the United' → ' States, the United States, and the United States, the United States, and the Un'
+    'Once upon a time there was' → ' no time to get a chance to get a chance to get a chance to get a chance to get '
+    'The results indicate that' → ' the results of the results of the results of the results of the results of the '
+  ──
+  Step 200/1648 | Loss 4.1628
+  Step 400/1648 | Loss 4.3762
+  Step 600/1648 | Loss 4.5149
+  Step 800/1648 | Loss 4.1882
+  Step 1000/1648 | Loss 4.2387
+  Step 1200/1648 | Loss 4.1810
+  Step 1400/1648 | Loss 4.3011
+  Step 1600/1648 | Loss 4.1087
+Ep 10/10 | Train 3.9738 | Val 4.1799 PPL 65.4 * BEST | 22504s
+  ── Generation samples ──
+    'It was a dark and stormy' → '.\n\nThe stormy stormy stormy stormy stormy stormy stormy stormy stormy stormy sto'
+    'The length of the hypotenuse' → ' of the function of the function of the function of the function of the function'
+    'The President of the United' → ' States, the United States, and the United States, the United States, and the Un'
+    'Once upon a time there was' → ' no time to get a chance to get a chance to get a chance to get a chance to get '
+    'The results indicate that' → ' the results of the results of the results of the results of the results of the '
+  ──
+
+======================================================================
+  STANDARD TRANSFORMER 13M — FINAL RESULTS
+======================================================================
+  TEST PPL:  64.07  |  TEST LOSS: 4.1600
+  Best val:  65.36  (epoch 10)
+  Total time: 6.26h
+
+  Model                                              Test PPL
+  ────────────────────────────────────────────────── ────────
+  Standard transformer 13M (THIS RUN)                   64.07
+  Standard transformer 13M (prior ref)                  64.50
+  DWARF condK                                           84.70
+  DWARF condK+RP                                        83.30
+
+  ✓ Confirmed: new result (64.1) consistent with prior reference (64.5), Δ=-0.4
+
+  Checkpoint → 2048_standard_baseline_checkpoints/best.pt

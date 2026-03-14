@@ -1,0 +1,4 @@
+Traceback (most recent call last):
+  File "/home/dlewis3/Desktop/AI/DWARF/train/train_2048_14m_d41s3.py", line 124, in <module>
+    from dsqg_attention_d41s3 import dsqg_attention_d41s3 as dsqg_attention_v3
+ImportError: cannot import name 'dsqg_attention_d41s3' from 'dsqg_attention_d41s3' (/home/dlewis3/Desktop/AI/DWARF/kernels/dsqg_attention_d41s3.py). Did you mean: 'dsqg_attention_v3'?

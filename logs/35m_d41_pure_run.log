@@ -1,0 +1,916 @@
+======================================================================
+  d41_35m_pure -- PURE DSQG (no full attention), D=512, dense=48, sparse=[96,128,384]
+======================================================================
+  GPU: NVIDIA H200  (150.1 GB)
+  Kernel: dsqg_attention_v3
+  Changes vs d41_35m: FULL_ATTN_LAYER=-1 (all 6 layers are DSQG)
+  Physics: Kalman-EMA + KdV soliton + AGC + scale_embed + IF amplifier + Huygens K/V
+  Architecture: INTERFERENCE=3, gate=0, NO full attention
+  References: condU_35M_pure=48.271/33.3% | d41_35m_hybrid=32.136/94.2%
+Loading FineWeb-Edu from cache: benchmarks/logs/condm_fineweb_edu_doc_cache.json
+  Loaded 100,000 docs from cache
+
+Loaded condI BPE tokenizer from /workspace/DWARF/train/../results/2048_condI_tokenizer.json
+Encoding data (max_seq_len=2048)...
+  Train: 121,232 sequences
+  Val: 2,923 sequences
+  Test: 3,464 sequences
+
+d41_35m_pure: 39,525,364 parameters
+  Layer types: ['DSQG', 'DSQG', 'DSQG', 'DSQG', 'DSQG', 'DSQG']
+Running causality check...
+  Pre-10:  0.00000000  (expect 0.0)
+  Pos-10:  1.717744  (expect >0)
+  Post-10: 0.706989  (expect >0)
+  PASS
+
+  Tokens/epoch: 248,161,904
+  Chinchilla:   790,507,280 tokens (epoch ~3.19)
+
+  [step    0] gn=embedding:0.910  out_proj:0.636  fc2:0.580  fc1:0.382  pv=pos_bias:11.9065  if_gain:1.0000  ema_factor:0.0300  scale_embed:0.0000
+  [step   10] gn=embedding:1.573  norm:0.078  fc2:0.043  qkv_proj:0.041  pv=pos_bias:11.9029  if_gain:1.0013  ema_factor:0.0303  scale_embed:0.0028
+  [step   20] gn=embedding:0.767  qkv_proj:0.048  norm:0.047  out_proj:0.033  pv=pos_bias:11.8994  if_gain:1.0010  ema_factor:0.0303  scale_embed:0.0054
+  [step   30] gn=embedding:0.365  qkv_proj:0.091  out_proj:0.068  pos_embed:0.037  pv=pos_bias:11.8958  if_gain:0.9996  ema_factor:0.0304  scale_embed:0.0076
+  [step   40] gn=embedding:0.285  qkv_proj:0.129  out_proj:0.090  pos_embed:0.053  pv=pos_bias:11.8923  if_gain:0.9985  ema_factor:0.0297  scale_embed:0.0099
+  [step   50] gn=embedding:0.302  qkv_proj:0.089  out_proj:0.061  pos_embed:0.059  pv=pos_bias:11.8888  if_gain:0.9977  ema_factor:0.0299  scale_embed:0.0123
+  [step   60] gn=embedding:0.247  qkv_proj:0.168  out_proj:0.112  pos_embed:0.064  pv=pos_bias:11.8854  if_gain:0.9975  ema_factor:0.0295  scale_embed:0.0139
+  [step   70] gn=embedding:0.283  qkv_proj:0.130  out_proj:0.088  pos_embed:0.068  pv=pos_bias:11.8821  if_gain:0.9976  ema_factor:0.0275  scale_embed:0.0160
+  [step   80] gn=embedding:0.377  qkv_proj:0.169  out_proj:0.131  fc2:0.087  pv=pos_bias:11.8789  if_gain:0.9974  ema_factor:0.0249  scale_embed:0.0188
+  [step   90] gn=embedding:0.312  qkv_proj:0.160  out_proj:0.130  fc2:0.093  pv=pos_bias:11.8756  if_gain:0.9977  ema_factor:0.0220  scale_embed:0.0215
+  [step  100] gn=embedding:0.247  qkv_proj:0.115  out_proj:0.077  pos_embed:0.072  pv=pos_bias:11.8726  if_gain:0.9978  scale_embed:0.0243  ema_factor:0.0189
+  [step  110] gn=embedding:0.331  qkv_proj:0.167  out_proj:0.124  fc2:0.086  pv=pos_bias:11.8694  if_gain:0.9978  scale_embed:0.0269  ema_factor:0.0157
+  [step  120] gn=embedding:0.287  qkv_proj:0.150  out_proj:0.111  fc2:0.073  pv=pos_bias:11.8657  if_gain:0.9989  scale_embed:0.0293  ema_factor:0.0127
+  [step  130] gn=embedding:0.224  qkv_proj:0.151  out_proj:0.111  pos_embed:0.075  pv=pos_bias:11.8621  if_gain:1.0004  scale_embed:0.0317  ema_factor:0.0101
+  [step  140] gn=embedding:0.252  qkv_proj:0.127  out_proj:0.097  pos_embed:0.074  pv=pos_bias:11.8582  if_gain:1.0021  scale_embed:0.0332  ema_factor:0.0083
+  [step  150] gn=embedding:0.267  qkv_proj:0.142  out_proj:0.109  fc2:0.075  pv=pos_bias:11.8545  if_gain:1.0034  scale_embed:0.0351  ema_factor:0.0076
+  [step  160] gn=embedding:0.295  qkv_proj:0.199  out_proj:0.144  fc2:0.099  pv=pos_bias:11.8506  if_gain:1.0048  scale_embed:0.0378  ema_factor:0.0077
+  [step  170] gn=embedding:0.265  qkv_proj:0.188  out_proj:0.126  fc2:0.089  pv=pos_bias:11.8471  if_gain:1.0060  scale_embed:0.0403  ema_factor:0.0076
+  [step  180] gn=embedding:0.352  qkv_proj:0.137  out_proj:0.111  fc2:0.091  pv=pos_bias:11.8436  if_gain:1.0071  scale_embed:0.0429  ema_factor:0.0071
+  [step  190] gn=embedding:0.302  qkv_proj:0.204  out_proj:0.154  fc2:0.113  pv=pos_bias:11.8408  if_gain:1.0085  scale_embed:0.0454  ema_factor:0.0071
+  Step 200/3789 | Loss 6.1743
+  [step  200] gn=embedding:0.265  qkv_proj:0.154  out_proj:0.120  fc2:0.085  pv=pos_bias:11.8376  if_gain:1.0100  scale_embed:0.0481  ema_factor:0.0076
+  [step  210] gn=embedding:0.210  qkv_proj:0.136  out_proj:0.100  fc2:0.075  pv=pos_bias:11.8345  if_gain:1.0113  scale_embed:0.0508  ema_factor:0.0081
+  [step  220] gn=embedding:0.229  qkv_proj:0.172  out_proj:0.134  fc2:0.110  pv=pos_bias:11.8312  if_gain:1.0125  scale_embed:0.0533  ema_factor:0.0079
+  [step  230] gn=embedding:0.298  qkv_proj:0.144  out_proj:0.117  fc2:0.094  pv=pos_bias:11.8275  if_gain:1.0137  scale_embed:0.0558  ema_factor:0.0075
+  [step  240] gn=embedding:0.227  qkv_proj:0.151  out_proj:0.123  fc2:0.099  pv=pos_bias:11.8236  if_gain:1.0151  scale_embed:0.0582  ema_factor:0.0084
+  [step  250] gn=embedding:0.238  qkv_proj:0.179  out_proj:0.135  fc2:0.106  pv=pos_bias:11.8198  if_gain:1.0166  scale_embed:0.0608  ema_factor:0.0089
+  [step  260] gn=embedding:0.221  qkv_proj:0.149  out_proj:0.119  fc2:0.098  pv=pos_bias:11.8162  if_gain:1.0175  scale_embed:0.0634  ema_factor:0.0089
+  [step  270] gn=embedding:0.230  qkv_proj:0.154  out_proj:0.129  fc2:0.111  pv=pos_bias:11.8128  if_gain:1.0186  scale_embed:0.0660  ema_factor:0.0091
+  [step  280] gn=embedding:0.240  qkv_proj:0.163  out_proj:0.126  fc2:0.097  pv=pos_bias:11.8086  if_gain:1.0196  scale_embed:0.0684  ema_factor:0.0094
+  [step  290] gn=embedding:0.227  qkv_proj:0.162  out_proj:0.129  fc2:0.101  pv=pos_bias:11.8045  if_gain:1.0208  scale_embed:0.0708  ema_factor:0.0089
+  [step  300] gn=embedding:0.215  qkv_proj:0.137  out_proj:0.111  fc2:0.090  pv=pos_bias:11.8003  if_gain:1.0219  scale_embed:0.0733  ema_factor:0.0084
+  [step  310] gn=embedding:0.258  qkv_proj:0.171  out_proj:0.139  fc2:0.116  pv=pos_bias:11.7964  if_gain:1.0231  scale_embed:0.0757  ema_factor:0.0091
+  [step  320] gn=embedding:0.232  qkv_proj:0.153  out_proj:0.125  fc2:0.100  pv=pos_bias:11.7918  if_gain:1.0239  scale_embed:0.0782  ema_factor:0.0099
+  [step  330] gn=embedding:0.233  qkv_proj:0.168  out_proj:0.133  fc2:0.103  pv=pos_bias:11.7880  if_gain:1.0244  scale_embed:0.0806  ema_factor:0.0101
+  [step  340] gn=embedding:0.235  qkv_proj:0.150  out_proj:0.126  fc2:0.107  pv=pos_bias:11.7839  if_gain:1.0251  scale_embed:0.0833  ema_factor:0.0099
+  [step  350] gn=embedding:0.235  qkv_proj:0.154  out_proj:0.127  fc2:0.107  pv=pos_bias:11.7804  if_gain:1.0258  scale_embed:0.0859  ema_factor:0.0098
+  [step  360] gn=embedding:0.241  qkv_proj:0.171  out_proj:0.150  fc2:0.123  pv=pos_bias:11.7766  if_gain:1.0269  scale_embed:0.0885  ema_factor:0.0091
+  [step  370] gn=embedding:0.228  qkv_proj:0.168  out_proj:0.147  fc2:0.121  pv=pos_bias:11.7730  if_gain:1.0278  scale_embed:0.0909  ema_factor:0.0080
+  [step  380] gn=embedding:0.212  qkv_proj:0.157  out_proj:0.138  fc2:0.117  pv=pos_bias:11.7701  if_gain:1.0290  scale_embed:0.0928  ema_factor:0.0085
+  [step  390] gn=embedding:0.199  qkv_proj:0.140  out_proj:0.120  fc2:0.099  pv=pos_bias:11.7669  if_gain:1.0298  scale_embed:0.0947  ema_factor:0.0097
+  Step 400/3789 | Loss 5.7575
+  [step  400] gn=embedding:0.215  qkv_proj:0.160  out_proj:0.138  fc2:0.110  pv=pos_bias:11.7634  if_gain:1.0305  scale_embed:0.0968  ema_factor:0.0096
+  [step  410] gn=embedding:0.206  qkv_proj:0.145  out_proj:0.126  fc2:0.111  pv=pos_bias:11.7597  if_gain:1.0314  scale_embed:0.0993  ema_factor:0.0085
+  [step  420] gn=embedding:0.208  qkv_proj:0.153  out_proj:0.130  fc2:0.111  pv=pos_bias:11.7563  if_gain:1.0323  scale_embed:0.1015  ema_factor:0.0091
+  [step  430] gn=embedding:0.233  qkv_proj:0.153  out_proj:0.135  fc2:0.113  pv=pos_bias:11.7520  if_gain:1.0330  scale_embed:0.1033  ema_factor:0.0094
+  [step  440] gn=embedding:0.207  qkv_proj:0.151  out_proj:0.127  fc2:0.106  pv=pos_bias:11.7474  if_gain:1.0329  scale_embed:0.1053  ema_factor:0.0097
+  [step  450] gn=embedding:0.223  qkv_proj:0.137  out_proj:0.121  fc2:0.104  pv=pos_bias:11.7430  if_gain:1.0339  scale_embed:0.1073  ema_factor:0.0093
+  [step  460] gn=embedding:0.206  qkv_proj:0.165  out_proj:0.144  fc2:0.119  pv=pos_bias:11.7391  if_gain:1.0349  scale_embed:0.1087  ema_factor:0.0088
+  [step  470] gn=embedding:0.214  qkv_proj:0.131  out_proj:0.120  fc2:0.105  pv=pos_bias:11.7355  if_gain:1.0360  scale_embed:0.1106  ema_factor:0.0080
+  [step  480] gn=embedding:0.218  qkv_proj:0.141  out_proj:0.131  fc2:0.118  pv=pos_bias:11.7315  if_gain:1.0365  scale_embed:0.1125  ema_factor:0.0073
+  [step  490] gn=embedding:0.206  qkv_proj:0.134  out_proj:0.121  fc2:0.109  pv=pos_bias:11.7276  if_gain:1.0369  scale_embed:0.1146  ema_factor:0.0079
+  Step 600/3789 | Loss 5.4181
+  Step 800/3789 | Loss 5.1735
+  Step 1000/3789 | Loss 5.0699
+  Step 1200/3789 | Loss 4.8292
+  Step 1400/3789 | Loss 4.7800
+  Step 1600/3789 | Loss 4.5480
+  Step 1800/3789 | Loss 4.6810
+  Step 2000/3789 | Loss 4.3285
+  Step 2200/3789 | Loss 4.4209
+  Step 2400/3789 | Loss 4.5329
+  Step 2600/3789 | Loss 4.0841
+  Step 2800/3789 | Loss 4.0642
+  Step 3000/3789 | Loss 4.1865
+  Step 3200/3789 | Loss 4.2925
+  Step 3400/3789 | Loss 4.1985
+  Step 3600/3789 | Loss 4.3353
+Ep 1/10 | Train 4.7755 | Val 4.0848 PPL 59.4 * BEST | 3571s (31%C)
+  DSQG pos-bias: |mean|=3.1342 |max|=10.8906 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.1558 |max|=0.5690
+  IF gains:      h0:1.10  h1:1.00  h2:1.01  h3:1.00  h4:1.00  h5:1.01  h6:1.00  h7:0.98
+  EMA factors:   b0:0.0034 (w≈292t)  b1:0.0041 (w≈247t)
+  KdV alphas:    b0:-0.0015  b1:-0.0018
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ' storm that was a very long time of time.\nThe storm was a very long time of time'
+    'The length of the hypotenuse' -> ' is the same as the length of the hypotenuse.\nThe length of the hypotenuse is th'
+    'The President of the United' -> ' States, the United States, and the United States, and the United States, and th'
+    'Once upon a time there was' -> ' a time when the people were not able to make a decision.\nThe first time that th'
+    'The results indicate that' -> ' the number of people in the United States is greater than the number of people '
+  --
+  Passkey...
+  mean=25.0%  (3/12 distances >50%)
+  d=1:60%  d=2:60%  d=4:60%  d=8:30%  d=16:10%  d=32:20%  d=64:10%  d=128:10%  d=256:10%  d=512:10%  d=1024:10%  d=1536:10%
+  [step    0] gn=embedding:0.265  out_proj:0.185  qkv_proj:0.167  fc2:0.128  pv=pos_bias:10.5691  if_gain:1.1779  scale_embed:0.5494  ema_factor:0.0041
+  [step   10] gn=embedding:0.219  out_proj:0.170  qkv_proj:0.161  fc2:0.122  pv=pos_bias:10.5664  if_gain:1.1779  scale_embed:0.5503  ema_factor:0.0044
+  [step   20] gn=embedding:0.215  out_proj:0.140  qkv_proj:0.140  fc2:0.121  pv=pos_bias:10.5637  if_gain:1.1783  scale_embed:0.5503  ema_factor:0.0044
+  [step   30] gn=embedding:0.216  qkv_proj:0.137  out_proj:0.136  fc2:0.117  pv=pos_bias:10.5612  if_gain:1.1793  scale_embed:0.5512  ema_factor:0.0036
+  [step   40] gn=embedding:0.213  qkv_proj:0.135  out_proj:0.135  5:0.129  pv=pos_bias:10.5588  if_gain:1.1789  scale_embed:0.5525  ema_factor:0.0036
+  [step   50] gn=embedding:0.216  out_proj:0.136  qkv_proj:0.135  fc2:0.113  pv=pos_bias:10.5557  if_gain:1.1791  scale_embed:0.5539  ema_factor:0.0046
+  [step   60] gn=embedding:0.224  out_proj:0.142  qkv_proj:0.136  fc2:0.118  pv=pos_bias:10.5522  if_gain:1.1789  scale_embed:0.5551  ema_factor:0.0047
+  [step   70] gn=embedding:0.229  qkv_proj:0.134  fc2:0.114  out_proj:0.113  pv=pos_bias:10.5484  if_gain:1.1794  scale_embed:0.5555  ema_factor:0.0044
+  [step   80] gn=embedding:0.235  qkv_proj:0.149  out_proj:0.140  fc2:0.122  pv=pos_bias:10.5451  if_gain:1.1796  scale_embed:0.5566  ema_factor:0.0035
+  [step   90] gn=embedding:0.226  out_proj:0.160  qkv_proj:0.149  5:0.121  pv=pos_bias:10.5409  if_gain:1.1801  scale_embed:0.5569  ema_factor:0.0044
+  [step  100] gn=embedding:0.219  out_proj:0.152  qkv_proj:0.145  fc2:0.126  pv=pos_bias:10.5370  if_gain:1.1808  scale_embed:0.5569  ema_factor:0.0038
+  [step  110] gn=embedding:0.222  qkv_proj:0.141  out_proj:0.130  fc2:0.116  pv=pos_bias:10.5338  if_gain:1.1813  scale_embed:0.5567  ema_factor:0.0037
+  [step  120] gn=embedding:0.244  qkv_proj:0.146  out_proj:0.141  fc2:0.122  pv=pos_bias:10.5300  if_gain:1.1810  scale_embed:0.5568  ema_factor:0.0046
+  [step  130] gn=embedding:0.216  out_proj:0.165  qkv_proj:0.150  fc2:0.122  pv=pos_bias:10.5269  if_gain:1.1813  scale_embed:0.5572  ema_factor:0.0045
+  [step  140] gn=embedding:0.223  qkv_proj:0.133  out_proj:0.125  fc2:0.117  pv=pos_bias:10.5242  if_gain:1.1811  scale_embed:0.5577  ema_factor:0.0038
+  [step  150] gn=embedding:0.227  out_proj:0.165  qkv_proj:0.151  fc2:0.119  pv=pos_bias:10.5210  if_gain:1.1808  scale_embed:0.5591  ema_factor:0.0037
+  [step  160] gn=embedding:0.226  qkv_proj:0.132  out_proj:0.123  fc2:0.115  pv=pos_bias:10.5170  if_gain:1.1811  scale_embed:0.5601  ema_factor:0.0041
+  [step  170] gn=embedding:0.220  qkv_proj:0.127  fc2:0.112  out_proj:0.111  pv=pos_bias:10.5124  if_gain:1.1815  scale_embed:0.5608  ema_factor:0.0042
+  [step  180] gn=embedding:0.235  qkv_proj:0.145  out_proj:0.145  fc2:0.122  pv=pos_bias:10.5079  if_gain:1.1808  scale_embed:0.5615  ema_factor:0.0039
+  [step  190] gn=embedding:0.220  out_proj:0.160  qkv_proj:0.146  fc2:0.127  pv=pos_bias:10.5041  if_gain:1.1805  scale_embed:0.5619  ema_factor:0.0041
+  Step 200/3789 | Loss 4.2232
+  [step  200] gn=embedding:0.234  out_proj:0.171  qkv_proj:0.151  fc2:0.122  pv=pos_bias:10.5009  if_gain:1.1815  scale_embed:0.5625  ema_factor:0.0043
+  [step  210] gn=embedding:0.226  qkv_proj:0.145  out_proj:0.133  fc2:0.118  pv=pos_bias:10.4981  if_gain:1.1821  scale_embed:0.5629  ema_factor:0.0038
+  [step  220] gn=embedding:0.245  out_proj:0.153  qkv_proj:0.152  fc2:0.125  pv=pos_bias:10.4951  if_gain:1.1823  scale_embed:0.5621  ema_factor:0.0044
+  [step  230] gn=embedding:0.241  out_proj:0.150  qkv_proj:0.148  fc2:0.115  pv=pos_bias:10.4918  if_gain:1.1828  scale_embed:0.5626  ema_factor:0.0037
+  [step  240] gn=embedding:0.225  qkv_proj:0.137  out_proj:0.131  fc2:0.113  pv=pos_bias:10.4886  if_gain:1.1826  scale_embed:0.5634  ema_factor:0.0037
+  [step  250] gn=embedding:0.206  out_proj:0.132  qkv_proj:0.127  fc2:0.108  pv=pos_bias:10.4846  if_gain:1.1826  scale_embed:0.5630  ema_factor:0.0043
+  [step  260] gn=embedding:0.232  qkv_proj:0.131  out_proj:0.120  fc2:0.114  pv=pos_bias:10.4819  if_gain:1.1829  scale_embed:0.5627  ema_factor:0.0039
+  [step  270] gn=embedding:0.213  out_proj:0.142  qkv_proj:0.136  fc2:0.114  pv=pos_bias:10.4778  if_gain:1.1833  scale_embed:0.5629  ema_factor:0.0039
+  [step  280] gn=embedding:0.217  out_proj:0.153  qkv_proj:0.142  fc2:0.121  pv=pos_bias:10.4743  if_gain:1.1828  scale_embed:0.5635  ema_factor:0.0039
+  [step  290] gn=embedding:0.233  qkv_proj:0.162  out_proj:0.159  fc2:0.123  pv=pos_bias:10.4718  if_gain:1.1831  scale_embed:0.5638  ema_factor:0.0036
+  [step  300] gn=embedding:0.234  out_proj:0.155  qkv_proj:0.143  fc2:0.123  pv=pos_bias:10.4690  if_gain:1.1831  scale_embed:0.5637  ema_factor:0.0042
+  [step  310] gn=embedding:0.232  qkv_proj:0.158  out_proj:0.152  fc2:0.123  pv=pos_bias:10.4660  if_gain:1.1831  scale_embed:0.5631  ema_factor:0.0046
+  [step  320] gn=embedding:0.231  qkv_proj:0.145  out_proj:0.134  fc2:0.111  pv=pos_bias:10.4634  if_gain:1.1837  scale_embed:0.5643  ema_factor:0.0041
+  [step  330] gn=embedding:0.222  qkv_proj:0.146  out_proj:0.130  fc2:0.116  pv=pos_bias:10.4606  if_gain:1.1839  scale_embed:0.5653  ema_factor:0.0043
+  [step  340] gn=embedding:0.219  qkv_proj:0.142  out_proj:0.138  fc2:0.116  pv=pos_bias:10.4574  if_gain:1.1837  scale_embed:0.5665  ema_factor:0.0044
+  [step  350] gn=embedding:0.222  qkv_proj:0.132  out_proj:0.125  fc2:0.116  pv=pos_bias:10.4542  if_gain:1.1833  scale_embed:0.5673  ema_factor:0.0040
+  [step  360] gn=embedding:0.223  qkv_proj:0.134  out_proj:0.131  fc2:0.113  pv=pos_bias:10.4512  if_gain:1.1836  scale_embed:0.5680  ema_factor:0.0039
+  [step  370] gn=embedding:0.227  out_proj:0.148  qkv_proj:0.145  fc2:0.117  pv=pos_bias:10.4482  if_gain:1.1844  scale_embed:0.5684  ema_factor:0.0041
+  [step  380] gn=embedding:0.219  out_proj:0.183  qkv_proj:0.157  fc2:0.130  pv=pos_bias:10.4462  if_gain:1.1845  scale_embed:0.5690  ema_factor:0.0041
+  [step  390] gn=embedding:0.222  qkv_proj:0.130  out_proj:0.126  fc2:0.111  pv=pos_bias:10.4427  if_gain:1.1846  scale_embed:0.5685  ema_factor:0.0040
+  Step 400/3789 | Loss 3.9696
+  [step  400] gn=embedding:0.216  qkv_proj:0.130  out_proj:0.114  fc2:0.109  pv=pos_bias:10.4385  if_gain:1.1847  scale_embed:0.5690  ema_factor:0.0037
+  [step  410] gn=embedding:0.238  qkv_proj:0.137  fc2:0.116  out_proj:0.115  pv=pos_bias:10.4350  if_gain:1.1845  scale_embed:0.5701  ema_factor:0.0043
+  [step  420] gn=embedding:0.229  qkv_proj:0.122  out_proj:0.110  fc2:0.109  pv=pos_bias:10.4319  if_gain:1.1845  scale_embed:0.5705  ema_factor:0.0041
+  [step  430] gn=embedding:0.230  out_proj:0.156  qkv_proj:0.142  fc2:0.118  pv=pos_bias:10.4283  if_gain:1.1849  scale_embed:0.5705  ema_factor:0.0041
+  [step  440] gn=embedding:0.217  qkv_proj:0.142  out_proj:0.137  fc2:0.115  pv=pos_bias:10.4246  if_gain:1.1850  scale_embed:0.5705  ema_factor:0.0037
+  [step  450] gn=embedding:0.232  qkv_proj:0.128  out_proj:0.118  fc2:0.112  pv=pos_bias:10.4209  if_gain:1.1855  scale_embed:0.5708  ema_factor:0.0044
+  [step  460] gn=embedding:0.220  out_proj:0.142  qkv_proj:0.135  fc2:0.117  pv=pos_bias:10.4178  if_gain:1.1858  scale_embed:0.5711  ema_factor:0.0041
+  [step  470] gn=embedding:0.230  2:0.148  qkv_proj:0.132  out_proj:0.124  pv=pos_bias:10.4152  if_gain:1.1863  scale_embed:0.5714  ema_factor:0.0041
+  [step  480] gn=embedding:0.218  qkv_proj:0.135  out_proj:0.121  fc2:0.110  pv=pos_bias:10.4119  if_gain:1.1866  scale_embed:0.5724  ema_factor:0.0048
+  [step  490] gn=embedding:0.215  out_proj:0.164  qkv_proj:0.147  fc2:0.117  pv=pos_bias:10.4087  if_gain:1.1864  scale_embed:0.5731  ema_factor:0.0041
+  Step 600/3789 | Loss 3.7580
+  Step 800/3789 | Loss 4.0393
+  Step 1000/3789 | Loss 4.0144
+  Step 1200/3789 | Loss 4.0217
+  Step 1400/3789 | Loss 3.8425
+  Step 1600/3789 | Loss 3.9306
+  Step 1800/3789 | Loss 4.2275
+  Step 2000/3789 | Loss 3.9450
+  Step 2200/3789 | Loss 3.8678
+  Step 2400/3789 | Loss 3.9272
+  Step 2600/3789 | Loss 3.8920
+  Step 2800/3789 | Loss 3.6478
+  Step 3000/3789 | Loss 3.7980
+  Step 3200/3789 | Loss 3.9344
+  Step 3400/3789 | Loss 3.9670
+  Step 3600/3789 | Loss 3.9522
+Ep 2/10 | Train 4.0542 | Val 3.8554 PPL 47.2 * BEST | 7119s (63%C)
+  DSQG pos-bias: |mean|=2.8599 |max|=9.9643 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.1909 |max|=0.8107
+  IF gains:      h0:1.12  h1:0.99  h2:1.01  h3:0.99  h4:0.98  h5:0.98  h6:0.97  h7:0.94
+  EMA factors:   b0:0.0034 (w≈293t)  b1:0.0039 (w≈258t)
+  KdV alphas:    b0:-0.0014  b1:-0.0016
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ' night, and the weather was very cold.\nThe weather was very cold, and the weathe'
+    'The length of the hypotenuse' -> ' is about 1.5 cm.\nThe length of the hypotenuse is about 1.5 cm.\nThe length of th'
+    'The President of the United' -> ' States, the President of the United States, and the President of the United Sta'
+    'Once upon a time there was' -> ' a great deal of excitement, and the people were very excited about the new worl'
+    'The results indicate that' -> ' the majority of the population is in the middle of the 20th century.\nThe popula'
+  --
+  Passkey...
+  mean=39.2%  (4/12 distances >50%)
+  d=1:100%  d=2:100%  d=4:80%  d=8:60%  d=16:40%  d=32:30%  d=64:10%  d=128:10%  d=256:10%  d=512:10%  d=1024:10%  d=1536:10%
+  [step    0] gn=embedding:0.247  out_proj:0.192  qkv_proj:0.122  fc2:0.119  pv=pos_bias:9.4377  if_gain:1.2886  scale_embed:0.6639  ema_factor:0.0039
+  [step   10] gn=embedding:0.256  out_proj:0.181  qkv_proj:0.121  fc2:0.119  pv=pos_bias:9.4345  if_gain:1.2887  scale_embed:0.6648  ema_factor:0.0029
+  [step   20] gn=embedding:0.260  out_proj:0.192  qkv_proj:0.126  fc2:0.119  pv=pos_bias:9.4322  if_gain:1.2888  scale_embed:0.6641  ema_factor:0.0030
+  [step   30] gn=embedding:0.240  out_proj:0.198  qkv_proj:0.131  fc2:0.119  pv=pos_bias:9.4302  if_gain:1.2892  scale_embed:0.6635  ema_factor:0.0031
+  [step   40] gn=embedding:0.258  out_proj:0.184  qkv_proj:0.121  fc2:0.121  pv=pos_bias:9.4278  if_gain:1.2892  scale_embed:0.6639  ema_factor:0.0035
+  [step   50] gn=embedding:0.244  out_proj:0.166  qkv_proj:0.114  fc2:0.113  pv=pos_bias:9.4253  if_gain:1.2895  scale_embed:0.6641  ema_factor:0.0035
+  [step   60] gn=embedding:0.243  out_proj:0.188  qkv_proj:0.128  fc2:0.122  pv=pos_bias:9.4234  if_gain:1.2897  scale_embed:0.6642  ema_factor:0.0032
+  [step   70] gn=embedding:0.256  out_proj:0.190  qkv_proj:0.133  fc2:0.119  pv=pos_bias:9.4215  if_gain:1.2897  scale_embed:0.6649  ema_factor:0.0034
+  [step   80] gn=embedding:0.260  out_proj:0.228  qkv_proj:0.140  fc2:0.124  pv=pos_bias:9.4194  if_gain:1.2904  scale_embed:0.6657  ema_factor:0.0036
+  [step   90] gn=embedding:0.324  out_proj:0.208  fc2:0.174  qkv_proj:0.166  pv=pos_bias:9.4168  if_gain:1.2907  scale_embed:0.6664  ema_factor:0.0034
+  [step  100] gn=embedding:0.249  out_proj:0.215  qkv_proj:0.135  fc2:0.123  pv=pos_bias:9.4139  if_gain:1.2904  scale_embed:0.6673  ema_factor:0.0033
+  [step  110] gn=embedding:0.243  out_proj:0.174  qkv_proj:0.119  fc2:0.111  pv=pos_bias:9.4111  if_gain:1.2906  scale_embed:0.6678  ema_factor:0.0038
+  [step  120] gn=embedding:0.249  out_proj:0.189  qkv_proj:0.125  fc2:0.118  pv=pos_bias:9.4083  if_gain:1.2909  scale_embed:0.6682  ema_factor:0.0038
+  [step  130] gn=embedding:0.244  out_proj:0.170  qkv_proj:0.120  fc2:0.114  pv=pos_bias:9.4053  if_gain:1.2910  scale_embed:0.6685  ema_factor:0.0030
+  [step  140] gn=embedding:0.262  out_proj:0.191  qkv_proj:0.129  fc2:0.120  pv=pos_bias:9.4018  if_gain:1.2916  scale_embed:0.6693  ema_factor:0.0031
+  [step  150] gn=embedding:0.238  out_proj:0.192  qkv_proj:0.130  fc2:0.113  pv=pos_bias:9.3984  if_gain:1.2918  scale_embed:0.6699  ema_factor:0.0031
+  [step  160] gn=embedding:0.252  out_proj:0.181  qkv_proj:0.127  fc2:0.119  pv=pos_bias:9.3959  if_gain:1.2920  scale_embed:0.6706  ema_factor:0.0030
+  [step  170] gn=embedding:0.255  out_proj:0.201  qkv_proj:0.137  fc2:0.121  pv=pos_bias:9.3929  if_gain:1.2925  scale_embed:0.6711  ema_factor:0.0040
+  [step  180] gn=embedding:0.253  out_proj:0.197  qkv_proj:0.130  fc2:0.118  pv=pos_bias:9.3902  if_gain:1.2929  scale_embed:0.6719  ema_factor:0.0039
+  [step  190] gn=embedding:0.242  out_proj:0.205  qkv_proj:0.138  fc2:0.128  pv=pos_bias:9.3866  if_gain:1.2934  scale_embed:0.6726  ema_factor:0.0037
+  Step 200/3789 | Loss 4.2110
+  [step  200] gn=embedding:0.247  out_proj:0.190  qkv_proj:0.120  fc2:0.116  pv=pos_bias:9.3829  if_gain:1.2936  scale_embed:0.6725  ema_factor:0.0037
+  [step  210] gn=embedding:0.243  out_proj:0.222  qkv_proj:0.135  fc2:0.118  pv=pos_bias:9.3801  if_gain:1.2938  scale_embed:0.6722  ema_factor:0.0042
+  [step  220] gn=embedding:0.256  out_proj:0.225  qkv_proj:0.142  fc2:0.120  pv=pos_bias:9.3769  if_gain:1.2939  scale_embed:0.6730  ema_factor:0.0035
+  [step  230] gn=embedding:0.250  out_proj:0.172  qkv_proj:0.118  fc2:0.114  pv=pos_bias:9.3745  if_gain:1.2942  scale_embed:0.6736  ema_factor:0.0036
+  [step  240] gn=embedding:0.247  out_proj:0.219  qkv_proj:0.137  fc2:0.122  pv=pos_bias:9.3718  if_gain:1.2947  scale_embed:0.6737  ema_factor:0.0035
+  [step  250] gn=embedding:0.255  out_proj:0.194  qkv_proj:0.125  fc2:0.118  pv=pos_bias:9.3685  if_gain:1.2949  scale_embed:0.6745  ema_factor:0.0035
+  [step  260] gn=embedding:0.252  out_proj:0.194  qkv_proj:0.127  fc2:0.118  pv=pos_bias:9.3651  if_gain:1.2954  scale_embed:0.6750  ema_factor:0.0043
+  [step  270] gn=embedding:0.244  out_proj:0.130  fc2:0.108  qkv_proj:0.105  pv=pos_bias:9.3621  if_gain:1.2953  scale_embed:0.6750  ema_factor:0.0039
+  [step  280] gn=embedding:0.241  out_proj:0.186  qkv_proj:0.123  fc2:0.117  pv=pos_bias:9.3587  if_gain:1.2956  scale_embed:0.6755  ema_factor:0.0033
+  [step  290] gn=embedding:0.244  out_proj:0.198  qkv_proj:0.125  fc2:0.117  pv=pos_bias:9.3556  if_gain:1.2959  scale_embed:0.6762  ema_factor:0.0034
+  [step  300] gn=embedding:0.254  out_proj:0.207  qkv_proj:0.136  fc2:0.120  pv=pos_bias:9.3537  if_gain:1.2962  scale_embed:0.6764  ema_factor:0.0032
+  [step  310] gn=embedding:0.261  out_proj:0.226  qkv_proj:0.139  fc2:0.128  pv=pos_bias:9.3522  if_gain:1.2966  scale_embed:0.6774  ema_factor:0.0030
+  [step  320] gn=embedding:0.254  out_proj:0.192  qkv_proj:0.127  fc2:0.120  pv=pos_bias:9.3508  if_gain:1.2969  scale_embed:0.6776  ema_factor:0.0034
+  [step  330] gn=embedding:0.256  out_proj:0.169  5:0.141  qkv_proj:0.119  pv=pos_bias:9.3486  if_gain:1.2973  scale_embed:0.6772  ema_factor:0.0035
+  [step  340] gn=embedding:0.241  out_proj:0.175  qkv_proj:0.116  fc2:0.116  pv=pos_bias:9.3457  if_gain:1.2973  scale_embed:0.6778  ema_factor:0.0034
+  [step  350] gn=embedding:0.257  out_proj:0.187  qkv_proj:0.122  fc2:0.119  pv=pos_bias:9.3428  if_gain:1.2972  scale_embed:0.6784  ema_factor:0.0039
+  [step  360] gn=embedding:0.254  out_proj:0.207  qkv_proj:0.131  fc2:0.123  pv=pos_bias:9.3398  if_gain:1.2973  scale_embed:0.6789  ema_factor:0.0034
+  [step  370] gn=embedding:0.240  out_proj:0.180  qkv_proj:0.116  fc2:0.112  pv=pos_bias:9.3364  if_gain:1.2977  scale_embed:0.6795  ema_factor:0.0037
+  [step  380] gn=embedding:0.249  out_proj:0.185  qkv_proj:0.124  fc2:0.122  pv=pos_bias:9.3337  if_gain:1.2981  scale_embed:0.6796  ema_factor:0.0039
+  [step  390] gn=embedding:0.246  out_proj:0.189  qkv_proj:0.116  fc2:0.114  pv=pos_bias:9.3316  if_gain:1.2983  scale_embed:0.6803  ema_factor:0.0030
+  Step 400/3789 | Loss 3.9804
+  [step  400] gn=embedding:0.269  out_proj:0.203  qkv_proj:0.126  fc2:0.125  pv=pos_bias:9.3291  if_gain:1.2985  scale_embed:0.6810  ema_factor:0.0030
+  [step  410] gn=out_proj:0.263  embedding:0.238  qkv_proj:0.154  fc2:0.135  pv=pos_bias:9.3266  if_gain:1.2987  scale_embed:0.6816  ema_factor:0.0038
+  [step  420] gn=embedding:0.247  out_proj:0.183  fc2:0.117  qkv_proj:0.116  pv=pos_bias:9.3238  if_gain:1.2988  scale_embed:0.6810  ema_factor:0.0036
+  [step  430] gn=embedding:0.251  out_proj:0.191  qkv_proj:0.127  fc2:0.123  pv=pos_bias:9.3209  if_gain:1.2992  scale_embed:0.6812  ema_factor:0.0035
+  [step  440] gn=embedding:0.270  out_proj:0.193  qkv_proj:0.129  fc2:0.122  pv=pos_bias:9.3187  if_gain:1.2995  scale_embed:0.6818  ema_factor:0.0036
+  [step  450] gn=embedding:0.255  out_proj:0.175  fc2:0.119  qkv_proj:0.115  pv=pos_bias:9.3163  if_gain:1.3001  scale_embed:0.6822  ema_factor:0.0033
+  [step  460] gn=embedding:0.256  out_proj:0.194  qkv_proj:0.129  fc2:0.121  pv=pos_bias:9.3138  if_gain:1.3002  scale_embed:0.6820  ema_factor:0.0039
+  [step  470] gn=embedding:0.247  out_proj:0.188  qkv_proj:0.123  fc2:0.113  pv=pos_bias:9.3108  if_gain:1.3002  scale_embed:0.6824  ema_factor:0.0032
+  [step  480] gn=embedding:0.241  out_proj:0.198  qkv_proj:0.122  fc2:0.121  pv=pos_bias:9.3079  if_gain:1.3006  scale_embed:0.6832  ema_factor:0.0037
+  [step  490] gn=embedding:0.247  out_proj:0.182  qkv_proj:0.119  fc2:0.115  pv=pos_bias:9.3055  if_gain:1.3008  scale_embed:0.6840  ema_factor:0.0033
+  Step 600/3789 | Loss 3.9583
+  Step 800/3789 | Loss 3.8317
+  Step 1000/3789 | Loss 3.9021
+  Step 1200/3789 | Loss 3.8209
+  Step 1400/3789 | Loss 3.8142
+  Step 1600/3789 | Loss 3.9294
+  Step 1800/3789 | Loss 3.9285
+  Step 2000/3789 | Loss 3.7672
+  Step 2200/3789 | Loss 4.0702
+  Step 2400/3789 | Loss 4.0342
+  Step 2600/3789 | Loss 4.0153
+  Step 2800/3789 | Loss 3.7796
+  Step 3000/3789 | Loss 3.6991
+  Step 3200/3789 | Loss 3.7924
+  Step 3400/3789 | Loss 3.8881
+  Step 3600/3789 | Loss 3.9149
+Ep 3/10 | Train 3.8933 | Val 3.7564 PPL 42.8 * BEST | 10686s (94%C)
+  DSQG pos-bias: |mean|=2.6351 |max|=9.1759 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.2049 |max|=1.0083
+  IF gains:      h0:1.12  h1:0.99  h2:1.02  h3:0.98  h4:0.97  h5:0.96  h6:0.95  h7:0.93
+  EMA factors:   b0:0.0043 (w≈233t)  b1:0.0033 (w≈303t)
+  KdV alphas:    b0:-0.0013  b1:-0.0015
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ' night, and the sun was bright and the sun was bright.\nThe sun was bright and th'
+    'The length of the hypotenuse' -> ' is about 1.5 mm. The length of the hypotenuse is about 1.5 mm. The length of th'
+    'The President of the United' -> ' States, the President of the United States, and the President of the United Sta'
+    'Once upon a time there was' -> ' a great deal of controversy, and the most important thing was that the people w'
+    'The results indicate that' -> ' the most common form of the disease is a disease that is transmitted by the imm'
+  --
+  Passkey...
+  mean=41.7%  (6/12 distances >50%)
+  d=1:100%  d=2:90%  d=4:70%  d=8:60%  d=16:50%  d=32:50%  d=64:20%  d=128:20%  d=256:10%  d=512:10%  d=1024:10%  d=1536:10%
+  [step    0] gn=embedding:0.275  out_proj:0.244  qkv_proj:0.128  fc2:0.125  pv=pos_bias:8.5202  if_gain:1.3857  scale_embed:0.8265  ema_factor:0.0033
+  [step   10] gn=embedding:0.252  out_proj:0.208  fc2:0.120  qkv_proj:0.108  pv=pos_bias:8.5183  if_gain:1.3857  scale_embed:0.8270  ema_factor:0.0031
+  [step   20] gn=embedding:0.271  out_proj:0.242  qkv_proj:0.128  fc2:0.124  pv=pos_bias:8.5167  if_gain:1.3858  scale_embed:0.8274  ema_factor:0.0030
+  [step   30] gn=embedding:0.281  out_proj:0.219  fc2:0.125  qkv_proj:0.112  pv=pos_bias:8.5151  if_gain:1.3857  scale_embed:0.8275  ema_factor:0.0030
+  [step   40] gn=embedding:0.265  out_proj:0.205  fc2:0.120  qkv_proj:0.110  pv=pos_bias:8.5134  if_gain:1.3859  scale_embed:0.8276  ema_factor:0.0033
+  [step   50] gn=embedding:0.266  out_proj:0.242  qkv_proj:0.125  fc2:0.119  pv=pos_bias:8.5113  if_gain:1.3861  scale_embed:0.8275  ema_factor:0.0029
+  [step   60] gn=out_proj:0.283  embedding:0.264  qkv_proj:0.133  fc2:0.131  pv=pos_bias:8.5093  if_gain:1.3863  scale_embed:0.8279  ema_factor:0.0033
+  [step   70] gn=embedding:0.263  out_proj:0.223  fc2:0.124  qkv_proj:0.115  pv=pos_bias:8.5073  if_gain:1.3865  scale_embed:0.8287  ema_factor:0.0030
+  [step   80] gn=embedding:0.271  out_proj:0.243  fc2:0.127  qkv_proj:0.122  pv=pos_bias:8.5049  if_gain:1.3868  scale_embed:0.8287  ema_factor:0.0030
+  [step   90] gn=embedding:0.272  out_proj:0.218  fc2:0.121  qkv_proj:0.113  pv=pos_bias:8.5028  if_gain:1.3870  scale_embed:0.8289  ema_factor:0.0034
+  [step  100] gn=embedding:0.282  out_proj:0.215  fc2:0.130  qkv_proj:0.117  pv=pos_bias:8.5004  if_gain:1.3869  scale_embed:0.8297  ema_factor:0.0030
+  [step  110] gn=embedding:0.262  out_proj:0.209  fc2:0.119  qkv_proj:0.110  pv=pos_bias:8.4985  if_gain:1.3869  scale_embed:0.8299  ema_factor:0.0031
+  [step  120] gn=embedding:0.273  out_proj:0.243  fc2:0.124  qkv_proj:0.117  pv=pos_bias:8.4965  if_gain:1.3869  scale_embed:0.8302  ema_factor:0.0032
+  [step  130] gn=embedding:0.265  out_proj:0.217  fc2:0.120  qkv_proj:0.112  pv=pos_bias:8.4945  if_gain:1.3866  scale_embed:0.8301  ema_factor:0.0029
+  [step  140] gn=embedding:0.277  out_proj:0.215  fc2:0.122  qkv_proj:0.110  pv=pos_bias:8.4928  if_gain:1.3869  scale_embed:0.8306  ema_factor:0.0034
+  [step  150] gn=embedding:0.271  out_proj:0.249  fc2:0.129  qkv_proj:0.121  pv=pos_bias:8.4908  if_gain:1.3870  scale_embed:0.8310  ema_factor:0.0031
+  [step  160] gn=embedding:0.259  out_proj:0.215  fc2:0.118  qkv_proj:0.112  pv=pos_bias:8.4885  if_gain:1.3874  scale_embed:0.8311  ema_factor:0.0033
+  [step  170] gn=embedding:0.271  out_proj:0.233  fc2:0.124  qkv_proj:0.118  pv=pos_bias:8.4862  if_gain:1.3879  scale_embed:0.8310  ema_factor:0.0032
+  [step  180] gn=embedding:0.257  out_proj:0.246  fc2:0.118  qkv_proj:0.116  pv=pos_bias:8.4841  if_gain:1.3880  scale_embed:0.8305  ema_factor:0.0030
+  [step  190] gn=embedding:0.269  out_proj:0.249  fc2:0.130  qkv_proj:0.120  pv=pos_bias:8.4821  if_gain:1.3881  scale_embed:0.8308  ema_factor:0.0028
+  Step 200/3789 | Loss 3.8132
+  [step  200] gn=embedding:0.270  out_proj:0.262  qkv_proj:0.128  fc2:0.126  pv=pos_bias:8.4803  if_gain:1.3886  scale_embed:0.8307  ema_factor:0.0034
+  [step  210] gn=embedding:0.268  out_proj:0.232  fc2:0.126  qkv_proj:0.121  pv=pos_bias:8.4780  if_gain:1.3886  scale_embed:0.8310  ema_factor:0.0030
+  [step  220] gn=embedding:0.263  out_proj:0.193  fc2:0.116  qkv_proj:0.105  pv=pos_bias:8.4756  if_gain:1.3889  scale_embed:0.8322  ema_factor:0.0031
+  [step  230] gn=embedding:0.281  out_proj:0.257  fc2:0.130  qkv_proj:0.129  pv=pos_bias:8.4728  if_gain:1.3890  scale_embed:0.8322  ema_factor:0.0031
+  [step  240] gn=embedding:0.259  out_proj:0.192  fc2:0.116  qkv_proj:0.110  pv=pos_bias:8.4698  if_gain:1.3889  scale_embed:0.8323  ema_factor:0.0028
+  [step  250] gn=embedding:0.286  out_proj:0.223  fc2:0.124  qkv_proj:0.116  pv=pos_bias:8.4671  if_gain:1.3891  scale_embed:0.8321  ema_factor:0.0033
+  [step  260] gn=out_proj:0.280  embedding:0.258  fc2:0.134  qkv_proj:0.130  pv=pos_bias:8.4649  if_gain:1.3893  scale_embed:0.8325  ema_factor:0.0037
+  [step  270] gn=embedding:0.281  out_proj:0.227  fc2:0.123  qkv_proj:0.111  pv=pos_bias:8.4626  if_gain:1.3895  scale_embed:0.8331  ema_factor:0.0033
+  [step  280] gn=embedding:0.258  out_proj:0.236  qkv_proj:0.124  fc2:0.123  pv=pos_bias:8.4596  if_gain:1.3895  scale_embed:0.8329  ema_factor:0.0033
+  [step  290] gn=embedding:0.326  out_proj:0.217  qkv_proj:0.139  fc2:0.133  pv=pos_bias:8.4566  if_gain:1.3896  scale_embed:0.8328  ema_factor:0.0033
+  [step  300] gn=embedding:0.265  out_proj:0.218  fc2:0.120  qkv_proj:0.112  pv=pos_bias:8.4538  if_gain:1.3898  scale_embed:0.8337  ema_factor:0.0029
+  [step  310] gn=embedding:0.281  out_proj:0.250  fc2:0.130  qkv_proj:0.121  pv=pos_bias:8.4503  if_gain:1.3900  scale_embed:0.8342  ema_factor:0.0034
+  [step  320] gn=embedding:0.261  out_proj:0.220  fc2:0.115  qkv_proj:0.114  pv=pos_bias:8.4471  if_gain:1.3902  scale_embed:0.8342  ema_factor:0.0031
+  [step  330] gn=embedding:0.259  out_proj:0.245  qkv_proj:0.127  fc2:0.122  pv=pos_bias:8.4443  if_gain:1.3905  scale_embed:0.8347  ema_factor:0.0030
+  [step  340] gn=embedding:0.277  out_proj:0.230  fc2:0.124  qkv_proj:0.117  pv=pos_bias:8.4424  if_gain:1.3904  scale_embed:0.8347  ema_factor:0.0033
+  [step  350] gn=embedding:0.273  out_proj:0.222  fc2:0.121  qkv_proj:0.116  pv=pos_bias:8.4401  if_gain:1.3907  scale_embed:0.8344  ema_factor:0.0033
+  [step  360] gn=embedding:0.260  out_proj:0.258  fc2:0.126  qkv_proj:0.126  pv=pos_bias:8.4377  if_gain:1.3908  scale_embed:0.8343  ema_factor:0.0030
+  [step  370] gn=embedding:0.265  out_proj:0.213  fc2:0.117  qkv_proj:0.108  pv=pos_bias:8.4355  if_gain:1.3910  scale_embed:0.8346  ema_factor:0.0033
+  [step  380] gn=embedding:0.268  out_proj:0.205  fc2:0.121  qkv_proj:0.110  pv=pos_bias:8.4335  if_gain:1.3911  scale_embed:0.8352  ema_factor:0.0035
+  [step  390] gn=embedding:0.273  out_proj:0.248  fc2:0.127  qkv_proj:0.125  pv=pos_bias:8.4321  if_gain:1.3912  scale_embed:0.8358  ema_factor:0.0028
+  Step 400/3789 | Loss 3.8105
+  [step  400] gn=embedding:0.278  out_proj:0.218  fc2:0.122  qkv_proj:0.113  pv=pos_bias:8.4303  if_gain:1.3917  scale_embed:0.8363  ema_factor:0.0024
+  [step  410] gn=embedding:0.281  out_proj:0.233  fc2:0.131  qkv_proj:0.121  pv=pos_bias:8.4279  if_gain:1.3921  scale_embed:0.8365  ema_factor:0.0033
+  [step  420] gn=embedding:0.269  out_proj:0.227  fc2:0.120  qkv_proj:0.115  pv=pos_bias:8.4254  if_gain:1.3924  scale_embed:0.8365  ema_factor:0.0034
+  [step  430] gn=embedding:0.253  out_proj:0.229  fc2:0.120  qkv_proj:0.119  pv=pos_bias:8.4235  if_gain:1.3925  scale_embed:0.8369  ema_factor:0.0031
+  [step  440] gn=embedding:0.258  out_proj:0.223  fc2:0.121  qkv_proj:0.119  pv=pos_bias:8.4216  if_gain:1.3924  scale_embed:0.8373  ema_factor:0.0029
+  [step  450] gn=embedding:0.278  out_proj:0.214  fc2:0.122  qkv_proj:0.108  pv=pos_bias:8.4192  if_gain:1.3925  scale_embed:0.8374  ema_factor:0.0032
+  [step  460] gn=embedding:0.274  out_proj:0.234  fc2:0.124  qkv_proj:0.119  pv=pos_bias:8.4169  if_gain:1.3926  scale_embed:0.8374  ema_factor:0.0032
+  [step  470] gn=embedding:0.271  out_proj:0.201  fc2:0.119  qkv_proj:0.115  pv=pos_bias:8.4145  if_gain:1.3929  scale_embed:0.8383  ema_factor:0.0030
+  [step  480] gn=embedding:0.258  out_proj:0.225  2:0.137  fc2:0.123  pv=pos_bias:8.4120  if_gain:1.3934  scale_embed:0.8390  ema_factor:0.0035
+  [step  490] gn=embedding:0.265  out_proj:0.234  fc2:0.126  qkv_proj:0.122  pv=pos_bias:8.4106  if_gain:1.3934  scale_embed:0.8400  ema_factor:0.0032
+  Step 600/3789 | Loss 3.9331
+  Step 800/3789 | Loss 3.9195
+  Step 1000/3789 | Loss 3.8444
+  Step 1200/3789 | Loss 3.8405
+  Step 1400/3789 | Loss 3.8486
+  Step 1600/3789 | Loss 3.6964
+  Step 1800/3789 | Loss 3.8748
+  Step 2000/3789 | Loss 3.8220
+  Step 2200/3789 | Loss 3.8877
+  Step 2400/3789 | Loss 3.8794
+  Step 2600/3789 | Loss 3.6627
+  Step 2800/3789 | Loss 3.8152
+  Step 3000/3789 | Loss 3.7151
+  Step 3200/3789 | Loss 3.9134
+  Step 3400/3789 | Loss 3.7475
+  Step 3600/3789 | Loss 4.0942
+Ep 4/10 | Train 3.8048 | Val 3.6937 PPL 40.2 * BEST | 14386s (126%C)
+  DSQG pos-bias: |mean|=2.4588 |max|=8.5349 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.2114 |max|=1.1411
+  IF gains:      h0:1.12  h1:0.99  h2:1.02  h3:0.98  h4:0.97  h5:0.96  h6:0.94  h7:0.92
+  EMA factors:   b0:0.0042 (w≈236t)  b1:0.0032 (w≈310t)
+  KdV alphas:    b0:-0.0012  b1:-0.0014
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ' day, and the sun was shining.\nThe sun was shining, and the sun was shining.\nThe'
+    'The length of the hypotenuse' -> ' is about 1.5 mm. The length of the hypotenuse is about 1.5 mm. The length of th'
+    'The President of the United' -> ' States, John F. Kennedy, was elected President of the United States in 1867.\nTh'
+    'Once upon a time there was' -> ' a great deal of excitement, and the people were very excited. The people were v'
+    'The results indicate that' -> ' the number of people who are affected by the disease is higher than the number '
+  --
+  Passkey...
+  mean=40.8%  (5/12 distances >50%)
+  d=1:100%  d=2:100%  d=4:70%  d=8:50%  d=16:50%  d=32:40%  d=64:20%  d=128:10%  d=256:20%  d=512:10%  d=1024:10%  d=1536:10%
+  [step    0] gn=out_proj:0.292  embedding:0.274  fc2:0.134  qkv_proj:0.126  pv=pos_bias:7.7964  if_gain:1.4570  scale_embed:0.9310  ema_factor:0.0032
+  [step   10] gn=embedding:0.283  out_proj:0.244  fc2:0.132  qkv_proj:0.111  pv=pos_bias:7.7950  if_gain:1.4571  scale_embed:0.9311  ema_factor:0.0033
+  [step   20] gn=embedding:0.275  out_proj:0.201  fc2:0.121  qkv_proj:0.101  pv=pos_bias:7.7938  if_gain:1.4570  scale_embed:0.9313  ema_factor:0.0032
+  [step   30] gn=embedding:0.293  out_proj:0.217  fc2:0.131  qkv_proj:0.105  pv=pos_bias:7.7925  if_gain:1.4570  scale_embed:0.9316  ema_factor:0.0033
+  [step   40] gn=embedding:0.277  out_proj:0.224  fc2:0.126  qkv_proj:0.106  pv=pos_bias:7.7908  if_gain:1.4570  scale_embed:0.9317  ema_factor:0.0034
+  [step   50] gn=embedding:0.283  out_proj:0.230  fc2:0.127  qkv_proj:0.101  pv=pos_bias:7.7894  if_gain:1.4568  scale_embed:0.9320  ema_factor:0.0028
+  [step   60] gn=embedding:0.293  out_proj:0.225  fc2:0.123  qkv_proj:0.108  pv=pos_bias:7.7882  if_gain:1.4573  scale_embed:0.9321  ema_factor:0.0030
+  [step   70] gn=embedding:0.303  out_proj:0.256  fc2:0.135  qkv_proj:0.126  pv=pos_bias:7.7869  if_gain:1.4576  scale_embed:0.9325  ema_factor:0.0030
+  [step   80] gn=embedding:0.277  out_proj:0.226  fc2:0.123  qkv_proj:0.109  pv=pos_bias:7.7854  if_gain:1.4577  scale_embed:0.9325  ema_factor:0.0029
+  [step   90] gn=embedding:0.274  out_proj:0.274  fc2:0.141  qkv_proj:0.125  pv=pos_bias:7.7833  if_gain:1.4575  scale_embed:0.9326  ema_factor:0.0030
+  [step  100] gn=embedding:0.280  out_proj:0.248  fc2:0.128  qkv_proj:0.113  pv=pos_bias:7.7813  if_gain:1.4575  scale_embed:0.9327  ema_factor:0.0029
+  [step  110] gn=embedding:0.288  out_proj:0.262  fc2:0.137  qkv_proj:0.113  pv=pos_bias:7.7795  if_gain:1.4576  scale_embed:0.9323  ema_factor:0.0031
+  [step  120] gn=embedding:0.291  out_proj:0.268  fc2:0.130  qkv_proj:0.120  pv=pos_bias:7.7781  if_gain:1.4578  scale_embed:0.9317  ema_factor:0.0032
+  [step  130] gn=embedding:0.300  out_proj:0.272  fc2:0.137  qkv_proj:0.123  pv=pos_bias:7.7765  if_gain:1.4578  scale_embed:0.9318  ema_factor:0.0028
+  [step  140] gn=embedding:0.302  out_proj:0.256  fc2:0.130  qkv_proj:0.112  pv=pos_bias:7.7751  if_gain:1.4578  scale_embed:0.9321  ema_factor:0.0027
+  [step  150] gn=embedding:0.282  out_proj:0.240  fc2:0.125  qkv_proj:0.113  pv=pos_bias:7.7734  if_gain:1.4578  scale_embed:0.9327  ema_factor:0.0030
+  [step  160] gn=embedding:0.285  out_proj:0.219  fc2:0.124  qkv_proj:0.106  pv=pos_bias:7.7718  if_gain:1.4577  scale_embed:0.9334  ema_factor:0.0032
+  [step  170] gn=embedding:0.269  out_proj:0.243  fc2:0.126  qkv_proj:0.110  pv=pos_bias:7.7702  if_gain:1.4580  scale_embed:0.9335  ema_factor:0.0030
+  [step  180] gn=embedding:0.298  out_proj:0.244  fc2:0.131  qkv_proj:0.108  pv=pos_bias:7.7687  if_gain:1.4581  scale_embed:0.9335  ema_factor:0.0029
+  [step  190] gn=embedding:0.284  out_proj:0.258  fc2:0.131  qkv_proj:0.117  pv=pos_bias:7.7669  if_gain:1.4580  scale_embed:0.9337  ema_factor:0.0028
+  Step 200/3789 | Loss 3.8685
+  [step  200] gn=embedding:0.283  out_proj:0.216  fc2:0.122  qkv_proj:0.107  pv=pos_bias:7.7652  if_gain:1.4580  scale_embed:0.9339  ema_factor:0.0029
+  [step  210] gn=embedding:0.288  out_proj:0.224  fc2:0.125  qkv_proj:0.110  pv=pos_bias:7.7631  if_gain:1.4580  scale_embed:0.9344  ema_factor:0.0026
+  [step  220] gn=embedding:0.284  out_proj:0.233  fc2:0.127  qkv_proj:0.111  pv=pos_bias:7.7616  if_gain:1.4582  scale_embed:0.9349  ema_factor:0.0029
+  [step  230] gn=embedding:0.290  out_proj:0.274  fc2:0.139  qkv_proj:0.131  pv=pos_bias:7.7598  if_gain:1.4583  scale_embed:0.9348  ema_factor:0.0033
+  [step  240] gn=embedding:0.274  out_proj:0.257  fc2:0.132  qkv_proj:0.116  pv=pos_bias:7.7583  if_gain:1.4584  scale_embed:0.9350  ema_factor:0.0036
+  [step  250] gn=embedding:0.282  out_proj:0.218  fc2:0.129  qkv_proj:0.104  pv=pos_bias:7.7570  if_gain:1.4587  scale_embed:0.9353  ema_factor:0.0029
+  [step  260] gn=embedding:0.291  out_proj:0.220  fc2:0.121  qkv_proj:0.107  pv=pos_bias:7.7555  if_gain:1.4590  scale_embed:0.9357  ema_factor:0.0024
+  [step  270] gn=embedding:0.286  out_proj:0.252  fc2:0.136  qkv_proj:0.115  pv=pos_bias:7.7541  if_gain:1.4591  scale_embed:0.9358  ema_factor:0.0032
+  [step  280] gn=embedding:0.294  out_proj:0.251  fc2:0.131  qkv_proj:0.118  pv=pos_bias:7.7526  if_gain:1.4591  scale_embed:0.9353  ema_factor:0.0034
+  [step  290] gn=embedding:0.283  out_proj:0.254  fc2:0.132  qkv_proj:0.119  pv=pos_bias:7.7511  if_gain:1.4594  scale_embed:0.9353  ema_factor:0.0030
+  [step  300] gn=embedding:0.282  out_proj:0.210  fc2:0.122  qkv_proj:0.103  pv=pos_bias:7.7496  if_gain:1.4599  scale_embed:0.9355  ema_factor:0.0030
+  [step  310] gn=embedding:0.276  out_proj:0.244  fc2:0.132  qkv_proj:0.112  pv=pos_bias:7.7481  if_gain:1.4604  scale_embed:0.9358  ema_factor:0.0030
+  [step  320] gn=embedding:0.301  out_proj:0.253  fc2:0.135  2:0.128  pv=pos_bias:7.7466  if_gain:1.4607  scale_embed:0.9357  ema_factor:0.0032
+  [step  330] gn=embedding:0.270  out_proj:0.217  fc2:0.125  qkv_proj:0.111  pv=pos_bias:7.7448  if_gain:1.4607  scale_embed:0.9361  ema_factor:0.0035
+  [step  340] gn=embedding:0.306  out_proj:0.285  fc2:0.138  qkv_proj:0.125  pv=pos_bias:7.7428  if_gain:1.4606  scale_embed:0.9365  ema_factor:0.0036
+  [step  350] gn=embedding:0.281  out_proj:0.231  fc2:0.125  qkv_proj:0.105  pv=pos_bias:7.7412  if_gain:1.4607  scale_embed:0.9368  ema_factor:0.0031
+  [step  360] gn=embedding:0.300  out_proj:0.254  fc2:0.134  qkv_proj:0.112  pv=pos_bias:7.7393  if_gain:1.4610  scale_embed:0.9373  ema_factor:0.0031
+  [step  370] gn=embedding:0.271  out_proj:0.250  fc2:0.126  qkv_proj:0.119  pv=pos_bias:7.7379  if_gain:1.4610  scale_embed:0.9373  ema_factor:0.0031
+  [step  380] gn=embedding:0.279  out_proj:0.267  fc2:0.132  qkv_proj:0.120  pv=pos_bias:7.7359  if_gain:1.4611  scale_embed:0.9378  ema_factor:0.0028
+  [step  390] gn=embedding:0.288  out_proj:0.244  fc2:0.126  qkv_proj:0.115  pv=pos_bias:7.7341  if_gain:1.4611  scale_embed:0.9381  ema_factor:0.0028
+  Step 400/3789 | Loss 3.7960
+  [step  400] gn=embedding:0.271  out_proj:0.231  fc2:0.127  qkv_proj:0.108  pv=pos_bias:7.7321  if_gain:1.4612  scale_embed:0.9382  ema_factor:0.0030
+  [step  410] gn=embedding:0.286  out_proj:0.264  fc2:0.131  qkv_proj:0.115  pv=pos_bias:7.7302  if_gain:1.4615  scale_embed:0.9380  ema_factor:0.0032
+  [step  420] gn=embedding:0.273  out_proj:0.205  fc2:0.122  qkv_proj:0.103  pv=pos_bias:7.7284  if_gain:1.4619  scale_embed:0.9383  ema_factor:0.0029
+  [step  430] gn=embedding:0.282  out_proj:0.259  fc2:0.129  qkv_proj:0.110  pv=pos_bias:7.7269  if_gain:1.4620  scale_embed:0.9385  ema_factor:0.0031
+  [step  440] gn=embedding:0.286  out_proj:0.277  fc2:0.142  qkv_proj:0.124  pv=pos_bias:7.7251  if_gain:1.4623  scale_embed:0.9378  ema_factor:0.0031
+  [step  450] gn=embedding:0.287  out_proj:0.268  fc2:0.134  qkv_proj:0.120  pv=pos_bias:7.7230  if_gain:1.4625  scale_embed:0.9380  ema_factor:0.0031
+  [step  460] gn=embedding:0.271  out_proj:0.239  fc2:0.133  qkv_proj:0.113  pv=pos_bias:7.7213  if_gain:1.4624  scale_embed:0.9384  ema_factor:0.0031
+  [step  470] gn=embedding:0.284  out_proj:0.265  fc2:0.135  qkv_proj:0.121  pv=pos_bias:7.7194  if_gain:1.4625  scale_embed:0.9387  ema_factor:0.0033
+  [step  480] gn=embedding:0.282  out_proj:0.254  fc2:0.134  qkv_proj:0.118  pv=pos_bias:7.7178  if_gain:1.4625  scale_embed:0.9390  ema_factor:0.0033
+  [step  490] gn=embedding:0.280  out_proj:0.200  fc2:0.121  qkv_proj:0.102  pv=pos_bias:7.7155  if_gain:1.4626  scale_embed:0.9388  ema_factor:0.0031
+  Step 600/3789 | Loss 3.8627
+  Step 800/3789 | Loss 3.8415
+  Step 1000/3789 | Loss 3.6738
+  Step 1200/3789 | Loss 3.7085
+  Step 1400/3789 | Loss 3.9555
+  Step 1600/3789 | Loss 3.6460
+  Step 1800/3789 | Loss 3.7033
+  Step 2000/3789 | Loss 3.5209
+  Step 2200/3789 | Loss 3.7229
+  Step 2400/3789 | Loss 3.5253
+  Step 2600/3789 | Loss 3.9717
+  Step 2800/3789 | Loss 3.8212
+  Step 3000/3789 | Loss 3.7813
+  Step 3200/3789 | Loss 3.9036
+  Step 3400/3789 | Loss 3.5647
+  Step 3600/3789 | Loss 3.9753
+Ep 5/10 | Train 3.7478 | Val 3.6512 PPL 38.5 * BEST | 18035s (157%C)
+  DSQG pos-bias: |mean|=2.3265 |max|=8.0426 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.2141 |max|=1.2025
+  IF gains:      h0:1.12  h1:0.99  h2:1.03  h3:0.99  h4:0.97  h5:0.95  h6:0.93  h7:0.92
+  EMA factors:   b0:0.0043 (w≈231t)  b1:0.0033 (w≈303t)
+  KdV alphas:    b0:-0.0011  b1:-0.0013
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ' night.\nThe first thing that was to happen was the fact that the sun was shining'
+    'The length of the hypotenuse' -> ' is determined by the number of times the hypotenuse is measured. The hypotenuse'
+    'The President of the United' -> ' States, George W. Bush, was elected president of the United States in 1898. He '
+    'Once upon a time there was' -> ' a great deal of confusion, and the people were not able to get out of the way. '
+    'The results indicate that' -> ' the number of people who are affected by the disease is increasing.\nThe authors'
+  --
+  Passkey...
+  mean=41.7%  (4/12 distances >50%)
+  d=1:100%  d=2:100%  d=4:80%  d=8:70%  d=16:40%  d=32:40%  d=64:20%  d=128:10%  d=256:10%  d=512:10%  d=1024:10%  d=1536:10%
+  [step    0] gn=embedding:0.305  out_proj:0.286  fc2:0.143  qkv_proj:0.119  pv=pos_bias:7.2641  if_gain:1.5011  scale_embed:0.9875  ema_factor:0.0033
+  [step   10] gn=embedding:0.290  out_proj:0.233  fc2:0.135  qkv_proj:0.106  pv=pos_bias:7.2632  if_gain:1.5014  scale_embed:0.9875  ema_factor:0.0032
+  [step   20] gn=embedding:0.295  out_proj:0.256  fc2:0.136  qkv_proj:0.112  pv=pos_bias:7.2623  if_gain:1.5014  scale_embed:0.9877  ema_factor:0.0034
+  [step   30] gn=embedding:0.308  out_proj:0.223  fc2:0.131  qkv_proj:0.102  pv=pos_bias:7.2612  if_gain:1.5014  scale_embed:0.9878  ema_factor:0.0032
+  [step   40] gn=embedding:0.319  out_proj:0.241  fc2:0.144  qkv_proj:0.118  pv=pos_bias:7.2599  if_gain:1.5014  scale_embed:0.9879  ema_factor:0.0030
+  [step   50] gn=embedding:0.301  out_proj:0.239  fc2:0.139  qkv_proj:0.117  pv=pos_bias:7.2585  if_gain:1.5014  scale_embed:0.9883  ema_factor:0.0028
+  [step   60] gn=embedding:0.288  out_proj:0.225  fc2:0.134  qkv_proj:0.110  pv=pos_bias:7.2577  if_gain:1.5014  scale_embed:0.9886  ema_factor:0.0027
+  [step   70] gn=embedding:0.286  out_proj:0.241  fc2:0.135  qkv_proj:0.109  pv=pos_bias:7.2572  if_gain:1.5016  scale_embed:0.9889  ema_factor:0.0031
+  [step   80] gn=embedding:0.297  out_proj:0.275  fc2:0.143  qkv_proj:0.115  pv=pos_bias:7.2559  if_gain:1.5019  scale_embed:0.9891  ema_factor:0.0034
+  [step   90] gn=embedding:0.299  out_proj:0.283  fc2:0.148  qkv_proj:0.117  pv=pos_bias:7.2544  if_gain:1.5019  scale_embed:0.9899  ema_factor:0.0030
+  [step  100] gn=embedding:0.281  out_proj:0.234  fc2:0.134  qkv_proj:0.107  pv=pos_bias:7.2528  if_gain:1.5020  scale_embed:0.9902  ema_factor:0.0030
+  [step  110] gn=embedding:0.303  out_proj:0.282  fc2:0.141  qkv_proj:0.123  pv=pos_bias:7.2510  if_gain:1.5021  scale_embed:0.9904  ema_factor:0.0031
+  [step  120] gn=embedding:0.320  out_proj:0.227  fc2:0.138  qkv_proj:0.107  pv=pos_bias:7.2494  if_gain:1.5022  scale_embed:0.9904  ema_factor:0.0034
+  [step  130] gn=embedding:0.310  out_proj:0.257  fc2:0.144  qkv_proj:0.113  pv=pos_bias:7.2483  if_gain:1.5021  scale_embed:0.9907  ema_factor:0.0034
+  [step  140] gn=embedding:0.301  out_proj:0.253  fc2:0.137  qkv_proj:0.113  pv=pos_bias:7.2470  if_gain:1.5022  scale_embed:0.9911  ema_factor:0.0033
+  [step  150] gn=embedding:0.312  out_proj:0.202  fc2:0.134  qkv_proj:0.100  pv=pos_bias:7.2459  if_gain:1.5021  scale_embed:0.9912  ema_factor:0.0032
+  [step  160] gn=embedding:0.303  out_proj:0.205  fc2:0.130  qkv_proj:0.105  pv=pos_bias:7.2447  if_gain:1.5024  scale_embed:0.9911  ema_factor:0.0030
+  [step  170] gn=embedding:0.310  out_proj:0.226  fc2:0.140  qkv_proj:0.107  pv=pos_bias:7.2433  if_gain:1.5025  scale_embed:0.9914  ema_factor:0.0028
+  [step  180] gn=embedding:0.289  out_proj:0.247  fc2:0.139  qkv_proj:0.114  pv=pos_bias:7.2417  if_gain:1.5026  scale_embed:0.9916  ema_factor:0.0031
+  [step  190] gn=embedding:0.303  out_proj:0.284  fc2:0.147  qkv_proj:0.125  pv=pos_bias:7.2408  if_gain:1.5026  scale_embed:0.9920  ema_factor:0.0031
+  Step 200/3789 | Loss 3.5473
+  [step  200] gn=embedding:0.304  out_proj:0.245  fc2:0.136  qkv_proj:0.107  pv=pos_bias:7.2398  if_gain:1.5026  scale_embed:0.9921  ema_factor:0.0030
+  [step  210] gn=embedding:0.290  out_proj:0.217  fc2:0.130  qkv_proj:0.106  pv=pos_bias:7.2389  if_gain:1.5028  scale_embed:0.9922  ema_factor:0.0031
+  [step  220] gn=embedding:0.302  out_proj:0.243  fc2:0.138  qkv_proj:0.109  pv=pos_bias:7.2378  if_gain:1.5028  scale_embed:0.9924  ema_factor:0.0031
+  [step  230] gn=embedding:0.290  out_proj:0.253  fc2:0.135  qkv_proj:0.114  pv=pos_bias:7.2369  if_gain:1.5025  scale_embed:0.9929  ema_factor:0.0029
+  [step  240] gn=embedding:0.298  out_proj:0.215  fc2:0.139  qkv_proj:0.106  pv=pos_bias:7.2360  if_gain:1.5025  scale_embed:0.9931  ema_factor:0.0031
+  [step  250] gn=embedding:0.288  out_proj:0.266  fc2:0.139  qkv_proj:0.119  pv=pos_bias:7.2349  if_gain:1.5025  scale_embed:0.9933  ema_factor:0.0030
+  [step  260] gn=embedding:0.295  out_proj:0.254  fc2:0.135  2:0.121  pv=pos_bias:7.2338  if_gain:1.5024  scale_embed:0.9933  ema_factor:0.0029
+  [step  270] gn=embedding:0.298  out_proj:0.259  fc2:0.138  qkv_proj:0.113  pv=pos_bias:7.2332  if_gain:1.5024  scale_embed:0.9931  ema_factor:0.0031
+  [step  280] gn=embedding:0.300  out_proj:0.238  fc2:0.143  qkv_proj:0.110  pv=pos_bias:7.2323  if_gain:1.5025  scale_embed:0.9929  ema_factor:0.0031
+  [step  290] gn=out_proj:0.301  embedding:0.297  fc2:0.153  qkv_proj:0.130  pv=pos_bias:7.2316  if_gain:1.5026  scale_embed:0.9931  ema_factor:0.0030
+  [step  300] gn=embedding:0.300  out_proj:0.233  fc2:0.135  qkv_proj:0.111  pv=pos_bias:7.2306  if_gain:1.5026  scale_embed:0.9935  ema_factor:0.0028
+  [step  310] gn=embedding:0.287  out_proj:0.219  fc2:0.134  qkv_proj:0.102  pv=pos_bias:7.2294  if_gain:1.5028  scale_embed:0.9936  ema_factor:0.0030
+  [step  320] gn=embedding:0.297  out_proj:0.296  fc2:0.147  qkv_proj:0.133  pv=pos_bias:7.2283  if_gain:1.5030  scale_embed:0.9937  ema_factor:0.0034
+  [step  330] gn=embedding:0.295  out_proj:0.247  fc2:0.140  qkv_proj:0.111  pv=pos_bias:7.2275  if_gain:1.5031  scale_embed:0.9934  ema_factor:0.0032
+  [step  340] gn=embedding:0.302  out_proj:0.234  fc2:0.135  qkv_proj:0.108  pv=pos_bias:7.2266  if_gain:1.5032  scale_embed:0.9933  ema_factor:0.0034
+  [step  350] gn=embedding:0.292  out_proj:0.276  fc2:0.142  qkv_proj:0.112  pv=pos_bias:7.2260  if_gain:1.5033  scale_embed:0.9936  ema_factor:0.0031
+  [step  360] gn=embedding:0.314  out_proj:0.236  fc2:0.137  qkv_proj:0.108  pv=pos_bias:7.2252  if_gain:1.5033  scale_embed:0.9938  ema_factor:0.0028
+  [step  370] gn=embedding:0.307  out_proj:0.240  fc2:0.135  qkv_proj:0.111  pv=pos_bias:7.2246  if_gain:1.5036  scale_embed:0.9936  ema_factor:0.0030
+  [step  380] gn=embedding:0.301  out_proj:0.269  fc2:0.145  qkv_proj:0.113  pv=pos_bias:7.2237  if_gain:1.5038  scale_embed:0.9934  ema_factor:0.0031
+  [step  390] gn=embedding:0.287  out_proj:0.230  fc2:0.129  qkv_proj:0.106  pv=pos_bias:7.2227  if_gain:1.5038  scale_embed:0.9935  ema_factor:0.0034
+  Step 400/3789 | Loss 3.6461
+  [step  400] gn=embedding:0.313  out_proj:0.273  fc2:0.149  qkv_proj:0.123  pv=pos_bias:7.2219  if_gain:1.5041  scale_embed:0.9940  ema_factor:0.0034
+  [step  410] gn=embedding:0.293  out_proj:0.200  fc2:0.137  qkv_proj:0.101  pv=pos_bias:7.2206  if_gain:1.5042  scale_embed:0.9943  ema_factor:0.0031
+  [step  420] gn=embedding:0.310  out_proj:0.275  fc2:0.145  qkv_proj:0.120  pv=pos_bias:7.2192  if_gain:1.5044  scale_embed:0.9948  ema_factor:0.0030
+  [step  430] gn=embedding:0.312  out_proj:0.237  fc2:0.142  qkv_proj:0.110  pv=pos_bias:7.2181  if_gain:1.5044  scale_embed:0.9950  ema_factor:0.0029
+  [step  440] gn=embedding:0.291  out_proj:0.244  fc2:0.137  qkv_proj:0.105  pv=pos_bias:7.2169  if_gain:1.5046  scale_embed:0.9951  ema_factor:0.0031
+  [step  450] gn=embedding:0.299  out_proj:0.263  fc2:0.145  qkv_proj:0.122  pv=pos_bias:7.2158  if_gain:1.5044  scale_embed:0.9953  ema_factor:0.0034
+  [step  460] gn=embedding:0.296  out_proj:0.284  fc2:0.147  qkv_proj:0.120  pv=pos_bias:7.2147  if_gain:1.5044  scale_embed:0.9953  ema_factor:0.0033
+  [step  470] gn=embedding:0.291  out_proj:0.259  fc2:0.136  qkv_proj:0.113  pv=pos_bias:7.2136  if_gain:1.5045  scale_embed:0.9951  ema_factor:0.0030
+  [step  480] gn=embedding:0.289  out_proj:0.248  fc2:0.130  qkv_proj:0.111  pv=pos_bias:7.2122  if_gain:1.5045  scale_embed:0.9952  ema_factor:0.0030
+  [step  490] gn=embedding:0.324  out_proj:0.267  fc2:0.143  qkv_proj:0.123  pv=pos_bias:7.2106  if_gain:1.5047  scale_embed:0.9952  ema_factor:0.0029
+  Step 600/3789 | Loss 3.8120
+  Step 800/3789 | Loss 3.5414
+  Step 1000/3789 | Loss 3.6659
+  Step 1200/3789 | Loss 3.7897
+  Step 1400/3789 | Loss 3.5746
+  Step 1600/3789 | Loss 3.6353
+  Step 1800/3789 | Loss 3.5326
+  Step 2000/3789 | Loss 3.7828
+  Step 2200/3789 | Loss 3.7240
+  Step 2400/3789 | Loss 3.8855
+  Step 2600/3789 | Loss 3.7824
+  Step 2800/3789 | Loss 3.6687
+  Step 3000/3789 | Loss 3.6143
+  Step 3200/3789 | Loss 3.5369
+  Step 3400/3789 | Loss 3.6488
+  Step 3600/3789 | Loss 3.7821
+Ep 6/10 | Train 3.7021 | Val 3.6177 PPL 37.3 * BEST | 21542s (188%C)
+  DSQG pos-bias: |mean|=2.2332 |max|=7.6909 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.2145 |max|=1.2407
+  IF gains:      h0:1.12  h1:0.99  h2:1.03  h3:0.99  h4:0.97  h5:0.95  h6:0.93  h7:0.92
+  EMA factors:   b0:0.0046 (w≈217t)  b1:0.0030 (w≈334t)
+  KdV alphas:    b0:-0.0010  b1:-0.0012
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ' night.\nThe first thing that was to happen was the fact that the city was not a '
+    'The length of the hypotenuse' -> ' is determined by the number of times the hypotenuse is measured. The hypotenuse'
+    'The President of the United' -> ' States, John F. Kennedy, was elected president of the United States in 1963.\nTh'
+    'Once upon a time there was' -> ' a great deal of confusion about the origin of the word, the word was not invent'
+    'The results indicate that' -> ' the use of the Internet has been a major source of concern for the development '
+  --
+  Passkey...
+  mean=44.2%  (6/12 distances >50%)
+  d=1:100%  d=2:100%  d=4:80%  d=8:60%  d=16:50%  d=32:50%  d=64:40%  d=128:10%  d=256:10%  d=512:10%  d=1024:10%  d=1536:10%
+  [step    0] gn=embedding:0.308  out_proj:0.301  fc2:0.154  qkv_proj:0.121  pv=pos_bias:6.8936  if_gain:1.5309  scale_embed:1.0229  ema_factor:0.0030
+  [step   10] gn=embedding:0.310  out_proj:0.239  fc2:0.145  qkv_proj:0.109  pv=pos_bias:6.8927  if_gain:1.5310  scale_embed:1.0231  ema_factor:0.0029
+  [step   20] gn=embedding:0.319  out_proj:0.300  fc2:0.159  qkv_proj:0.131  pv=pos_bias:6.8920  if_gain:1.5313  scale_embed:1.0230  ema_factor:0.0028
+  [step   30] gn=embedding:0.302  out_proj:0.231  fc2:0.140  qkv_proj:0.106  pv=pos_bias:6.8913  if_gain:1.5315  scale_embed:1.0228  ema_factor:0.0030
+  [step   40] gn=embedding:0.323  out_proj:0.273  fc2:0.155  qkv_proj:0.119  pv=pos_bias:6.8906  if_gain:1.5314  scale_embed:1.0228  ema_factor:0.0032
+  [step   50] gn=embedding:0.316  out_proj:0.298  fc2:0.168  qkv_proj:0.129  pv=pos_bias:6.8899  if_gain:1.5315  scale_embed:1.0229  ema_factor:0.0034
+  [step   60] gn=embedding:0.309  out_proj:0.236  fc2:0.151  qkv_proj:0.116  pv=pos_bias:6.8892  if_gain:1.5316  scale_embed:1.0231  ema_factor:0.0033
+  [step   70] gn=embedding:0.299  out_proj:0.248  fc2:0.146  qkv_proj:0.115  pv=pos_bias:6.8887  if_gain:1.5318  scale_embed:1.0232  ema_factor:0.0030
+  [step   80] gn=embedding:0.296  out_proj:0.267  fc2:0.149  qkv_proj:0.113  pv=pos_bias:6.8883  if_gain:1.5318  scale_embed:1.0234  ema_factor:0.0031
+  [step   90] gn=embedding:0.300  out_proj:0.225  fc2:0.144  qkv_proj:0.109  pv=pos_bias:6.8880  if_gain:1.5321  scale_embed:1.0234  ema_factor:0.0029
+  [step  100] gn=embedding:0.303  out_proj:0.235  fc2:0.136  qkv_proj:0.127  pv=pos_bias:6.8875  if_gain:1.5322  scale_embed:1.0234  ema_factor:0.0027
+  [step  110] gn=embedding:0.295  out_proj:0.242  fc2:0.143  qkv_proj:0.111  pv=pos_bias:6.8869  if_gain:1.5321  scale_embed:1.0233  ema_factor:0.0026
+  [step  120] gn=embedding:0.296  out_proj:0.260  fc2:0.151  qkv_proj:0.121  pv=pos_bias:6.8863  if_gain:1.5320  scale_embed:1.0231  ema_factor:0.0025
+  [step  130] gn=embedding:0.299  out_proj:0.270  fc2:0.151  qkv_proj:0.123  pv=pos_bias:6.8857  if_gain:1.5320  scale_embed:1.0231  ema_factor:0.0027
+  [step  140] gn=embedding:0.300  out_proj:0.269  fc2:0.145  qkv_proj:0.116  pv=pos_bias:6.8853  if_gain:1.5322  scale_embed:1.0233  ema_factor:0.0030
+  [step  150] gn=embedding:0.313  out_proj:0.286  fc2:0.152  qkv_proj:0.122  pv=pos_bias:6.8845  if_gain:1.5322  scale_embed:1.0235  ema_factor:0.0032
+  [step  160] gn=embedding:0.304  out_proj:0.233  fc2:0.147  qkv_proj:0.109  pv=pos_bias:6.8841  if_gain:1.5322  scale_embed:1.0236  ema_factor:0.0031
+  [step  170] gn=embedding:0.299  out_proj:0.234  fc2:0.153  qkv_proj:0.112  pv=pos_bias:6.8834  if_gain:1.5320  scale_embed:1.0234  ema_factor:0.0031
+  [step  180] gn=embedding:0.300  out_proj:0.236  fc2:0.148  qkv_proj:0.116  pv=pos_bias:6.8825  if_gain:1.5320  scale_embed:1.0234  ema_factor:0.0032
+  [step  190] gn=embedding:0.297  out_proj:0.262  fc2:0.150  qkv_proj:0.124  pv=pos_bias:6.8815  if_gain:1.5320  scale_embed:1.0234  ema_factor:0.0031
+  Step 200/3789 | Loss 3.4757
+  [step  200] gn=embedding:0.294  out_proj:0.250  fc2:0.143  qkv_proj:0.108  pv=pos_bias:6.8806  if_gain:1.5321  scale_embed:1.0235  ema_factor:0.0033
+  [step  210] gn=embedding:0.312  out_proj:0.274  fc2:0.148  qkv_proj:0.126  pv=pos_bias:6.8796  if_gain:1.5321  scale_embed:1.0235  ema_factor:0.0032
+  [step  220] gn=embedding:0.304  out_proj:0.236  fc2:0.150  qkv_proj:0.113  pv=pos_bias:6.8788  if_gain:1.5323  scale_embed:1.0235  ema_factor:0.0029
+  [step  230] gn=embedding:0.306  out_proj:0.255  2:0.192  fc2:0.156  pv=pos_bias:6.8781  if_gain:1.5323  scale_embed:1.0236  ema_factor:0.0030
+  [step  240] gn=embedding:0.311  out_proj:0.255  fc2:0.153  qkv_proj:0.123  pv=pos_bias:6.8774  if_gain:1.5324  scale_embed:1.0239  ema_factor:0.0031
+  [step  250] gn=embedding:0.297  out_proj:0.240  fc2:0.148  qkv_proj:0.111  pv=pos_bias:6.8768  if_gain:1.5324  scale_embed:1.0241  ema_factor:0.0030
+  [step  260] gn=embedding:0.301  out_proj:0.237  fc2:0.140  qkv_proj:0.114  pv=pos_bias:6.8759  if_gain:1.5322  scale_embed:1.0241  ema_factor:0.0030
+  [step  270] gn=embedding:0.293  out_proj:0.233  fc2:0.139  qkv_proj:0.111  pv=pos_bias:6.8748  if_gain:1.5322  scale_embed:1.0241  ema_factor:0.0032
+  [step  280] gn=embedding:0.297  out_proj:0.257  fc2:0.141  qkv_proj:0.114  pv=pos_bias:6.8738  if_gain:1.5321  scale_embed:1.0243  ema_factor:0.0031
+  [step  290] gn=embedding:0.296  out_proj:0.246  fc2:0.148  qkv_proj:0.116  pv=pos_bias:6.8726  if_gain:1.5322  scale_embed:1.0244  ema_factor:0.0033
+  [step  300] gn=embedding:0.306  out_proj:0.248  fc2:0.145  qkv_proj:0.115  pv=pos_bias:6.8719  if_gain:1.5323  scale_embed:1.0245  ema_factor:0.0029
+  [step  310] gn=embedding:0.299  out_proj:0.249  fc2:0.148  qkv_proj:0.107  pv=pos_bias:6.8713  if_gain:1.5323  scale_embed:1.0245  ema_factor:0.0029
+  [step  320] gn=embedding:0.306  out_proj:0.247  fc2:0.148  qkv_proj:0.117  pv=pos_bias:6.8705  if_gain:1.5324  scale_embed:1.0246  ema_factor:0.0032
+  [step  330] gn=embedding:0.306  out_proj:0.263  fc2:0.148  qkv_proj:0.114  pv=pos_bias:6.8697  if_gain:1.5325  scale_embed:1.0243  ema_factor:0.0032
+  [step  340] gn=embedding:0.304  out_proj:0.289  fc2:0.159  qkv_proj:0.122  pv=pos_bias:6.8689  if_gain:1.5325  scale_embed:1.0243  ema_factor:0.0029
+  [step  350] gn=embedding:0.302  out_proj:0.288  fc2:0.158  qkv_proj:0.123  pv=pos_bias:6.8681  if_gain:1.5325  scale_embed:1.0244  ema_factor:0.0026
+  [step  360] gn=embedding:0.314  out_proj:0.278  fc2:0.154  qkv_proj:0.124  pv=pos_bias:6.8676  if_gain:1.5326  scale_embed:1.0245  ema_factor:0.0028
+  [step  370] gn=embedding:0.303  out_proj:0.260  fc2:0.152  qkv_proj:0.119  pv=pos_bias:6.8670  if_gain:1.5326  scale_embed:1.0243  ema_factor:0.0031
+  [step  380] gn=embedding:0.315  out_proj:0.253  fc2:0.147  qkv_proj:0.112  pv=pos_bias:6.8663  if_gain:1.5327  scale_embed:1.0243  ema_factor:0.0032
+  [step  390] gn=embedding:0.309  out_proj:0.243  fc2:0.156  qkv_proj:0.113  pv=pos_bias:6.8656  if_gain:1.5326  scale_embed:1.0241  ema_factor:0.0029
+  Step 400/3789 | Loss 3.7488
+  [step  400] gn=embedding:0.292  out_proj:0.237  fc2:0.145  qkv_proj:0.106  pv=pos_bias:6.8651  if_gain:1.5326  scale_embed:1.0239  ema_factor:0.0029
+  [step  410] gn=embedding:0.307  out_proj:0.254  fc2:0.149  qkv_proj:0.117  pv=pos_bias:6.8646  if_gain:1.5327  scale_embed:1.0237  ema_factor:0.0030
+  [step  420] gn=embedding:0.301  out_proj:0.276  fc2:0.151  qkv_proj:0.118  pv=pos_bias:6.8641  if_gain:1.5329  scale_embed:1.0236  ema_factor:0.0031
+  [step  430] gn=embedding:0.310  out_proj:0.255  fc2:0.150  qkv_proj:0.120  pv=pos_bias:6.8638  if_gain:1.5329  scale_embed:1.0236  ema_factor:0.0031
+  [step  440] gn=embedding:0.297  out_proj:0.231  fc2:0.152  qkv_proj:0.103  pv=pos_bias:6.8633  if_gain:1.5329  scale_embed:1.0235  ema_factor:0.0032
+  [step  450] gn=embedding:0.319  out_proj:0.238  fc2:0.147  qkv_proj:0.112  pv=pos_bias:6.8626  if_gain:1.5328  scale_embed:1.0236  ema_factor:0.0032
+  [step  460] gn=embedding:0.322  out_proj:0.232  fc2:0.155  2:0.144  pv=pos_bias:6.8620  if_gain:1.5329  scale_embed:1.0237  ema_factor:0.0032
+  [step  470] gn=embedding:0.307  out_proj:0.245  fc2:0.143  qkv_proj:0.107  pv=pos_bias:6.8612  if_gain:1.5329  scale_embed:1.0237  ema_factor:0.0030
+  [step  480] gn=embedding:0.294  out_proj:0.261  fc2:0.151  qkv_proj:0.118  pv=pos_bias:6.8605  if_gain:1.5329  scale_embed:1.0238  ema_factor:0.0029
+  [step  490] gn=embedding:0.303  out_proj:0.288  fc2:0.161  qkv_proj:0.128  pv=pos_bias:6.8598  if_gain:1.5330  scale_embed:1.0242  ema_factor:0.0029
+  Step 600/3789 | Loss 3.7681
+  Step 800/3789 | Loss 3.8531
+  Step 1000/3789 | Loss 3.3908
+  Step 1200/3789 | Loss 3.6495
+  Step 1400/3789 | Loss 3.5031
+  Step 1600/3789 | Loss 3.6548
+  Step 1800/3789 | Loss 3.7583
+  Step 2000/3789 | Loss 3.7128
+  Step 2200/3789 | Loss 3.8020
+  Step 2400/3789 | Loss 3.6694
+  Step 2600/3789 | Loss 3.7486
+  Step 2800/3789 | Loss 3.9289
+  Step 3000/3789 | Loss 3.5403
+  Step 3200/3789 | Loss 3.6694
+  Step 3400/3789 | Loss 3.7550
+  Step 3600/3789 | Loss 3.8048
+Ep 7/10 | Train 3.6664 | Val 3.5936 PPL 36.4 * BEST | 25191s (220%C)
+  DSQG pos-bias: |mean|=2.1738 |max|=7.4692 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.2140 |max|=1.2597
+  IF gains:      h0:1.12  h1:0.99  h2:1.03  h3:0.99  h4:0.97  h5:0.95  h6:0.93  h7:0.92
+  EMA factors:   b0:0.0047 (w≈213t)  b1:0.0031 (w≈320t)
+  KdV alphas:    b0:-0.0010  b1:-0.0012
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ' day.\nThe first day of the month was the first day of the month. The first day o'
+    'The length of the hypotenuse' -> ' is determined by the number of times the hypotenuse is applied to the hypotenus'
+    'The President of the United' -> ' States, John F. Kennedy, was elected president of the United States in 1898.\nTh'
+    'Once upon a time there was' -> ' a great deal of confusion, and the people were not able to get the news.\nThe fi'
+    'The results indicate that' -> ' the use of the Internet has been a major source of concern for the development '
+  --
+  Passkey...
+  mean=47.5%  (6/12 distances >50%)
+  d=1:100%  d=2:100%  d=4:100%  d=8:70%  d=16:50%  d=32:50%  d=64:40%  d=128:20%  d=256:10%  d=512:10%  d=1024:10%  d=1536:10%
+  [step    0] gn=embedding:0.315  out_proj:0.248  fc2:0.155  qkv_proj:0.114  pv=pos_bias:6.6630  if_gain:1.5501  scale_embed:1.0360  ema_factor:0.0031
+  [step   10] gn=embedding:0.314  out_proj:0.208  fc2:0.153  qkv_proj:0.115  pv=pos_bias:6.6625  if_gain:1.5502  scale_embed:1.0361  ema_factor:0.0033
+  [step   20] gn=embedding:0.313  out_proj:0.228  fc2:0.152  qkv_proj:0.108  pv=pos_bias:6.6619  if_gain:1.5503  scale_embed:1.0361  ema_factor:0.0031
+  [step   30] gn=embedding:0.309  out_proj:0.292  fc2:0.173  2:0.130  pv=pos_bias:6.6615  if_gain:1.5504  scale_embed:1.0362  ema_factor:0.0030
+  [step   40] gn=embedding:0.314  out_proj:0.268  fc2:0.163  qkv_proj:0.121  pv=pos_bias:6.6610  if_gain:1.5504  scale_embed:1.0363  ema_factor:0.0028
+  [step   50] gn=embedding:0.304  out_proj:0.257  fc2:0.155  qkv_proj:0.113  pv=pos_bias:6.6607  if_gain:1.5504  scale_embed:1.0363  ema_factor:0.0028
+  [step   60] gn=embedding:0.303  out_proj:0.260  fc2:0.159  qkv_proj:0.114  pv=pos_bias:6.6602  if_gain:1.5504  scale_embed:1.0363  ema_factor:0.0029
+  [step   70] gn=embedding:0.318  out_proj:0.222  fc2:0.152  qkv_proj:0.118  pv=pos_bias:6.6597  if_gain:1.5504  scale_embed:1.0361  ema_factor:0.0031
+  [step   80] gn=embedding:0.317  out_proj:0.237  fc2:0.159  qkv_proj:0.116  pv=pos_bias:6.6591  if_gain:1.5504  scale_embed:1.0361  ema_factor:0.0032
+  [step   90] gn=embedding:0.301  out_proj:0.267  fc2:0.158  qkv_proj:0.117  pv=pos_bias:6.6587  if_gain:1.5504  scale_embed:1.0362  ema_factor:0.0032
+  [step  100] gn=embedding:0.328  out_proj:0.260  fc2:0.165  qkv_proj:0.118  pv=pos_bias:6.6583  if_gain:1.5504  scale_embed:1.0363  ema_factor:0.0032
+  [step  110] gn=embedding:0.310  out_proj:0.236  fc2:0.152  qkv_proj:0.113  pv=pos_bias:6.6580  if_gain:1.5503  scale_embed:1.0366  ema_factor:0.0031
+  [step  120] gn=embedding:0.308  out_proj:0.246  fc2:0.155  qkv_proj:0.119  pv=pos_bias:6.6577  if_gain:1.5503  scale_embed:1.0367  ema_factor:0.0031
+  [step  130] gn=embedding:0.307  out_proj:0.251  fc2:0.158  qkv_proj:0.122  pv=pos_bias:6.6573  if_gain:1.5504  scale_embed:1.0365  ema_factor:0.0030
+  [step  140] gn=embedding:0.329  out_proj:0.230  fc2:0.156  qkv_proj:0.109  pv=pos_bias:6.6569  if_gain:1.5504  scale_embed:1.0365  ema_factor:0.0029
+  [step  150] gn=embedding:0.305  out_proj:0.252  fc2:0.157  qkv_proj:0.126  pv=pos_bias:6.6564  if_gain:1.5504  scale_embed:1.0366  ema_factor:0.0030
+  [step  160] gn=embedding:0.304  out_proj:0.236  fc2:0.154  qkv_proj:0.108  pv=pos_bias:6.6559  if_gain:1.5504  scale_embed:1.0365  ema_factor:0.0031
+  [step  170] gn=embedding:0.317  out_proj:0.251  fc2:0.166  qkv_proj:0.123  pv=pos_bias:6.6555  if_gain:1.5505  scale_embed:1.0366  ema_factor:0.0031
+  [step  180] gn=embedding:0.307  out_proj:0.262  fc2:0.165  qkv_proj:0.118  pv=pos_bias:6.6552  if_gain:1.5505  scale_embed:1.0367  ema_factor:0.0031
+  [step  190] gn=embedding:0.316  out_proj:0.270  fc2:0.169  qkv_proj:0.125  pv=pos_bias:6.6548  if_gain:1.5506  scale_embed:1.0368  ema_factor:0.0032
+  Step 200/3789 | Loss 3.6473
+  [step  200] gn=embedding:0.309  out_proj:0.225  fc2:0.148  qkv_proj:0.107  pv=pos_bias:6.6544  if_gain:1.5506  scale_embed:1.0367  ema_factor:0.0032
+  [step  210] gn=embedding:0.310  out_proj:0.219  fc2:0.148  qkv_proj:0.106  pv=pos_bias:6.6539  if_gain:1.5506  scale_embed:1.0368  ema_factor:0.0030
+  [step  220] gn=embedding:0.306  out_proj:0.259  fc2:0.157  qkv_proj:0.120  pv=pos_bias:6.6534  if_gain:1.5507  scale_embed:1.0369  ema_factor:0.0030
+  [step  230] gn=embedding:0.299  out_proj:0.234  fc2:0.154  qkv_proj:0.114  pv=pos_bias:6.6530  if_gain:1.5507  scale_embed:1.0368  ema_factor:0.0029
+  [step  240] gn=embedding:0.315  out_proj:0.286  fc2:0.167  qkv_proj:0.142  pv=pos_bias:6.6526  if_gain:1.5508  scale_embed:1.0370  ema_factor:0.0030
+  [step  250] gn=embedding:0.314  out_proj:0.260  fc2:0.158  qkv_proj:0.136  pv=pos_bias:6.6523  if_gain:1.5510  scale_embed:1.0370  ema_factor:0.0032
+  [step  260] gn=embedding:0.316  out_proj:0.237  fc2:0.158  qkv_proj:0.116  pv=pos_bias:6.6521  if_gain:1.5510  scale_embed:1.0371  ema_factor:0.0031
+  [step  270] gn=embedding:0.304  out_proj:0.220  fc2:0.153  5:0.115  pv=pos_bias:6.6517  if_gain:1.5510  scale_embed:1.0372  ema_factor:0.0029
+  [step  280] gn=embedding:0.317  out_proj:0.249  fc2:0.163  qkv_proj:0.119  pv=pos_bias:6.6513  if_gain:1.5509  scale_embed:1.0371  ema_factor:0.0029
+  [step  290] gn=embedding:0.307  out_proj:0.285  fc2:0.159  qkv_proj:0.127  pv=pos_bias:6.6510  if_gain:1.5510  scale_embed:1.0371  ema_factor:0.0029
+  [step  300] gn=embedding:0.315  out_proj:0.227  fc2:0.155  pos_embed:0.106  pv=pos_bias:6.6506  if_gain:1.5509  scale_embed:1.0371  ema_factor:0.0030
+  [step  310] gn=embedding:0.318  out_proj:0.218  fc2:0.151  qkv_proj:0.109  pv=pos_bias:6.6501  if_gain:1.5509  scale_embed:1.0372  ema_factor:0.0030
+  [step  320] gn=embedding:0.305  out_proj:0.258  fc2:0.164  qkv_proj:0.123  pv=pos_bias:6.6497  if_gain:1.5509  scale_embed:1.0372  ema_factor:0.0030
+  [step  330] gn=embedding:0.307  out_proj:0.248  fc2:0.156  qkv_proj:0.121  pv=pos_bias:6.6492  if_gain:1.5510  scale_embed:1.0371  ema_factor:0.0030
+  [step  340] gn=embedding:0.302  out_proj:0.216  fc2:0.152  qkv_proj:0.112  pv=pos_bias:6.6488  if_gain:1.5511  scale_embed:1.0371  ema_factor:0.0029
+  [step  350] gn=embedding:0.320  out_proj:0.265  fc2:0.177  qkv_proj:0.124  pv=pos_bias:6.6485  if_gain:1.5511  scale_embed:1.0370  ema_factor:0.0028
+  [step  360] gn=embedding:0.297  out_proj:0.210  fc2:0.147  pos_embed:0.106  pv=pos_bias:6.6480  if_gain:1.5511  scale_embed:1.0371  ema_factor:0.0029
+  [step  370] gn=embedding:0.309  out_proj:0.241  fc2:0.155  qkv_proj:0.114  pv=pos_bias:6.6476  if_gain:1.5511  scale_embed:1.0374  ema_factor:0.0030
+  [step  380] gn=embedding:0.312  out_proj:0.219  fc2:0.152  qkv_proj:0.109  pv=pos_bias:6.6472  if_gain:1.5510  scale_embed:1.0375  ema_factor:0.0031
+  [step  390] gn=embedding:0.315  out_proj:0.249  fc2:0.151  qkv_proj:0.119  pv=pos_bias:6.6466  if_gain:1.5511  scale_embed:1.0375  ema_factor:0.0032
+  Step 400/3789 | Loss 3.4769
+  [step  400] gn=embedding:0.321  out_proj:0.230  fc2:0.158  qkv_proj:0.110  pv=pos_bias:6.6461  if_gain:1.5512  scale_embed:1.0376  ema_factor:0.0032
+  [step  410] gn=embedding:0.310  out_proj:0.215  fc2:0.156  qkv_proj:0.106  pv=pos_bias:6.6456  if_gain:1.5513  scale_embed:1.0377  ema_factor:0.0031
+  [step  420] gn=embedding:0.297  out_proj:0.236  fc2:0.156  qkv_proj:0.117  pv=pos_bias:6.6450  if_gain:1.5513  scale_embed:1.0375  ema_factor:0.0030
+  [step  430] gn=embedding:0.304  out_proj:0.210  fc2:0.152  qkv_proj:0.110  pv=pos_bias:6.6445  if_gain:1.5514  scale_embed:1.0374  ema_factor:0.0032
+  [step  440] gn=embedding:0.316  out_proj:0.261  fc2:0.166  qkv_proj:0.119  pv=pos_bias:6.6442  if_gain:1.5514  scale_embed:1.0374  ema_factor:0.0032
+  [step  450] gn=embedding:0.307  out_proj:0.245  fc2:0.154  qkv_proj:0.111  pv=pos_bias:6.6440  if_gain:1.5515  scale_embed:1.0374  ema_factor:0.0032
+  [step  460] gn=embedding:0.324  out_proj:0.228  fc2:0.158  qkv_proj:0.111  pv=pos_bias:6.6437  if_gain:1.5513  scale_embed:1.0374  ema_factor:0.0031
+  [step  470] gn=embedding:0.324  out_proj:0.232  fc2:0.155  qkv_proj:0.108  pv=pos_bias:6.6433  if_gain:1.5513  scale_embed:1.0375  ema_factor:0.0029
+  [step  480] gn=embedding:0.306  out_proj:0.231  fc2:0.154  qkv_proj:0.114  pv=pos_bias:6.6428  if_gain:1.5514  scale_embed:1.0378  ema_factor:0.0029
+  [step  490] gn=embedding:0.303  out_proj:0.213  fc2:0.150  qkv_proj:0.111  pv=pos_bias:6.6424  if_gain:1.5515  scale_embed:1.0378  ema_factor:0.0029
+  Step 600/3789 | Loss 3.7793
+  Step 800/3789 | Loss 3.6446
+  Step 1000/3789 | Loss 3.4246
+  Step 1200/3789 | Loss 3.8022
+  Step 1400/3789 | Loss 3.6304
+  Step 1600/3789 | Loss 3.6356
+  Step 1800/3789 | Loss 3.5868
+  Step 2000/3789 | Loss 3.7596
+  Step 2200/3789 | Loss 3.3321
+  Step 2400/3789 | Loss 3.7974
+  Step 2600/3789 | Loss 3.6585
+  Step 2800/3789 | Loss 3.5813
+  Step 3000/3789 | Loss 3.5698
+  Step 3200/3789 | Loss 3.5357
+  Step 3400/3789 | Loss 3.7855
+  Step 3600/3789 | Loss 3.5090
+Ep 8/10 | Train 3.6317 | Val 3.5745 PPL 35.7 * BEST | 28860s (251%C)
+  DSQG pos-bias: |mean|=2.1418 |max|=7.3504 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.2133 |max|=1.2669
+  IF gains:      h0:1.11  h1:0.99  h2:1.04  h3:0.99  h4:0.97  h5:0.95  h6:0.93  h7:0.93
+  EMA factors:   b0:0.0046 (w≈216t)  b1:0.0031 (w≈322t)
+  KdV alphas:    b0:-0.0010  b1:-0.0012
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ' night.\nThe first day of the month was the first day of the month. The first day'
+    'The length of the hypotenuse' -> ' is determined by the number of times the hypotenuse is applied to the hypotenus'
+    'The President of the United' -> ' States, John F. Kennedy, was elected President of the United States in 1963.\nTh'
+    'Once upon a time there was' -> ' a great deal of confusion, and the people were not able to get the news. The pe'
+    'The results indicate that' -> ' the use of the Internet has been a major source of concern for the development '
+  --
+  Passkey...
+  mean=48.3%  (6/12 distances >50%)
+  d=1:100%  d=2:100%  d=4:100%  d=8:80%  d=16:50%  d=32:50%  d=64:40%  d=128:20%  d=256:10%  d=512:10%  d=1024:10%  d=1536:10%
+  [step    0] gn=embedding:0.304  out_proj:0.221  fc2:0.156  qkv_proj:0.109  pv=pos_bias:6.5361  if_gain:1.5604  scale_embed:1.0388  ema_factor:0.0031
+  [step   10] gn=embedding:0.306  out_proj:0.219  fc2:0.157  qkv_proj:0.116  pv=pos_bias:6.5359  if_gain:1.5604  scale_embed:1.0388  ema_factor:0.0031
+  [step   20] gn=embedding:0.311  out_proj:0.228  fc2:0.160  qkv_proj:0.110  pv=pos_bias:6.5357  if_gain:1.5604  scale_embed:1.0388  ema_factor:0.0031
+  [step   30] gn=embedding:0.317  out_proj:0.215  fc2:0.159  qkv_proj:0.112  pv=pos_bias:6.5355  if_gain:1.5605  scale_embed:1.0388  ema_factor:0.0031
+  [step   40] gn=embedding:0.309  out_proj:0.193  fc2:0.155  pos_embed:0.108  pv=pos_bias:6.5352  if_gain:1.5604  scale_embed:1.0388  ema_factor:0.0031
+  [step   50] gn=embedding:0.305  out_proj:0.217  fc2:0.163  qkv_proj:0.109  pv=pos_bias:6.5349  if_gain:1.5605  scale_embed:1.0388  ema_factor:0.0032
+  [step   60] gn=embedding:0.305  out_proj:0.194  fc2:0.151  qkv_proj:0.110  pv=pos_bias:6.5347  if_gain:1.5605  scale_embed:1.0388  ema_factor:0.0032
+  [step   70] gn=embedding:0.321  out_proj:0.177  fc2:0.156  pos_embed:0.109  pv=pos_bias:6.5344  if_gain:1.5606  scale_embed:1.0388  ema_factor:0.0031
+  [step   80] gn=embedding:0.309  out_proj:0.216  fc2:0.154  qkv_proj:0.110  pv=pos_bias:6.5343  if_gain:1.5606  scale_embed:1.0388  ema_factor:0.0030
+  [step   90] gn=embedding:0.304  out_proj:0.210  fc2:0.152  qkv_proj:0.109  pv=pos_bias:6.5341  if_gain:1.5606  scale_embed:1.0388  ema_factor:0.0030
+  [step  100] gn=embedding:0.310  out_proj:0.211  fc2:0.155  pos_embed:0.109  pv=pos_bias:6.5339  if_gain:1.5607  scale_embed:1.0389  ema_factor:0.0030
+  [step  110] gn=embedding:0.310  out_proj:0.223  fc2:0.160  qkv_proj:0.114  pv=pos_bias:6.5336  if_gain:1.5606  scale_embed:1.0389  ema_factor:0.0029
+  [step  120] gn=embedding:0.305  out_proj:0.241  fc2:0.165  qkv_proj:0.113  pv=pos_bias:6.5333  if_gain:1.5606  scale_embed:1.0390  ema_factor:0.0029
+  [step  130] gn=embedding:0.307  out_proj:0.285  fc2:0.181  qkv_proj:0.123  pv=pos_bias:6.5330  if_gain:1.5607  scale_embed:1.0390  ema_factor:0.0030
+  [step  140] gn=embedding:0.307  out_proj:0.230  fc2:0.165  qkv_proj:0.116  pv=pos_bias:6.5328  if_gain:1.5607  scale_embed:1.0390  ema_factor:0.0030
+  [step  150] gn=embedding:0.300  out_proj:0.193  fc2:0.152  pos_embed:0.109  pv=pos_bias:6.5326  if_gain:1.5607  scale_embed:1.0390  ema_factor:0.0031
+  [step  160] gn=embedding:0.308  out_proj:0.230  fc2:0.162  qkv_proj:0.119  pv=pos_bias:6.5325  if_gain:1.5607  scale_embed:1.0390  ema_factor:0.0031
+  [step  170] gn=embedding:0.303  out_proj:0.180  fc2:0.153  pos_embed:0.107  pv=pos_bias:6.5323  if_gain:1.5607  scale_embed:1.0389  ema_factor:0.0031
+  [step  180] gn=embedding:0.308  out_proj:0.199  fc2:0.156  qkv_proj:0.108  pv=pos_bias:6.5320  if_gain:1.5608  scale_embed:1.0388  ema_factor:0.0031
+  [step  190] gn=embedding:0.316  out_proj:0.205  fc2:0.157  2:0.120  pv=pos_bias:6.5317  if_gain:1.5608  scale_embed:1.0388  ema_factor:0.0031
+  Step 200/3789 | Loss 3.6713
+  [step  200] gn=embedding:0.313  out_proj:0.216  fc2:0.166  qkv_proj:0.112  pv=pos_bias:6.5315  if_gain:1.5608  scale_embed:1.0388  ema_factor:0.0031
+  [step  210] gn=embedding:0.316  out_proj:0.197  fc2:0.155  qkv_proj:0.108  pv=pos_bias:6.5312  if_gain:1.5609  scale_embed:1.0388  ema_factor:0.0030
+  [step  220] gn=embedding:0.302  out_proj:0.217  fc2:0.159  qkv_proj:0.112  pv=pos_bias:6.5310  if_gain:1.5609  scale_embed:1.0388  ema_factor:0.0029
+  [step  230] gn=embedding:0.306  out_proj:0.207  fc2:0.153  qkv_proj:0.107  pv=pos_bias:6.5307  if_gain:1.5609  scale_embed:1.0387  ema_factor:0.0029
+  [step  240] gn=embedding:0.302  out_proj:0.252  fc2:0.168  qkv_proj:0.119  pv=pos_bias:6.5305  if_gain:1.5610  scale_embed:1.0387  ema_factor:0.0030
+  [step  250] gn=embedding:0.311  out_proj:0.222  fc2:0.155  qkv_proj:0.117  pv=pos_bias:6.5303  if_gain:1.5610  scale_embed:1.0388  ema_factor:0.0031
+  [step  260] gn=embedding:0.312  out_proj:0.212  fc2:0.159  qkv_proj:0.117  pv=pos_bias:6.5302  if_gain:1.5611  scale_embed:1.0388  ema_factor:0.0031
+  [step  270] gn=embedding:0.321  out_proj:0.219  fc2:0.158  qkv_proj:0.112  pv=pos_bias:6.5300  if_gain:1.5611  scale_embed:1.0389  ema_factor:0.0031
+  [step  280] gn=embedding:0.306  out_proj:0.214  fc2:0.159  qkv_proj:0.110  pv=pos_bias:6.5298  if_gain:1.5611  scale_embed:1.0390  ema_factor:0.0031
+  [step  290] gn=embedding:0.308  out_proj:0.210  fc2:0.154  pos_embed:0.108  pv=pos_bias:6.5296  if_gain:1.5611  scale_embed:1.0390  ema_factor:0.0031
+  [step  300] gn=embedding:0.302  out_proj:0.223  fc2:0.157  qkv_proj:0.112  pv=pos_bias:6.5294  if_gain:1.5612  scale_embed:1.0391  ema_factor:0.0032
+  [step  310] gn=embedding:0.309  out_proj:0.180  fc2:0.150  pos_embed:0.108  pv=pos_bias:6.5292  if_gain:1.5612  scale_embed:1.0391  ema_factor:0.0032
+  [step  320] gn=embedding:0.298  out_proj:0.204  fc2:0.156  pos_embed:0.107  pv=pos_bias:6.5289  if_gain:1.5612  scale_embed:1.0391  ema_factor:0.0031
+  [step  330] gn=embedding:0.305  out_proj:0.202  fc2:0.153  pos_embed:0.109  pv=pos_bias:6.5288  if_gain:1.5613  scale_embed:1.0391  ema_factor:0.0030
+  [step  340] gn=embedding:0.317  out_proj:0.261  fc2:0.170  qkv_proj:0.121  pv=pos_bias:6.5286  if_gain:1.5613  scale_embed:1.0391  ema_factor:0.0030
+  [step  350] gn=embedding:0.307  out_proj:0.202  fc2:0.156  pos_embed:0.105  pv=pos_bias:6.5283  if_gain:1.5613  scale_embed:1.0391  ema_factor:0.0029
+  [step  360] gn=embedding:0.310  out_proj:0.219  fc2:0.158  pos_embed:0.108  pv=pos_bias:6.5280  if_gain:1.5614  scale_embed:1.0391  ema_factor:0.0030
+  [step  370] gn=embedding:0.312  out_proj:0.214  fc2:0.158  qkv_proj:0.107  pv=pos_bias:6.5278  if_gain:1.5614  scale_embed:1.0391  ema_factor:0.0030
+  [step  380] gn=embedding:0.299  out_proj:0.179  fc2:0.153  pos_embed:0.108  pv=pos_bias:6.5276  if_gain:1.5615  scale_embed:1.0390  ema_factor:0.0030
+  [step  390] gn=embedding:0.318  out_proj:0.246  fc2:0.168  qkv_proj:0.123  pv=pos_bias:6.5274  if_gain:1.5615  scale_embed:1.0390  ema_factor:0.0030
+  Step 400/3789 | Loss 3.5810
+  [step  400] gn=embedding:0.305  out_proj:0.218  fc2:0.158  qkv_proj:0.111  pv=pos_bias:6.5271  if_gain:1.5615  scale_embed:1.0390  ema_factor:0.0030
+  [step  410] gn=embedding:0.303  out_proj:0.213  fc2:0.157  qkv_proj:0.110  pv=pos_bias:6.5269  if_gain:1.5615  scale_embed:1.0389  ema_factor:0.0030
+  [step  420] gn=embedding:0.306  out_proj:0.230  fc2:0.157  qkv_proj:0.109  pv=pos_bias:6.5266  if_gain:1.5615  scale_embed:1.0388  ema_factor:0.0031
+  [step  430] gn=embedding:0.311  out_proj:0.230  fc2:0.166  qkv_proj:0.118  pv=pos_bias:6.5264  if_gain:1.5616  scale_embed:1.0388  ema_factor:0.0030
+  [step  440] gn=embedding:0.302  out_proj:0.219  fc2:0.160  qkv_proj:0.114  pv=pos_bias:6.5261  if_gain:1.5616  scale_embed:1.0388  ema_factor:0.0030
+  [step  450] gn=embedding:0.297  out_proj:0.237  fc2:0.168  qkv_proj:0.112  pv=pos_bias:6.5258  if_gain:1.5616  scale_embed:1.0388  ema_factor:0.0031
+  [step  460] gn=embedding:0.305  out_proj:0.208  fc2:0.159  pos_embed:0.110  pv=pos_bias:6.5255  if_gain:1.5617  scale_embed:1.0387  ema_factor:0.0031
+  [step  470] gn=embedding:0.306  out_proj:0.208  fc2:0.154  qkv_proj:0.111  pv=pos_bias:6.5253  if_gain:1.5617  scale_embed:1.0387  ema_factor:0.0030
+  [step  480] gn=embedding:0.306  out_proj:0.217  fc2:0.162  qkv_proj:0.109  pv=pos_bias:6.5251  if_gain:1.5618  scale_embed:1.0386  ema_factor:0.0030
+  [step  490] gn=embedding:0.307  out_proj:0.257  fc2:0.170  qkv_proj:0.130  pv=pos_bias:6.5248  if_gain:1.5618  scale_embed:1.0385  ema_factor:0.0030
+  Step 600/3789 | Loss 3.4576
+  Step 800/3789 | Loss 3.6247
+  Step 1000/3789 | Loss 3.4187
+  Step 1200/3789 | Loss 3.5685
+  Step 1400/3789 | Loss 3.4438
+  Step 1600/3789 | Loss 3.6324
+  Step 1800/3789 | Loss 3.7648
+  Step 2000/3789 | Loss 3.5537
+  Step 2200/3789 | Loss 3.5094
+  Step 2400/3789 | Loss 3.5704
+  Step 2600/3789 | Loss 3.4166
+  Step 2800/3789 | Loss 3.3985
+  Step 3000/3789 | Loss 3.5895
+  Step 3200/3789 | Loss 3.7010
+  Step 3400/3789 | Loss 3.7162
+  Step 3600/3789 | Loss 3.7764
+Ep 9/10 | Train 3.6179 | Val 3.5670 PPL 35.4 * BEST | 32512s (283%C)
+  DSQG pos-bias: |mean|=2.1295 |max|=7.3044 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.2129 |max|=1.2697
+  IF gains:      h0:1.11  h1:0.99  h2:1.04  h3:1.00  h4:0.97  h5:0.95  h6:0.93  h7:0.93
+  EMA factors:   b0:0.0045 (w≈222t)  b1:0.0030 (w≈332t)
+  KdV alphas:    b0:-0.0010  b1:-0.0011
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ' night.\nThe first day of the month was the first day of the month. The first day'
+    'The length of the hypotenuse' -> ' is determined by the number of times the hypotenuse is applied. The hypotenuse '
+    'The President of the United' -> ' States, John F. Kennedy, was elected President of the United States in 1964.\nTh'
+    'Once upon a time there was' -> ' a great deal of confusion, and the people were not able to get the news. The pe'
+    'The results indicate that' -> ' the use of the Internet has been a major source of concern for the development '
+  --
+  Passkey...
+  mean=48.3%  (6/12 distances >50%)
+  d=1:100%  d=2:100%  d=4:100%  d=8:80%  d=16:50%  d=32:50%  d=64:40%  d=128:20%  d=256:10%  d=512:10%  d=1024:10%  d=1536:10%
+  [step    0] gn=embedding:0.299  out_proj:0.178  fc2:0.152  2:0.113  pv=pos_bias:6.4869  if_gain:1.5657  scale_embed:1.0398  ema_factor:0.0030
+  [step   10] gn=embedding:0.314  out_proj:0.194  fc2:0.157  pos_embed:0.109  pv=pos_bias:6.4868  if_gain:1.5657  scale_embed:1.0398  ema_factor:0.0030
+  [step   20] gn=embedding:0.312  out_proj:0.187  fc2:0.157  qkv_proj:0.111  pv=pos_bias:6.4867  if_gain:1.5657  scale_embed:1.0398  ema_factor:0.0030
+  [step   30] gn=embedding:0.319  out_proj:0.189  fc2:0.156  pos_embed:0.111  pv=pos_bias:6.4867  if_gain:1.5657  scale_embed:1.0397  ema_factor:0.0030
+  [step   40] gn=embedding:0.306  out_proj:0.169  fc2:0.152  pos_embed:0.107  pv=pos_bias:6.4866  if_gain:1.5657  scale_embed:1.0398  ema_factor:0.0030
+  [step   50] gn=embedding:0.314  out_proj:0.197  fc2:0.155  pos_embed:0.110  pv=pos_bias:6.4866  if_gain:1.5657  scale_embed:1.0398  ema_factor:0.0030
+  [step   60] gn=embedding:0.311  out_proj:0.172  fc2:0.153  pos_embed:0.109  pv=pos_bias:6.4865  if_gain:1.5657  scale_embed:1.0397  ema_factor:0.0031
+  [step   70] gn=embedding:0.312  out_proj:0.196  fc2:0.165  pos_embed:0.110  pv=pos_bias:6.4865  if_gain:1.5658  scale_embed:1.0398  ema_factor:0.0030
+  [step   80] gn=embedding:0.305  out_proj:0.173  fc2:0.150  pos_embed:0.107  pv=pos_bias:6.4864  if_gain:1.5658  scale_embed:1.0398  ema_factor:0.0030
+  [step   90] gn=embedding:0.299  out_proj:0.178  fc2:0.161  pos_embed:0.107  pv=pos_bias:6.4864  if_gain:1.5658  scale_embed:1.0398  ema_factor:0.0030
+  [step  100] gn=embedding:0.311  out_proj:0.164  fc2:0.154  pos_embed:0.110  pv=pos_bias:6.4864  if_gain:1.5658  scale_embed:1.0398  ema_factor:0.0030
+  [step  110] gn=embedding:0.299  out_proj:0.179  fc2:0.153  pos_embed:0.111  pv=pos_bias:6.4863  if_gain:1.5658  scale_embed:1.0398  ema_factor:0.0030
+  [step  120] gn=embedding:0.303  out_proj:0.165  fc2:0.151  pos_embed:0.107  pv=pos_bias:6.4862  if_gain:1.5658  scale_embed:1.0398  ema_factor:0.0030
+  [step  130] gn=embedding:0.305  out_proj:0.180  fc2:0.156  pos_embed:0.110  pv=pos_bias:6.4862  if_gain:1.5658  scale_embed:1.0398  ema_factor:0.0030
+  [step  140] gn=embedding:0.313  out_proj:0.181  fc2:0.159  pos_embed:0.110  pv=pos_bias:6.4862  if_gain:1.5658  scale_embed:1.0398  ema_factor:0.0030
+  [step  150] gn=embedding:0.308  out_proj:0.213  fc2:0.166  qkv_proj:0.116  pv=pos_bias:6.4861  if_gain:1.5658  scale_embed:1.0398  ema_factor:0.0030
+  [step  160] gn=embedding:0.322  out_proj:0.183  fc2:0.163  pos_embed:0.111  pv=pos_bias:6.4861  if_gain:1.5658  scale_embed:1.0398  ema_factor:0.0030
+  [step  170] gn=embedding:0.310  out_proj:0.177  fc2:0.155  pos_embed:0.109  pv=pos_bias:6.4860  if_gain:1.5658  scale_embed:1.0398  ema_factor:0.0030
+  [step  180] gn=embedding:0.312  out_proj:0.187  fc2:0.160  qkv_proj:0.115  pv=pos_bias:6.4860  if_gain:1.5658  scale_embed:1.0398  ema_factor:0.0030
+  [step  190] gn=embedding:0.316  out_proj:0.179  fc2:0.154  pos_embed:0.109  pv=pos_bias:6.4859  if_gain:1.5658  scale_embed:1.0398  ema_factor:0.0030
+  Step 200/3789 | Loss 3.5421
+  [step  200] gn=embedding:0.305  out_proj:0.182  fc2:0.153  2:0.119  pv=pos_bias:6.4858  if_gain:1.5658  scale_embed:1.0398  ema_factor:0.0030
+  [step  210] gn=embedding:0.307  out_proj:0.203  fc2:0.161  pos_embed:0.109  pv=pos_bias:6.4858  if_gain:1.5658  scale_embed:1.0398  ema_factor:0.0030
+  [step  220] gn=embedding:0.307  out_proj:0.173  fc2:0.152  pos_embed:0.110  pv=pos_bias:6.4858  if_gain:1.5658  scale_embed:1.0398  ema_factor:0.0030
+  [step  230] gn=embedding:0.313  out_proj:0.176  fc2:0.159  qkv_proj:0.110  pv=pos_bias:6.4857  if_gain:1.5659  scale_embed:1.0398  ema_factor:0.0030
+  [step  240] gn=embedding:0.304  out_proj:0.170  fc2:0.150  pos_embed:0.110  pv=pos_bias:6.4856  if_gain:1.5659  scale_embed:1.0398  ema_factor:0.0030
+  [step  250] gn=embedding:0.312  out_proj:0.186  fc2:0.153  pos_embed:0.109  pv=pos_bias:6.4856  if_gain:1.5659  scale_embed:1.0398  ema_factor:0.0030
+  [step  260] gn=embedding:0.306  out_proj:0.167  fc2:0.150  pos_embed:0.109  pv=pos_bias:6.4855  if_gain:1.5659  scale_embed:1.0399  ema_factor:0.0030
+  [step  270] gn=embedding:0.309  out_proj:0.180  fc2:0.152  pos_embed:0.108  pv=pos_bias:6.4855  if_gain:1.5659  scale_embed:1.0399  ema_factor:0.0030
+  [step  280] gn=embedding:0.309  out_proj:0.180  fc2:0.152  pos_embed:0.108  pv=pos_bias:6.4855  if_gain:1.5659  scale_embed:1.0399  ema_factor:0.0030
+  [step  290] gn=embedding:0.308  out_proj:0.173  fc2:0.152  pos_embed:0.110  pv=pos_bias:6.4854  if_gain:1.5659  scale_embed:1.0399  ema_factor:0.0030
+  [step  300] gn=embedding:0.312  out_proj:0.204  fc2:0.159  pos_embed:0.109  pv=pos_bias:6.4854  if_gain:1.5659  scale_embed:1.0399  ema_factor:0.0030
+  [step  310] gn=embedding:0.311  out_proj:0.191  fc2:0.157  pos_embed:0.110  pv=pos_bias:6.4853  if_gain:1.5659  scale_embed:1.0399  ema_factor:0.0030
+  [step  320] gn=embedding:0.311  out_proj:0.178  fc2:0.158  pos_embed:0.109  pv=pos_bias:6.4853  if_gain:1.5659  scale_embed:1.0399  ema_factor:0.0030
+  [step  330] gn=embedding:0.314  out_proj:0.201  fc2:0.156  pos_embed:0.109  pv=pos_bias:6.4852  if_gain:1.5659  scale_embed:1.0399  ema_factor:0.0030
+  [step  340] gn=embedding:0.305  out_proj:0.178  fc2:0.153  pos_embed:0.110  pv=pos_bias:6.4852  if_gain:1.5659  scale_embed:1.0399  ema_factor:0.0030
+  [step  350] gn=embedding:0.308  out_proj:0.205  fc2:0.161  qkv_proj:0.113  pv=pos_bias:6.4852  if_gain:1.5659  scale_embed:1.0399  ema_factor:0.0030
+  [step  360] gn=embedding:0.324  out_proj:0.192  fc2:0.161  qkv_proj:0.110  pv=pos_bias:6.4851  if_gain:1.5659  scale_embed:1.0399  ema_factor:0.0030
+  [step  370] gn=embedding:0.306  out_proj:0.170  fc2:0.157  pos_embed:0.110  pv=pos_bias:6.4851  if_gain:1.5659  scale_embed:1.0399  ema_factor:0.0030
+  [step  380] gn=embedding:0.296  out_proj:0.161  fc2:0.145  pos_embed:0.108  pv=pos_bias:6.4850  if_gain:1.5659  scale_embed:1.0399  ema_factor:0.0031
+  [step  390] gn=embedding:0.304  out_proj:0.161  fc2:0.154  pos_embed:0.109  pv=pos_bias:6.4850  if_gain:1.5659  scale_embed:1.0399  ema_factor:0.0031
+  Step 400/3789 | Loss 3.5782
+  [step  400] gn=embedding:0.319  out_proj:0.199  fc2:0.163  qkv_proj:0.111  pv=pos_bias:6.4849  if_gain:1.5659  scale_embed:1.0399  ema_factor:0.0031
+  [step  410] gn=embedding:0.294  out_proj:0.183  fc2:0.152  pos_embed:0.110  pv=pos_bias:6.4849  if_gain:1.5659  scale_embed:1.0399  ema_factor:0.0031
+  [step  420] gn=embedding:0.314  out_proj:0.206  fc2:0.157  qkv_proj:0.113  pv=pos_bias:6.4848  if_gain:1.5659  scale_embed:1.0399  ema_factor:0.0031
+  [step  430] gn=embedding:0.305  out_proj:0.170  fc2:0.147  pos_embed:0.107  pv=pos_bias:6.4848  if_gain:1.5659  scale_embed:1.0399  ema_factor:0.0031
+  [step  440] gn=embedding:0.318  out_proj:0.185  fc2:0.158  pos_embed:0.110  pv=pos_bias:6.4847  if_gain:1.5660  scale_embed:1.0399  ema_factor:0.0031
+  [step  450] gn=embedding:0.307  out_proj:0.183  fc2:0.159  pos_embed:0.109  pv=pos_bias:6.4847  if_gain:1.5660  scale_embed:1.0400  ema_factor:0.0031
+  [step  460] gn=embedding:0.311  out_proj:0.203  fc2:0.160  qkv_proj:0.109  pv=pos_bias:6.4846  if_gain:1.5660  scale_embed:1.0400  ema_factor:0.0031
+  [step  470] gn=embedding:0.299  out_proj:0.176  fc2:0.147  pos_embed:0.109  pv=pos_bias:6.4846  if_gain:1.5660  scale_embed:1.0400  ema_factor:0.0031
+  [step  480] gn=embedding:0.305  out_proj:0.179  fc2:0.153  pos_embed:0.110  pv=pos_bias:6.4846  if_gain:1.5660  scale_embed:1.0400  ema_factor:0.0031
+  [step  490] gn=embedding:0.318  out_proj:0.174  fc2:0.158  pos_embed:0.110  pv=pos_bias:6.4845  if_gain:1.5660  scale_embed:1.0400  ema_factor:0.0031
+  Step 600/3789 | Loss 3.4737
+  Step 800/3789 | Loss 3.5278
+  Step 1000/3789 | Loss 3.5674
+  Step 1200/3789 | Loss 3.5837
+  Step 1400/3789 | Loss 3.4425
+  Step 1600/3789 | Loss 3.8273
+  Step 1800/3789 | Loss 3.4941
+  Step 2000/3789 | Loss 3.5821
+  Step 2200/3789 | Loss 3.6626
+  Step 2400/3789 | Loss 3.6039
+  Step 2600/3789 | Loss 3.5034
+  Step 2800/3789 | Loss 3.5555
+  Step 3000/3789 | Loss 3.9087
+  Step 3200/3789 | Loss 3.6210
+  Step 3400/3789 | Loss 3.8183
+  Step 3600/3789 | Loss 3.6264
+Ep 10/10 | Train 3.6016 | Val 3.5653 PPL 35.4 * BEST | 36049s (314%C)
+  DSQG pos-bias: |mean|=2.1277 |max|=7.2977 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.2129 |max|=1.2699
+  IF gains:      h0:1.11  h1:0.99  h2:1.04  h3:1.00  h4:0.97  h5:0.95  h6:0.93  h7:0.93
+  EMA factors:   b0:0.0045 (w≈224t)  b1:0.0030 (w≈334t)
+  KdV alphas:    b0:-0.0010  b1:-0.0011
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ' night.\nThe first day of the month was the first day of the month. The first day'
+    'The length of the hypotenuse' -> ' is determined by the number of times the hypotenuse is applied. The hypotenuse '
+    'The President of the United' -> ' States, John F. Kennedy, was elected President of the United States in 1964.\nTh'
+    'Once upon a time there was' -> ' a great deal of confusion, and the people were not able to get the news. The pe'
+    'The results indicate that' -> ' the use of the Internet has been a major source of concern for the development '
+  --
+  Passkey...
+  mean=48.3%  (6/12 distances >50%)
+  d=1:100%  d=2:100%  d=4:100%  d=8:80%  d=16:50%  d=32:50%  d=64:40%  d=128:20%  d=256:10%  d=512:10%  d=1024:10%  d=1536:10%
+
+  condU TEST: PPL 37.873 | Loss 3.6342
+  I3G0 reference:  52.948 PPL | delta = -15.075
+  condM reference: 54.529 PPL | delta = -16.656
+
+  -- Temperature sweep (best checkpoint) --
+
+  [greedy]
+    'It was a dark and stormy' -> ' night.\nThe first day of the month was the first day of the month. The first day'
+    'The length of the hypotenuse' -> ' is determined by the number of times the hypotenuse is applied. The hypotenuse '
+    'The President of the United' -> ' States, John F. Kennedy, was elected President of the United States in 1964.\nTh'
+    'Once upon a time there was' -> ' a great deal of confusion, and the people were not able to get the news. The pe'
+    'The results indicate that' -> ' the use of the Internet has been a major source of concern for the development '
+
+  [T=0.5]
+    'It was a dark and stormy' -> ' night, and the darkest night was the day of the Lord.\nThe Lord said, “I am the '
+    'The length of the hypotenuse' -> ' is a measure of the amount of fluid in the body. It is measured in milligrams p'
+    'The President of the United' -> ' States and the President of the United States is a member of the United States '
+    'Once upon a time there was' -> ' a great deal of activity in the world. It was the same as the period of the fir'
+    'The results indicate that' -> ' the current study is not as accurate as the previous study. The results are bas'
+
+  [T=0.7]
+    'It was a dark and stormy' -> ' night, and the sun was still shining on the moon. The sky was bright and the su'
+    'The length of the hypotenuse' -> ' is determined by the amount of fluid that is pumped into the cylinder. The cyli'
+    'The President of the United' -> ' States of America has been a leader in the global debate about the role of the '
+    'Once upon a time there was' -> ' a sense of pride, pride, and pride. The circumstances of the time were differen'
+    'The results indicate that' -> ' the cardiomyopathy treatment is less effective and that patients are less likel'
+
+  [T=1.0]
+    'It was a dark and stormy' -> ' day, at the helm of the day. The storm had been burning the sky and its torment'
+    'The length of the hypotenuse' -> ' from the edge to the side was well approximated to the height of the radius of '
+    'The President of the United' -> ' States is represented by the Air Force in the Annual Report, entitled, "Our Our'
+    'Once upon a time there was' -> ' never any reason to forget that, right now and next the world became a center o'
+    'The results indicate that' -> ' biochemical pathways that take place during prolonged immunogenicity may be med'
+
+  Final passkey: mean=48.3%  (6/12 distances >50%)
+  d=1:100%  d=2:100%  d=4:100%  d=8:80%  d=16:50%  d=32:50%  d=64:40%  d=128:20%  d=256:10%  d=512:10%  d=1024:10%  d=1536:10%
+  I3G0 reference:  53.3% passkey
+  condM reference: 83.3% passkey
+
+  Final IF gains: h0:1.114  h1:0.995  h2:1.036  h3:0.996  h4:0.969  h5:0.953  h6:0.929  h7:0.926
+  Final scale_embed: |mean|=0.2129 |max|=1.2699
+  Final EMA factors:  b0:0.0045  b1:0.0030   (window≈224t)
+  Final KdV alphas:   b0:-0.0010  b1:-0.0011
+
+  Results -> benchmarks/logs/d41_35m_pure_results.json
+

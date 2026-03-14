@@ -1,0 +1,34 @@
+============================================================
+  DWARF External Benchmark Evaluator
+============================================================
+  GPU: NVIDIA GeForce RTX 3090
+  Tasks: ['hellaswag', 'piqa', 'arc_easy', 'arc_challenge', 'winogrande', 'lambada']
+  Tokenizer: /home/dlewis3/Desktop/AI/DWARF/results/2048_condI_tokenizer.json
+
+Loading checkpoint: checkpoints/condU/best.pt
+Arch: condu_13m
+  Loaded 14,057,352 params from checkpoints/condU/best.pt
+  Parameters: 14,057,352
+  Label: condU 13M (50-sample rerun)
+
+  [hellaswag] SKIP — not cached. Run download_benchmarks.py first.
+  [piqa] SKIP — not cached. Run download_benchmarks.py first.
+  [arc_easy] SKIP — not cached. Run download_benchmarks.py first.
+  [arc_challenge] SKIP — not cached. Run download_benchmarks.py first.
+  [winogrande] SKIP — not cached. Run download_benchmarks.py first.
+  [lambada] SKIP — not cached. Run download_benchmarks.py first.
+
+============================================================
+  condU 13M (50-sample rerun)
+============================================================
+  Task                     Accuracy       N
+  ---------------------- ----------  ------
+  hellaswag                     N/A     ---
+  piqa                          N/A     ---
+  arc_easy                      N/A     ---
+  arc_challenge                 N/A     ---
+  winogrande                    N/A     ---
+  lambada                       N/A     ---
+============================================================
+
+  Results -> /home/dlewis3/Desktop/AI/DWARF/evals/logs/eval_external_condU_13M_(50-sample_rerun)_20260304_202715.json

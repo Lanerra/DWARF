@@ -1,0 +1,65 @@
+
+============================================================
+  eval_suite.py — condu_v5_13m
+  Device: cuda
+============================================================
+
+  Model: condU-v5 13M (MOVT+QK-OVT+NPCI, D=256)
+
+  Loading tokenizer...
+  Loading model...
+[kernel] CUDA extension loaded — using compiled CUDA backward
+  Loaded condU-v5 13M (MOVT+QK-OVT+NPCI, D=256): 14,059,832 params from best.pt
+
+  [1/4] Calibration...
+    entropy=7.034 bits  top1=0.189  eff_vocab=20.4  (0.2s)
+
+  [2/4] Distance-conditioned loss (wikitext-103)...
+    Loading wikitext-103 test split...
+    Using 17 full 2048-token chunks
+    Buckets:
+    0-16          PPL= 340.97  n=  289
+    17-64         PPL= 208.46  n=  816
+    65-256        PPL= 113.45  n= 3264
+    257-512       PPL=  98.93  n= 4352
+    513-1024      PPL=  84.65  n= 8704
+    1025-2047     PPL=  79.17  n=17374
+    (3.4s)
+
+  [3/4] Few-shot string copy...
+    exact=5/15  (33.3%)  mean_lev=7.07  (0.7s)
+
+  [4/4] Passkey retrieval...
+    d=    1: accuracy=20.0%
+    d=    2: accuracy=0.0%
+    d=    4: accuracy=20.0%
+    d=    8: accuracy=20.0%
+    d=   16: accuracy=20.0%
+    d=   32: accuracy=20.0%
+    d=   64: accuracy=20.0%
+    d=  128: accuracy=20.0%
+    d=  256: accuracy=0.0%
+    d=  512: accuracy=0.0%
+    d= 1024: accuracy=0.0%
+    d= 1536: accuracy=0.0%
+    mean_accuracy=11.7%  (0.1s)
+
+  Generation samples (greedy + T=0.7)...
+
+  [greedy]
+    'It was a dark and stormy'               → ' storm.\nThe first day of the day, the first day of the day, the first day of the'
+    'The length of the hypotenuse'           → ' is about 1.5 cm. The length of the hypotenuse is about 1.5 cm. The length of th'
+    'The President of the United'            → ' States, the President of the United States, and the President of the United Sta'
+    'Once upon a time there was'             → ' no doubt that the first time the first time the first time the first time the f'
+    'The results indicate that'              → ' the first step in the process is to determine the number of different types of '
+
+  [T=0.7]
+    'It was a dark and stormy'               → ' city.\nWhen the city’s suburbs were split up, the city became a part of the city'
+    'The length of the hypotenuse'           → ' is the length of the rectangle that is the length of the rectangle that is atta'
+    'The President of the United'            → ' States Congress, as well as the president of the United States, will be informe'
+    'Once upon a time there was'             → ' a significant amount of knowledge from the real world. However, there was littl'
+    'The results indicate that'              → ' a new issue would be taken as a consequence of the continuous completion of the'
+
+  Results saved to /home/dlewis3/Desktop/AI/DWARF/evals/logs/eval_suite_condu_v5_13m_20260307_141102.json
+============================================================
+

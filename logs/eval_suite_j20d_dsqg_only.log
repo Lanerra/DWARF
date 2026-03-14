@@ -1,0 +1,66 @@
+
+============================================================
+  eval_suite.py — j20d_physics_dsqg_only
+  Device: cuda
+============================================================
+
+  Model: J20D Physics 38.7M — DSQG only (no full attn)
+
+  Loading tokenizer...
+  Loading model...
+  WARNING: unexpected keys: ['blocks.5._orig_mod.norm1.weight', 'blocks.5._orig_mod.norm1.bias', 'blocks.5._orig_mod.norm2.weight', 'blocks.5._orig_mod.norm2.bias', 'blocks.5._orig_mod.attn.qkv_proj.weight', 'blocks.5._orig_mod.attn.qkv_proj.bias', 'blocks.5._orig_mod.attn.out_proj.weight', 'blocks.5._orig_mod.attn.out_proj.bias', 'blocks.5._orig_mod.attn.gate_proj.weight', 'blocks.5._orig_mod.attn.gate_proj.bias', 'blocks.5._orig_mod.ffn.fc1.weight', 'blocks.5._orig_mod.ffn.fc1.bias', 'blocks.5._orig_mod.ffn.fc2.weight', 'blocks.5._orig_mod.ffn.fc2.bias']
+  INFO: 14 keys missing (random init) — intentional for ablation
+  Loaded J20D Physics 38.7M — DSQG only (no full attn): 38,724,058 params from df0d435_j20d_physics_best.pt
+
+  [1/4] Calibration...
+    entropy=8.808 bits  top1=0.134  eff_vocab=281.2  (0.4s)
+
+  [2/4] Distance-conditioned loss (wikitext-103)...
+    Loading wikitext-103 test split...
+    Using 17 full 2048-token chunks
+    Buckets:
+    0-16          PPL= 689.82  n=  289
+    17-64         PPL= 845.64  n=  816
+    65-256        PPL= 760.94  n= 3264
+    257-512       PPL= 759.48  n= 4352
+    513-1024      PPL= 937.87  n= 8704
+    1025-2047     PPL= 927.06  n=17374
+    (3.4s)
+
+  [3/4] Few-shot string copy...
+    exact=0/15  (0.0%)  mean_lev=9.27  (1.0s)
+
+  [4/4] Passkey retrieval...
+    d=    1: accuracy=0.0%
+    d=    2: accuracy=0.0%
+    d=    4: accuracy=0.0%
+    d=    8: accuracy=0.0%
+    d=   16: accuracy=0.0%
+    d=   32: accuracy=0.0%
+    d=   64: accuracy=0.0%
+    d=  128: accuracy=0.0%
+    d=  256: accuracy=0.0%
+    d=  512: accuracy=0.0%
+    d= 1024: accuracy=0.0%
+    d= 1536: accuracy=0.0%
+    mean_accuracy=0.0%  (0.3s)
+
+  Generation samples (greedy + T=0.7)...
+
+  [greedy]
+    'It was a dark and stormy'               → ' day, and the whole thing was not so much a matter of time.\n- The first two year'
+    'The length of the hypotenuse'           → ' and the following are the most common causes of the disease:\n- the presence of '
+    'The President of the United'            → ' States, he is also a member of the American- and/or other major international c'
+    'Once upon a time there was'             → ' a great deal of time and effort to find out how much time it was spent in the p'
+    'The results indicate that'              → ' the use of a given amount of time-consuming and/or non-directional information '
+
+  [T=0.7]
+    'It was a dark and stormy'               → ' day that he had an important time in life, and which was probably the most succ'
+    'The length of the hypotenuse'           → ' and its associated effects on the canopy. commonly used in the case of a child '
+    'The President of the United'            → ' States is a highly important part of the state’s history of the world. This is '
+    'Once upon a time there was'             → ' a time when a long-term resistance was made, there was a way to ensure that the'
+    'The results indicate that'              → ' it is possible to determine how much the current will be seen in a given region'
+
+  Results saved to /home/dlewis3/Desktop/AI/DWARF/evals/logs/eval_suite_j20d_physics_dsqg_only_20260314_084930.json
+============================================================
+

@@ -1,0 +1,239 @@
+======================================================================
+  condX-v2 35M — Learnable Bypass Gate, Scaled (FineWeb-Edu)
+======================================================================
+  GPU: NVIDIA GeForce RTX 4090  (23.6 GB)
+  Kernel:    dsqg_attention_v3
+  Base arch: condV (Kalman-EMA + KdV + AGC) + bypass gate, D=512
+  Gate init: bypass_alpha=-10.0 → gate≈0.000045 (effectively condV Q)
+  Sweep:     13M gate sweep showed gate=0 is strictly optimal for passkey
+  Target:    condU 35M = 38.293 PPL / 90.0% passkey
+Loading FineWeb-Edu from cache: benchmarks/logs/condm_fineweb_edu_doc_cache.json
+  Loaded 100,000 docs from cache
+
+Loaded condI BPE tokenizer from /home/dlewis3/Desktop/AI/DWARF/results/2048_condI_tokenizer.json
+Encoding data (max_seq_len=2048)...
+  Train: 121,232 sequences
+  Val: 2,923 sequences
+  Test: 3,464 sequences
+
+condX 35M: 38,729,739 parameters
+  Layer types:  ['DSQG', 'DSQG', 'DSQG_INT', 'DSQG', 'DSQG', 'FULL_BYPASS']
+  Clean save after block: 1
+  Chinchilla budget:  774,594,780 tokens  (774.6M)
+  Max train seqs:     54,057  (Chinchilla lands at ep7)
+  Tokens/epoch:       110,654,679
+  Chinchilla ep:      1.43
+  train: 54,057  val: 2,923  test: 3,464 seqs
+Running causality check...
+  Pre-10:  0.00000000  (expect 0.0)
+  Pos-10:  1.639029  (expect >0)
+  Post-10: 0.596959  (expect >0)
+  PASS
+
+  Tokens/epoch: 110,654,679
+  Chinchilla:   774,594,780 tokens (epoch ~7.00)
+  Clean residual saved after block: 1
+
+  Step 200/1690 | Loss 6.0631
+  Step 400/1690 | Loss 5.5276
+  Step 600/1690 | Loss 5.4288
+  Step 800/1690 | Loss 5.0362
+  Step 1000/1690 | Loss 4.9263
+  Step 1200/1690 | Loss 4.8410
+  Step 1400/1690 | Loss 4.4916
+  Step 1600/1690 | Loss 4.6318
+Ep 1/10 | Train 5.2778 | Val 4.3457 PPL 77.1 * BEST | 1836s (14%C)
+  DSQG pos-bias: |mean|=3.5665 |max|=13.9790 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.1238 |max|=0.3566
+  IF gains:      h0:0.99  h1:1.01  h2:1.00  h3:0.98  h4:1.00  h5:1.00  h6:0.99  h7:1.01
+  Bypass gate:   alpha=-9.4455  gate=0.000079  (gate→0=condV-like, gate→1=fully-clean-Q)
+  Bypass diag:   clean_norm=23.9507  full_norm=23.9603  q_cosim=1.0000  q_delta_norm=0.0005
+  EMA factors:   b0:0.0126
+  KdV alphas:    b0:-0.0019
+  -- Generation (T=0.7) --
+    'It was a dark and stormy' -> ' weather, but it was not until now a storm.\nIt was believed that the rainy snowy'
+    'The length of the hypotenuse' -> ' is determined by the frequency of the hypersensitivity of the T.D. (S.D.F.L.D.)'
+    'The President of the United' -> ' States and the United States, and the United States.\nThe nation’s population is'
+    'Once upon a time there was' -> ' a lot of time to learn.\nHowever, the moment the person had been able to have a '
+    'The results indicate that' -> ' the total total total of the total total total total of the total total total o'
+  --
+  Passkey...
+  mean=10.0%  (0/12 distances >50%)
+  d=1:20%  d=2:20%  d=4:20%  d=8:20%  d=16:20%  d=32:20%  d=64:0%  d=128:0%  d=256:0%  d=512:0%  d=1024:0%  d=1536:0%
+  Step 200/1690 | Loss 4.2910
+  Step 400/1690 | Loss 4.3476
+  Step 600/1690 | Loss 4.3154
+  Step 800/1690 | Loss 4.1808
+  Step 1000/1690 | Loss 4.2037
+  Step 1200/1690 | Loss 4.0673
+  Step 1400/1690 | Loss 4.0725
+  Step 1600/1690 | Loss 4.0717
+Ep 2/10 | Train 4.2163 | Val 3.9589 PPL 52.4 * BEST | 3717s (29%C)
+  DSQG pos-bias: |mean|=3.4355 |max|=13.3455 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.1715 |max|=0.5875
+  IF gains:      h0:0.97  h1:1.01  h2:0.98  h3:0.95  h4:0.99  h5:0.97  h6:0.97  h7:0.98
+  Bypass gate:   alpha=-8.6954  gate=0.000167  (gate→0=condV-like, gate→1=fully-clean-Q)
+  Bypass diag:   clean_norm=24.1935  full_norm=24.1942  q_cosim=1.0000  q_delta_norm=0.0010
+  EMA factors:   b0:0.0125
+  KdV alphas:    b0:-0.0018
+  -- Generation (T=0.7) --
+    'It was a dark and stormy' -> ' night, in the morning, and a day in the morning. The day was on the morning, an'
+    'The length of the hypotenuse' -> " of the ear in a form called the patient's ear. It was called the upper ear, the"
+    'The President of the United' -> ' States is the first president to have a general vote, the President of the Unit'
+    'Once upon a time there was' -> ' no fire, but the ground would be filled with dust and dust.\nIn the second part '
+    'The results indicate that' -> ' the disease was a disease that was caused by the disease and that the disease w'
+  --
+  Passkey...
+  mean=50.0%  (9/12 distances >50%)
+  d=1:80%  d=2:60%  d=4:60%  d=8:60%  d=16:60%  d=32:60%  d=64:60%  d=128:60%  d=256:60%  d=512:20%  d=1024:20%  d=1536:0%
+  Step 200/1690 | Loss 3.8624
+  Step 400/1690 | Loss 4.0518
+  Step 600/1690 | Loss 3.8706
+  Step 800/1690 | Loss 4.1095
+  Step 1000/1690 | Loss 3.9183
+  Step 1200/1690 | Loss 3.8489
+  Step 1400/1690 | Loss 3.9940
+  Step 1600/1690 | Loss 4.0400
+Ep 3/10 | Train 3.9769 | Val 3.8186 PPL 45.5 * BEST | 5605s (43%C)
+  DSQG pos-bias: |mean|=3.3114 |max|=12.7985 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.1961 |max|=0.7456
+  IF gains:      h0:0.97  h1:1.01  h2:0.96  h3:0.93  h4:0.98  h5:0.95  h6:0.95  h7:0.94
+  Bypass gate:   alpha=-8.0894  gate=0.000307  (gate→0=condV-like, gate→1=fully-clean-Q)
+  Bypass diag:   clean_norm=24.0124  full_norm=24.0040  q_cosim=1.0000  q_delta_norm=0.0020
+  EMA factors:   b0:0.0121
+  KdV alphas:    b0:-0.0017
+  -- Generation (T=0.7) --
+    'It was a dark and stormy' -> ', and the head was one of the few miles away from the North Pole.\nThe second thi'
+    'The length of the hypotenuse' -> 'e with the center of the hand is determined by the angle of the end of the hand.'
+    'The President of the United' -> ' States, he was not interested in his contributions to the United States.\nThe Pr'
+    'Once upon a time there was' -> ' no evidence of a method of study. As a result, they were not all accurate.\nThe '
+    'The results indicate that' -> ' the energy consumption of fossil fuels is only a major factor in the energy con'
+  --
+  Passkey...
+  mean=48.3%  (7/12 distances >50%)
+  d=1:80%  d=2:80%  d=4:80%  d=8:60%  d=16:40%  d=32:60%  d=64:60%  d=128:20%  d=256:60%  d=512:20%  d=1024:20%  d=1536:0%
+  Step 200/1690 | Loss 4.2048
+  Step 400/1690 | Loss 3.8518
+  Step 600/1690 | Loss 3.9060
+  Step 800/1690 | Loss 3.7617
+  Step 1000/1690 | Loss 4.0691
+  Step 1200/1690 | Loss 3.8428
+  Step 1400/1690 | Loss 3.8455
+  Step 1600/1690 | Loss 3.7651
+Ep 4/10 | Train 3.8452 | Val 3.7332 PPL 41.8 * BEST | 7482s (57%C)
+  DSQG pos-bias: |mean|=3.2065 |max|=12.3446 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.2101 |max|=0.8497
+  IF gains:      h0:0.98  h1:1.01  h2:0.95  h3:0.92  h4:0.97  h5:0.93  h6:0.93  h7:0.92
+  Bypass gate:   alpha=-7.6107  gate=0.000495  (gate→0=condV-like, gate→1=fully-clean-Q)
+  Bypass diag:   clean_norm=23.8357  full_norm=23.8215  q_cosim=1.0000  q_delta_norm=0.0033
+  EMA factors:   b0:0.0115
+  KdV alphas:    b0:-0.0017
+  -- Generation (T=0.7) --
+    'It was a dark and stormy' -> ' day, and it was quite obvious that the parents of the parents of the children h'
+    'The length of the hypotenuse' -> ' is 1/8 inch long, 1/8 inch long. The length of the hypotenuse is equal to the l'
+    'The President of the United' -> ' States, and President Obama, has received a lot of support from the President, '
+    'Once upon a time there was' -> ' a new situation, and the situation was quite different. The next time, when a n'
+    'The results indicate that' -> ' the use of the word “in” may be less useful than the original word “in” (see Fr'
+  --
+  Passkey...
+  mean=73.3%  (10/12 distances >50%)
+  d=1:100%  d=2:100%  d=4:100%  d=8:100%  d=16:60%  d=32:80%  d=64:80%  d=128:60%  d=256:80%  d=512:40%  d=1024:60%  d=1536:20%
+  Step 200/1690 | Loss 3.7537
+  Step 400/1690 | Loss 3.6286
+  Step 600/1690 | Loss 3.8909
+  Step 800/1690 | Loss 3.8152
+  Step 1000/1690 | Loss 3.7907
+  Step 1200/1690 | Loss 3.9021
+  Step 1400/1690 | Loss 3.7270
+  Step 1600/1690 | Loss 3.6935
+Ep 5/10 | Train 3.7654 | Val 3.6804 PPL 39.7 * BEST | 9374s (71%C)
+  DSQG pos-bias: |mean|=3.1243 |max|=12.0013 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.2180 |max|=0.9263
+  IF gains:      h0:0.98  h1:1.01  h2:0.94  h3:0.91  h4:0.96  h5:0.91  h6:0.91  h7:0.90
+  Bypass gate:   alpha=-7.2684  gate=0.000697  (gate→0=condV-like, gate→1=fully-clean-Q)
+  Bypass diag:   clean_norm=23.7013  full_norm=23.6820  q_cosim=1.0000  q_delta_norm=0.0046
+  EMA factors:   b0:0.0111
+  KdV alphas:    b0:-0.0016
+  -- Generation (T=0.7) --
+    'It was a dark and stormy' -> ' day and this was the day when the people of the Himalayas were swept away by th'
+    'The length of the hypotenuse' -> ' and contraction of the hypotenuse is indicated by a parallel bending and contra'
+    'The President of the United' -> ' States, William F. Kennedy, was among the most influential of all Americans in '
+    'Once upon a time there was' -> ' a great deal of land, some of which would come to be known as the "probable lan'
+    'The results indicate that' -> ' the use of the human body is not an easy task.\nThe first step is to use the hum'
+  --
+  Passkey...
+  mean=71.7%  (9/12 distances >50%)
+  d=1:100%  d=2:100%  d=4:100%  d=8:100%  d=16:80%  d=32:80%  d=64:80%  d=128:80%  d=256:80%  d=512:20%  d=1024:20%  d=1536:20%
+  Step 200/1690 | Loss 3.6054
+  Step 400/1690 | Loss 3.7266
+  Step 600/1690 | Loss 3.8576
+  Step 800/1690 | Loss 3.5146
+Device: NVIDIA GeForce RTX 4090
+Loading FineWeb-Edu from cache: benchmarks/logs/condm_fineweb_edu_doc_cache.json
+  Loaded 100,000 docs from cache
+Loaded ep5 weights  val_ppl=39.662
+Parameters: 38,729,739
+/home/dlewis3/Desktop/AI/DWARF/.venv/lib/python3.12/site-packages/torch/optim/lr_scheduler.py:227: UserWarning: Detected call of `lr_scheduler.step()` before `optimizer.step()`. In PyTorch 1.1.0 and later, you should call them in the opposite order: `optimizer.step()` before `lr_scheduler.step()`.  Failure to do this will result in PyTorch skipping the first value of the learning rate schedule. See more details at https://pytorch.org/docs/stable/optim.html#how-to-adjust-learning-rate
+  warnings.warn(
+LR after fast-forward (14845 steps): 1.50e-04
+
+============================================================
+
+============================================================
+RESUMED ep5 → running epochs 6–10
+LR at resume: 1.50e-04  (cosine from 3e-4)
+RESUMED ep5 → running epochs 6–10
+============================================================
+
+LR at resume: 1.50e-04  (cosine from 3e-4)
+============================================================
+
+Traceback (most recent call last):
+  File "/home/dlewis3/Desktop/AI/DWARF/train/resume_35m_condX_v2_ep5.py", line 116, in <module>
+    batch = train_data[indices[idx_start: idx_start + BATCH_SIZE]]
+            ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: only integer tensors of a single element can be converted to an index
+Device: NVIDIA GeForce RTX 4090
+Loading pre-encoded dataset from /home/dlewis3/Desktop/AI/DWARF/logs/fineweb_encoded_2048.pt ...
+  train: 212,458  val: 5,582  test: 5,473 seqs
+Loaded ep5 weights  val_ppl=39.662
+Parameters: 38,729,739
+/home/dlewis3/Desktop/AI/DWARF/.venv/lib/python3.12/site-packages/torch/optim/lr_scheduler.py:227: UserWarning: Detected call of `lr_scheduler.step()` before `optimizer.step()`. In PyTorch 1.1.0 and later, you should call them in the opposite order: `optimizer.step()` before `lr_scheduler.step()`.  Failure to do this will result in PyTorch skipping the first value of the learning rate schedule. See more details at https://pytorch.org/docs/stable/optim.html#how-to-adjust-learning-rate
+  warnings.warn(
+LR after fast-forward (33200 steps): 1.50e-04
+
+============================================================
+
+============================================================
+RESUMED ep5 → running epochs 6–10
+RESUMED ep5 → running epochs 6–10
+LR at resume: 1.50e-04  (cosine from 3e-4)
+============================================================
+
+LR at resume: 1.50e-04  (cosine from 3e-4)
+============================================================
+
+Device: NVIDIA GeForce RTX 4090
+Loading pre-encoded dataset from /home/dlewis3/Desktop/AI/DWARF/logs/fineweb_encoded_2048.pt ...
+  train: 52,716  val: 5,582  test: 5,473 seqs  (subset of 212,458 — matching original condX-v2 run)
+Loaded ep5 weights  val_ppl=39.662
+Parameters: 38,729,739
+/home/dlewis3/Desktop/AI/DWARF/.venv/lib/python3.12/site-packages/torch/optim/lr_scheduler.py:227: UserWarning: Detected call of `lr_scheduler.step()` before `optimizer.step()`. In PyTorch 1.1.0 and later, you should call them in the opposite order: `optimizer.step()` before `lr_scheduler.step()`.  Failure to do this will result in PyTorch skipping the first value of the learning rate schedule. See more details at https://pytorch.org/docs/stable/optim.html#how-to-adjust-learning-rate
+  warnings.warn(
+LR after fast-forward (8240 steps): 1.50e-04
+
+============================================================
+
+============================================================
+RESUMED ep5 → running epochs 6–10
+RESUMED ep5 → running epochs 6–10
+LR at resume: 1.50e-04  (cosine from 3e-4)
+LR at resume: 1.50e-04  (cosine from 3e-4)
+============================================================
+
+============================================================
+
+  Step 200/1648 | Loss 3.8470
+  Step 200/1648 | Loss 3.8470
+  Step 400/1648 | Loss 3.6649
+  Step 400/1648 | Loss 3.6649

@@ -1,0 +1,267 @@
+======================================================================
+  condU 13M @ N=4096 — V4 Kernel (J=47, max δ=4096)
+  D=256, H=8, d_head=32, L=6, FFN=1024, N=4096
+  Full attention at layer 5 (0-indexed)
+  Offsets: range(0,33) ∪ {48..1536,2048,3072,4096} = 47 total
+======================================================================
+  GPU: NVIDIA GeForce RTX 4090  (23.6 GB)
+  References: condU_13M_2048=52.206/43.3%pk | condM_13M=54.529/83.3%pk
+  ISO-compute: 26,358 seqs × 4096 tokens ≈ 108M tokens/epoch
+Loading FineWeb-Edu from cache: benchmarks/logs/condm_fineweb_edu_doc_cache.json
+  Loaded 100,000 docs from cache
+
+Loaded condI BPE tokenizer from /home/dlewis3/Desktop/AI/DWARF/benchmarks/results/2048_condI_tokenizer.json
+Loading pre-encoded 4096-context dataset from benchmarks/logs/fineweb_encoded_4096.pt ...
+  train: 106,229  val: 2,791  test: 2,736 seqs (from cache)
+  Capped to 26,358 train seqs (iso-compute vs N=2048)
+  train: 26,358  val: 2,791  test: 2,736
+
+condU 13M @ N=4096: 14,582,240 parameters
+  Layer types: ['DSQG', 'DSQG', 'DSQG+INT', 'DSQG', 'DSQG', 'FULL']
+Running causality check...
+  Pre-10:  0.00000000  (expect 0.0)
+  Pos-10:  1.455601  (expect >0)
+  Post-10: 0.338326  (expect >0)
+  PASS
+  Compiling model with torch.compile (mode=default)...
+  Compile done.
+
+  Tokens/epoch: 107,936,010
+  Chinchilla:   291,644,800 tokens (epoch ~2.70)
+
+/usr/lib/python3.12/ast.py:407: UserWarning: loc("/tmp/torchinductor_dlewis3/ng/cngpoz3fxvem6r4hatctralsxel7wdsvspsys3fqydu2j7k5izuu.py":81:36): The result of tl.advance is not being used. Note that tl.advance does not have any side effects. To move the block pointer, you need to assign the result of tl.advance to a variable.
+  return visitor(node)
+/usr/lib/python3.12/ast.py:407: UserWarning: loc("/tmp/torchinductor_dlewis3/ng/cngpoz3fxvem6r4hatctralsxel7wdsvspsys3fqydu2j7k5izuu.py":82:36): The result of tl.advance is not being used. Note that tl.advance does not have any side effects. To move the block pointer, you need to assign the result of tl.advance to a variable.
+  return visitor(node)
+  Step 200/824 | Loss 6.3731
+  Step 400/824 | Loss 5.9296
+  Step 600/824 | Loss 5.6729
+  Step 800/824 | Loss 5.4615
+/home/dlewis3/Desktop/AI/DWARF/.venv/lib/python3.12/site-packages/torch/_inductor/compile_fx.py:194: UserWarning: TensorFloat32 tensor cores for float32 matrix multiplication available but not enabled. Consider setting `torch.set_float32_matmul_precision('high')` for better performance.
+  warnings.warn(
+Ep 1/10 | Train 6.1961 | Val 5.3979 PPL 220.9 * BEST | 442s (37%C)
+  DSQG pos-bias: |mean|=3.9357 |max|=16.2330 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.0746 |max|=0.1987
+  IF gains:      h0:1.021  h1:1.010  h2:1.012  h3:1.005  h4:1.020  h5:1.011  h6:1.009  h7:1.008
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> '.\nThe first time was the first time.\nThe first time was the first time.\nThe firs'
+    'The length of the hypotenuse' -> ' is the same as the same as the same as the same as the same as the same as the '
+    'The President of the United' -> ' States, the United States, the United States, and the United States, and the Un'
+    'Once upon a time there was' -> ' a little time to be a good way to make it a good way to make it.\nThe first thin'
+    'The results indicate that' -> ' the results are the most important.\nThe most important studies have been found '
+  --
+  Passkey...
+W0303 19:31:14.388000 745849 torch/_dynamo/convert_frame.py:906] [1/8] torch._dynamo hit config.cache_size_limit (8)
+W0303 19:31:14.388000 745849 torch/_dynamo/convert_frame.py:906] [1/8]    function: 'forward' (/home/dlewis3/Desktop/AI/DWARF/benchmarks/train_4096_13m_condU.py:250)
+W0303 19:31:14.388000 745849 torch/_dynamo/convert_frame.py:906] [1/8]    last reason: 1/1: len(L['self']._modules) == 8                                
+W0303 19:31:14.388000 745849 torch/_dynamo/convert_frame.py:906] [1/8] To log all recompilation reasons, use TORCH_LOGS="recompiles".
+W0303 19:31:14.388000 745849 torch/_dynamo/convert_frame.py:906] [1/8] To diagnose recompilation issues, see https://pytorch.org/docs/main/torch.compiler_troubleshooting.html.
+  mean=0.0%  (0/14 distances >50%)
+  d=1:0%  d=2:0%  d=4:0%  d=8:0%  d=16:0%  d=32:0%  d=64:0%  d=128:0%  d=256:0%  d=512:0%  d=1024:0%  d=1536:0%  d=2048:0%  d=3072:0%
+  Step 200/824 | Loss 5.2314
+  Step 400/824 | Loss 5.0874
+  Step 600/824 | Loss 5.1397
+  Step 800/824 | Loss 4.9046
+Ep 2/10 | Train 5.1858 | Val 4.8919 PPL 133.2 * BEST | 833s (74%C)
+  DSQG pos-bias: |mean|=3.8721 |max|=15.8587 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.1269 |max|=0.3903
+  IF gains:      h0:1.042  h1:1.019  h2:1.020  h3:1.011  h4:1.035  h5:1.014  h6:1.010  h7:1.004
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> '.\nThe first time the first time was the first time.\nThe first time was the first'
+    'The length of the hypotenuse' -> ' is the most common part of the period of the period of the period of the period'
+    'The President of the United' -> ' States, the United States, and the United States.\nThe United States, the United'
+    'Once upon a time there was' -> ' a lot of time.\nThe first time was to be the first time. The first time was the '
+    'The results indicate that' -> ' the effects of the effects of the effects of the effects of the effects of the '
+  --
+  Passkey...
+  mean=0.0%  (0/14 distances >50%)
+  d=1:0%  d=2:0%  d=4:0%  d=8:0%  d=16:0%  d=32:0%  d=64:0%  d=128:0%  d=256:0%  d=512:0%  d=1024:0%  d=1536:0%  d=2048:0%  d=3072:0%
+  Step 200/824 | Loss 5.0084
+  Step 400/824 | Loss 4.7924
+  Step 600/824 | Loss 4.6707
+  Step 800/824 | Loss 4.7586
+Ep 3/10 | Train 4.7806 | Val 4.4750 PPL 87.8 * BEST | 1185s (111%C)
+  DSQG pos-bias: |mean|=3.8079 |max|=15.5281 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.1540 |max|=0.5078
+  IF gains:      h0:1.039  h1:1.016  h2:1.015  h3:1.012  h4:1.039  h5:1.017  h6:1.006  h7:0.992
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> '.\nThe first thing is that the first time the first time the first time was the f'
+    'The length of the hypotenuse' -> ' of the first two-dimensional, the first-dimensional, and the second-dimensional'
+    'The President of the United' -> ' States, the President, and the President, the President, the President, and the'
+    'Once upon a time there was' -> ' a lot of time.\nThe first time the first time was the first time the first time '
+    'The results indicate that' -> ' the current current is not the first.\nThe current current is the first step in '
+  --
+  Passkey...
+  mean=0.0%  (0/14 distances >50%)
+  d=1:0%  d=2:0%  d=4:0%  d=8:0%  d=16:0%  d=32:0%  d=64:0%  d=128:0%  d=256:0%  d=512:0%  d=1024:0%  d=1536:0%  d=2048:0%  d=3072:0%
+  Step 200/824 | Loss 4.4871
+  Step 400/824 | Loss 4.3591
+  Step 600/824 | Loss 4.4029
+  Step 800/824 | Loss 4.1949
+Ep 4/10 | Train 4.4544 | Val 4.2738 PPL 71.8 * BEST | 1534s (148%C)
+  DSQG pos-bias: |mean|=3.7500 |max|=15.2519 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.1717 |max|=0.5866
+  IF gains:      h0:1.041  h1:1.020  h2:1.013  h3:1.013  h4:1.037  h5:1.021  h6:1.002  h7:0.985
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ' day.\nThe first day of the day was the first day of the day. The first day of th'
+    'The length of the hypotenuse' -> ' is the most common type of the hypoglycerus.\nThe most common type of the hypogl'
+    'The President of the United' -> ' States, the President, and the President, the President, and the President, the'
+    'Once upon a time there was' -> ' a little more than a few years.\nThe first time the first time the first time wa'
+    'The results indicate that' -> ' the effects of the effect of the effect of the effect of the effect of the effe'
+  --
+  Passkey...
+  mean=0.0%  (0/14 distances >50%)
+  d=1:0%  d=2:0%  d=4:0%  d=8:0%  d=16:0%  d=32:0%  d=64:0%  d=128:0%  d=256:0%  d=512:0%  d=1024:0%  d=1536:0%  d=2048:0%  d=3072:0%
+  Step 200/824 | Loss 4.3159
+  Step 400/824 | Loss 4.3774
+  Step 600/824 | Loss 4.1317
+  Step 800/824 | Loss 4.3799
+Ep 5/10 | Train 4.2990 | Val 4.1776 PPL 65.2 * BEST | 1888s (185%C)
+  DSQG pos-bias: |mean|=3.7023 |max|=15.0356 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.1828 |max|=0.6383
+  IF gains:      h0:1.046  h1:1.025  h2:1.013  h3:1.017  h4:1.034  h5:1.021  h6:1.001  h7:0.982
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ' night.\nThe first thing that was that of the day was that of the day.\nThe night '
+    'The length of the hypotenuse' -> ' is the most common type of hyphenosis.\nThe most common type of hyphenosis is th'
+    'The President of the United' -> ' States, the President, and the President, was the President.\nThe President was '
+    'Once upon a time there was' -> ' a little more than a few years ago, the first time the first time the first tim'
+    'The results indicate that' -> ' the first step in the first step is to determine the extent of the first step i'
+  --
+  Passkey...
+  mean=0.0%  (0/14 distances >50%)
+  d=1:0%  d=2:0%  d=4:0%  d=8:0%  d=16:0%  d=32:0%  d=64:0%  d=128:0%  d=256:0%  d=512:0%  d=1024:0%  d=1536:0%  d=2048:0%  d=3072:0%
+  Step 200/824 | Loss 4.4100
+  Step 400/824 | Loss 4.3122
+  Step 600/824 | Loss 4.1730
+  Step 800/824 | Loss 4.2036
+Ep 6/10 | Train 4.2175 | Val 4.1219 PPL 61.7 * BEST | 2238s (222%C)
+  DSQG pos-bias: |mean|=3.6670 |max|=14.8795 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.1894 |max|=0.6705
+  IF gains:      h0:1.050  h1:1.029  h2:1.013  h3:1.020  h4:1.033  h5:1.020  h6:1.002  h7:0.981
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ' night.\nThe first thing that was to be done was that the day was to be done.\nThe'
+    'The length of the hypotenuse' -> ' is the most common type of hyphenosis.\nThe following is the following:\n- The fi'
+    'The President of the United' -> ' States, the President, and the President, and the President, and the President,'
+    'Once upon a time there was' -> ' a new idea of the “the world” that was to be a “the world” and to be a “the wor'
+    'The results indicate that' -> ' the first step in the process is to determine the level of the process.\nThe fir'
+  --
+  Passkey...
+  mean=0.0%  (0/14 distances >50%)
+  d=1:0%  d=2:0%  d=4:0%  d=8:0%  d=16:0%  d=32:0%  d=64:0%  d=128:0%  d=256:0%  d=512:0%  d=1024:0%  d=1536:0%  d=2048:0%  d=3072:0%
+  Step 200/824 | Loss 4.2738
+  Step 400/824 | Loss 4.2533
+  Step 600/824 | Loss 4.1512
+  Step 800/824 | Loss 4.1456
+Ep 7/10 | Train 4.1771 | Val 4.0859 PPL 59.5 * BEST | 2589s (259%C)
+  DSQG pos-bias: |mean|=3.6438 |max|=14.7790 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.1929 |max|=0.6889
+  IF gains:      h0:1.052  h1:1.032  h2:1.014  h3:1.022  h4:1.032  h5:1.020  h6:1.002  h7:0.981
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ' night.\nThe first thing that we can do is to do is to do something that is not a'
+    'The length of the hypotenuse' -> ' is the most common type of hypoxia.\nThe following are the following:\n- The firs'
+    'The President of the United' -> ' States, the President, and the President, and the President, and the President,'
+    'Once upon a time there was' -> ' a little more than a few days before the day.\nThe first time the first time the'
+    'The results indicate that' -> ' the first step in the process is to determine the amount of time the first step'
+  --
+  Passkey...
+  mean=0.0%  (0/14 distances >50%)
+  d=1:0%  d=2:0%  d=4:0%  d=8:0%  d=16:0%  d=32:0%  d=64:0%  d=128:0%  d=256:0%  d=512:0%  d=1024:0%  d=1536:0%  d=2048:0%  d=3072:0%
+  Step 200/824 | Loss 4.1314
+  Step 400/824 | Loss 4.3840
+  Step 600/824 | Loss 4.0000
+  Step 800/824 | Loss 4.2607
+Ep 8/10 | Train 4.1452 | Val 4.0681 PPL 58.4 * BEST | 2935s (296%C)
+  DSQG pos-bias: |mean|=3.6311 |max|=14.7251 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.1945 |max|=0.6987
+  IF gains:      h0:1.054  h1:1.034  h2:1.015  h3:1.024  h4:1.032  h5:1.019  h6:1.003  h7:0.981
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ' night.\nThe first day of the day was the first day of the day. The night was the'
+    'The length of the hypotenuse' -> ' is determined by the degree of the degree of the degree of the degree of the de'
+    'The President of the United' -> ' States, the President, and the President, and the President, and the President,'
+    'Once upon a time there was' -> ' a new one.\nThe first thing that we can do is to do is to do this.\nThe first thi'
+    'The results indicate that' -> ' the first step in the process is to determine the function of the process.\nThe '
+  --
+  Passkey...
+  mean=0.0%  (0/14 distances >50%)
+  d=1:0%  d=2:0%  d=4:0%  d=8:0%  d=16:0%  d=32:0%  d=64:0%  d=128:0%  d=256:0%  d=512:0%  d=1024:0%  d=1536:0%  d=2048:0%  d=3072:0%
+  Step 200/824 | Loss 4.1213
+  Step 400/824 | Loss 4.0982
+  Step 600/824 | Loss 4.2171
+  Step 800/824 | Loss 4.2127
+Ep 9/10 | Train 4.1247 | Val 4.0591 PPL 57.9 * BEST | 3282s (333%C)
+  DSQG pos-bias: |mean|=3.6263 |max|=14.7046 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.1951 |max|=0.7030
+  IF gains:      h0:1.055  h1:1.035  h2:1.015  h3:1.025  h4:1.032  h5:1.019  h6:1.003  h7:0.981
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ' night.\nThe first day of the day was the first day of the day. The night was the'
+    'The length of the hypotenuse' -> ' is determined by the degree of the degree of the degree of the degree of the de'
+    'The President of the United' -> ' States, the President, and the President, and the President, and the President,'
+    'Once upon a time there was' -> ' a new one.\nThe first thing that we can do is to do is to do so.\nThe first thing'
+    'The results indicate that' -> ' the first step in the process is to determine the number of steps in the proces'
+  --
+  Passkey...
+  mean=0.0%  (0/14 distances >50%)
+  d=1:0%  d=2:0%  d=4:0%  d=8:0%  d=16:0%  d=32:0%  d=64:0%  d=128:0%  d=256:0%  d=512:0%  d=1024:0%  d=1536:0%  d=2048:0%  d=3072:0%
+  Step 200/824 | Loss 4.1517
+  Step 400/824 | Loss 4.3612
+  Step 600/824 | Loss 4.2369
+  Step 800/824 | Loss 3.8666
+Ep 10/10 | Train 4.1219 | Val 4.0579 PPL 57.9 * BEST | 3631s (370%C)
+  DSQG pos-bias: |mean|=3.6256 |max|=14.7016 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.1951 |max|=0.7035
+  IF gains:      h0:1.055  h1:1.035  h2:1.015  h3:1.025  h4:1.032  h5:1.019  h6:1.003  h7:0.981
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ' night.\nThe first day of the day was the first day of the day. The night was the'
+    'The length of the hypotenuse' -> ' is determined by the degree of the degree of the degree of the degree of the de'
+    'The President of the United' -> ' States, the President, and the President, and the President, and the President,'
+    'Once upon a time there was' -> ' a new one.\nThe first thing that we can do is to do is to do this.\nThe first thi'
+    'The results indicate that' -> ' the first step in the process is to determine the degree of the process of the '
+  --
+  Passkey...
+  mean=0.0%  (0/14 distances >50%)
+  d=1:0%  d=2:0%  d=4:0%  d=8:0%  d=16:0%  d=32:0%  d=64:0%  d=128:0%  d=256:0%  d=512:0%  d=1024:0%  d=1536:0%  d=2048:0%  d=3072:0%
+
+  condU 13M @ N=4096 TEST: PPL 58.617 | Loss 4.0710
+  condU 13M @ N=2048 ref:  52.206 PPL | delta = +6.411
+  condM 13M @ N=2048 ref:  54.529 PPL | delta = +4.088
+  Standard 13M ref:        64.070 PPL | delta = -5.453
+
+  -- Temperature sweep (best checkpoint) --
+
+  [greedy]
+    'It was a dark and stormy' -> ' night.\nThe first day of the day was the first day of the day. The night was the'
+    'The length of the hypotenuse' -> ' is determined by the degree of the degree of the degree of the degree of the de'
+    'The President of the United' -> ' States, the President, and the President, and the President, and the President,'
+    'Once upon a time there was' -> ' a new one.\nThe first thing that we can do is to do is to do this.\nThe first thi'
+    'The results indicate that' -> ' the first step in the process is to determine the degree of the process of the '
+
+  [T=0.5]
+    'It was a dark and stormy' -> ', and a dark light was poured into the air. It was a very dry and dry place. It '
+    'The length of the hypotenuse' -> ' of the lower-level maximal maximal maximal maximal maximal maximal maximal maxi'
+    'The President of the United' -> ' States, and the President, and the President, are appointed to the President an'
+    'Once upon a time there was' -> ' a special interest in the real world.\nThe idea of the term “the universe” is th'
+    'The results indicate that' -> ' the prevalence of the prevalence of the prevalence of the prevalence of the pre'
+
+  [T=0.7]
+    'It was a dark and stormy' -> ' night, and was that he was a huge part of the town.\nThe story of the man who ha'
+    'The length of the hypotenuse' -> ' is approximately 3.5 cm. The upper length of the deconstruct is about 1.5 cm. T'
+    'The President of the United' -> ' States.\n- See also\n-\n- How is the law to be applied to the United States?\n- The'
+    'Once upon a time there was' -> ' an animal, it was a dog. It was a dog, and the dog was a dog.\nCreating a dog is'
+    'The results indicate that' -> ' the present season is high for an average season (1.5% of the year), which is t'
+
+  [T=1.0]
+    'It was a dark and stormy' -> ' one or two\nnothing else, but they all couldn’t make so much darkness, lest they'
+    'The length of the hypotenuse' -> '\nbeach is unknown (and false is in color) if it is anything. If someone once wen'
+    'The President of the United' -> ' States was at the time that Germany took control of the continent and was more '
+    'Once upon a time there was' -> ' a fire in the safe and razeed “get” fire of the new where it could be done. Las'
+    'The results indicate that' -> ' the metastasis is a well-intentioned, healthy and nonadrenantal. It also raises'
+
+  Final passkey: mean=0.0%  (0/14 distances >50%)
+  d=1:0%  d=2:0%  d=4:0%  d=8:0%  d=16:0%  d=32:0%  d=64:0%  d=128:0%  d=256:0%  d=512:0%  d=1024:0%  d=1536:0%  d=2048:0%  d=3072:0%
+  condU 13M @ N=2048: 43.3% passkey (max d=1536)
+  condM 13M @ N=2048: 83.3% passkey (max d=1536)
+
+  Final IF gains: h0:1.055  h1:1.035  h2:1.015  h3:1.025  h4:1.032  h5:1.019  h6:1.003  h7:0.981
+  Final scale_embed: |mean|=0.1951 |max|=0.7035
+
+  Results -> benchmarks/logs/condU_13m_4096_results.json

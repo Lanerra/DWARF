@@ -1,0 +1,940 @@
+
+
+
+/home/dlewis3/Desktop/AI/wave-field-llm/.venv/lib/python3.12/site-packages/torch/_dynamo/eval_frame.py:1181: UserWarning: torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly. Starting in PyTorch 2.9, calling checkpoint without use_reentrant will raise an exception. use_reentrant=False is recommended, but if you need to preserve the current default behavior, you can pass use_reentrant=True. Refer to docs for more details on the differences between the two variants.
+  return fn(*args, **kwargs)
+======================================================================
+  WAVE FIELD — V5-KdV ABLATION @ 2048 TOKENS
+  Condition A:   V4 no dispersion           → TEST PPL 86.8  (prior)
+  Condition B:   V4D with dispersion         → TEST PPL 87.9  (prior)
+  Condition C:   V4 + causal Morlet wavelet  → TEST PPL 87.2  (prior)
+  Condition D:   V5-KdV DB4+KdV+RG init      ← THIS RUN
+
+  Three mechanisms (see module docstring):
+    1. DB4 minimum-phase basis  (93.3% energy in first 2 taps)
+    2. V5-KdV nonlinear term    (α per head, init 0.05, causal)
+    3. RG-motivated gain init   (depth-decayed: 0.458 → 0.092)
+======================================================================
+Loading OpenWebText (up to 100,000 docs)...
+  25,000 docs...
+  50,000 docs...
+  75,000 docs...
+  100,000 docs...
+  100,000 docs | train 95,000 | val 2,500 | test 2,500
+
+Training BPE tokenizer (vocab=32000)...
+  BPE vocab: 32000 tokens
+
+  Encoding data (max_seq_len=2048)...
+  Train 112,583 | Val 3,008 | Test 3,024
+  Device: cuda | AMP: True
+
+======================================================================
+  CONDITION D — V5-KdV: DB4 + KdV nonlinearity + RG gain init
+======================================================================
+
+  Parameters: 13,326,832 total, 48 KdV α (6 layers × 8 heads)
+  Causality check PASSED (DB4): pos1→pos0 leakage = 2.67e-09
+  Causality check PASSED (KdV): pre-impulse leakage = 0.00e+00
+
+  Applying RG init: base_gain=0.458, depth_decay=0.864
+    Layer 0: target_mean=0.4580  actual_mean=0.4580
+    Layer 1: target_mean=0.3957  actual_mean=0.3957
+    Layer 2: target_mean=0.3419  actual_mean=0.3419
+    Layer 3: target_mean=0.2954  actual_mean=0.2954
+    Layer 4: target_mean=0.2552  actual_mean=0.2552
+    Layer 5: target_mean=0.2205  actual_mean=0.2205
+  RG init complete.
+
+  Wave V5-KdV (DB4+KdV+RG): 13,326,832 params | batch 8×4=32 | lr 0.0003
+    Step 200/14073 | Loss 10.1878
+    Step 400/14073 | Loss 10.1633
+    Step 600/14073 | Loss 10.1282
+    Step 800/14073 | Loss 10.0840
+    Step 1000/14073 | Loss 10.0349
+    Step 1200/14073 | Loss 9.9852
+    Step 1400/14073 | Loss 9.9356
+    Step 1600/14073 | Loss 9.8844
+    Step 1800/14073 | Loss 9.8323
+    Step 2000/14073 | Loss 9.7780
+    Step 2200/14073 | Loss 9.7214
+    Step 2400/14073 | Loss 9.6641
+    Step 2600/14073 | Loss 9.6033
+    Step 2800/14073 | Loss 9.5404
+    Step 3000/14073 | Loss 9.4754
+    Step 3200/14073 | Loss 9.4093
+    Step 3400/14073 | Loss 9.3415
+    Step 3600/14073 | Loss 9.2724
+    Step 3800/14073 | Loss 9.2023
+    Step 4000/14073 | Loss 9.1330
+    Step 4200/14073 | Loss 9.0644
+    Step 4400/14073 | Loss 8.9956
+    Step 4600/14073 | Loss 8.9295
+    Step 4800/14073 | Loss 8.8641
+    Step 5000/14073 | Loss 8.7998
+    Step 5200/14073 | Loss 8.7383
+    Step 5400/14073 | Loss 8.6787
+    Step 5600/14073 | Loss 8.6204
+    Step 5800/14073 | Loss 8.5656
+    Step 6000/14073 | Loss 8.5122
+    Step 6200/14073 | Loss 8.4603
+    Step 6400/14073 | Loss 8.4102
+    Step 6600/14073 | Loss 8.3626
+    Step 6800/14073 | Loss 8.3160
+    Step 7000/14073 | Loss 8.2711
+    Step 7200/14073 | Loss 8.2276
+    Step 7400/14073 | Loss 8.1862
+    Step 7600/14073 | Loss 8.1450
+    Step 7800/14073 | Loss 8.1065
+    Step 8000/14073 | Loss 8.0682
+    Step 8200/14073 | Loss 8.0316
+    Step 8400/14073 | Loss 7.9964
+    Step 8600/14073 | Loss 7.9618
+    Step 8800/14073 | Loss 7.9285
+    Step 9000/14073 | Loss 7.8965
+    Step 9200/14073 | Loss 7.8648
+    Step 9400/14073 | Loss 7.8347
+    Step 9600/14073 | Loss 7.8046
+    Step 9800/14073 | Loss 7.7758
+    Step 10000/14073 | Loss 7.7479
+    Step 10200/14073 | Loss 7.7210
+    Step 10400/14073 | Loss 7.6948
+    Step 10600/14073 | Loss 7.6689
+    Step 10800/14073 | Loss 7.6439
+    Step 11000/14073 | Loss 7.6194
+    Step 11200/14073 | Loss 7.5953
+    Step 11400/14073 | Loss 7.5720
+    Step 11600/14073 | Loss 7.5492
+    Step 11800/14073 | Loss 7.5267
+    Step 12000/14073 | Loss 7.5049
+    Step 12200/14073 | Loss 7.4835
+    Step 12400/14073 | Loss 7.4629
+    Step 12600/14073 | Loss 7.4421
+    Step 12800/14073 | Loss 7.4219
+    Step 13000/14073 | Loss 7.4023
+    Step 13200/14073 | Loss 7.3833
+    Step 13400/14073 | Loss 7.3645
+    Step 13600/14073 | Loss 7.3457
+    Step 13800/14073 | Loss 7.3275
+    Step 14000/14073 | Loss 7.3097
+/home/dlewis3/Desktop/AI/wave-field-llm/.venv/lib/python3.12/site-packages/torch/utils/checkpoint.py:232: UserWarning: None of the inputs have requires_grad=True. Gradients will be None
+  check_backward_validity(args)
+  Ep   1/10 | Train 7.3031 | Val 6.0314 PPL 416.3 Acc 16.3% | 1230s * BEST
+
+  ── Generation samples (greedy, 150 tokens) ──
+  ['It was a dark and stormy']
+    → ', and the first time, and the first time, and the first time, and the first time, and the first time, and the first time'
+  ['The length of the hypotenuse']
+    → ' the first time, and the first time, and the first time, and the first time, and the first time, and the first time, and'
+  ['The President of the United']
+    → ' States, and the first time, and the first time, and the first time, and the first time, and the first time, and the fir'
+  ['Once upon a time there was']
+    → ' a few years ago, and the first time, and the first time, and the first time, and the first time, and the first time, an'
+  ['The results indicate that']
+    → ' the first time, and the first time, and the first time, and the first time, and the first time, and the first time, and'
+  ──
+
+    Step 200/14073 | Loss 6.0636
+    Step 400/14073 | Loss 6.0551
+    Step 600/14073 | Loss 6.0586
+    Step 800/14073 | Loss 6.0483
+    Step 1000/14073 | Loss 6.0405
+    Step 1200/14073 | Loss 6.0315
+    Step 1400/14073 | Loss 6.0240
+    Step 1600/14073 | Loss 6.0181
+    Step 1800/14073 | Loss 6.0129
+    Step 2000/14073 | Loss 6.0067
+    Step 2200/14073 | Loss 6.0012
+    Step 2400/14073 | Loss 5.9930
+    Step 2600/14073 | Loss 5.9848
+    Step 2800/14073 | Loss 5.9780
+    Step 3000/14073 | Loss 5.9716
+    Step 3200/14073 | Loss 5.9661
+    Step 3400/14073 | Loss 5.9597
+    Step 3600/14073 | Loss 5.9527
+    Step 3800/14073 | Loss 5.9477
+    Step 4000/14073 | Loss 5.9414
+    Step 4200/14073 | Loss 5.9363
+    Step 4400/14073 | Loss 5.9309
+    Step 4600/14073 | Loss 5.9258
+    Step 4800/14073 | Loss 5.9202
+    Step 5000/14073 | Loss 5.9150
+    Step 5200/14073 | Loss 5.9100
+    Step 5400/14073 | Loss 5.9044
+    Step 5600/14073 | Loss 5.8981
+    Step 5800/14073 | Loss 5.8918
+    Step 6000/14073 | Loss 5.8869
+    Step 6200/14073 | Loss 5.8821
+    Step 6400/14073 | Loss 5.8769
+    Step 6600/14073 | Loss 5.8732
+    Step 6800/14073 | Loss 5.8686
+    Step 7000/14073 | Loss 5.8636
+    Step 7200/14073 | Loss 5.8583
+    Step 7400/14073 | Loss 5.8529
+    Step 7600/14073 | Loss 5.8483
+    Step 7800/14073 | Loss 5.8435
+    Step 8000/14073 | Loss 5.8385
+    Step 8200/14073 | Loss 5.8336
+    Step 8400/14073 | Loss 5.8289
+    Step 8600/14073 | Loss 5.8243
+    Step 8800/14073 | Loss 5.8194
+    Step 9000/14073 | Loss 5.8149
+    Step 9200/14073 | Loss 5.8103
+    Step 9400/14073 | Loss 5.8059
+    Step 9600/14073 | Loss 5.8012
+    Step 9800/14073 | Loss 5.7965
+    Step 10000/14073 | Loss 5.7922
+    Step 10200/14073 | Loss 5.7880
+    Step 10400/14073 | Loss 5.7835
+    Step 10600/14073 | Loss 5.7799
+    Step 10800/14073 | Loss 5.7756
+    Step 11000/14073 | Loss 5.7713
+    Step 11200/14073 | Loss 5.7675
+    Step 11400/14073 | Loss 5.7634
+    Step 11600/14073 | Loss 5.7592
+    Step 11800/14073 | Loss 5.7548
+    Step 12000/14073 | Loss 5.7506
+    Step 12200/14073 | Loss 5.7465
+    Step 12400/14073 | Loss 5.7429
+    Step 12600/14073 | Loss 5.7392
+    Step 12800/14073 | Loss 5.7356
+    Step 13000/14073 | Loss 5.7318
+    Step 13200/14073 | Loss 5.7279
+    Step 13400/14073 | Loss 5.7240
+    Step 13600/14073 | Loss 5.7200
+    Step 13800/14073 | Loss 5.7161
+    Step 14000/14073 | Loss 5.7123
+  Ep   2/10 | Train 5.7110 | Val 5.4064 PPL 222.8 Acc 19.3% | 1220s * BEST
+
+  ── Generation samples (greedy, 150 tokens) ──
+  ['It was a dark and stormy']
+    → ', but it\'s "The first-based and the same as a new and the same as a new and the same as a new and the same as a new and '
+  ['The length of the hypotenuse']
+    → '.                                                                                                                       '
+  ['The President of the United']
+    → ' States.                                                                                                                '
+  ['Once upon a time there was']
+    → ' a new and the same as a new and the same as a new and the same as a new and the same as a new and the same as a new and'
+  ['The results indicate that']
+    → ' the same as a new and the same as a new and the same as a new and the same as a new and the same as a new and the same '
+  ──
+
+    Step 200/14073 | Loss 5.4374
+    Step 400/14073 | Loss 5.4155
+    Step 600/14073 | Loss 5.4213
+    Step 800/14073 | Loss 5.4143
+    Step 1000/14073 | Loss 5.4154
+    Step 1200/14073 | Loss 5.4153
+    Step 1400/14073 | Loss 5.4129
+    Step 1600/14073 | Loss 5.4130
+    Step 1800/14073 | Loss 5.4104
+    Step 2000/14073 | Loss 5.4094
+    Step 2200/14073 | Loss 5.4073
+    Step 2400/14073 | Loss 5.4054
+    Step 2600/14073 | Loss 5.4037
+    Step 2800/14073 | Loss 5.4027
+    Step 3000/14073 | Loss 5.3991
+    Step 3200/14073 | Loss 5.3956
+    Step 3400/14073 | Loss 5.3929
+    Step 3600/14073 | Loss 5.3888
+    Step 3800/14073 | Loss 5.3863
+    Step 4000/14073 | Loss 5.3824
+    Step 4200/14073 | Loss 5.3797
+    Step 4400/14073 | Loss 5.3766
+    Step 4600/14073 | Loss 5.3750
+    Step 4800/14073 | Loss 5.3719
+    Step 5000/14073 | Loss 5.3698
+    Step 5200/14073 | Loss 5.3680
+    Step 5400/14073 | Loss 5.3664
+    Step 5600/14073 | Loss 5.3634
+    Step 5800/14073 | Loss 5.3602
+    Step 6000/14073 | Loss 5.3581
+    Step 6200/14073 | Loss 5.3557
+    Step 6400/14073 | Loss 5.3531
+    Step 6600/14073 | Loss 5.3512
+    Step 6800/14073 | Loss 5.3483
+    Step 7000/14073 | Loss 5.3460
+    Step 7200/14073 | Loss 5.3430
+    Step 7400/14073 | Loss 5.3403
+    Step 7600/14073 | Loss 5.3378
+    Step 7800/14073 | Loss 5.3350
+    Step 8000/14073 | Loss 5.3326
+    Step 8200/14073 | Loss 5.3300
+    Step 8400/14073 | Loss 5.3277
+    Step 8600/14073 | Loss 5.3251
+    Step 8800/14073 | Loss 5.3221
+    Step 9000/14073 | Loss 5.3194
+    Step 9200/14073 | Loss 5.3169
+    Step 9400/14073 | Loss 5.3148
+    Step 9600/14073 | Loss 5.3130
+    Step 9800/14073 | Loss 5.3110
+    Step 10000/14073 | Loss 5.3085
+    Step 10200/14073 | Loss 5.3062
+    Step 10400/14073 | Loss 5.3039
+    Step 10600/14073 | Loss 5.3014
+    Step 10800/14073 | Loss 5.2987
+    Step 11000/14073 | Loss 5.2959
+    Step 11200/14073 | Loss 5.2939
+    Step 11400/14073 | Loss 5.2914
+    Step 11600/14073 | Loss 5.2893
+    Step 11800/14073 | Loss 5.2872
+    Step 12000/14073 | Loss 5.2851
+    Step 12200/14073 | Loss 5.2833
+    Step 12400/14073 | Loss 5.2809
+    Step 12600/14073 | Loss 5.2786
+    Step 12800/14073 | Loss 5.2767
+    Step 13000/14073 | Loss 5.2745
+    Step 13200/14073 | Loss 5.2724
+    Step 13400/14073 | Loss 5.2701
+    Step 13600/14073 | Loss 5.2678
+    Step 13800/14073 | Loss 5.2656
+    Step 14000/14073 | Loss 5.2631
+  Ep   3/10 | Train 5.2621 | Val 5.0810 PPL 160.9 Acc 21.4% | 1183s * BEST
+
+  ── Generation samples (greedy, 150 tokens) ──
+  ['It was a dark and stormy']
+    → ', the most of the most of the most of the most of the most of the most of the most of the most of the most of the most o'
+  ['The length of the hypotenuse']
+    → ' a new projects.                                                                                                        '
+  ['The President of the United']
+    → ' States, the most of the most of the most of the most of the most of the most of the most of the most of the most of the'
+  ['Once upon a time there was']
+    → ' a new projects.                                                                                                        '
+  ['The results indicate that']
+    → ' the most of the most of the most of the most of the most of the most of the most of the most of the most of the most of'
+  ──
+
+    Step 200/14073 | Loss 5.0901
+    Step 400/14073 | Loss 5.0809
+    Step 600/14073 | Loss 5.0846
+    Step 800/14073 | Loss 5.0804
+    Step 1000/14073 | Loss 5.0869
+    Step 1200/14073 | Loss 5.0832
+    Step 1400/14073 | Loss 5.0837
+    Step 1600/14073 | Loss 5.0810
+    Step 1800/14073 | Loss 5.0803
+    Step 2000/14073 | Loss 5.0779
+    Step 2200/14073 | Loss 5.0780
+    Step 2400/14073 | Loss 5.0774
+    Step 2600/14073 | Loss 5.0756
+    Step 2800/14073 | Loss 5.0762
+    Step 3000/14073 | Loss 5.0750
+    Step 3200/14073 | Loss 5.0739
+    Step 3400/14073 | Loss 5.0731
+    Step 3600/14073 | Loss 5.0709
+    Step 3800/14073 | Loss 5.0701
+    Step 4000/14073 | Loss 5.0690
+    Step 4200/14073 | Loss 5.0671
+    Step 4400/14073 | Loss 5.0653
+    Step 4600/14073 | Loss 5.0632
+    Step 4800/14073 | Loss 5.0625
+    Step 5000/14073 | Loss 5.0611
+    Step 5200/14073 | Loss 5.0595
+    Step 5400/14073 | Loss 5.0585
+    Step 5600/14073 | Loss 5.0574
+    Step 5800/14073 | Loss 5.0567
+    Step 6000/14073 | Loss 5.0545
+    Step 6200/14073 | Loss 5.0535
+    Step 6400/14073 | Loss 5.0512
+    Step 6600/14073 | Loss 5.0498
+    Step 6800/14073 | Loss 5.0483
+    Step 7000/14073 | Loss 5.0469
+    Step 7200/14073 | Loss 5.0460
+    Step 7400/14073 | Loss 5.0443
+    Step 7600/14073 | Loss 5.0438
+    Step 7800/14073 | Loss 5.0422
+    Step 8000/14073 | Loss 5.0413
+    Step 8200/14073 | Loss 5.0406
+    Step 8400/14073 | Loss 5.0396
+    Step 8600/14073 | Loss 5.0391
+    Step 8800/14073 | Loss 5.0376
+    Step 9000/14073 | Loss 5.0370
+    Step 9200/14073 | Loss 5.0363
+    Step 9400/14073 | Loss 5.0355
+    Step 9600/14073 | Loss 5.0341
+    Step 9800/14073 | Loss 5.0328
+    Step 10000/14073 | Loss 5.0314
+    Step 10200/14073 | Loss 5.0306
+    Step 10400/14073 | Loss 5.0293
+    Step 10600/14073 | Loss 5.0281
+    Step 10800/14073 | Loss 5.0265
+    Step 11000/14073 | Loss 5.0257
+    Step 11200/14073 | Loss 5.0244
+    Step 11400/14073 | Loss 5.0232
+    Step 11600/14073 | Loss 5.0219
+    Step 11800/14073 | Loss 5.0205
+    Step 12000/14073 | Loss 5.0199
+    Step 12200/14073 | Loss 5.0192
+    Step 12400/14073 | Loss 5.0182
+    Step 12600/14073 | Loss 5.0168
+    Step 12800/14073 | Loss 5.0157
+    Step 13000/14073 | Loss 5.0147
+    Step 13200/14073 | Loss 5.0134
+    Step 13400/14073 | Loss 5.0125
+    Step 13600/14073 | Loss 5.0114
+    Step 13800/14073 | Loss 5.0104
+    Step 14000/14073 | Loss 5.0091
+  Ep   4/10 | Train 5.0086 | Val 4.8867 PPL 132.5 Acc 22.7% | 1184s * BEST
+
+  ── Generation samples (greedy, 150 tokens) ──
+  ['It was a dark and stormy']
+    → ', the world.                                                                                                            '
+  ['The length of the hypotenuse']
+    → ' the world.                                                                                                             '
+  ['The President of the United']
+    → ' States, the world.                                                                                                     '
+  ['Once upon a time there was']
+    → ' a new technology.                                                                                                      '
+  ['The results indicate that']
+    → ' the world.                                                                                                             '
+  ──
+
+    Step 200/14073 | Loss 4.9414
+    Step 400/14073 | Loss 4.9244
+    Step 600/14073 | Loss 4.9257
+    Step 800/14073 | Loss 4.9183
+    Step 1000/14073 | Loss 4.9139
+    Step 1200/14073 | Loss 4.9090
+    Step 1400/14073 | Loss 4.9082
+    Step 1600/14073 | Loss 4.9071
+    Step 1800/14073 | Loss 4.9049
+    Step 2000/14073 | Loss 4.9024
+    Step 2200/14073 | Loss 4.8993
+    Step 2400/14073 | Loss 4.8979
+    Step 2600/14073 | Loss 4.8974
+    Step 2800/14073 | Loss 4.8961
+    Step 3000/14073 | Loss 4.8962
+    Step 3200/14073 | Loss 4.8957
+    Step 3400/14073 | Loss 4.8954
+    Step 3600/14073 | Loss 4.8941
+    Step 3800/14073 | Loss 4.8937
+    Step 4000/14073 | Loss 4.8927
+    Step 4200/14073 | Loss 4.8916
+    Step 4400/14073 | Loss 4.8916
+    Step 4600/14073 | Loss 4.8906
+    Step 4800/14073 | Loss 4.8906
+    Step 5000/14073 | Loss 4.8895
+    Step 5200/14073 | Loss 4.8903
+    Step 5400/14073 | Loss 4.8897
+    Step 5600/14073 | Loss 4.8888
+    Step 5800/14073 | Loss 4.8878
+    Step 6000/14073 | Loss 4.8866
+    Step 6200/14073 | Loss 4.8862
+    Step 6400/14073 | Loss 4.8858
+    Step 6600/14073 | Loss 4.8854
+    Step 6800/14073 | Loss 4.8847
+    Step 7000/14073 | Loss 4.8845
+    Step 7200/14073 | Loss 4.8833
+    Step 7400/14073 | Loss 4.8830
+    Step 7600/14073 | Loss 4.8829
+    Step 7800/14073 | Loss 4.8826
+    Step 8000/14073 | Loss 4.8822
+    Step 8200/14073 | Loss 4.8817
+    Step 8400/14073 | Loss 4.8805
+    Step 8600/14073 | Loss 4.8793
+    Step 8800/14073 | Loss 4.8789
+    Step 9000/14073 | Loss 4.8790
+    Step 9200/14073 | Loss 4.8787
+    Step 9400/14073 | Loss 4.8785
+    Step 9600/14073 | Loss 4.8780
+    Step 9800/14073 | Loss 4.8775
+    Step 10000/14073 | Loss 4.8766
+    Step 10200/14073 | Loss 4.8760
+    Step 10400/14073 | Loss 4.8748
+    Step 10600/14073 | Loss 4.8745
+    Step 10800/14073 | Loss 4.8738
+    Step 11000/14073 | Loss 4.8727
+    Step 11200/14073 | Loss 4.8721
+    Step 11400/14073 | Loss 4.8714
+    Step 11600/14073 | Loss 4.8704
+    Step 11800/14073 | Loss 4.8697
+    Step 12000/14073 | Loss 4.8692
+    Step 12200/14073 | Loss 4.8684
+    Step 12400/14073 | Loss 4.8679
+    Step 12600/14073 | Loss 4.8672
+    Step 12800/14073 | Loss 4.8666
+    Step 13000/14073 | Loss 4.8661
+    Step 13200/14073 | Loss 4.8654
+    Step 13400/14073 | Loss 4.8648
+    Step 13600/14073 | Loss 4.8643
+    Step 13800/14073 | Loss 4.8635
+    Step 14000/14073 | Loss 4.8628
+  Ep   5/10 | Train 4.8625 | Val 4.7841 PPL 119.6 Acc 23.5% | 1183s * BEST
+
+  ── Generation samples (greedy, 150 tokens) ──
+  ['It was a dark and stormy']
+    → '.                                                       The first-the-the-the-the-the-the-the-the-the-the-the-the-the-th'
+  ['The length of the hypotenuse']
+    → ' the first-the-the-the-the-the-the-the-the-the-the-the-the-the-the-the-the-the-the-the-the-the-the-the-the-the-the-the-t'
+  ['The President of the United']
+    → ' States, and the first-the-the-the-the-the-the-the-the-the-the-the-the-the-the-the-the-the-the-the-the-the-the-the-the-t'
+  ['Once upon a time there was']
+    → ' a new technology.                                                     The first-the-the-the-the-the-the-the-the-the-the'
+  ['The results indicate that']
+    → ' the first-the-the-the-the-the-the-the-the-the-the-the-the-the-the-the-the-the-the-the-the-the-the-the-the-the-the-the-t'
+  ──
+
+    Step 200/14073 | Loss 4.7725
+    Step 400/14073 | Loss 4.7882
+    Step 600/14073 | Loss 4.7910
+    Step 800/14073 | Loss 4.7942
+    Step 1000/14073 | Loss 4.7912
+    Step 1200/14073 | Loss 4.7935
+    Step 1400/14073 | Loss 4.7926
+    Step 1600/14073 | Loss 4.7918
+    Step 1800/14073 | Loss 4.7916
+    Step 2000/14073 | Loss 4.7903
+    Step 2200/14073 | Loss 4.7894
+    Step 2400/14073 | Loss 4.7906
+    Step 2600/14073 | Loss 4.7901
+    Step 2800/14073 | Loss 4.7901
+    Step 3000/14073 | Loss 4.7895
+    Step 3200/14073 | Loss 4.7890
+    Step 3400/14073 | Loss 4.7886
+    Step 3600/14073 | Loss 4.7892
+    Step 3800/14073 | Loss 4.7907
+    Step 4000/14073 | Loss 4.7915
+    Step 4200/14073 | Loss 4.7920
+    Step 4400/14073 | Loss 4.7909
+    Step 4600/14073 | Loss 4.7910
+    Step 4800/14073 | Loss 4.7904
+    Step 5000/14073 | Loss 4.7899
+    Step 5200/14073 | Loss 4.7907
+    Step 5400/14073 | Loss 4.7895
+    Step 5600/14073 | Loss 4.7891
+    Step 5800/14073 | Loss 4.7888
+    Step 6000/14073 | Loss 4.7883
+    Step 6200/14073 | Loss 4.7883
+    Step 6400/14073 | Loss 4.7885
+    Step 6600/14073 | Loss 4.7880
+    Step 6800/14073 | Loss 4.7883
+    Step 7000/14073 | Loss 4.7887
+    Step 7200/14073 | Loss 4.7885
+    Step 7400/14073 | Loss 4.7882
+    Step 7600/14073 | Loss 4.7871
+    Step 7800/14073 | Loss 4.7866
+    Step 8000/14073 | Loss 4.7860
+    Step 8200/14073 | Loss 4.7851
+    Step 8400/14073 | Loss 4.7844
+    Step 8600/14073 | Loss 4.7844
+    Step 8800/14073 | Loss 4.7837
+    Step 9000/14073 | Loss 4.7833
+    Step 9200/14073 | Loss 4.7828
+    Step 9400/14073 | Loss 4.7819
+    Step 9600/14073 | Loss 4.7819
+    Step 9800/14073 | Loss 4.7813
+    Step 10000/14073 | Loss 4.7815
+    Step 10200/14073 | Loss 4.7810
+    Step 10400/14073 | Loss 4.7809
+    Step 10600/14073 | Loss 4.7807
+    Step 10800/14073 | Loss 4.7803
+    Step 11000/14073 | Loss 4.7801
+    Step 11200/14073 | Loss 4.7799
+    Step 11400/14073 | Loss 4.7795
+    Step 11600/14073 | Loss 4.7788
+    Step 11800/14073 | Loss 4.7784
+    Step 12000/14073 | Loss 4.7781
+    Step 12200/14073 | Loss 4.7783
+    Step 12400/14073 | Loss 4.7780
+    Step 12600/14073 | Loss 4.7781
+    Step 12800/14073 | Loss 4.7783
+    Step 13000/14073 | Loss 4.7782
+    Step 13200/14073 | Loss 4.7776
+    Step 13400/14073 | Loss 4.7774
+    Step 13600/14073 | Loss 4.7774
+    Step 13800/14073 | Loss 4.7770
+    Step 14000/14073 | Loss 4.7764
+  Ep   6/10 | Train 4.7763 | Val 4.7263 PPL 112.9 Acc 24.0% | 1182s * BEST
+
+  ── Generation samples (greedy, 150 tokens) ──
+  ['It was a dark and stormy']
+    → ', and the world.                                                                                                        '
+  ['The length of the hypotenuse']
+    → ', and the world.                                                                                                        '
+  ['The President of the United']
+    → ' States.                                                                                                                '
+  ['Once upon a time there was']
+    → ' a new technology.                                                                                                      '
+  ['The results indicate that']
+    → ' the world.                                                                                                             '
+  ──
+
+    Step 200/14073 | Loss 4.7180
+    Step 400/14073 | Loss 4.7244
+    Step 600/14073 | Loss 4.7186
+    Step 800/14073 | Loss 4.7242
+    Step 1000/14073 | Loss 4.7226
+    Step 1200/14073 | Loss 4.7234
+    Step 1400/14073 | Loss 4.7227
+    Step 1600/14073 | Loss 4.7250
+    Step 1800/14073 | Loss 4.7254
+    Step 2000/14073 | Loss 4.7265
+    Step 2200/14073 | Loss 4.7256
+    Step 2400/14073 | Loss 4.7294
+    Step 2600/14073 | Loss 4.7294
+    Step 2800/14073 | Loss 4.7297
+    Step 3000/14073 | Loss 4.7307
+    Step 3200/14073 | Loss 4.7300
+    Step 3400/14073 | Loss 4.7304
+    Step 3600/14073 | Loss 4.7292
+    Step 3800/14073 | Loss 4.7297
+    Step 4000/14073 | Loss 4.7289
+    Step 4200/14073 | Loss 4.7290
+    Step 4400/14073 | Loss 4.7296
+    Step 4600/14073 | Loss 4.7289
+    Step 4800/14073 | Loss 4.7285
+    Step 5000/14073 | Loss 4.7284
+    Step 5200/14073 | Loss 4.7284
+    Step 5400/14073 | Loss 4.7277
+    Step 5600/14073 | Loss 4.7287
+    Step 5800/14073 | Loss 4.7288
+    Step 6000/14073 | Loss 4.7284
+    Step 6200/14073 | Loss 4.7284
+    Step 6400/14073 | Loss 4.7279
+    Step 6600/14073 | Loss 4.7272
+    Step 6800/14073 | Loss 4.7274
+    Step 7000/14073 | Loss 4.7273
+    Step 7200/14073 | Loss 4.7272
+    Step 7400/14073 | Loss 4.7265
+    Step 7600/14073 | Loss 4.7264
+    Step 7800/14073 | Loss 4.7266
+    Step 8000/14073 | Loss 4.7265
+    Step 8200/14073 | Loss 4.7255
+    Step 8400/14073 | Loss 4.7251
+    Step 8600/14073 | Loss 4.7250
+    Step 8800/14073 | Loss 4.7250
+    Step 9000/14073 | Loss 4.7242
+    Step 9200/14073 | Loss 4.7238
+    Step 9400/14073 | Loss 4.7238
+    Step 9600/14073 | Loss 4.7239
+    Step 9800/14073 | Loss 4.7239
+    Step 10000/14073 | Loss 4.7235
+    Step 10200/14073 | Loss 4.7236
+    Step 10400/14073 | Loss 4.7230
+    Step 10600/14073 | Loss 4.7228
+    Step 10800/14073 | Loss 4.7227
+    Step 11000/14073 | Loss 4.7226
+    Step 11200/14073 | Loss 4.7225
+    Step 11400/14073 | Loss 4.7225
+    Step 11600/14073 | Loss 4.7226
+    Step 11800/14073 | Loss 4.7226
+    Step 12000/14073 | Loss 4.7225
+    Step 12200/14073 | Loss 4.7224
+    Step 12400/14073 | Loss 4.7222
+    Step 12600/14073 | Loss 4.7221
+    Step 12800/14073 | Loss 4.7215
+    Step 13000/14073 | Loss 4.7216
+    Step 13200/14073 | Loss 4.7217
+    Step 13400/14073 | Loss 4.7215
+    Step 13600/14073 | Loss 4.7210
+    Step 13800/14073 | Loss 4.7211
+    Step 14000/14073 | Loss 4.7208
+  Ep   7/10 | Train 4.7207 | Val 4.6768 PPL 107.4 Acc 24.4% | 1184s * BEST
+
+  ── Generation samples (greedy, 150 tokens) ──
+  ['It was a dark and stormy']
+    → ", and the world's new information.                                                                                      "
+  ['The length of the hypotenuse']
+    → " the world's new information.                                                                                           "
+  ['The President of the United']
+    → " States, and the world's new information.                                                                               "
+  ['Once upon a time there was']
+    → ' a new information.                                                                                                     '
+  ['The results indicate that']
+    → " the world's new information.                                                                                           "
+  ──
+
+    Step 200/14073 | Loss 4.6734
+    Step 400/14073 | Loss 4.6703
+    Step 600/14073 | Loss 4.6724
+    Step 800/14073 | Loss 4.6827
+    Step 1000/14073 | Loss 4.6856
+    Step 1200/14073 | Loss 4.6823
+    Step 1400/14073 | Loss 4.6842
+    Step 1600/14073 | Loss 4.6833
+    Step 1800/14073 | Loss 4.6848
+    Step 2000/14073 | Loss 4.6837
+    Step 2200/14073 | Loss 4.6829
+    Step 2400/14073 | Loss 4.6830
+    Step 2600/14073 | Loss 4.6821
+    Step 2800/14073 | Loss 4.6818
+    Step 3000/14073 | Loss 4.6822
+    Step 3200/14073 | Loss 4.6837
+    Step 3400/14073 | Loss 4.6846
+    Step 3600/14073 | Loss 4.6859
+    Step 3800/14073 | Loss 4.6858
+    Step 4000/14073 | Loss 4.6868
+    Step 4200/14073 | Loss 4.6867
+    Step 4400/14073 | Loss 4.6871
+    Step 4600/14073 | Loss 4.6868
+    Step 4800/14073 | Loss 4.6867
+    Step 5000/14073 | Loss 4.6869
+    Step 5200/14073 | Loss 4.6864
+    Step 5400/14073 | Loss 4.6867
+    Step 5600/14073 | Loss 4.6867
+    Step 5800/14073 | Loss 4.6867
+    Step 6000/14073 | Loss 4.6864
+    Step 6200/14073 | Loss 4.6865
+    Step 6400/14073 | Loss 4.6873
+    Step 6600/14073 | Loss 4.6875
+    Step 6800/14073 | Loss 4.6879
+    Step 7000/14073 | Loss 4.6881
+    Step 7200/14073 | Loss 4.6881
+    Step 7400/14073 | Loss 4.6886
+    Step 7600/14073 | Loss 4.6884
+    Step 7800/14073 | Loss 4.6888
+    Step 8000/14073 | Loss 4.6886
+    Step 8200/14073 | Loss 4.6882
+    Step 8400/14073 | Loss 4.6885
+    Step 8600/14073 | Loss 4.6878
+    Step 8800/14073 | Loss 4.6878
+    Step 9000/14073 | Loss 4.6876
+    Step 9200/14073 | Loss 4.6879
+    Step 9400/14073 | Loss 4.6886
+    Step 9600/14073 | Loss 4.6876
+    Step 9800/14073 | Loss 4.6881
+    Step 10000/14073 | Loss 4.6883
+    Step 10200/14073 | Loss 4.6883
+    Step 10400/14073 | Loss 4.6882
+    Step 10600/14073 | Loss 4.6880
+    Step 10800/14073 | Loss 4.6874
+    Step 11000/14073 | Loss 4.6875
+    Step 11200/14073 | Loss 4.6873
+    Step 11400/14073 | Loss 4.6873
+    Step 11600/14073 | Loss 4.6875
+    Step 11800/14073 | Loss 4.6870
+    Step 12000/14073 | Loss 4.6874
+    Step 12200/14073 | Loss 4.6871
+    Step 12400/14073 | Loss 4.6870
+    Step 12600/14073 | Loss 4.6869
+    Step 12800/14073 | Loss 4.6871
+    Step 13000/14073 | Loss 4.6868
+    Step 13200/14073 | Loss 4.6865
+    Step 13400/14073 | Loss 4.6865
+    Step 13600/14073 | Loss 4.6864
+    Step 13800/14073 | Loss 4.6864
+    Step 14000/14073 | Loss 4.6863
+  Ep   8/10 | Train 4.6862 | Val 4.6449 PPL 104.1 Acc 24.6% | 1183s * BEST
+
+  ── Generation samples (greedy, 150 tokens) ──
+  ['It was a dark and stormy']
+    → '.                                                                                                                       '
+  ['The length of the hypotenuse']
+    → ', and the first time.                                                                                                   '
+  ['The President of the United']
+    → ' States, and the first time.                                                                                            '
+  ['Once upon a time there was']
+    → ' a lot of the first time.                                                                                               '
+  ['The results indicate that']
+    → ' the first time.                                                                                                        '
+  ──
+
+    Step 200/14073 | Loss 4.6672
+    Step 400/14073 | Loss 4.6657
+    Step 600/14073 | Loss 4.6659
+    Step 800/14073 | Loss 4.6599
+    Step 1000/14073 | Loss 4.6574
+    Step 1200/14073 | Loss 4.6567
+    Step 1400/14073 | Loss 4.6583
+    Step 1600/14073 | Loss 4.6577
+    Step 1800/14073 | Loss 4.6565
+    Step 2000/14073 | Loss 4.6574
+    Step 2200/14073 | Loss 4.6583
+    Step 2400/14073 | Loss 4.6601
+    Step 2600/14073 | Loss 4.6595
+    Step 2800/14073 | Loss 4.6589
+    Step 3000/14073 | Loss 4.6596
+    Step 3200/14073 | Loss 4.6618
+    Step 3400/14073 | Loss 4.6617
+    Step 3600/14073 | Loss 4.6611
+    Step 3800/14073 | Loss 4.6606
+    Step 4000/14073 | Loss 4.6608
+    Step 4200/14073 | Loss 4.6610
+    Step 4400/14073 | Loss 4.6625
+    Step 4600/14073 | Loss 4.6613
+    Step 4800/14073 | Loss 4.6614
+    Step 5000/14073 | Loss 4.6613
+    Step 5200/14073 | Loss 4.6620
+    Step 5400/14073 | Loss 4.6614
+    Step 5600/14073 | Loss 4.6615
+    Step 5800/14073 | Loss 4.6613
+    Step 6000/14073 | Loss 4.6605
+    Step 6200/14073 | Loss 4.6602
+    Step 6400/14073 | Loss 4.6611
+    Step 6600/14073 | Loss 4.6617
+    Step 6800/14073 | Loss 4.6621
+    Step 7000/14073 | Loss 4.6621
+    Step 7200/14073 | Loss 4.6628
+    Step 7400/14073 | Loss 4.6623
+    Step 7600/14073 | Loss 4.6626
+    Step 7800/14073 | Loss 4.6627
+    Step 8000/14073 | Loss 4.6627
+    Step 8200/14073 | Loss 4.6627
+    Step 8400/14073 | Loss 4.6623
+    Step 8600/14073 | Loss 4.6622
+    Step 8800/14073 | Loss 4.6619
+    Step 9000/14073 | Loss 4.6617
+    Step 9200/14073 | Loss 4.6616
+    Step 9400/14073 | Loss 4.6620
+    Step 9600/14073 | Loss 4.6617
+    Step 9800/14073 | Loss 4.6611
+    Step 10000/14073 | Loss 4.6616
+    Step 10200/14073 | Loss 4.6614
+    Step 10400/14073 | Loss 4.6616
+    Step 10600/14073 | Loss 4.6617
+    Step 10800/14073 | Loss 4.6617
+    Step 11000/14073 | Loss 4.6613
+    Step 11200/14073 | Loss 4.6612
+    Step 11400/14073 | Loss 4.6610
+    Step 11600/14073 | Loss 4.6611
+    Step 11800/14073 | Loss 4.6614
+    Step 12000/14073 | Loss 4.6617
+    Step 12200/14073 | Loss 4.6617
+    Step 12400/14073 | Loss 4.6615
+    Step 12600/14073 | Loss 4.6616
+    Step 12800/14073 | Loss 4.6618
+    Step 13000/14073 | Loss 4.6617
+    Step 13200/14073 | Loss 4.6620
+    Step 13400/14073 | Loss 4.6619
+    Step 13600/14073 | Loss 4.6616
+    Step 13800/14073 | Loss 4.6618
+    Step 14000/14073 | Loss 4.6615
+  Ep   9/10 | Train 4.6614 | Val 4.6277 PPL 102.3 Acc 24.8% | 1183s * BEST
+
+  ── Generation samples (greedy, 150 tokens) ──
+  ['It was a dark and stormy']
+    → '.                                                                                                                       '
+  ['The length of the hypotenuse']
+    → ', the world.                                                                                                            '
+  ['The President of the United']
+    → ' States, the world.                                                                                                     '
+  ['Once upon a time there was']
+    → ' a new technology.                                                                                                      '
+  ['The results indicate that']
+    → ' the world.                                                                                                             '
+  ──
+
+    Step 200/14073 | Loss 4.6333
+    Step 400/14073 | Loss 4.6325
+    Step 600/14073 | Loss 4.6311
+    Step 800/14073 | Loss 4.6341
+    Step 1000/14073 | Loss 4.6322
+    Step 1200/14073 | Loss 4.6350
+    Step 1400/14073 | Loss 4.6338
+    Step 1600/14073 | Loss 4.6338
+    Step 1800/14073 | Loss 4.6351
+    Step 2000/14073 | Loss 4.6337
+    Step 2200/14073 | Loss 4.6342
+    Step 2400/14073 | Loss 4.6339
+    Step 2600/14073 | Loss 4.6338
+    Step 2800/14073 | Loss 4.6335
+    Step 3000/14073 | Loss 4.6341
+    Step 3200/14073 | Loss 4.6356
+    Step 3400/14073 | Loss 4.6339
+    Step 3600/14073 | Loss 4.6334
+    Step 3800/14073 | Loss 4.6336
+    Step 4000/14073 | Loss 4.6331
+    Step 4200/14073 | Loss 4.6330
+    Step 4400/14073 | Loss 4.6322
+    Step 4600/14073 | Loss 4.6325
+    Step 4800/14073 | Loss 4.6324
+    Step 5000/14073 | Loss 4.6325
+    Step 5200/14073 | Loss 4.6329
+    Step 5400/14073 | Loss 4.6336
+    Step 5600/14073 | Loss 4.6336
+    Step 5800/14073 | Loss 4.6342
+    Step 6000/14073 | Loss 4.6346
+    Step 6200/14073 | Loss 4.6352
+    Step 6400/14073 | Loss 4.6353
+    Step 6600/14073 | Loss 4.6351
+    Step 6800/14073 | Loss 4.6349
+    Step 7000/14073 | Loss 4.6350
+    Step 7200/14073 | Loss 4.6349
+    Step 7400/14073 | Loss 4.6356
+    Step 7600/14073 | Loss 4.6356
+    Step 7800/14073 | Loss 4.6355
+    Step 8000/14073 | Loss 4.6357
+    Step 8200/14073 | Loss 4.6364
+    Step 8400/14073 | Loss 4.6368
+    Step 8600/14073 | Loss 4.6366
+    Step 8800/14073 | Loss 4.6358
+    Step 9000/14073 | Loss 4.6355
+    Step 9200/14073 | Loss 4.6352
+    Step 9400/14073 | Loss 4.6353
+    Step 9600/14073 | Loss 4.6355
+    Step 9800/14073 | Loss 4.6359
+    Step 10000/14073 | Loss 4.6364
+    Step 10200/14073 | Loss 4.6364
+    Step 10400/14073 | Loss 4.6365
+    Step 10600/14073 | Loss 4.6362
+    Step 10800/14073 | Loss 4.6358
+    Step 11000/14073 | Loss 4.6359
+    Step 11200/14073 | Loss 4.6357
+    Step 11400/14073 | Loss 4.6356
+    Step 11600/14073 | Loss 4.6354
+    Step 11800/14073 | Loss 4.6354
+    Step 12000/14073 | Loss 4.6350
+    Step 12200/14073 | Loss 4.6350
+    Step 12400/14073 | Loss 4.6348
+    Step 12600/14073 | Loss 4.6351
+    Step 12800/14073 | Loss 4.6357
+    Step 13000/14073 | Loss 4.6357
+    Step 13200/14073 | Loss 4.6357
+    Step 13400/14073 | Loss 4.6360
+    Step 13600/14073 | Loss 4.6360
+    Step 13800/14073 | Loss 4.6358
+    Step 14000/14073 | Loss 4.6359
+  Ep  10/10 | Train 4.6359 | Val 4.6012 PPL 99.6 Acc 25.0% | 1184s * BEST
+
+  ── Generation samples (greedy, 150 tokens) ──
+  ['It was a dark and stormy']
+    → ', and the world. The new technology. The new technology. The new technology. The new technology. The new technology. The'
+  ['The length of the hypotenuse']
+    → ', and the world. The new technology. The new technology. The new technology. The new technology. The new technology. The'
+  ['The President of the United']
+    → ' States, and the world. The new technology. The new technology. The new technology. The new technology. The new technolo'
+  ['Once upon a time there was']
+    → ' a few years ago, and the world. The new technology. The new technology. The new technology. The new technology. The new'
+  ['The results indicate that']
+    → ' the world. The new technology. The new technology. The new technology. The new technology. The new technology. The new '
+  ──
+
+
+  Condition D TEST: PPL 99.6 | Acc 25.0%
+
+  ── Learned KdV α values ──
+  Layer     H0    H1    H2    H3    H4    H5    H6    H7  
+  Layer 0   0.129  0.088  -0.125  0.058  -0.159  0.078  0.058  -0.040
+  Layer 1   0.059  0.032  0.059  0.220  -0.094  -0.029  0.004  -0.037
+  Layer 2   0.001  0.210  -0.023  -0.060  -0.114  -0.083  -0.138  -0.020
+  Layer 3   0.154  -0.011  0.037  0.013  -0.120  -0.053  0.048  -0.018
+  Layer 4   0.045  0.004  0.032  -0.004  0.032  -0.096  -0.031  0.003
+  Layer 5   -0.001  0.011  -0.011  0.000  0.010  -0.022  0.013  0.000
+
+  Overall α: mean=0.0023  std=0.0792  min=-0.1591  max=0.2198
+  Positive α fraction: 54.2%  (>0.10: 8.3%)
+
+  ── Learned wavelet gains (DB4 scales) ──
+  Layer    L0    L1    L2    L3    L4    L5    L6    L7    L8    L9    L10   L11  
+  Layer 0   0.318  0.370  0.126  0.052  0.051  0.046  0.042  0.039  0.034  0.029  0.038  0.053
+  Layer 1   0.006  0.380  0.144  0.109  0.072  0.069  0.055  0.053  0.047  0.042  0.060  0.038
+  Layer 2   -0.093  0.207  0.115  0.146  0.098  0.067  0.052  0.045  0.036  0.032  0.029  0.015
+  Layer 3   -0.051  0.152  0.123  0.139  0.091  0.067  0.051  0.044  0.039  0.034  0.029  0.014
+  Layer 4   -0.028  0.169  0.096  0.104  0.065  0.050  0.031  0.023  0.018  0.013  0.012  0.004
+  Layer 5   0.045  0.189  0.094  0.090  0.060  0.055  0.043  0.031  0.024  0.018  0.016  0.007
+
+  Overall: mean=0.069  std=0.134  min=-0.256  max=0.933
+
+======================================================================
+  ABLATION RESULTS — A / B / C / D
+======================================================================
+
+  Model                                        Test PPL     vs A
+  ────────────────────────────────────────── ────────── ────────
+  [Standard 13.5M @ 2048]                          64.5        —
+  Wave V4 (no dispersion)  [A]                     86.8    +0.0
+  Wave V4D (w/ dispersion) [B]                     87.9    +1.1
+  Wave V4 + Morlet         [C]                     87.2    +0.4
+  Wave V5-KdV (DB4+KdV+RG) [D]                     99.6   +12.8
+
+  ✗ V5-KdV trails — combined mechanism did not help at 13M scale

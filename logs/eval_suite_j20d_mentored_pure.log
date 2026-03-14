@@ -1,0 +1,66 @@
+
+============================================================
+  eval_suite.py — j20d_mentored_pure
+  Device: cuda
+============================================================
+
+  Model: J20D Mentored — pure DSQG (blocks 0-4 co-trained, block 5 random)
+
+  Loading tokenizer...
+  Loading model...
+  WARNING: unexpected keys: ['blocks.5._orig_mod.norm1.weight', 'blocks.5._orig_mod.norm1.bias', 'blocks.5._orig_mod.norm2.weight', 'blocks.5._orig_mod.norm2.bias', 'blocks.5._orig_mod.attn.qkv_proj.weight', 'blocks.5._orig_mod.attn.qkv_proj.bias', 'blocks.5._orig_mod.attn.out_proj.weight', 'blocks.5._orig_mod.attn.out_proj.bias', 'blocks.5._orig_mod.attn.gate_proj.weight', 'blocks.5._orig_mod.attn.gate_proj.bias', 'blocks.5._orig_mod.ffn.fc1.weight', 'blocks.5._orig_mod.ffn.fc1.bias', 'blocks.5._orig_mod.ffn.fc2.weight', 'blocks.5._orig_mod.ffn.fc2.bias']
+  INFO: 33 keys missing (random init) — intentional for ablation
+  Loaded J20D Mentored — pure DSQG (blocks 0-4 co-trained, block 5 random): 39,515,092 params from df0d435_j20d_physics_best.pt
+
+  [1/4] Calibration...
+    entropy=8.235 bits  top1=0.202  eff_vocab=212.2  (0.4s)
+
+  [2/4] Distance-conditioned loss (wikitext-103)...
+    Loading wikitext-103 test split...
+    Using 17 full 2048-token chunks
+    Buckets:
+    0-16          PPL= 732.09  n=  289
+    17-64         PPL= 942.36  n=  816
+    65-256        PPL= 844.57  n= 3264
+    257-512       PPL= 848.89  n= 4352
+    513-1024      PPL=1057.36  n= 8704
+    1025-2047     PPL=1023.72  n=17374
+    (3.3s)
+
+  [3/4] Few-shot string copy...
+    exact=0/15  (0.0%)  mean_lev=9.47  (1.1s)
+
+  [4/4] Passkey retrieval...
+    d=    1: accuracy=0.0%
+    d=    2: accuracy=0.0%
+    d=    4: accuracy=0.0%
+    d=    8: accuracy=0.0%
+    d=   16: accuracy=0.0%
+    d=   32: accuracy=0.0%
+    d=   64: accuracy=0.0%
+    d=  128: accuracy=0.0%
+    d=  256: accuracy=0.0%
+    d=  512: accuracy=0.0%
+    d= 1024: accuracy=0.0%
+    d= 1536: accuracy=0.0%
+    mean_accuracy=0.0%  (0.3s)
+
+  Generation samples (greedy + T=0.7)...
+
+  [greedy]
+    'It was a dark and stormy'               → ' day, and it was not easy to find a way to get rid of it.\n- The first thing to d'
+    'The length of the hypotenuse'           → ' is a measure of the amount of time it takes to be a person’s first-hand or even'
+    'The President of the United'            → ' States, which had been a member of the United States, has been a member of the '
+    'Once upon a time there was'             → ' a great deal of time to be able to find a way to get rid of the rest of the wor'
+    'The results indicate that'              → ' the most important thing to remember is that it is not a matter of time or spac'
+
+  [T=0.7]
+    'It was a dark and stormy'               → ' thing, so that we should not be able to make a difference with the whole work e'
+    'The length of the hypotenuse'           → ' is a function of the ability of the same person to take advantage of the three '
+    'The President of the United'            → ' States, the first thing that can be done in the nation to implement the actions'
+    'Once upon a time there was'             → ' a wide variety of things that could be done with a different kind of work. The '
+    'The results indicate that'              → ' the development of a positive measure of the amount of time spent in a given wo'
+
+  Results saved to /home/dlewis3/Desktop/AI/DWARF/evals/logs/eval_suite_j20d_mentored_pure_20260314_085446.json
+============================================================
+

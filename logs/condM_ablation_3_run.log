@@ -1,0 +1,240 @@
+======================================================================
+  DWARF condM Layer-Position Ablation
+  Full attention at layer 3 (0-indexed)  |  5 DSQG layers
+======================================================================
+  GPU: NVIDIA GeForce RTX 4090  (23.6 GB)
+  Layer stack: 3 DSQG → 1 full attn (layer 3) → 2 DSQG
+  Funnel hypothesis: layer 5 (last) should be best; layer 0 should be worst
+Loading OpenWebText (up to 100,000 docs)...
+  25,000 docs...
+  50,000 docs...
+  75,000 docs...
+  100,000 docs...
+Loaded condI BPE tokenizer from /home/dlewis3/Desktop/AI/DWARF/benchmarks/results/2048_condI_tokenizer.json
+Encoding data (max_seq_len=2048)...
+  Train: 52,716 sequences
+  Val: 1,435 sequences
+  Test: 1,459 sequences
+
+condM: 14,116,576 parameters
+  Layer types: ['DSQG', 'DSQG', 'DSQG', 'FULL', 'DSQG', 'DSQG']
+  Note: DSQG layers use condN offsets (44); layer 3 is O(N²) causal
+Running causality check...
+  Pre-10:  0.00000000  (expect 0.0)
+  Pos-10:  0.929538  (expect >0)
+  Post-10: 0.365586  (expect >0)
+  PASS
+  Step 200/1648 | Loss 6.6665
+  Step 400/1648 | Loss 5.9441
+  Step 600/1648 | Loss 5.7951
+  Step 800/1648 | Loss 5.6633
+  Step 1000/1648 | Loss 5.4445
+  Step 1200/1648 | Loss 5.4286
+  Step 1400/1648 | Loss 5.2715
+  Step 1600/1648 | Loss 5.0544
+Ep 1/10 | Train 4.8494 | Val 5.0741 PPL 159.8 * BEST | 1568s
+  DSQG pos-bias: |mean|=3.5841 |max|=13.9948 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' → ', and it was a little bit of a little bit of a little bit of a little bit of a l'
+    'The length of the hypotenuse' → ' of the “the same thing that is the same thing that is the same thing that is th'
+    'The President of the United' → ' States, the United States, and the United States, the United States, the United'
+    'Once upon a time there was' → ' no reason to do it.\n\nThe first time I was to have a lot of time to do with the '
+    'The results indicate that' → ' the results were not in the same cases.\n\nThe results were the same as the resul'
+  ──
+  Step 200/1648 | Loss 5.0472
+  Step 400/1648 | Loss 4.9483
+  Step 600/1648 | Loss 4.7608
+  Step 800/1648 | Loss 4.8432
+  Step 1000/1648 | Loss 4.5759
+  Step 1200/1648 | Loss 4.5493
+  Step 1400/1648 | Loss 4.5328
+  Step 1600/1648 | Loss 4.6145
+Ep 2/10 | Train 3.8204 | Val 4.4599 PPL 86.5 * BEST | 3120s
+  DSQG pos-bias: |mean|=3.5171 |max|=13.3675 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' → ', and it was a very good thing.\n\nThe first thing I’ve seen was that I’m not goin'
+    'The length of the hypotenuse' → ', the most important part of the world.\n\nThe first step in the world is to be th'
+    'The President of the United' → ' States, and the United States, and the United States, and the United States, an'
+    'Once upon a time there was' → ' no way to get the best of the game.\n\nThe game was a great game, but it was a gr'
+    'The results indicate that' → ' the results of the results are not necessarily the same as the results of the r'
+  ──
+  Step 200/1648 | Loss 4.3970
+  Step 400/1648 | Loss 4.5617
+  Step 600/1648 | Loss 4.5272
+  Step 800/1648 | Loss 4.4914
+  Step 1000/1648 | Loss 4.3570
+  Step 1200/1648 | Loss 4.4134
+  Step 1400/1648 | Loss 4.2793
+  Step 1600/1648 | Loss 4.4521
+Ep 3/10 | Train 4.5068 | Val 4.2662 PPL 71.2 * BEST | 4706s
+  DSQG pos-bias: |mean|=3.4481 |max|=12.8245 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' → ', but it was a little bit more than a few years ago.\n\nThe first thing that was h'
+    'The length of the hypotenuse' → ', the first time in the first half of the century, was the first time in the fir'
+    'The President of the United' → ' States, the president of the United States, and the president of the United Sta'
+    'Once upon a time there was' → ' a chance to get a chance to get a chance to get a chance to get a chance to get'
+    'The results indicate that' → ' the two teams are in the same position as the team.\n\nThe team is expected to be'
+  ──
+  Step 200/1648 | Loss 4.2823
+  Step 400/1648 | Loss 4.2544
+  Step 600/1648 | Loss 4.2669
+  Step 800/1648 | Loss 4.3437
+  Step 1000/1648 | Loss 4.1634
+  Step 1200/1648 | Loss 4.2678
+  Step 1400/1648 | Loss 4.5530
+  Step 1600/1648 | Loss 4.3776
+Ep 4/10 | Train 4.0862 | Val 4.1654 PPL 64.4 * BEST | 6331s
+  DSQG pos-bias: |mean|=3.3862 |max|=12.3809 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' → ', but it was a little bit more than a few years ago.\n\nThe first thing I had to d'
+    'The length of the hypotenuse' → ', which is the same as the "toxic" of the "toxic" of the "toxic" of the "toxic" '
+    'The President of the United' → ' States, who has been in the White House since the election, has been in the Whi'
+    'Once upon a time there was' → ' a chance to get a little bit of a chance to get a little bit of a chance to get'
+    'The results indicate that' → ' the results of the results are not statistically significant.\n\nThe results of t'
+  ──
+  Step 200/1648 | Loss 4.2660
+  Step 400/1648 | Loss 4.1635
+  Step 600/1648 | Loss 4.2949
+  Step 800/1648 | Loss 4.2449
+  Step 1000/1648 | Loss 4.0544
+  Step 1200/1648 | Loss 4.2856
+  Step 1400/1648 | Loss 4.0361
+  Step 1600/1648 | Loss 4.1261
+Ep 5/10 | Train 4.1949 | Val 4.1112 PPL 61.0 * BEST | 7900s
+  DSQG pos-bias: |mean|=3.3360 |max|=12.0407 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' → ', but it was a little bit of a surprise.\n\n“I’m not sure what I’m doing,” said th'
+    'The length of the hypotenuse' → ', the length of the length of the length of the length of the length of the leng'
+    'The President of the United' → ' States, who has been in the country since the last election, has been in the co'
+    'Once upon a time there was' → ' no need to be a good one.\n\n“I’m not sure if I’m a fan of the game, I’m not sure'
+    'The results indicate that' → ' the number of people who have been killed in the attack are not likely to be ki'
+  ──
+  Step 200/1648 | Loss 4.2446
+  Step 400/1648 | Loss 4.1039
+  Step 600/1648 | Loss 4.2882
+  Step 800/1648 | Loss 4.1559
+  Step 1000/1648 | Loss 4.0881
+  Step 1200/1648 | Loss 4.1851
+  Step 1400/1648 | Loss 4.0291
+  Step 1600/1648 | Loss 4.0949
+Ep 6/10 | Train 4.2700 | Val 4.0690 PPL 58.5 * BEST | 9460s
+  DSQG pos-bias: |mean|=3.2989 |max|=11.7963 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' → ' storm.\n\nThe storm was a huge storm, and the storm was a huge storm.\n\nThe storm '
+    'The length of the hypotenuse' → ' is a bit more complicated.\n\nThe length of the intenuse is a bit more complicate'
+    'The President of the United' → ' States, who has been in the United States since the beginning of the war, has b'
+    'Once upon a time there was' → ' a chance to see the future of the world.\n\nThe world is a world that is a world '
+    'The results indicate that' → ' the number of people who are not in the United States are not in the United Sta'
+  ──
+  Step 200/1648 | Loss 3.7421
+  Step 400/1648 | Loss 4.1094
+  Step 600/1648 | Loss 4.1955
+  Step 800/1648 | Loss 4.0523
+  Step 1000/1648 | Loss 3.9532
+  Step 1200/1648 | Loss 4.1250
+  Step 1400/1648 | Loss 3.9308
+  Step 1600/1648 | Loss 3.8054
+Ep 7/10 | Train 4.0751 | Val 4.0417 PPL 56.9 * BEST | 11050s
+  DSQG pos-bias: |mean|=3.2745 |max|=11.6426 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' → ', but it was a very good thing.\n\nThe first thing I had to do was take a look at '
+    'The length of the hypotenuse' → ' is a bit different from the length of the equation.\n\nThe length of the equation'
+    'The President of the United' → ' States, who has been in the United States since the beginning of the Cold War, '
+    'Once upon a time there was' → ' a lot of people in the world who were not interested in the world.\n\nThe world i'
+    'The results indicate that' → ' the number of people who are not in the United States are not in the United Sta'
+  ──
+  Step 200/1648 | Loss 4.0551
+  Step 400/1648 | Loss 4.1647
+  Step 600/1648 | Loss 4.1962
+  Step 800/1648 | Loss 4.1454
+  Step 1000/1648 | Loss 3.9460
+  Step 1200/1648 | Loss 4.1001
+  Step 1400/1648 | Loss 4.0929
+  Step 1600/1648 | Loss 4.1179
+Ep 8/10 | Train 3.9668 | Val 4.0275 PPL 56.1 * BEST | 12621s
+  DSQG pos-bias: |mean|=3.2611 |max|=11.5600 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' → ' storm.\n\nThe storm was a huge storm, and the storm was a huge storm.\n\nThe storm '
+    'The length of the hypotenuse' → ' is a bit of a bit of a bit of a bit of a bit of a bit of a bit of a bit of a bi'
+    'The President of the United' → ' States, who has been in the United States since the beginning of the Cold War, '
+    'Once upon a time there was' → ' a lot of time to go.\n\nThe first thing I’ve seen was that the first time I’ve se'
+    'The results indicate that' → ' the number of people who are not in the United States is a factor in the number'
+  ──
+  Step 200/1648 | Loss 4.1238
+  Step 400/1648 | Loss 4.0075
+  Step 600/1648 | Loss 3.7667
+  Step 800/1648 | Loss 4.2105
+  Step 1000/1648 | Loss 4.0457
+  Step 1200/1648 | Loss 4.1550
+  Step 1400/1648 | Loss 4.0328
+  Step 1600/1648 | Loss 4.0645
+Ep 9/10 | Train 3.8428 | Val 4.0211 PPL 55.8 * BEST | 14186s
+  DSQG pos-bias: |mean|=3.2559 |max|=11.5285 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' → ' storm.\n\nThe storm was a huge storm, and the storm was a huge storm.\n\nThe storm '
+    'The length of the hypotenuse' → ' is a bit more complicated than the length of the equation.\n\nThe length of the e'
+    'The President of the United' → ' States, who has been in the United States since the beginning of the Cold War, '
+    'Once upon a time there was' → ' a lot of people who were in the same place who were in the same place.\n\n"I was '
+    'The results indicate that' → ' the number of people who are not in the United States is a significant factor i'
+  ──
+  Step 200/1648 | Loss 4.2676
+  Step 400/1648 | Loss 4.1520
+  Step 600/1648 | Loss 4.1013
+  Step 800/1648 | Loss 4.0636
+  Step 1000/1648 | Loss 4.1190
+  Step 1200/1648 | Loss 4.1081
+  Step 1400/1648 | Loss 3.9449
+  Step 1600/1648 | Loss 4.0953
+Ep 10/10 | Train 4.0012 | Val 4.0192 PPL 55.7 * BEST | 15746s
+  DSQG pos-bias: |mean|=3.2551 |max|=11.5240 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' → ' storm.\n\nThe storm was a huge storm, and the storm was a huge storm.\n\nThe storm '
+    'The length of the hypotenuse' → ' is a bit more complicated than the length of the equation.\n\nThe length of the e'
+    'The President of the United' → ' States, who has been in the United States since the beginning of the Cold War, '
+    'Once upon a time there was' → ' a lot of time to go.\n\nThe first thing I had to do was make sure I was able to g'
+    'The results indicate that' → ' the number of people who are not in the United States is a significant factor i'
+  ──
+
+  condM TEST: PPL 54.5 | Loss 3.9978
+
+  ── Temperature sweep (best checkpoint) ──
+
+  [greedy]
+    'It was a dark and stormy' → ' storm.\n\nThe storm was a huge storm, and the storm was a huge storm.\n\nThe storm '
+    'The length of the hypotenuse' → ' is a bit more complicated than the length of the equation.\n\nThe length of the e'
+    'The President of the United' → ' States, who has been in the United States since the beginning of the Cold War, '
+    'Once upon a time there was' → ' a lot of time to go.\n\nThe first thing I had to do was make sure I was able to g'
+    'The results indicate that' → ' the number of people who are not in the United States is a significant factor i'
+
+  [T=0.5]
+    'It was a dark and stormy' → ' moment.\n\nIt was a little scary. It was a very good time for me to get a little '
+    'The length of the hypotenuse' → ' process is a bit less complicated.\n\nThe process of creating a new method is a b'
+    'The President of the United' → ' States, and the president of the United States, are among the most influential '
+    'Once upon a time there was' → ' a lack of time in the world.\n\nIn the past, the world is now being held up with '
+    'The results indicate that' → ' the state’s public-private partnerships are not in the interests of the state.\n'
+
+  [T=0.7]
+    'It was a dark and stormy' → ', and we didn’t have a chance to let them go and make a move. We had to have the'
+    'The length of the hypotenuse' → ' was the same as the mid-1980s, but the effect was generally higher in the upper'
+    'The President of the United' → ' States, who has been in charge of the Iraq war, is charged with resisting arres'
+    'Once upon a time there was' → ' no chance to see the future, and it was not just the place to live, but it was '
+    'The results indicate that' → ' there is a possibility that the use of the minuscule pipeline in the United Sta'
+
+  [T=1.0]
+    'It was a dark and stormy' → ' monster blowing and something must be put on fire in the air.\n\nIn what happened'
+    'The length of the hypotenuse' → ' problem that takes a huge step to reduce the global form of an upsurge caused b'
+    'The President of the United' → ' States last month said on Tuesday that Trump had stood in the mog of silence af'
+    'Once upon a time there was' → ' an enormous personal experience that typically had merit to the United States.”'
+    'The results indicate that' → ' the numbers of fewer information were given after the dot two were provided bef'
+
+======================================================================
+  condM LAYER-POSITION ABLATION — full_attn @ layer 3
+======================================================================
+  Standard transformer 13M (reference)                    64.07
+  condN (pure DSQG, 44 offsets)                           ~70.7
+  condM (5 DSQG + 1 full attn, hybrid)                     54.5
+
+  condM vs condN (projected): -16.2 PPL
+  → Full attention layer provides critical global context; hybrid is the path
+
+  Results → /home/dlewis3/Desktop/AI/DWARF/benchmarks/2048_condM_layer3_results.json

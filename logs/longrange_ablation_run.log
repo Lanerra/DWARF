@@ -1,0 +1,87 @@
+======================================================================
+  WAVE FIELD 13M — LONG-RANGE ALPHA ABLATION @ 2048 TOKENS
+  Condition E: V4 + G=seq_len (geometric fix only)
+  Condition F: V4 + G=seq_len + long-range α init (both fixes)
+  Baseline: Condition A PPL 86.8 (V4, G=4096, original init)
+======================================================================
+
+  Device: cuda
+  GPU: NVIDIA GeForce RTX 4090
+Loading OpenWebText (up to 100,000 docs)...
+  25,000 docs...
+  50,000 docs...
+  75,000 docs...
+  100,000 docs...
+  100,000 docs | train 95,000 | val 2,500 | test 2,500
+
+Training BPE tokenizer (vocab=32000)...
+
+
+
+  BPE vocab: 32000 tokens
+Encoding data (max_seq_len=2048)...
+  Train: 52,716 sequences
+  Val: 1,435 sequences
+  Test: 1,459 sequences
+
+======================================================================
+  CONDITION E — V4 + G=seq_len (geometric fix only)
+  field_size=2048 (stride=1.0), damping=linspace(-2,0), floor=0.05
+======================================================================
+  Wave V4 + G=seq_len: 14,115,344 params | field_size=2048 | damping_floor=0.05
+  Init α: mean=0.4049 max_E95=8.5 tokens (0.4% of ctx)
+  Step 200/1648 | Loss 3.7854
+  Step 400/1648 | Loss 2.2766
+  Step 600/1648 | Loss 1.3648
+  Step 800/1648 | Loss 1.4141
+  Step 1000/1648 | Loss 0.9157
+  Step 1200/1648 | Loss 0.4677
+  Step 1400/1648 | Loss 0.3634
+  Step 1600/1648 | Loss 0.3096
+Ep 1/10 | Train 0.2908 | Val 0.2065 PPL 1.2 * BEST | 404s
+  α mean=0.4369 min=0.1804 max=0.8228 | E95 max=8.3 tokens
+  ── Generation samples (greedy, 150 tokens) ──
+    'It was a dark and stormy' → ' nuclear nuclear nuclear nuclear nuclear nuclear nuclear nuclear nuclear nuclear'
+    'The length of the hypotenuse' → ' response response response response response response response response respons'
+    'The President of the United' → ' United United United United United United United United United United United Un'
+    'Once upon a time there was' → ' was was was was was was was was was was was was was was was was was was was was'
+    'The results indicate that' → ' that that that that that that that that that that that that that that that that'
+  ──
+  Step 200/1648 | Loss 0.2414
+  Step 400/1648 | Loss 0.1967
+  Step 600/1648 | Loss 0.1790
+  Step 800/1648 | Loss 0.1747
+  Step 1000/1648 | Loss 0.1644
+  Step 1200/1648 | Loss 0.1522
+  Step 1400/1648 | Loss 0.1391
+  Step 1600/1648 | Loss 0.1333
+Ep 2/10 | Train 0.1202 | Val 0.1086 PPL 1.1 * BEST | 809s
+  α mean=0.4510 min=0.1864 max=0.8308 | E95 max=8.1 tokens
+  ── Generation samples (greedy, 150 tokens) ──
+    'It was a dark and stormy' → 'yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy'
+    'The length of the hypotenuse' → 'useuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseus'
+    'The President of the United' → ' United United United United United United United United United United United Un'
+    'Once upon a time there was' → ' was was was was was was was was was was was was was was was was was was was was'
+    'The results indicate that' → ' that that that that that that that that that that that that that that that that'
+  ──
+  Step 200/1648 | Loss 0.1285
+  Step 400/1648 | Loss 0.1215
+  Step 600/1648 | Loss 0.1337
+  Step 800/1648 | Loss 0.1289
+  Step 1000/1648 | Loss 0.1387
+  Step 1200/1648 | Loss 0.1040
+  Step 1400/1648 | Loss 0.1154
+  Step 1600/1648 | Loss 0.1053
+Ep 3/10 | Train 0.1021 | Val 0.0910 PPL 1.1 * BEST | 1208s
+  α mean=0.4648 min=0.1939 max=0.8458 | E95 max=7.8 tokens
+  ── Generation samples (greedy, 150 tokens) ──
+    'It was a dark and stormy' → 'yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy'
+    'The length of the hypotenuse' → 'useuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseus'
+    'The President of the United' → ' United United United United United United United United United United United Un'
+    'Once upon a time there was' → ' was was was was was was was was was was was was was was was was was was was was'
+    'The results indicate that' → ' that that that that that that that that that that that that that that that that'
+  ──
+  Step 200/1648 | Loss 0.1101
+  Step 400/1648 | Loss 0.1013
+  Step 600/1648 | Loss 0.1076
+  Step 800/1648 | Loss 0.1116

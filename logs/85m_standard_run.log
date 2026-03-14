@@ -1,0 +1,260 @@
+========================================================================
+  Standard Transformer Baseline — 85M Scale
+  D=640, H=8, d_head=80, L=12, FFN=2560
+  F.scaled_dot_product_attention (Flash Attention on H100/H200)
+  Untied out_proj — consistent with 13M and 27M baselines
+========================================================================
+  GPU: NVIDIA H200  (150.1 GB)
+Loaded condI BPE tokenizer from /workspace/DWARF/benchmarks/results/2048_condI_tokenizer.json
+Loading OpenWebText (up to 100,000 docs)...
+  25,000 docs...
+  50,000 docs...
+  75,000 docs...
+  100,000 docs...
+Encoding data (max_seq_len=2048)...
+  Train: 52,716 sequences
+  Val: 1,435 sequences
+  Test: 1,459 sequences
+
+Standard 85M baseline: 101,354,240 parameters (101.35M)
+  D=640, H=8, d_head=80, L=12, FFN=2560
+  vs condM 85M: 88,267,552 params (tied emb + DSQG layers)
+  Δparams: +13,086,688 (+14.8%)
+  Step 200/824 | Loss 6.5102 | LR 1.46e-04
+  Step 400/824 | Loss 5.9423 | LR 2.91e-04
+  Step 600/824 | Loss 5.6921 | LR 3.00e-04
+  Step 800/824 | Loss 5.3508 | LR 2.98e-04
+Ep 1/10 | Train 5.3205 | Val 5.3452 PPL 209.6 * BEST | 397s
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' → ', and the water, and the water, and the water, and the water, and the water, and'
+    'The length of the hypotenuse' → ' of the first-time-time-time-time-time-time-time-time-time-time-time-in-in-in-in'
+    'The President of the United' → ' States, the United States, the United States, the United States, the United Sta'
+    'Once upon a time there was' → ' a few years ago, the most of the most of the most of the world.
+
+The most of th'
+    'The results indicate that' → ' the “the “the “the “the” is “the “the “the “the”” “the “the “the”” “the “the “t'
+  ──
+  Step 200/824 | Loss 5.1052 | LR 2.96e-04
+  Step 400/824 | Loss 4.8976 | LR 2.93e-04
+  Step 600/824 | Loss 4.8214 | LR 2.89e-04
+  Step 800/824 | Loss 4.6578 | LR 2.84e-04
+Ep 2/10 | Train 4.5584 | Val 4.5748 PPL 97.0 * BEST | 798s
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' → ' and a few years ago.
+
+The first time I was to be a little bit of a few years ag'
+    'The length of the hypotenuse' → ' of the "suspices" of the "suspices" of the "suspices" of the "solution" of the '
+    'The President of the United' → ' States, the United States, the United States, and the United States, the United'
+    'Once upon a time there was' → ' no way to do it.
+
+The first time I was to be able to get the time to get the ti'
+    'The results indicate that' → ' the number of people who have been killed in the country.
+
+The number of people'
+  ──
+  Step 200/824 | Loss 4.4999 | LR 2.78e-04
+  Step 400/824 | Loss 4.3363 | LR 2.72e-04
+  Step 600/824 | Loss 4.2477 | LR 2.65e-04
+  Step 800/824 | Loss 4.2082 | LR 2.57e-04
+Ep 3/10 | Train 4.2141 | Val 4.1433 PPL 63.0 * BEST | 1199s
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' → ' night.
+
+The storm was a storm that was a storm that was a storm that was a stor'
+    'The length of the hypotenuse' → ' of the world’s most powerful, and the most powerful, most powerful, and most po'
+    'The President of the United' → ' States, the president of the United States, was the president of the United Sta'
+    'Once upon a time there was' → ' no way to get a new job.
+
+The first thing I was trying to do was to get a job d'
+    'The results indicate that' → ' the team is not a team.
+
+The team is not a team. The team is not a team. The te'
+  ──
+  Step 200/824 | Loss 4.1052 | LR 2.48e-04
+  Step 400/824 | Loss 4.0478 | LR 2.39e-04
+  Step 600/824 | Loss 4.0137 | LR 2.30e-04
+  Step 800/824 | Loss 3.9883 | LR 2.20e-04
+Ep 4/10 | Train 3.9639 | Val 3.9715 PPL 53.1 * BEST | 1601s
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' → ' night.
+
+The first thing I saw was the first thing I saw was the first thing I s'
+    'The length of the hypotenuse' → ' of the brain is a bit of a lot of work.
+
+The brain is a bit of a lot of work, b'
+    'The President of the United' → ' States, the United States, and the United States, the United States, and the Un'
+    'Once upon a time there was' → ' no way to do it.
+
+The first thing I did was to do was to do was to do something'
+    'The results indicate that' → ' the team is not going to be able to do so.
+
+The team is not going to be able to'
+  ──
+  Step 200/824 | Loss 3.9567 | LR 2.09e-04
+  Step 400/824 | Loss 3.9130 | LR 1.99e-04
+  Step 600/824 | Loss 3.8890 | LR 1.88e-04
+  Step 800/824 | Loss 3.7452 | LR 1.77e-04
+Ep 5/10 | Train 3.9109 | Val 3.8695 PPL 47.9 * BEST | 2000s
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' → ' night.
+
+The first day of the game was a very long time ago.
+
+The first day of t'
+    'The length of the hypotenuse' → ' of the human brain is a very important part of the human brain.
+
+The human brai'
+    'The President of the United' → ' States, the president of the United States, has been a vocal critic of the pres'
+    'Once upon a time there was' → ' no way to go.
+
+The first thing I wanted to do was to get a little bit of a bit '
+    'The results indicate that' → ' the number of people who are not aware of the situation is not a problem.
+
+The '
+  ──
+  Step 200/824 | Loss 3.8194 | LR 1.65e-04
+  Step 400/824 | Loss 3.8287 | LR 1.54e-04
+  Step 600/824 | Loss 3.7927 | LR 1.44e-04
+  Step 800/824 | Loss 3.7560 | LR 1.33e-04
+Ep 6/10 | Train 3.7751 | Val 3.8010 PPL 44.7 * BEST | 2407s
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' → ' night.
+
+The first day of the storm, the first day of the storm, the second day '
+    'The length of the hypotenuse' → ' of the human body is approximately 1.5 cm (1.5 cm) long, and is approximately 1'
+    'The President of the United' → ' States, the president of the United States, the president of the United States,'
+    'Once upon a time there was' → ' no way to get the ball back.
+
+The first thing I saw was that the ball was not a'
+    'The results indicate that' → ' the number of people who have been affected by the death of the deceased is not'
+  ──
+  Step 200/824 | Loss 3.7980 | LR 1.21e-04
+  Step 400/824 | Loss 3.6817 | LR 1.11e-04
+  Step 600/824 | Loss 3.7262 | LR 1.02e-04
+  Step 800/824 | Loss 3.6480 | LR 9.23e-05
+Ep 7/10 | Train 3.7776 | Val 3.7562 PPL 42.8 * BEST | 2815s
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' → ' day for the first time in a row.
+
+"I was very happy to be here and I was very h'
+    'The length of the hypotenuse' → ' of the human body is a very small part of the body. The body is a very small pa'
+    'The President of the United' → ' States, the president of the United States, the United States, and the United S'
+    'Once upon a time there was' → ' no way to get a better idea of what to do.
+
+The first thing I learned about the'
+    'The results indicate that' → ' the majority of the population in the United States is in the minority.
+
+The nu'
+  ──
+  Step 200/824 | Loss 3.6873 | LR 8.23e-05
+  Step 400/824 | Loss 3.6768 | LR 7.40e-05
+  Step 600/824 | Loss 3.7146 | LR 6.63e-05
+  Step 800/824 | Loss 3.5591 | LR 5.93e-05
+Ep 8/10 | Train 3.5690 | Val 3.7294 PPL 41.7 * BEST | 3223s
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' → ' night in the city of D.C. that night.
+
+The city of D.C. was a quiet, quiet, and'
+    'The length of the hypotenuse' → ' of the human body is approximately 1.5 cm (1.5 cm) long, and is approximately 1'
+    'The President of the United' → ' States, the president of the United States, and the United States, the presiden'
+    'Once upon a time there was' → ' a time when the game was over.
+
+The game was a bit of a surprise, but it was a '
+    'The results indicate that' → ' the number of people who are in the United States is more than twice as likely '
+  ──
+  Step 200/824 | Loss 3.6623 | LR 5.22e-05
+  Step 400/824 | Loss 3.6638 | LR 4.66e-05
+  Step 600/824 | Loss 3.5645 | LR 4.18e-05
+  Step 800/824 | Loss 3.6024 | LR 3.77e-05
+Ep 9/10 | Train 3.6101 | Val 3.7112 PPL 40.9 * BEST | 3629s
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' → ' day for the first time in the history of the United States.
+
+The first time in '
+    'The length of the hypotenuse' → ' of the human body is a little bit too much for the body.
+
+The body is a little '
+    'The President of the United' → ' States, the United States, and the United States, the United States, the United'
+    'Once upon a time there was' → ' no way to get the story done.
+
+The story of the story is a story of the story. '
+    'The results indicate that' → ' the number of people who are affected by the disease is more than twice as like'
+  ──
+  Step 200/824 | Loss 3.6563 | LR 3.42e-05
+  Step 400/824 | Loss 3.5428 | LR 3.19e-05
+  Step 600/824 | Loss 3.5108 | LR 3.05e-05
+  Step 800/824 | Loss 3.5609 | LR 3.00e-05
+Ep 10/10 | Train 3.5149 | Val 3.7014 PPL 40.5 * BEST | 4034s
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' → ' night.
+
+"I was like, 'Oh, I'm going to be here, I'm going to be here, I'm going'
+    'The length of the hypotenuse' → ' of the human body is approximately 1,000 feet (1,000 feet) long, and the length'
+    'The President of the United' → ' States, the president of the United States, and the United States, the presiden'
+    'Once upon a time there was' → ' no way to get the job done.
+
+The first thing I noticed was that the first thing'
+    'The results indicate that' → ' the number of people who are in the United States is more than twice as likely '
+  ──
+
+── Standard 85M TEST: PPL 39.447 | Loss 3.6750 ──
+
+── Temperature sweep (best checkpoint) ──
+
+[greedy]
+  'It was a dark and stormy' → ' night.
+
+"I was like, 'Oh, I'm going to be here, I'm going to be here, I'm going'
+  'The length of the hypotenuse' → ' of the human body is approximately 1,000 feet (1,000 feet) long, and the length'
+  'The President of the United' → ' States, the president of the United States, and the United States, the presiden'
+  'Once upon a time there was' → ' no way to get the job done.
+
+The first thing I noticed was that the first thing'
+  'The results indicate that' → ' the number of people who are in the United States is more than twice as likely '
+
+[T=0.5]
+  'It was a dark and stormy' → ' night. It was a beautiful day. It was the quietest morning of my life. I was a '
+  'The length of the hypotenuse' → ' project is to be determined by the nature of the project. The project is a smal'
+  'The President of the United' → ' States, the President of the United States, has said he will not seek any furth'
+  'Once upon a time there was' → ' no escape from the end of the tunnel, then the escape was just as dangerous. It'
+  'The results indicate that' → ' the numbers are not correct. It is not clear that the numbers are correct.
+
+In '
+
+[T=0.7]
+  'It was a dark and stormy' → ' day.
+
+There were 19,000 people in the city as of October 2015.
+
+The city had be'
+  'The length of the hypotenuse' → ' is shorter than the length of the cardiac arrest, but the exterior of the cell '
+  'The President of the United' → ' States will have a hard time seeing the effects of the 'universal political' mo'
+  'Once upon a time there was' → ' no official confirmation for the party, but I would have gathered a few minutes'
+  'The results indicate that' → ' the police are investigating a possible sexual encounter with a woman. In a stu'
+
+[T=1.0]
+  'It was a dark and stormy' → ' night. People were waiting in the first exam room. A teenage boy was expecting '
+  'The length of the hypotenuse' → ' then the enamel icon makes the clue to the trap button more right on the table,'
+  'The President of the United' → ' States Department of State, assassinated it in November 1944.
+
+On May 5, the in'
+  'Once upon a time there was' → ' some time and then the NSL team instantlyaned their spikes on a single lightnin'
+  'The results indicate that' → ' rich Germans will help in Germany in helping solve American financial problems.'
+
+========================================================================
+  condM Scaling Series vs Standard Transformer
+========================================================================
+  Model                                  Params       PPL
+  ────────────────────────────────────  ────────  ────────
+  Standard 13M                            21.6M    64.073
+  condM 13M                              13.98M    54.529
+  Standard 27M                           37.97M    50.683
+  condM 27M                              26.46M    44.500
+  Standard 85M (this)                    101.4M    39.447
+  condM 85M                               88.3M    36.042
+
+  85M gap: condM vs standard = -3.405 PPL (13% fewer params for condM)
+========================================================================
+
+Results → /workspace/DWARF/benchmarks/results/85m_standard_baseline_results.json
+

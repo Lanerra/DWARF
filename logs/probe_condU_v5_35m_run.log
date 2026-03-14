@@ -1,0 +1,349 @@
+[kernel] CUDA extension loaded — using compiled CUDA backward
+============================================================================
+  ⚗️  Checkpoint ablation probe — condU_v5 35M
+============================================================================
+  GPU: NVIDIA GeForce RTX 3090  (25.3 GB)
+  Checkpoint:      /home/dlewis3/Desktop/AI/DWARF/checkpoints/condU_v5/best.pt
+  Architecture:    D=512, H=8, L=6, FFN=2048
+  Offsets:         44 total (33 local + 11 sparse)
+  Passkey config:  5 trials, 12 distances
+
+  Tokenizer:  /home/dlewis3/Desktop/AI/DWARF/results/2048_condI_tokenizer.json  (vocab=32000)
+  Val: 5,582 seqs  |  Test: 5,473 seqs
+  Model:      38,732,856 params loaded
+  Layers:     ['DSQG', 'DSQG', 'DSQG+IF', 'DSQG', 'DSQG', 'FULL']
+  DSQG:       [0, 1, 2, 3, 4]
+  IF layers:  [2]
+
+============================================================================
+  Baseline (unmodified checkpoint)
+============================================================================
+  baseline                                                 pk= 98.3%  ppl=  39.53  [106s]
+  passkey breakdown: d=1:100%  d=2:100%  d=4:100%  d=8:100%  d=16:100%  d=32:100%  d=64:100%  d=128:100%  d=256:100%  d=512:100%  d=1024:100%  d=1536:80%
+
+============================================================================
+  ① Offset importance (J=44 offsets)
+============================================================================
+  zero offset[0] = 0                                       pk= 90.0%  ppl=  41.69  [110s]
+  zero offset[1] = 1                                       pk= 93.3%  ppl=  39.83  [112s]
+  zero offset[2] = 2                                       pk= 98.3%  ppl=  42.02  [112s]
+  zero offset[3] = 3                                       pk= 51.7%  ppl=  44.97  [112s]
+  zero offset[4] = 4                                       pk= 41.7%  ppl=  46.83  [112s]
+  zero offset[5] = 5                                       pk= 88.3%  ppl=  48.24  [112s]
+  zero offset[6] = 6                                       pk= 88.3%  ppl=  49.24  [112s]
+  zero offset[7] = 7                                       pk= 85.0%  ppl=  50.01  [112s]
+  zero offset[8] = 8                                       pk= 91.7%  ppl=  50.64  [112s]
+  zero offset[9] = 9                                       pk= 88.3%  ppl=  51.09  [112s]
+  zero offset[10] = 10                                     pk= 93.3%  ppl=  51.40  [112s]
+  zero offset[11] = 11                                     pk= 93.3%  ppl=  51.73  [112s]
+  zero offset[12] = 12                                     pk= 90.0%  ppl=  51.98  [112s]
+  zero offset[13] = 13                                     pk= 86.7%  ppl=  52.18  [112s]
+  zero offset[14] = 14                                     pk= 86.7%  ppl=  52.33  [112s]
+  zero offset[15] = 15                                     pk= 88.3%  ppl=  52.50  [112s]
+  zero offset[16] = 16                                     pk= 86.7%  ppl=  52.64  [112s]
+  zero offset[17] = 17                                     pk= 86.7%  ppl=  52.74  [112s]
+  zero offset[18] = 18                                     pk= 86.7%  ppl=  52.83  [112s]
+  zero offset[19] = 19                                     pk= 91.7%  ppl=  52.92  [112s]
+  zero offset[20] = 20                                     pk= 88.3%  ppl=  52.98  [112s]
+  zero offset[21] = 21                                     pk= 93.3%  ppl=  53.04  [112s]
+  zero offset[22] = 22                                     pk= 93.3%  ppl=  53.13  [112s]
+  zero offset[23] = 23                                     pk= 90.0%  ppl=  53.16  [112s]
+  zero offset[24] = 24                                     pk= 86.7%  ppl=  53.22  [112s]
+  zero offset[25] = 25                                     pk= 86.7%  ppl=  53.23  [112s]
+  zero offset[26] = 26                                     pk= 90.0%  ppl=  53.28  [112s]
+  zero offset[27] = 27                                     pk= 86.7%  ppl=  53.30  [112s]
+  zero offset[28] = 28                                     pk= 86.7%  ppl=  53.29  [112s]
+  zero offset[29] = 29                                     pk= 86.7%  ppl=  53.28  [112s]
+  zero offset[30] = 30                                     pk= 91.7%  ppl=  53.30  [112s]
+  zero offset[31] = 31                                     pk= 86.7%  ppl=  53.30  [112s]
+  zero offset[32] = 32                                     pk= 93.3%  ppl=  53.25  [112s]
+  zero offset[33] = 48                                     pk= 90.0%  ppl=  53.31  [112s]
+  zero offset[34] = 64                                     pk= 88.3%  ppl=  53.21  [112s]
+  zero offset[35] = 96                                     pk= 93.3%  ppl=  52.92  [112s]
+  zero offset[36] = 128                                    pk= 85.0%  ppl=  52.62  [112s]
+  zero offset[37] = 192                                    pk= 90.0%  ppl=  52.01  [112s]
+  zero offset[38] = 256                                    pk= 90.0%  ppl=  51.41  [112s]
+  zero offset[39] = 384                                    pk= 93.3%  ppl=  50.24  [112s]
+  zero offset[40] = 512                                    pk= 88.3%  ppl=  49.16  [112s]
+  zero offset[41] = 768                                    pk= 96.7%  ppl=  47.20  [112s]
+  zero offset[42] = 1024                                   pk= 93.3%  ppl=  45.41  [112s]
+  zero offset[43] = 1536                                   pk= 91.7%  ppl=  42.18  [112s]
+  zero sparse group {128}                                  pk= 85.0%  ppl=  52.62  [112s]
+  zero sparse group {384}                                  pk= 93.3%  ppl=  50.24  [112s]
+  zero sparse group {1536}                                 pk= 91.7%  ppl=  42.18  [112s]
+  zero sparse group {128,384}                              pk= 80.0%  ppl=  62.97  [112s]
+  zero sparse group {128,384,1536}                         pk= 80.0%  ppl=  65.20  [112s]
+
+============================================================================
+  ② Head knockout (per layer, per head)
+============================================================================
+  L0 H0 knockout                                           pk=100.0%  ppl=  40.46  [112s]
+  L0 H1 knockout                                           pk= 95.0%  ppl=  40.04  [112s]
+  L0 H2 knockout                                           pk=100.0%  ppl=  39.94  [112s]
+  L0 H3 knockout                                           pk= 96.7%  ppl=  40.22  [112s]
+  L0 H4 knockout                                           pk= 98.3%  ppl=  41.60  [112s]
+  L0 H5 knockout                                           pk=100.0%  ppl=  40.80  [112s]
+  L0 H6 knockout                                           pk=100.0%  ppl=  41.36  [112s]
+  L0 H7 knockout                                           pk=100.0%  ppl=  42.03  [112s]
+  L1 H0 knockout                                           pk=100.0%  ppl=  40.46  [112s]
+  L1 H1 knockout                                           pk= 98.3%  ppl=  40.26  [112s]
+  L1 H2 knockout                                           pk=100.0%  ppl=  39.76  [112s]
+  L1 H3 knockout                                           pk=100.0%  ppl=  39.81  [112s]
+  L1 H4 knockout                                           pk= 98.3%  ppl=  39.78  [112s]
+  L1 H5 knockout                                           pk= 98.3%  ppl=  39.87  [112s]
+  L1 H6 knockout                                           pk=100.0%  ppl=  40.30  [112s]
+  L1 H7 knockout                                           pk= 95.0%  ppl=  40.31  [112s]
+  L2 H0 knockout                                           pk=100.0%  ppl=  40.45  [112s]
+  L2 H1 knockout                                           pk= 96.7%  ppl=  40.48  [112s]
+  L2 H2 knockout                                           pk=100.0%  ppl=  39.90  [112s]
+  L2 H3 knockout                                           pk= 95.0%  ppl=  39.96  [112s]
+  L2 H4 knockout                                           pk= 98.3%  ppl=  39.97  [112s]
+  L2 H5 knockout                                           pk=100.0%  ppl=  40.11  [112s]
+  L2 H6 knockout                                           pk= 95.0%  ppl=  40.36  [112s]
+  L2 H7 knockout                                           pk= 98.3%  ppl=  40.66  [112s]
+  L3 H0 knockout                                           pk=100.0%  ppl=  40.17  [112s]
+  L3 H1 knockout                                           pk=100.0%  ppl=  40.15  [112s]
+  L3 H2 knockout                                           pk=100.0%  ppl=  40.27  [112s]
+  L3 H3 knockout                                           pk= 86.7%  ppl=  40.35  [112s]
+  L3 H4 knockout                                           pk=100.0%  ppl=  40.03  [112s]
+  L3 H5 knockout                                           pk=100.0%  ppl=  40.14  [112s]
+  L3 H6 knockout                                           pk= 98.3%  ppl=  40.58  [112s]
+  L3 H7 knockout                                           pk=100.0%  ppl=  40.21  [112s]
+  L4 H0 knockout                                           pk=100.0%  ppl=  40.43  [112s]
+  L4 H1 knockout                                           pk= 98.3%  ppl=  40.52  [112s]
+  L4 H2 knockout                                           pk=100.0%  ppl=  40.10  [112s]
+  L4 H3 knockout                                           pk=100.0%  ppl=  40.77  [112s]
+  L4 H4 knockout                                           pk= 95.0%  ppl=  40.18  [112s]
+  L4 H5 knockout                                           pk= 96.7%  ppl=  40.04  [112s]
+  L4 H6 knockout                                           pk=100.0%  ppl=  40.72  [112s]
+  L4 H7 knockout                                           pk= 36.7%  ppl=  45.53  [112s]
+  L5 H0 knockout                                           pk= 93.3%  ppl=  40.35  [112s]
+  L5 H1 knockout                                           pk= 96.7%  ppl=  40.33  [112s]
+  L5 H2 knockout                                           pk=100.0%  ppl=  40.09  [112s]
+  L5 H3 knockout                                           pk= 98.3%  ppl=  39.79  [112s]
+  L5 H4 knockout                                           pk=100.0%  ppl=  40.85  [112s]
+  L5 H5 knockout                                           pk= 98.3%  ppl=  40.25  [112s]
+  L5 H6 knockout                                           pk=100.0%  ppl=  40.36  [112s]
+  L5 H7 knockout                                           pk= 90.0%  ppl=  40.34  [112s]
+
+============================================================================
+  ③ Layer residual knockout
+============================================================================
+  skip layer 0                                             pk=  0.0%  ppl=8402.68  [112s]
+  skip layer 1                                             pk=100.0%  ppl=  51.98  [112s]
+  skip layer 2                                             pk= 93.3%  ppl=  51.67  [112s]
+  skip layer 3                                             pk= 80.0%  ppl=  51.18  [112s]
+  skip layer 4                                             pk=  0.0%  ppl=  66.57  [112s]
+  skip layer 5                                             pk=  0.0%  ppl= 167.93  [112s]
+
+============================================================================
+  ④ Interference component ablations
+============================================================================
+  interference layers: [2]
+  L2 zero inter_gate (gate→0.5)                            pk= 95.0%  ppl=  39.91  [112s]
+  L2 zero inter_k_proj (no K inj)                          pk= 98.3%  ppl=  39.71  [112s]
+  L2 zero inter_v_proj (no V inj)                          pk= 96.7%  ppl=  41.28  [112s]
+  L2 zero all IF                                           pk= 96.7%  ppl=  41.58  [112s]
+
+============================================================================
+  ⑤ scale_embed amplitude sweep
+============================================================================
+  scale_embed x 0.00                                       pk= 95.0%  ppl=  40.20  [112s]
+  scale_embed x 0.10                                       pk= 95.0%  ppl=  40.03  [112s]
+  scale_embed x 0.25                                       pk= 95.0%  ppl=  39.83  [112s]
+  scale_embed x 0.50                                       pk= 96.7%  ppl=  39.62  [112s]
+  scale_embed x 0.75                                       pk= 98.3%  ppl=  39.53  [112s]
+  scale_embed x 1.00                                       pk= 98.3%  ppl=  39.53  [112s]
+  scale_embed x 1.50                                       pk=100.0%  ppl=  39.73  [112s]
+  scale_embed x 2.00                                       pk=100.0%  ppl=  40.12  [112s]
+  scale_embed x 3.00                                       pk=100.0%  ppl=  41.27  [112s]
+
+============================================================================
+  ⑥ pos_bias amplitude sweep
+============================================================================
+  pos_bias x 0.00                                          pk= 11.7%  ppl= 199.42  [112s]
+  pos_bias x 0.10                                          pk= 13.3%  ppl= 158.01  [112s]
+  pos_bias x 0.25                                          pk= 18.3%  ppl= 103.97  [112s]
+  pos_bias x 0.50                                          pk= 51.7%  ppl=  53.25  [112s]
+  pos_bias x 0.75                                          pk= 90.0%  ppl=  40.89  [112s]
+  pos_bias x 1.00                                          pk= 98.3%  ppl=  39.53  [112s]
+  pos_bias x 1.50                                          pk=100.0%  ppl=  42.31  [112s]
+  pos_bias x 2.00                                          pk=100.0%  ppl=  46.49  [112s]
+
+============================================================================
+  ⑦ if_gain ablations
+============================================================================
+  if_gain = 1.0 (uniform, no learned amplification)        pk= 95.0%  ppl=  43.27  [112s]
+  if_gain = 0.0 (kill all DSQG head outputs)               pk=  0.0%  ppl= 427.50  [112s]
+
+────────────────────────────────────────────────────────────────────────────
+  ① Offset importance
+────────────────────────────────────────────────────────────────────────────
+  Label                                                      pk%     Δpk      ppl     Δppl
+  ───────────────────────────────────────────────────────  ─────  ──────  ───────  ───────
+  zero offset[0] = 0                                        90.0   -8.3    41.69    +2.16
+  zero offset[1] = 1                                        93.3   -5.0    39.83    +0.30
+  zero offset[2] = 2                                        98.3   +0.0    42.02    +2.48
+  zero offset[3] = 3                                        51.7  -46.7    44.97    +5.44
+  zero offset[4] = 4                                        41.7  -56.7    46.83    +7.30
+  zero offset[5] = 5                                        88.3  -10.0    48.24    +8.71
+  zero offset[6] = 6                                        88.3  -10.0    49.24    +9.71
+  zero offset[7] = 7                                        85.0  -13.3    50.01   +10.48
+  zero offset[8] = 8                                        91.7   -6.7    50.64   +11.10
+  zero offset[9] = 9                                        88.3  -10.0    51.09   +11.55
+  zero offset[10] = 10                                      93.3   -5.0    51.40   +11.87
+  zero offset[11] = 11                                      93.3   -5.0    51.73   +12.20
+  zero offset[12] = 12                                      90.0   -8.3    51.98   +12.45
+  zero offset[13] = 13                                      86.7  -11.7    52.18   +12.65
+  zero offset[14] = 14                                      86.7  -11.7    52.33   +12.80
+  zero offset[15] = 15                                      88.3  -10.0    52.50   +12.97
+  zero offset[16] = 16                                      86.7  -11.7    52.64   +13.11
+  zero offset[17] = 17                                      86.7  -11.7    52.74   +13.21
+  zero offset[18] = 18                                      86.7  -11.7    52.83   +13.29
+  zero offset[19] = 19                                      91.7   -6.7    52.92   +13.39
+  zero offset[20] = 20                                      88.3  -10.0    52.98   +13.45
+  zero offset[21] = 21                                      93.3   -5.0    53.04   +13.51
+  zero offset[22] = 22                                      93.3   -5.0    53.13   +13.59
+  zero offset[23] = 23                                      90.0   -8.3    53.16   +13.63
+  zero offset[24] = 24                                      86.7  -11.7    53.22   +13.69
+  zero offset[25] = 25                                      86.7  -11.7    53.23   +13.70
+  zero offset[26] = 26                                      90.0   -8.3    53.28   +13.75
+  zero offset[27] = 27                                      86.7  -11.7    53.30   +13.77
+  zero offset[28] = 28                                      86.7  -11.7    53.29   +13.76
+  zero offset[29] = 29                                      86.7  -11.7    53.28   +13.75
+  zero offset[30] = 30                                      91.7   -6.7    53.30   +13.77
+  zero offset[31] = 31                                      86.7  -11.7    53.30   +13.77
+  zero offset[32] = 32                                      93.3   -5.0    53.25   +13.72
+  zero offset[33] = 48                                      90.0   -8.3    53.31   +13.78
+  zero offset[34] = 64                                      88.3  -10.0    53.21   +13.68
+  zero offset[35] = 96                                      93.3   -5.0    52.92   +13.39
+  zero offset[36] = 128                                     85.0  -13.3    52.62   +13.09
+  zero offset[37] = 192                                     90.0   -8.3    52.01   +12.48
+  zero offset[38] = 256                                     90.0   -8.3    51.41   +11.88
+  zero offset[39] = 384                                     93.3   -5.0    50.24   +10.71
+  zero offset[40] = 512                                     88.3  -10.0    49.16    +9.63
+  zero offset[41] = 768                                     96.7   -1.7    47.20    +7.67
+  zero offset[42] = 1024                                    93.3   -5.0    45.41    +5.88
+  zero offset[43] = 1536                                    91.7   -6.7    42.18    +2.65
+  zero sparse group {128}                                   85.0  -13.3    52.62   +13.09
+  zero sparse group {384}                                   93.3   -5.0    50.24   +10.71
+  zero sparse group {1536}                                  91.7   -6.7    42.18    +2.65
+  zero sparse group {128,384}                               80.0  -18.3    62.97   +23.44
+  zero sparse group {128,384,1536}                          80.0  -18.3    65.20   +25.67
+
+────────────────────────────────────────────────────────────────────────────
+  ② Head knockout
+────────────────────────────────────────────────────────────────────────────
+  Label                                                      pk%     Δpk      ppl     Δppl
+  ───────────────────────────────────────────────────────  ─────  ──────  ───────  ───────
+  L0 H0 knockout                                           100.0   +1.7    40.46    +0.93
+  L0 H1 knockout                                            95.0   -3.3    40.04    +0.51
+  L0 H2 knockout                                           100.0   +1.7    39.94    +0.41
+  L0 H3 knockout                                            96.7   -1.7    40.22    +0.69
+  L0 H4 knockout                                            98.3   +0.0    41.60    +2.07
+  L0 H5 knockout                                           100.0   +1.7    40.80    +1.27
+  L0 H6 knockout                                           100.0   +1.7    41.36    +1.83
+  L0 H7 knockout                                           100.0   +1.7    42.03    +2.50
+  L1 H0 knockout                                           100.0   +1.7    40.46    +0.93
+  L1 H1 knockout                                            98.3   +0.0    40.26    +0.73
+  L1 H2 knockout                                           100.0   +1.7    39.76    +0.23
+  L1 H3 knockout                                           100.0   +1.7    39.81    +0.28
+  L1 H4 knockout                                            98.3   +0.0    39.78    +0.25
+  L1 H5 knockout                                            98.3   +0.0    39.87    +0.33
+  L1 H6 knockout                                           100.0   +1.7    40.30    +0.76
+  L1 H7 knockout                                            95.0   -3.3    40.31    +0.78
+  L2 H0 knockout                                           100.0   +1.7    40.45    +0.92
+  L2 H1 knockout                                            96.7   -1.7    40.48    +0.95
+  L2 H2 knockout                                           100.0   +1.7    39.90    +0.37
+  L2 H3 knockout                                            95.0   -3.3    39.96    +0.43
+  L2 H4 knockout                                            98.3   +0.0    39.97    +0.44
+  L2 H5 knockout                                           100.0   +1.7    40.11    +0.58
+  L2 H6 knockout                                            95.0   -3.3    40.36    +0.83
+  L2 H7 knockout                                            98.3   +0.0    40.66    +1.13
+  L3 H0 knockout                                           100.0   +1.7    40.17    +0.64
+  L3 H1 knockout                                           100.0   +1.7    40.15    +0.62
+  L3 H2 knockout                                           100.0   +1.7    40.27    +0.74
+  L3 H3 knockout                                            86.7  -11.7    40.35    +0.82
+  L3 H4 knockout                                           100.0   +1.7    40.03    +0.50
+  L3 H5 knockout                                           100.0   +1.7    40.14    +0.61
+  L3 H6 knockout                                            98.3   +0.0    40.58    +1.05
+  L3 H7 knockout                                           100.0   +1.7    40.21    +0.68
+  L4 H0 knockout                                           100.0   +1.7    40.43    +0.90
+  L4 H1 knockout                                            98.3   +0.0    40.52    +0.99
+  L4 H2 knockout                                           100.0   +1.7    40.10    +0.57
+  L4 H3 knockout                                           100.0   +1.7    40.77    +1.24
+  L4 H4 knockout                                            95.0   -3.3    40.18    +0.65
+  L4 H5 knockout                                            96.7   -1.7    40.04    +0.51
+  L4 H6 knockout                                           100.0   +1.7    40.72    +1.19
+  L4 H7 knockout                                            36.7  -61.7    45.53    +6.00
+  L5 H0 knockout                                            93.3   -5.0    40.35    +0.81
+  L5 H1 knockout                                            96.7   -1.7    40.33    +0.80
+  L5 H2 knockout                                           100.0   +1.7    40.09    +0.55
+  L5 H3 knockout                                            98.3   +0.0    39.79    +0.26
+  L5 H4 knockout                                           100.0   +1.7    40.85    +1.32
+  L5 H5 knockout                                            98.3   +0.0    40.25    +0.71
+  L5 H6 knockout                                           100.0   +1.7    40.36    +0.83
+  L5 H7 knockout                                            90.0   -8.3    40.34    +0.80
+
+────────────────────────────────────────────────────────────────────────────
+  ③ Layer residual knockout
+────────────────────────────────────────────────────────────────────────────
+  Label                                                      pk%     Δpk      ppl     Δppl
+  ───────────────────────────────────────────────────────  ─────  ──────  ───────  ───────
+  skip layer 0                                               0.0  -98.3  8402.68  +8363.15
+  skip layer 1                                             100.0   +1.7    51.98   +12.45
+  skip layer 2                                              93.3   -5.0    51.67   +12.14
+  skip layer 3                                              80.0  -18.3    51.18   +11.65
+  skip layer 4                                               0.0  -98.3    66.57   +27.04
+  skip layer 5                                               0.0  -98.3   167.93  +128.40
+
+────────────────────────────────────────────────────────────────────────────
+  ④ Interference components
+────────────────────────────────────────────────────────────────────────────
+  Label                                                      pk%     Δpk      ppl     Δppl
+  ───────────────────────────────────────────────────────  ─────  ──────  ───────  ───────
+  L2 zero inter_gate (gate→0.5)                             95.0   -3.3    39.91    +0.37
+  L2 zero inter_k_proj (no K inj)                           98.3   +0.0    39.71    +0.18
+  L2 zero inter_v_proj (no V inj)                           96.7   -1.7    41.28    +1.75
+  L2 zero all IF                                            96.7   -1.7    41.58    +2.05
+
+────────────────────────────────────────────────────────────────────────────
+  ⑤ scale_embed amplitude sweep
+────────────────────────────────────────────────────────────────────────────
+  Label                                                      pk%     Δpk      ppl     Δppl
+  ───────────────────────────────────────────────────────  ─────  ──────  ───────  ───────
+  scale_embed x 0.00                                        95.0   -3.3    40.20    +0.67
+  scale_embed x 0.10                                        95.0   -3.3    40.03    +0.50
+  scale_embed x 0.25                                        95.0   -3.3    39.83    +0.30
+  scale_embed x 0.50                                        96.7   -1.7    39.62    +0.09
+  scale_embed x 0.75                                        98.3   +0.0    39.53    -0.00
+  scale_embed x 1.00                                        98.3   +0.0    39.53    +0.00
+  scale_embed x 1.50                                       100.0   +1.7    39.73    +0.20
+  scale_embed x 2.00                                       100.0   +1.7    40.12    +0.59
+  scale_embed x 3.00                                       100.0   +1.7    41.27    +1.74
+
+────────────────────────────────────────────────────────────────────────────
+  ⑥ pos_bias amplitude sweep
+────────────────────────────────────────────────────────────────────────────
+  Label                                                      pk%     Δpk      ppl     Δppl
+  ───────────────────────────────────────────────────────  ─────  ──────  ───────  ───────
+  pos_bias x 0.00                                           11.7  -86.7   199.42  +159.89
+  pos_bias x 0.10                                           13.3  -85.0   158.01  +118.48
+  pos_bias x 0.25                                           18.3  -80.0   103.97   +64.44
+  pos_bias x 0.50                                           51.7  -46.7    53.25   +13.72
+  pos_bias x 0.75                                           90.0   -8.3    40.89    +1.36
+  pos_bias x 1.00                                           98.3   +0.0    39.53    +0.00
+  pos_bias x 1.50                                          100.0   +1.7    42.31    +2.78
+  pos_bias x 2.00                                          100.0   +1.7    46.49    +6.95
+
+────────────────────────────────────────────────────────────────────────────
+  ⑦ if_gain ablations
+────────────────────────────────────────────────────────────────────────────
+  Label                                                      pk%     Δpk      ppl     Δppl
+  ───────────────────────────────────────────────────────  ─────  ──────  ───────  ───────
+  if_gain = 1.0 (uniform, no learned amplification)         95.0   -3.3    43.27    +3.74
+  if_gain = 0.0 (kill all DSQG head outputs)                 0.0  -98.3   427.50  +387.96
+
+  Test PPL (unmodified): 39.998
+  Total runtime: 14305s (4.0h)
+  Results → /home/dlewis3/Desktop/AI/DWARF/benchmarks/logs/probe_condU_v5_35m_results.json

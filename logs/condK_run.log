@@ -1,0 +1,243 @@
+======================================================================
+  DWARF ATTENTION — CONDITION K
+  Dyadic Wave And Resonant Field Attention
+  condJ + rel-pos-bias + ELU normalizer + RG init + no interference
+======================================================================
+  GPU: NVIDIA GeForce RTX 4090  (23.6 GB)
+Loading OpenWebText (up to 100,000 docs)...
+  25,000 docs...
+  50,000 docs...
+  75,000 docs...
+  100,000 docs...
+  100,000 docs | train 95,000 | val 2,500 | test 2,500
+
+Loading condI BPE tokenizer (shared for comparability)...
+  Vocab: 32000 tokens
+Encoding data (max_seq_len=2048)...
+  Train: 52,716 sequences
+  Val: 1,435 sequences
+  Test: 1,459 sequences
+
+DWARF condK: 13,855,424 parameters
+  Architecture: 6 layers × 8 heads × 256d
+  Gather: Σ_{j,τ} gain_j · φ(Q·K_{shifted} + bias_{j,τ}) · V_{shifted} / Z
+  Feature map: φ(x) = elu(x) + 1  (always positive)
+  Rel-pos-bias: 44 taps × 8 heads × 6 layers = 2,112 params
+  Interference pooling: REMOVED (ablation test)
+  Scale init: RG-inspired (early→local, late→global)
+  Identity bypass: 48 params (softplus per head per layer)
+Running causality check...
+  Pre-5:  0.00000000  (expect 0.0)
+  Pos-5:  1.302351  (expect >0)
+  Post-5: 0.333893  (expect >0)
+  PASS — architecture is causal
+  Step 200/1648 | Loss 6.4565
+  Step 400/1648 | Loss 6.2701
+  Step 600/1648 | Loss 5.9350
+  Step 800/1648 | Loss 5.5574
+  Step 1000/1648 | Loss 5.5037
+  Step 1200/1648 | Loss 5.3168
+  Step 1400/1648 | Loss 5.1063
+  Step 1600/1648 | Loss 5.0826
+Ep 1/10 | Train 5.2510 | Val 5.1891 PPL 179.3 * BEST | 1585s
+  Scale prior (top-3): j=0 rf=4tok gain=0.120, j=1 rf=8tok gain=0.108, j=2 rf=16tok gain=0.104
+  Identity bypass mean: 0.0207
+  Pos-bias |mean|=0.1435  |max|=0.4288
+  ── Generation samples ──
+    'It was a dark and stormy' → ', and I was a little bit of a little bit of a bit. I was just a little bit of a '
+    'The length of the hypotenuse' → ' is the same.\n\nThe first of the first time I was in the first place, but I was n'
+    'The President of the United' → ' States, and the United States, and the United States, and the United States.\n\nT'
+    'Once upon a time there was' → ' a lot of people who had been in the same way. I was not sure that I was going t'
+    'The results indicate that' → ' the number of cases of the study were not the same.\n\nThe study was published in'
+  ──
+  Step 200/1648 | Loss 5.1154
+  Step 400/1648 | Loss 5.0611
+  Step 600/1648 | Loss 5.0510
+  Step 800/1648 | Loss 5.1085
+  Step 1000/1648 | Loss 4.8355
+  Step 1200/1648 | Loss 5.0260
+  Step 1400/1648 | Loss 4.9410
+  Step 1600/1648 | Loss 5.1245
+Ep 2/10 | Train 4.9328 | Val 4.8466 PPL 127.3 * BEST | 3024s
+  Scale prior (top-3): j=0 rf=4tok gain=0.126, j=1 rf=8tok gain=0.110, j=2 rf=16tok gain=0.104
+  Identity bypass mean: 0.0220
+  Pos-bias |mean|=0.2566  |max|=0.8180
+  ── Generation samples ──
+    'It was a dark and stormy' → ', and a very good, very little, very good, and I think it was a very good thing '
+    'The length of the hypotenuse' → ' ( (b) and the (b) ( ( (0) ( (0) ( ( (0) ( ( (0) ( ( (0) ( ( (0) ( ( (0) ( ( (0)'
+    'The President of the United' → ' States, and the United States, and the United States, and the United States, an'
+    'Once upon a time there was' → ' a time when I was a kid, I was a kid. I was a kid, I was a kid. I was a kid, I '
+    'The results indicate that' → ' the number of changes in the data is expected to be.\n\nThe results are not the f'
+  ──
+  Step 200/1648 | Loss 4.8038
+  Step 400/1648 | Loss 4.7372
+  Step 600/1648 | Loss 4.7735
+  Step 800/1648 | Loss 4.8074
+  Step 1000/1648 | Loss 4.4816
+  Step 1200/1648 | Loss 4.6432
+  Step 1400/1648 | Loss 4.6463
+  Step 1600/1648 | Loss 4.5663
+Ep 3/10 | Train 4.4901 | Val 4.6845 PPL 108.3 * BEST | 4450s
+  Scale prior (top-3): j=0 rf=4tok gain=0.129, j=1 rf=8tok gain=0.112, j=2 rf=16tok gain=0.104
+  Identity bypass mean: 0.0233
+  Pos-bias |mean|=0.3401  |max|=1.1506
+  ── Generation samples ──
+    'It was a dark and stormy' → ', and a little bit of a little bit of a little bit.\n\n"I\'m not going to be a good'
+    'The length of the hypotenuse' → ' is the same as the the (e) the (1) and the (1) (1) ( (1) (1)) (1) (1)) (1) ( (1'
+    'The President of the United' → ' States, has been a member of the United States, and the United States has been '
+    'Once upon a time there was' → ' a time when I was going to go to the hospital, I was going to get a job. I was '
+    'The results indicate that' → ' the number of participants in the study are not likely to be identified.\n\nThe s'
+  ──
+  Step 200/1648 | Loss 4.6391
+  Step 400/1648 | Loss 4.7112
+  Step 600/1648 | Loss 4.3635
+  Step 800/1648 | Loss 4.5832
+  Step 1000/1648 | Loss 4.6050
+  Step 1200/1648 | Loss 4.5481
+  Step 1400/1648 | Loss 4.7888
+  Step 1600/1648 | Loss 4.6205
+Ep 4/10 | Train 4.9936 | Val 4.5892 PPL 98.4 * BEST | 5873s
+  Scale prior (top-3): j=0 rf=4tok gain=0.131, j=1 rf=8tok gain=0.113, j=2 rf=16tok gain=0.104
+  Identity bypass mean: 0.0246
+  Pos-bias |mean|=0.4014  |max|=1.4263
+  ── Generation samples ──
+    'It was a dark and stormy' → ', and a little bit of a snowy night.\n\nThe night before the storm, the snow was s'
+    'The length of the hypotenuse' → ' is the same as the the x and the x.\n\n\nThe x is the x x x x x x x x x x x x x x '
+    'The President of the United' → ' States, has been a member of the United States, and has been a member of the Un'
+    'Once upon a time there was' → ' a time when the building was built, the building was built. The building was bu'
+    'The results indicate that' → ' the number of people who are in the population are in the same category.\n\nThe s'
+  ──
+  Step 200/1648 | Loss 4.6477
+  Step 400/1648 | Loss 4.5776
+  Step 600/1648 | Loss 4.5990
+  Step 800/1648 | Loss 4.6001
+  Step 1000/1648 | Loss 4.5206
+  Step 1200/1648 | Loss 4.4826
+  Step 1400/1648 | Loss 4.3369
+  Step 1600/1648 | Loss 4.9088
+Ep 5/10 | Train 4.7703 | Val 4.5319 PPL 92.9 * BEST | 7298s
+  Scale prior (top-3): j=0 rf=4tok gain=0.132, j=1 rf=8tok gain=0.113, j=2 rf=16tok gain=0.103
+  Identity bypass mean: 0.0258
+  Pos-bias |mean|=0.4448  |max|=1.6378
+  ── Generation samples ──
+    'It was a dark and stormy' → ' day.\n\nThe night before the storm, the storm was hit by a storm.\n\nThe storm was '
+    'The length of the hypotenuse' → ' is the same as the p.c.a. the length of the p. 1.\n\n(b) 1.2 (1.2)\n\n(2) 2.2 (1) 2'
+    'The President of the United' → ' States, has been a member of the United States, and has been a member of the Un'
+    'Once upon a time there was' → ' no one to be able to go to the station, and then the next day, we were able to '
+    'The results indicate that' → ' the number of people who are in the population are in the same category.\n\nThe s'
+  ──
+  Step 200/1648 | Loss 4.2899
+  Step 400/1648 | Loss 4.4638
+  Step 600/1648 | Loss 4.5669
+  Step 800/1648 | Loss 4.6540
+  Step 1000/1648 | Loss 4.6227
+  Step 1200/1648 | Loss 4.6059
+  Step 1400/1648 | Loss 4.4986
+  Step 1600/1648 | Loss 4.3863
+Ep 6/10 | Train 4.5264 | Val 4.4922 PPL 89.3 * BEST | 8724s
+  Scale prior (top-3): j=0 rf=4tok gain=0.133, j=1 rf=8tok gain=0.113, j=2 rf=16tok gain=0.103
+  Identity bypass mean: 0.0269
+  Pos-bias |mean|=0.4738  |max|=1.7913
+  ── Generation samples ──
+    'It was a dark and stormy' → ' day. It was a little bit cold, and I was still in the middle of the night. I wa'
+    'The length of the hypotenuse' → ' is the same as the the p_c. The second is the second of the the_t.\n\n\n__________'
+    'The President of the United' → ' States, has been a member of the United States, and the United States, and the '
+    'Once upon a time there was' → ' a time when the building was built, it was a place where the building was built'
+    'The results indicate that' → ' the current study is likely to be a significant factor in the study.\n\nThe study'
+  ──
+  Step 200/1648 | Loss 4.4346
+  Step 400/1648 | Loss 4.3003
+  Step 600/1648 | Loss 4.5008
+  Step 800/1648 | Loss 3.7844
+  Step 1000/1648 | Loss 4.5424
+  Step 1200/1648 | Loss 4.6019
+  Step 1400/1648 | Loss 4.5267
+  Step 1600/1648 | Loss 4.2565
+Ep 7/10 | Train 4.4410 | Val 4.4676 PPL 87.1 * BEST | 10148s
+  Scale prior (top-3): j=0 rf=4tok gain=0.133, j=1 rf=8tok gain=0.113, j=2 rf=16tok gain=0.103
+  Identity bypass mean: 0.0277
+  Pos-bias |mean|=0.4916  |max|=1.8929
+  ── Generation samples ──
+    'It was a dark and stormy' → ' day. It was a little bit of a surprise.\n\nI was just a little nervous. I was jus'
+    'The length of the hypotenuse' → ' is the same as the the lower the the the left.\n\nThe lower the the length of the'
+    'The President of the United' → ' States, has been a member of the United States, and the United States has been '
+    'Once upon a time there was' → ' no one in the room, but the other was still there.\n\n"I was just trying to get o'
+    'The results indicate that' → ' the number of people who are in the population are more likely to be affected b'
+  ──
+  Step 200/1648 | Loss 4.4061
+  Step 400/1648 | Loss 4.3115
+  Step 600/1648 | Loss 4.3540
+  Step 800/1648 | Loss 4.5927
+  Step 1000/1648 | Loss 4.3883
+  Step 1200/1648 | Loss 4.4055
+  Step 1400/1648 | Loss 4.4000
+  Step 1600/1648 | Loss 4.2963
+Ep 8/10 | Train 4.4349 | Val 4.4511 PPL 85.7 * BEST | 11570s
+  Scale prior (top-3): j=0 rf=4tok gain=0.133, j=1 rf=8tok gain=0.113, j=2 rf=16tok gain=0.103
+  Identity bypass mean: 0.0281
+  Pos-bias |mean|=0.5007  |max|=1.9474
+  ── Generation samples ──
+    'It was a dark and stormy' → ' day.\n\nThe night before the storm, the storm was still in the air.\n\nThe storm wa'
+    'The length of the hypotenuse' → ' is the same as the the pH.\n\nThe second is the pH.\n\nThe second is the p.m. of th'
+    'The President of the United' → ' States, has been a member of the United States, and the United States has been '
+    'Once upon a time there was' → ' no one in the room, but the other was still there.\n\nThe first time I was in the'
+    'The results indicate that' → ' the current study is likely to be a significant factor in the study.\n\nThe study'
+  ──
+  Step 200/1648 | Loss 4.3457
+  Step 400/1648 | Loss 4.4109
+  Step 600/1648 | Loss 4.4181
+  Step 800/1648 | Loss 4.2164
+  Step 1000/1648 | Loss 4.4587
+  Step 1200/1648 | Loss 4.5835
+  Step 1400/1648 | Loss 4.5033
+  Step 1600/1648 | Loss 4.3620
+Ep 9/10 | Train 4.4876 | Val 4.4429 PPL 85.0 * BEST | 12994s
+  Scale prior (top-3): j=0 rf=4tok gain=0.133, j=1 rf=8tok gain=0.113, j=2 rf=16tok gain=0.103
+  Identity bypass mean: 0.0283
+  Pos-bias |mean|=0.5041  |max|=1.9681
+  ── Generation samples ──
+    'It was a dark and stormy' → ' day.\n\nThe night before the storm, the storm was still cold.\n\nThe storm was a st'
+    'The length of the hypotenuse' → ' is the same as the above.\n\nThe second is the second of the two of the two of th'
+    'The President of the United' → ' States, has been a member of the United States, and the United States has been '
+    'Once upon a time there was' → ' no one else to do it.\n\n"I was a little bit surprised by the fact that I was goi'
+    'The results indicate that' → ' the current study is likely to be a significant factor in the study.\n\nThe study'
+  ──
+  Step 200/1648 | Loss 4.4990
+  Step 400/1648 | Loss 4.3800
+  Step 600/1648 | Loss 4.5640
+  Step 800/1648 | Loss 4.5810
+  Step 1000/1648 | Loss 4.4618
+  Step 1200/1648 | Loss 4.5133
+  Step 1400/1648 | Loss 4.3752
+  Step 1600/1648 | Loss 4.0260
+Ep 10/10 | Train 4.6220 | Val 4.4418 PPL 84.9 * BEST | 14417s
+  Scale prior (top-3): j=0 rf=4tok gain=0.133, j=1 rf=8tok gain=0.113, j=2 rf=16tok gain=0.103
+  Identity bypass mean: 0.0284
+  Pos-bias |mean|=0.5046  |max|=1.9712
+  ── Generation samples ──
+    'It was a dark and stormy' → ' day.\n\nThe night before the storm, the sun was falling, and the sun was still co'
+    'The length of the hypotenuse' → ' is the same as the above.\n\nThe second is the second of the two of the two of th'
+    'The President of the United' → ' States, has been a member of the United States, and the United States has been '
+    'Once upon a time there was' → ' no one in the room, but the other was still there.\n\n"I was just trying to get o'
+    'The results indicate that' → ' the current study is likely to be a significant factor in the study.\n\nThe study'
+  ──
+
+  DWARF condK TEST: PPL 84.7 | Loss 4.4396
+  Dominant prior scale: j=0 (RF=4 tokens)
+  Full prior gains: j0=0.133 j1=0.113 j2=0.103 j3=0.093 j4=0.079 j5=0.077 j6=0.076 j7=0.074 j8=0.084 j9=0.085 j10=0.082
+
+======================================================================
+  DWARF condK vs. ABLATION TABLE
+======================================================================
+  Model                                                   PPL
+  ────────────────────────────────────────────────────────────
+  Standard transformer 13M (reference)                   64.5
+  Wave V4 [A] (G=4096, FFT)                              86.8
+  Wave V4D [B] + dispersion β                            87.9
+  Wave V4 + Morlet [C]                                   87.2
+  Wave V4 + KdV [D] (failed)                             99.6
+  Causal D4 DWT [G] (fixed gains)                        99.4
+  G + Q-gate post-gather [H] (null)                     100.0
+  G + Q-scale pre-gather [I]                             93.3
+  OPWF efficient Q·K [J]                                  TBD
+  DWARF condK (this run)                                 84.7

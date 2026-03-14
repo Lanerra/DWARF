@@ -1,0 +1,15 @@
+======================================================================
+  d41_35m_pure -- PURE DSQG (no full attention), D=512, dense=48, sparse=[96,128,384]
+======================================================================
+  GPU: NVIDIA GeForce RTX 3090  (25.3 GB)
+  Kernel: dsqg_attention_v3
+  Changes vs d41_35m: FULL_ATTN_LAYER=-1 (all 6 layers are DSQG)
+  Physics: Kalman-EMA + KdV soliton + AGC + scale_embed + IF amplifier + Huygens K/V
+  Architecture: INTERFERENCE=3, gate=0, NO full attention
+  References: condU_35M_pure=48.271/33.3% | d41_35m_hybrid=32.136/94.2%
+Loading FineWeb-Edu from cache: benchmarks/logs/condm_fineweb_edu_doc_cache.json
+  Loaded 100,000 docs from cache
+
+Loaded condI BPE tokenizer from /home/dlewis3/Desktop/AI/DWARF/train/../results/2048_condI_tokenizer.json
+Encoding data (max_seq_len=2048)...
+  Train: 121,232 sequences

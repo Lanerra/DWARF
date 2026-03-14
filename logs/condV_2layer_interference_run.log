@@ -1,0 +1,95 @@
+======================================================================
+  condV -- Receiver-Chain Interference (13M, FineWeb-Edu)
+======================================================================
+  GPU: NVIDIA GeForce RTX 4090  (23.6 GB)
+  Kernel: dsqg_attention_v3 (UNCHANGED from condU)
+  Changes vs condU: Kalman-EMA + KdV soliton + AGC (interference)
+  Retained: Q-weighted scale gains, IF amplifier, Huygens K/V inject
+  Architecture: INTERFERENCE=3, gate=0, 1 FullAttn @ layer 5
+  References: condU=52.206/43.3% | I3G0=52.948/53.3% | condM=54.529/83.3%
+Loading FineWeb-Edu from cache: benchmarks/logs/condm_fineweb_edu_doc_cache.json
+  Loaded 100,000 docs from cache
+
+Loaded condI BPE tokenizer from /home/dlewis3/Desktop/AI/DWARF/benchmarks/results/2048_condI_tokenizer.json
+Loading pre-encoded dataset from benchmarks/logs/fineweb_encoded_2048.pt ...
+  train: 52,716  val: 5,582  test: 5,473 seqs (from cache)
+
+condV: 14,255,244 parameters
+  Layer types: ['DSQG', 'DSQG', 'DSQG', 'DSQG', 'DSQG', 'FULL']
+Running causality check...
+  Pre-10:  0.00000000  (expect 0.0)
+  Pos-10:  1.362617  (expect >0)
+  Post-10: 0.321507  (expect >0)
+  PASS
+
+  Tokens/epoch: 107,909,652
+  Chinchilla:   285,104,880 tokens (epoch ~2.64)
+
+  Step 200/1648 | Loss 6.5849
+  Step 400/1648 | Loss 5.9616
+  Step 600/1648 | Loss 5.8284
+  Step 800/1648 | Loss 5.6756
+  Step 1000/1648 | Loss 5.1168
+  Step 1200/1648 | Loss 5.3627
+  Step 1400/1648 | Loss 5.0710
+  Step 1600/1648 | Loss 5.1554
+Ep 1/10 | Train 5.7867 | Val 5.0138 PPL 150.5 * BEST | 651s (38%C)
+  DSQG pos-bias: |mean|=3.5668 |max|=13.9768 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.1190 |max|=0.3592
+  IF gains:      h0:1.00  h1:1.01  h2:1.01  h3:1.02  h4:1.00  h5:1.01  h6:1.02  h7:0.99
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ', and a little more than a few years ago.\nThe most important thing to do is that'
+    'The length of the hypotenuse' -> ' is the same as the same as the same as the same as the same as the same as the '
+    'The President of the United' -> ' States, the United States, and the United States, and the United States, and th'
+    'Once upon a time there was' -> ' no evidence of the fact that the people were not able to do with them.\nThe firs'
+    'The results indicate that' -> ' the results of the results of the results are not available.\nThe results of the'
+  --
+  Passkey...
+  mean=0.0%  (0/12 distances >50%)
+  d=1:0%  d=2:0%  d=4:0%  d=8:0%  d=16:0%  d=32:0%  d=64:0%  d=128:0%  d=256:0%  d=512:0%  d=1024:0%  d=1536:0%
+  Step 200/1648 | Loss 4.8637
+  Step 400/1648 | Loss 5.0483
+  Step 600/1648 | Loss 4.8185
+  Step 800/1648 | Loss 4.8532
+  Step 1000/1648 | Loss 4.6730
+  Step 1200/1648 | Loss 4.7832
+  Step 1400/1648 | Loss 4.5746
+  Step 1600/1648 | Loss 4.5725
+Ep 2/10 | Train 4.7683 | Val 4.3958 PPL 81.1 * BEST | 1309s (76%C)
+  DSQG pos-bias: |mean|=3.4399 |max|=13.3459 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.1729 |max|=0.5628
+  IF gains:      h0:0.99  h1:1.00  h2:0.99  h3:1.02  h4:0.97  h5:0.99  h6:1.00  h7:0.97
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ', and the most important thing to do is the stormy, and the stormy, and the stor'
+    'The length of the hypotenuse' -> ' of the two-dimensional, the length of the two-dimensional, the length of the tw'
+    'The President of the United' -> ' States, the United States, the United States, and the United States.\nThe United'
+    'Once upon a time there was' -> ' a lot of time to get the time to get the time.\nThe first time to get the time t'
+    'The results indicate that' -> ' the results of the results are not statistically significant.\nThe results of th'
+  --
+  Passkey...
+  mean=10.0%  (0/12 distances >50%)
+  d=1:0%  d=2:20%  d=4:20%  d=8:20%  d=16:20%  d=32:20%  d=64:20%  d=128:0%  d=256:0%  d=512:0%  d=1024:0%  d=1536:0%
+  Step 200/1648 | Loss 4.6595
+  Step 400/1648 | Loss 4.3316
+  Step 600/1648 | Loss 4.2957
+  Step 800/1648 | Loss 4.3950
+  Step 1000/1648 | Loss 4.2076
+  Step 1200/1648 | Loss 4.2849
+  Step 1400/1648 | Loss 4.3617
+  Step 1600/1648 | Loss 4.4136
+Ep 3/10 | Train 4.3652 | Val 4.1914 PPL 66.1 * BEST | 1979s (114%C)
+  DSQG pos-bias: |mean|=3.3179 |max|=12.8127 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.2028 |max|=0.6979
+  IF gains:      h0:0.99  h1:0.99  h2:0.99  h3:1.02  h4:0.95  h5:0.98  h6:0.98  h7:0.95
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ' storm.\nThe stormy storm was a stormy storm. The storm was a stormy storm. The s'
+    'The length of the hypotenuse' -> ' of the body is the length of the body. The body is the body of the body. The bo'
+    'The President of the United' -> ' States, and the President of the United States, was the President of the United'
+    'Once upon a time there was' -> ' a great deal of time.\nThe first time the first time the first time the first ti'
+    'The results indicate that' -> ' the results of the study are not statistically significant.\nThe results of the '
+  --
+  Passkey...
+  mean=10.0%  (0/12 distances >50%)
+  d=1:0%  d=2:20%  d=4:20%  d=8:20%  d=16:20%  d=32:20%  d=64:20%  d=128:0%  d=256:0%  d=512:0%  d=1024:0%  d=1536:0%
+  Step 200/1648 | Loss 4.3589
+  Step 400/1648 | Loss 4.1782

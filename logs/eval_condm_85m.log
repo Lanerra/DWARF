@@ -1,0 +1,64 @@
+
+============================================================
+  eval_suite.py — condm_85m
+  Device: cuda
+============================================================
+
+  Model: condM 85M (11 DSQG + 1 full attn, Layer 11)
+
+  Loading tokenizer...
+  Loading model...
+  Loaded condM 85M (11 DSQG + 1 full attn, Layer 11): 88,267,552 params from best.ptrom
+
+  [1/4] Calibration...
+    entropy=6.786 bits  top1=0.278  eff_vocab=23.7  (0.2s)
+
+  [2/4] Distance-conditioned loss (wikitext-103)...
+    Loading wikitext-103 test split...
+    Using 17 full 2048-token chunks
+    Buckets:
+    0-16          PPL= 252.36  n=  289
+    17-64         PPL= 137.62  n=  816
+    65-256        PPL=  81.07  n= 3264
+    257-512       PPL=  73.41  n= 4352
+    513-1024      PPL=  57.63  n= 8704
+    1025-2047     PPL=  56.80  n=17374
+    (4.7s)
+
+  [3/4] Few-shot string copy...
+    exact=5/15  (33.3%)  mean_lev=7.73  (3.7s)
+
+  [4/4] Passkey retrieval...
+    d=    1: accuracy=100.0%
+    d=    2: accuracy=100.0%
+    d=    4: accuracy=100.0%
+    d=    8: accuracy=100.0%
+    d=   16: accuracy=100.0%
+    d=   32: accuracy=100.0%
+    d=   64: accuracy=100.0%
+    d=  128: accuracy=80.0%
+    d=  256: accuracy=60.0%
+    d=  512: accuracy=40.0%
+    d= 1024: accuracy=80.0%
+    d= 1536: accuracy=40.0%
+    mean_accuracy=83.3%  (1.2s)
+
+  Generation samples (greedy + T=0.7)...
+
+  [greedy]
+    'It was a dark and stormy'               → ' day, and it was a very, very, very warm day.\n\nThe first thing I noticed was tha'
+    'The length of the hypotenuse'           → " is the length of the cardinal's head. The length of the cardinal's head is the "
+    'The President of the United'            → ' States, who has been a leading advocate of the expansion of the U.S. military, '
+    'Once upon a time there was'             → ' a new kind of "dramatic" or "dramatic" object that was not present in the unive'
+    'The results indicate that'              → ' the number of people who are in the United States is not likely to be the same '
+
+  [T=0.7]
+    'It was a dark and stormy'               → ' day. And I was on the phone to the hotel room, and I was like, “This is not wha'
+    'The length of the hypotenuse'           → ' in this case was considered to be less than a quarter of the maximum. This does'
+    'The President of the United'            → ' States is personally committed to helping the U.S. solve the crisis of global c'
+    'Once upon a time there was'             → ' a time when there was a new kind of social order to the social world, there was'
+    'The results indicate that'              → ' the average American is more likely to be the most likely to be the most likely'
+
+  Results saved to /home/dlewis3/Desktop/AI/DWARF/benchmarks/logs/eval_suite_condm_85m_20260228_184613.json
+============================================================
+

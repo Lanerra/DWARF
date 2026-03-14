@@ -1,0 +1,54 @@
+======================================================================
+  DWARF condL — DSQG (Dyadic Sparse-Query Gated Attention)
+  Test: does replacing D4 c_δ with softmax(Q·K_δ) close the gap?
+======================================================================
+  GPU: NVIDIA GeForce RTX 3090  (25.3 GB)
+
+  Architecture comparison (condK → condL):
+    c_δ source:      D4 convolution (spatial) → softmax(Q·K_δ) (semantic)
+    ELU feature map: φ(x)=elu(x)+1 → REMOVED (softmax normalizes)
+    ELU normalizer:  Z = Σ gain·φ   → REMOVED (softmax sums to 1)
+    Q-scale gains:   q_scale_proj    → REMOVED (no per-scale gains)
+    Identity bypass: separate param  → REMOVED (offset=0 in softmax)
+    Position bias:   KEPT (44 taps × 8 heads per layer = 352 params/layer)
+    Gate proj:       KEPT
+    Pooling:         NONE (same as condK)
+
+  Offset table: 44 (j,τ) pairs, 24 unique offsets
+Loading OpenWebText (up to 100,000 docs)...
+  25,000 docs...
+  50,000 docs...
+  75,000 docs...
+  100,000 docs...
+  100,000 docs | train 95,000 | val 2,500 | test 2,500
+
+Loaded condI BPE tokenizer (shared vocabulary)
+  Vocab: 32000 tokens
+Encoding data (max_seq_len=2048)...
+  Train: 52,716 sequences
+  Val: 1,435 sequences
+  Test: 1,459 sequences
+
+DWARF condL (DSQG): 13,852,736 parameters
+  Architecture: 6 layers × 8 heads × 256d
+  Attention: softmax over 44 dyadic offsets (Q·K_δ/√d + pos_bias_δ)
+  Position bias: 44 × 8 × 6 = 2,112 params
+  Δ params vs condK: -70,634,720
+  (condK had scale_gain, q_scale_proj, identity_bypass; condL has only pos_bias)
+Running causality check...
+  Pre-5:  0.00000000  (expect 0.0)
+  Pos-5:  1.369679  (expect >0)
+  Post-5: 0.152707  (expect >0)
+  PASS — architecture is causal
+  Step 200/1648 | Loss 6.5274
+  Step 400/1648 | Loss 6.1645
+  Step 600/1648 | Loss 5.7652
+  Step 800/1648 | Loss 5.5999
+  Step 1000/1648 | Loss 5.4396
+  Step 1200/1648 | Loss 5.5333
+  Step 1400/1648 | Loss 5.4169
+  Step 1600/1648 | Loss 5.2853
+Ep 1/10 | Train 5.2974 | Val 5.3338 PPL 207.2 * BEST | 2563s
+  Pos-bias scale preference (top-3): j=0 rf=4tok bias=+0.247, j=1 rf=8tok bias=+0.130, j=2 rf=16tok bias=-0.052
+  Pos-bias |mean|=0.2645  |max|=0.4816
+  ── Generation samples ──

@@ -1,0 +1,220 @@
+======================================================================
+  DWARF condM-v2: RMSNorm + SwiGLU + RoPE + EMA pooling
+  Full attention at layer 5 | No absolute position embeddings
+======================================================================
+  GPU: NVIDIA GeForce RTX 4090  (23.6 GB)
+Loading OpenWebText (up to 100,000 docs)...
+  25,000 docs...
+  50,000 docs...
+  75,000 docs...
+  100,000 docs...
+Loaded condI BPE tokenizer from /home/dlewis3/Desktop/AI/DWARF/benchmarks/results/2048_condI_tokenizer.json
+Encoding data (max_seq_len=2048)...
+  Train: 52,716 sequences
+  Val: 1,435 sequences
+  Test: 1,459 sequences
+
+condM-v2: 13,439,200 parameters
+  Layer stack:      ['DSQG', 'DSQG', 'DSQG', 'DSQG', 'DSQG', 'FULL']
+  FFN hidden:       682 (SwiGLU 8D/3, ≈ iso-parameter with 4D GELU)
+  Norm:             RMSNorm (no bias)
+  Pooling:          Causal mean (vectorized cumsum; EMA dropped: Python loop = ~3× slowdown)
+  Position:         DSQG β-bias (relative) + RoPE in full attn (relative)
+                    No absolute P[pos] embedding
+  δ=0 bias:         Small negative init (−log(1.2)·α) vs 0 in condM
+  QKV/out biases:   Removed (gate_proj keeps bias=2.0)
+  Residual init:    σ = 0.02/√(2·6) = 0.00577
+  Embedding scale:  ×√256 = ×16.00
+  Autocast:         bf16
+  LR warmup:        1% of total steps
+  Weight decay:     0.1 for weights, 0.0 for biases/norms/pos_bias
+Running causality check...
+  Pre-10:  0.00000000  (expect 0.0)
+  Pos-10:  4.930699  (expect >0)
+  Post-10: 0.103221  (expect >0)
+  PASS
+  Optimizer: 39 decay params, 27 no-decay params
+  LR schedule: 164 warmup steps → cosine over 16480 total
+  Step 200/1648 | Loss 6.8111
+  Step 400/1648 | Loss 6.4004
+  Step 600/1648 | Loss 5.7875
+  Step 800/1648 | Loss 5.7052
+  Step 1000/1648 | Loss 5.4706
+  Step 1200/1648 | Loss 5.3653
+  Step 1400/1648 | Loss 5.1277
+  Step 1600/1648 | Loss 5.1773
+Ep 1/10 | Train 4.9129 | Val 5.0577 PPL 157.2 * BEST | 1819s
+  DSQG pos-bias: |mean|=3.7885 |max|=14.6984 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' → ', and the people were going to be the first to be the first to be the first time'
+    'The length of the hypotenuse' → ' of the world. The first time the world was the first time to be the first place'
+    'The President of the United' → ' States, and the United States, the United States, and the United States, and th'
+    'Once upon a time there was' → ' a lot of time to get a lot of time.\n\nThe first thing I was going to do was was '
+    'The results indicate that' → ' the number of the number of the number of the number of the number of the numbe'
+  ──
+  Step 200/1648 | Loss 4.9057
+  Step 400/1648 | Loss 4.8152
+  Step 600/1648 | Loss 4.9015
+  Step 800/1648 | Loss 4.6511
+  Step 1000/1648 | Loss 4.9570
+  Step 1200/1648 | Loss 4.6824
+  Step 1400/1648 | Loss 4.7052
+  Step 1600/1648 | Loss 4.5835
+Ep 2/10 | Train 4.5022 | Val 4.5862 PPL 98.1 * BEST | 3561s
+  DSQG pos-bias: |mean|=3.8812 |max|=14.7029 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' → ', and it was a very good thing. It was a great thing. It was a great thing. It w'
+    'The length of the hypotenuse' → ', the length of the length of the length of the length of the length of the leng'
+    'The President of the United' → ' States is a very good deal.\n\nThe president has been a member of the United Stat'
+    'Once upon a time there was' → ' a chance to be a chance to be a player.\n\nThe first time I was a player who was '
+    'The results indicate that' → ' the results are not likely to be expected.\n\nThe results are expected to be expe'
+  ──
+  Step 200/1648 | Loss 4.7098
+  Step 400/1648 | Loss 4.4790
+  Step 600/1648 | Loss 4.4071
+  Step 800/1648 | Loss 4.5499
+  Step 1000/1648 | Loss 4.3810
+  Step 1200/1648 | Loss 4.5520
+  Step 1400/1648 | Loss 4.3778
+  Step 1600/1648 | Loss 4.4220
+Ep 3/10 | Train 4.1231 | Val 4.3093 PPL 74.4 * BEST | 5133s
+  DSQG pos-bias: |mean|=3.9467 |max|=14.7069 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' → ' night.\n\nThe night of the night, the night of the night, the night of the night,'
+    'The length of the hypotenuse' → ' of the time is the length of the time of the time. The length of the time is th'
+    'The President of the United' → ' States is a major step forward in the United States.\n\nThe United States is a ma'
+    'Once upon a time there was' → ' a “dangerous” thing, and it was a very different way of thinking.\n\n“I’m not sur'
+    'The results indicate that' → ' the results of the study are not statistically significant.\n\nThe results of the'
+  ──
+  Step 200/1648 | Loss 4.4141
+  Step 400/1648 | Loss 4.2967
+  Step 600/1648 | Loss 4.2337
+  Step 800/1648 | Loss 4.2298
+  Step 1000/1648 | Loss 4.2547
+  Step 1200/1648 | Loss 4.2096
+  Step 1400/1648 | Loss 4.1896
+  Step 1600/1648 | Loss 4.2597
+Ep 4/10 | Train 4.2304 | Val 4.1902 PPL 66.0 * BEST | 6697s
+  DSQG pos-bias: |mean|=3.9938 |max|=14.7190 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' → ' place.\n\nThe first thing I was told was that I was going to be a little bit nerv'
+    'The length of the hypotenuse' → ' is a bit more than a bit of a bit of a bit of a bit of a bit of a bit of a bit '
+    'The President of the United' → ' States, the United States, the United States, and the United States, the United'
+    'Once upon a time there was' → ' a new, more complex, more complex, complex complex, and more complex complex co'
+    'The results indicate that' → ' the results are not accurate.\n\nThe results are not accurate.\n\nThe results are n'
+  ──
+  Step 200/1648 | Loss 4.2837
+  Step 400/1648 | Loss 4.1904
+  Step 600/1648 | Loss 4.2799
+  Step 800/1648 | Loss 4.1790
+  Step 1000/1648 | Loss 4.1784
+  Step 1200/1648 | Loss 4.3529
+  Step 1400/1648 | Loss 4.2623
+  Step 1600/1648 | Loss 4.1438
+Ep 5/10 | Train 4.1902 | Val 4.1257 PPL 61.9 * BEST | 8272s
+  DSQG pos-bias: |mean|=4.0264 |max|=14.7238 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' → ' night.\n\nThe first day of the night, the night was a little more than a few minu'
+    'The length of the hypotenuse' → ' is a bit more complex than the length of the interval. The length of the interv'
+    'The President of the United' → ' States is not sure whether the United States is going to be able to do so.\n\nThe'
+    'Once upon a time there was' → ' a lot of time to do, I was very excited about how I was going to be able to do '
+    'The results indicate that' → ' the results are not statistically significant.\n\nThe results are based on the re'
+  ──
+  Step 200/1648 | Loss 3.9281
+  Step 400/1648 | Loss 4.1149
+  Step 600/1648 | Loss 4.1843
+  Step 800/1648 | Loss 4.2389
+  Step 1000/1648 | Loss 4.2164
+  Step 1200/1648 | Loss 4.2198
+  Step 1400/1648 | Loss 4.1342
+  Step 1600/1648 | Loss 4.0973
+Ep 6/10 | Train 3.5130 | Val 4.0801 PPL 59.2 * BEST | 9821s
+  DSQG pos-bias: |mean|=4.0479 |max|=14.7277 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' → ', and it was a little bit of a surprise.\n\nThe first time I was in the room, I wa'
+    'The length of the hypotenuse' → ' is a bit more complicated than the length of the length of the length of the le'
+    'The President of the United' → ' States, the United States, and the United States, are the only countries that a'
+    'Once upon a time there was' → ' no way to do it.\n\nThe first thing I’ve ever seen is that I’ve been in the proce'
+    'The results indicate that' → ' the results are not statistically significant.\n\nThe results are not statistical'
+  ──
+  Step 200/1648 | Loss 4.2038
+  Step 400/1648 | Loss 4.2397
+  Step 600/1648 | Loss 4.2862
+  Step 800/1648 | Loss 4.4134
+  Step 1000/1648 | Loss 4.2505
+  Step 1200/1648 | Loss 4.1986
+  Step 1400/1648 | Loss 4.0307
+  Step 1600/1648 | Loss 4.0818
+Ep 7/10 | Train 4.0941 | Val 4.0545 PPL 57.7 * BEST | 11348s
+  DSQG pos-bias: |mean|=4.0607 |max|=14.7321 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' → ', and it was a little bit of a surprise.\n\nThe first thing I was told was that I '
+    'The length of the hypotenuse' → ' is a bit more complex than the length of the length of the length of the length'
+    'The President of the United' → ' States, the United States, and the United States, are the most likely to be the'
+    'Once upon a time there was' → ' no need for a new kind of new technology.\n\nThe first thing that was to be done '
+    'The results indicate that' → ' the results of the study are not statistically significant.\n\nThe study was cond'
+  ──
+  Step 200/1648 | Loss 4.1206
+  Step 400/1648 | Loss 4.0219
+  Step 600/1648 | Loss 4.0533
+  Step 800/1648 | Loss 4.2340
+  Step 1000/1648 | Loss 4.0022
+  Step 1200/1648 | Loss 4.0034
+  Step 1400/1648 | Loss 4.2205
+  Step 1600/1648 | Loss 4.1418
+Ep 8/10 | Train 4.0665 | Val 4.0383 PPL 56.7 * BEST | 12879s
+  DSQG pos-bias: |mean|=4.0672 |max|=14.7339 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' → ', but it was a little bit of a surprise.\n\nThe first thing I was told was that I '
+    'The length of the hypotenuse' → ' is a bit more complex than the length of the length of the length of the length'
+    'The President of the United' → ' States, the United States, the United States, and the United States, are the on'
+    'Once upon a time there was' → ' a lot of work to do, and I was able to do it. I was able to do it with a lot of'
+    'The results indicate that' → ' the results of the study are not statistically significant.\n\nThe results of the'
+  ──
+  Step 200/1648 | Loss 4.1774
+  Step 400/1648 | Loss 4.0703
+  Step 600/1648 | Loss 4.0620
+  Step 800/1648 | Loss 3.9610
+  Step 1000/1648 | Loss 4.0680
+  Step 1200/1648 | Loss 4.0621
+  Step 1400/1648 | Loss 4.2150
+  Step 1600/1648 | Loss 4.1137
+Ep 9/10 | Train 4.0844 | Val 4.0314 PPL 56.3 * BEST | 14408s
+  DSQG pos-bias: |mean|=4.0695 |max|=14.7341 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' → ', but it was a little bit of a surprise.\n\nThe first thing I was told was that I '
+    'The length of the hypotenuse' → ' is a bit more complex than the length of the length of the length of the length'
+    'The President of the United' → ' States, the United States, and the United States, are the only countries that a'
+    'Once upon a time there was' → ' no way to get a job, and the fact that the government was doing it is not going'
+    'The results indicate that' → ' the results are not statistically significant.\n\nThe results are not statistical'
+  ──
+  Step 200/1648 | Loss 3.9291
+  Step 400/1648 | Loss 4.2005
+  Step 600/1648 | Loss 3.8865
+  Step 800/1648 | Loss 3.9842
+  Step 1000/1648 | Loss 3.8141
+  Step 1200/1648 | Loss 4.0508
+  Step 1400/1648 | Loss 4.0370
+  Step 1600/1648 | Loss 4.0896
+Ep 10/10 | Train 4.2666 | Val 4.0305 PPL 56.3 * BEST | 15938s
+  DSQG pos-bias: |mean|=4.0699 |max|=14.7341 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' → ', but it was a little bit of a surprise.\n\nThe first thing I was told was that I '
+    'The length of the hypotenuse' → ' is a bit more complex than the length of the length of the length of the length'
+    'The President of the United' → ' States, the United States, and the United States, are the only countries that a'
+    'Once upon a time there was' → ' a chance that the world would be able to get to the point where it would be a l'
+    'The results indicate that' → ' the results are not statistically significant.\n\nThe results are not statistical'
+  ──
+Traceback (most recent call last):
+  File "/home/dlewis3/Desktop/AI/DWARF/benchmarks/train_2048_condM_v2.py", line 802, in <module>
+    main()
+  File "/home/dlewis3/Desktop/AI/DWARF/benchmarks/train_2048_condM_v2.py", line 790, in main
+    results = train(model, train_data, val_data, test_data, tokenizer,
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dlewis3/Desktop/AI/DWARF/benchmarks/train_2048_condM_v2.py", line 678, in train
+    model.load_state_dict(torch.load(os.path.join(save_dir, 'best.pt'),
+  File "/home/dlewis3/Desktop/AI/DWARF/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 2581, in load_state_dict
+    raise RuntimeError(
+RuntimeError: Error(s) in loading state_dict for CondMV2Transformer:
+	Missing key(s) in state_dict: "embedding.weight", "blocks.0.norm1.scale", "blocks.0.norm2.scale", "blocks.0.attn.pos_bias", "blocks.0.attn.offsets", "blocks.0.attn.qkv_proj.weight", "blocks.0.attn.out_proj.weight", "blocks.0.attn.gate_proj.weight", "blocks.0.attn.gate_proj.bias", "blocks.0.ffn.gate_proj.weight", "blocks.0.ffn.up_proj.weight", "blocks.0.ffn.down_proj.weight", "blocks.1.norm1.scale", "blocks.1.norm2.scale", "blocks.1.attn.pos_bias", "blocks.1.attn.offsets", "blocks.1.attn.qkv_proj.weight", "blocks.1.attn.out_proj.weight", "blocks.1.attn.gate_proj.weight", "blocks.1.attn.gate_proj.bias", "blocks.1.ffn.gate_proj.weight", "blocks.1.ffn.up_proj.weight", "blocks.1.ffn.down_proj.weight", "blocks.2.norm1.scale", "blocks.2.norm2.scale", "blocks.2.attn.pos_bias", "blocks.2.attn.offsets", "blocks.2.attn.qkv_proj.weight", "blocks.2.attn.out_proj.weight", "blocks.2.attn.gate_proj.weight", "blocks.2.attn.gate_proj.bias", "blocks.2.ffn.gate_proj.weight", "blocks.2.ffn.up_proj.weight", "blocks.2.ffn.down_proj.weight", "blocks.2.inter_norm.scale", "blocks.2.inter_gate.weight", "blocks.2.inter_gate.bias", "blocks.2.inter_pool_proj.weight", "blocks.2.inter_pool_proj.bias", "blocks.3.norm1.scale", "blocks.3.norm2.scale", "blocks.3.attn.pos_bias", "blocks.3.attn.offsets", "blocks.3.attn.qkv_proj.weight", "blocks.3.attn.out_proj.weight", "blocks.3.attn.gate_proj.weight", "blocks.3.attn.gate_proj.bias", "blocks.3.ffn.gate_proj.weight", "blocks.3.ffn.up_proj.weight", "blocks.3.ffn.down_proj.weight", "blocks.4.norm1.scale", "blocks.4.norm2.scale", "blocks.4.attn.pos_bias", "blocks.4.attn.offsets", "blocks.4.attn.qkv_proj.weight", "blocks.4.attn.out_proj.weight", "blocks.4.attn.gate_proj.weight", "blocks.4.attn.gate_proj.bias", "blocks.4.ffn.gate_proj.weight", "blocks.4.ffn.up_proj.weight", "blocks.4.ffn.down_proj.weight", "blocks.5.norm1.scale", "blocks.5.norm2.scale", "blocks.5.attn.rope_cos", "blocks.5.attn.rope_sin", "blocks.5.attn.qkv_proj.weight", "blocks.5.attn.out_proj.weight", "blocks.5.attn.gate_proj.weight", "blocks.5.attn.gate_proj.bias", "blocks.5.ffn.gate_proj.weight", "blocks.5.ffn.up_proj.weight", "blocks.5.ffn.down_proj.weight", "norm.scale", "out.weight". 
+	Unexpected key(s) in state_dict: "model", "optimizer", "scheduler", "epoch", "val_ppl", "best_val_loss". 

@@ -1,0 +1,251 @@
+======================================================================
+  WAVE FIELD 13M — CONDITION J
+  Outer-Product Wave Field (OPWF): K⊗V deposit, Q @ F gather
+  Testing: does content-based Q·K retrieval close the PPL gap?
+======================================================================
+
+  Device: cuda
+  GPU: NVIDIA GeForce RTX 4090  (23.6 GB)
+  Note: efficient OPWF — no large field tensor. Memory ~same as condI.
+Loading OpenWebText (up to 100,000 docs)...
+  25,000 docs...
+  50,000 docs...
+  75,000 docs...
+  100,000 docs...
+  100,000 docs | train 95,000 | val 2,500 | test 2,500
+
+Loading condI BPE tokenizer from /home/dlewis3/Desktop/AI/wave-field-llm/benchmarks/2048_condI_tokenizer.json...
+  (reusing condI tokenizer for direct comparability)
+  Vocab: 32000 tokens
+Encoding data (max_seq_len=2048)...
+  Train: 52,716 sequences
+  Val: 1,435 sequences
+  Test: 1,459 sequences
+
+Condition J: 14,117,504 params
+  (condI had ~14,117,840; delta = +-336)
+  Architecture: 6 layers × 8 heads × 256d
+  Method: efficient OPWF — no explicit K⊗V tensor
+  Gather: Σ_j_τ gain_j * h_τ * (Q·K_shifted) * V_shifted
+  Taps:   11 scales × 4 D4 = 44 inner products/pos
+  Memory: O(N × HD) — same as condI, no HD×HD field
+  Identity bypass: 48 params (softplus per head per layer)
+  Q-scale: per-position scale selection retained from condI
+Running causality check...
+  Positions 0-4: max |diff| = 0.00000000  (expect 0.0)
+  Position 5:    max |diff| = 0.938628  (expect >0)
+  Positions 6+:  max |diff| = 0.218757  (expect >0)
+  PASS — architecture is causal
+
+  Free VRAM before training: 22.1 GB
+  Estimated field tensor (bf16): 0.27 GB per layer forward
+  Step 200/1648 | Loss 6.7374
+  Step 400/1648 | Loss 5.9211
+  Step 600/1648 | Loss 5.7245
+  Step 800/1648 | Loss 5.5170
+  Step 1000/1648 | Loss 5.4312
+  Step 1200/1648 | Loss 5.3795
+  Step 1400/1648 | Loss 5.2272
+  Step 1600/1648 | Loss 5.2056
+Ep 1/10 | Train 5.1569 | Val 5.1729 PPL 176.4 * BEST | 1376s
+  Scale prior (top-3): j=0 rf=4tok gain=0.119, j=1 rf=8tok gain=0.103, j=2 rf=16tok gain=0.095
+  Identity bypass mean: 0.0219
+  (Note: actual gains are position-specific via Q)
+  ── Generation samples (greedy, 150 tokens) ──
+    'It was a dark and stormy' → ', and it was a very good time.\n\nThe first time I was in the first time I was in '
+    'The length of the hypotenuse' → ' of the world, the most important thing to do is the most important thing to do '
+    'The President of the United' → ' States, the United States, and the United States, and the United States, and th'
+    'Once upon a time there was' → ' a lot of time in the past year.\n\nThe first time I was in the first time I was i'
+    'The results indicate that' → ' the number of people who are not in the same way, they are not going to be able'
+  ──
+  Step 200/1648 | Loss 4.9988
+  Step 400/1648 | Loss 5.0231
+  Step 600/1648 | Loss 4.7960
+  Step 800/1648 | Loss 5.1874
+  Step 1000/1648 | Loss 5.0272
+  Step 1200/1648 | Loss 4.7729
+  Step 1400/1648 | Loss 4.9089
+  Step 1600/1648 | Loss 4.8820
+Ep 2/10 | Train 4.8609 | Val 4.8306 PPL 125.3 * BEST | 2751s
+  Scale prior (top-3): j=0 rf=4tok gain=0.133, j=1 rf=8tok gain=0.106, j=2 rf=16tok gain=0.097
+  Identity bypass mean: 0.0247
+  (Note: actual gains are position-specific via Q)
+  ── Generation samples (greedy, 150 tokens) ──
+    'It was a dark and stormy' → ', and it was a very good thing to be.\n\nI was a little bit of a little bit of a l'
+    'The length of the hypotenuse' → ' is the same as the "The" of the "The" of the "The" of the "The" is "The "The" "'
+    'The President of the United' → ' States, and the United States, and the United States, and the United States, an'
+    'Once upon a time there was' → ' a lot of time to get a lot of money.\n\nThe first time I was a little bit of a bi'
+    'The results indicate that' → ' the results are not the case.\n\nThe report said the report was "a significant in'
+  ──
+  Step 200/1648 | Loss 4.7186
+  Step 400/1648 | Loss 4.7373
+  Step 600/1648 | Loss 4.7448
+  Step 800/1648 | Loss 4.6343
+  Step 1000/1648 | Loss 4.8977
+  Step 1200/1648 | Loss 4.8152
+  Step 1400/1648 | Loss 4.6782
+  Step 1600/1648 | Loss 4.7570
+Ep 3/10 | Train 4.6565 | Val 4.6804 PPL 107.8 * BEST | 4115s
+  Scale prior (top-3): j=0 rf=4tok gain=0.143, j=1 rf=8tok gain=0.107, j=2 rf=16tok gain=0.098
+  Identity bypass mean: 0.0272
+  (Note: actual gains are position-specific via Q)
+  ── Generation samples (greedy, 150 tokens) ──
+    'It was a dark and stormy' → ' way. It was a very difficult time to get a lot of attention. It was a very good'
+    'The length of the hypotenuse' → ' is the same as the the first of the three. The first of the three is the first '
+    'The President of the United' → ' States, and the United States, and the United States, and the United States, an'
+    'Once upon a time there was' → ' a “freedom” that would have been a “freedom” of the “freedom” of the “freedom” '
+    'The results indicate that' → ' the number of people who are in the same way are the number of people who are i'
+  ──
+  Step 200/1648 | Loss 4.7159
+  Step 400/1648 | Loss 4.7106
+  Step 600/1648 | Loss 4.8763
+  Step 800/1648 | Loss 4.5368
+  Step 1000/1648 | Loss 4.5286
+  Step 1200/1648 | Loss 5.0199
+  Step 1400/1648 | Loss 4.6834
+  Step 1600/1648 | Loss 4.7795
+Ep 4/10 | Train 4.4416 | Val 4.5903 PPL 98.5 * BEST | 5484s
+  Scale prior (top-3): j=0 rf=4tok gain=0.149, j=1 rf=8tok gain=0.107, j=2 rf=16tok gain=0.100
+  Identity bypass mean: 0.0295
+  (Note: actual gains are position-specific via Q)
+  ── Generation samples (greedy, 150 tokens) ──
+    'It was a dark and stormy' → ', and it was a very good time to get a lot of money.\n\n"I\'m not going to be able '
+    'The length of the hypotenuse' → ' is the same as the the theer of the the original. The second is the second of t'
+    'The President of the United' → ' States has been a member of the United States.\n\nThe United States has been the '
+    'Once upon a time there was' → ' a time when the first time the government had been able to get the job done, an'
+    'The results indicate that' → ' the number of deaths in the United States is not the only one that is in the Un'
+  ──
+  Step 200/1648 | Loss 4.5311
+  Step 400/1648 | Loss 4.3928
+  Step 600/1648 | Loss 4.5555
+  Step 800/1648 | Loss 4.7898
+  Step 1000/1648 | Loss 4.4364
+  Step 1200/1648 | Loss 4.5805
+  Step 1400/1648 | Loss 4.5516
+  Step 1600/1648 | Loss 4.5560
+Ep 5/10 | Train 4.3929 | Val 4.5320 PPL 92.9 * BEST | 6843s
+  Scale prior (top-3): j=0 rf=4tok gain=0.153, j=1 rf=8tok gain=0.108, j=2 rf=16tok gain=0.101
+  Identity bypass mean: 0.0315
+  (Note: actual gains are position-specific via Q)
+  ── Generation samples (greedy, 150 tokens) ──
+    'It was a dark and stormy' → ', and it was a little bit of a bit more.\n\n“I’m not sure what I’m doing, I’m goin'
+    'The length of the hypotenuse' → ' is the same as the one that is the same as the other. The second is the same as'
+    'The President of the United' → ' States has been the first to be the first to be the first to be the first to be'
+    'Once upon a time there was' → ' a lot of time to get a job.\n\n“I’m not going to be able to do it. I’m not going '
+    'The results indicate that' → ' the average household income of the population is 1.5 percent. The average age '
+  ──
+  Step 200/1648 | Loss 4.6447
+  Step 400/1648 | Loss 4.5813
+  Step 600/1648 | Loss 4.3794
+  Step 800/1648 | Loss 4.4816
+  Step 1000/1648 | Loss 4.5695
+  Step 1200/1648 | Loss 4.3802
+  Step 1400/1648 | Loss 4.3761
+  Step 1600/1648 | Loss 4.4054
+Ep 6/10 | Train 4.4544 | Val 4.4936 PPL 89.4 * BEST | 8225s
+  Scale prior (top-3): j=0 rf=4tok gain=0.155, j=1 rf=8tok gain=0.108, j=2 rf=16tok gain=0.101
+  Identity bypass mean: 0.0333
+  (Note: actual gains are position-specific via Q)
+  ── Generation samples (greedy, 150 tokens) ──
+    'It was a dark and stormy' → ' day. It was a very good day.\n\n"I was a little bit more nervous about it. I was '
+    'The length of the hypotenuse' → ' is the same as the the same as the the same as the original, the more the the m'
+    'The President of the United' → ' States has been the first to be the first to be the first to be the first to be'
+    'Once upon a time there was' → ' a lot of time to get a job.\n\n“I’m not going to be able to get a job. I’m going '
+    'The results indicate that' → ' the average annual average of the total total of the total total total total to'
+  ──
+  Step 200/1648 | Loss 4.8149
+  Step 400/1648 | Loss 4.3872
+  Step 600/1648 | Loss 4.5455
+  Step 800/1648 | Loss 4.4304
+  Step 1000/1648 | Loss 4.5423
+  Step 1200/1648 | Loss 4.5083
+  Step 1400/1648 | Loss 4.5464
+  Step 1600/1648 | Loss 4.5601
+Ep 7/10 | Train 4.5187 | Val 4.4685 PPL 87.2 * BEST | 9601s
+  Scale prior (top-3): j=0 rf=4tok gain=0.157, j=1 rf=8tok gain=0.108, j=2 rf=16tok gain=0.102
+  Identity bypass mean: 0.0346
+  (Note: actual gains are position-specific via Q)
+  ── Generation samples (greedy, 150 tokens) ──
+    'It was a dark and stormy' → ' day. It was a very good day. It was a great time to get a lot of attention.\n\nI '
+    'The length of the hypotenuse' → ' is the length of the body. The body is the same as the body. The body is the bo'
+    'The President of the United' → ' States has been the only member of the United States.\n\nThe United States has be'
+    'Once upon a time there was' → ' a lot of time to get a job.\n\n“I’m not going to be able to do it. I’m not going '
+    'The results indicate that' → ' the government has been able to find a way to get the money to get the money.\n\n'
+  ──
+  Step 200/1648 | Loss 4.4455
+  Step 400/1648 | Loss 4.6019
+  Step 600/1648 | Loss 4.5043
+  Step 800/1648 | Loss 4.3604
+  Step 1000/1648 | Loss 4.2995
+  Step 1200/1648 | Loss 4.3001
+  Step 1400/1648 | Loss 4.2868
+  Step 1600/1648 | Loss 4.5014
+Ep 8/10 | Train 4.3779 | Val 4.4544 PPL 86.0 * BEST | 10985s
+  Scale prior (top-3): j=0 rf=4tok gain=0.157, j=1 rf=8tok gain=0.108, j=2 rf=16tok gain=0.102
+  Identity bypass mean: 0.0354
+  (Note: actual gains are position-specific via Q)
+  ── Generation samples (greedy, 150 tokens) ──
+    'It was a dark and stormy' → ' day. It was a very good day. It was a great time to get a little bit of a smile'
+    'The length of the hypotenuse' → ' is the same as the other. The second is the same as the second. The second is t'
+    'The President of the United' → ' States has been the subject of a series of scandals that have been made by the '
+    'Once upon a time there was' → ' a lot of time to get a job.\n\n“I’m not going to be able to get a lot of money on'
+    'The results indicate that' → ' the government has been able to find a way to get the government to do so.\n\nThe'
+  ──
+  Step 200/1648 | Loss 4.5447
+  Step 400/1648 | Loss 4.1967
+  Step 600/1648 | Loss 4.5154
+  Step 800/1648 | Loss 4.3932
+  Step 1000/1648 | Loss 4.3271
+  Step 1200/1648 | Loss 4.5117
+  Step 1400/1648 | Loss 4.4744
+  Step 1600/1648 | Loss 4.3225
+Ep 9/10 | Train 4.4634 | Val 4.4460 PPL 85.3 * BEST | 12364s
+  Scale prior (top-3): j=0 rf=4tok gain=0.157, j=1 rf=8tok gain=0.108, j=2 rf=16tok gain=0.102
+  Identity bypass mean: 0.0357
+  (Note: actual gains are position-specific via Q)
+  ── Generation samples (greedy, 150 tokens) ──
+    'It was a dark and stormy' → ' day. It was a very good day. It was a great time to get a chance to see the wor'
+    'The length of the hypotenuse' → ' is the same as the other. The second is the same as the second. The second is t'
+    'The President of the United' → ' States has been the subject of a series of scandals that have been made by the '
+    'Once upon a time there was' → ' a lot of time to get a job.\n\n“I’m not going to be able to get a job. I’m going '
+    'The results indicate that' → ' the average annual average of the total total of the total total total total to'
+  ──
+  Step 200/1648 | Loss 4.3426
+  Step 400/1648 | Loss 4.4489
+  Step 600/1648 | Loss 4.2781
+  Step 800/1648 | Loss 4.4305
+  Step 1000/1648 | Loss 4.5724
+  Step 1200/1648 | Loss 4.3973
+  Step 1400/1648 | Loss 4.3664
+  Step 1600/1648 | Loss 4.4502
+Ep 10/10 | Train 4.6180 | Val 4.4451 PPL 85.2 * BEST | 13738s
+  Scale prior (top-3): j=0 rf=4tok gain=0.157, j=1 rf=8tok gain=0.108, j=2 rf=16tok gain=0.102
+  Identity bypass mean: 0.0358
+  (Note: actual gains are position-specific via Q)
+  ── Generation samples (greedy, 150 tokens) ──
+    'It was a dark and stormy' → ' day. It was a very good day. It was a great time to get a little more than a fe'
+    'The length of the hypotenuse' → ' is the same as the other. The second is the same as the second. The second is t'
+    'The President of the United' → ' States has been the subject of a series of scandals that have been made by the '
+    'Once upon a time there was' → ' a lot of time to get a job.\n\n“I’m not going to be able to get a job. I’m going '
+    'The results indicate that' → ' the government has been able to find a way to get the government to do so.\n\nThe'
+  ──
+
+  CONDITION J TEST: PPL 85.1 | Loss 4.4442
+  Final dominant prior scale: j=0 (RF=4 tokens)
+  Full prior gains: j0=0.157 j1=0.108 j2=0.102 j3=0.088 j4=0.085 j5=0.080 j6=0.078 j7=0.077 j8=0.076 j9=0.067 j10=0.083
+  Identity bypass mean: 0.0358
+
+======================================================================
+  CONDITION J RESULTS vs. ABLATION TABLE
+======================================================================
+  Model                                                   PPL
+  ────────────────────────────────────────────────────────────
+  Standard transformer 13M baseline                      64.5
+  Wave V4 [A] (G=4096, FFT, floor=0.05)                  86.8
+  Wave V4D [B] (+ dispersion β)                          87.9
+  Wave V4 + Morlet [C] (causal wavelet)                  87.2
+  Wave V4 + KdV [D] (nonlinear)                          99.6
+  Condition G (causal D4 DWT, fixed gains)               99.4
+  Condition H (G + Q-gate post-gather)                  100.0
+  Condition I (G + Q-scale pre-gather)                   93.3
+  Condition J (OPWF: K⊗V field + Q gather)               85.1

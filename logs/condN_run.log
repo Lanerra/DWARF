@@ -1,0 +1,220 @@
+======================================================================
+  DWARF condN — Dense-32 Local + Dyadic Long-Range DSQG
+  Softmax over 44 unique offsets with ALiBi per-head bias init
+======================================================================
+  GPU: NVIDIA H100 80GB HBM3  (85.0 GB)
+  Offset set: {0..32} ∪ {48,64,...,1536} = 44 offsets
+  Coverage improvement: ~35% (dyadic only) → ~55% (dense-32 + dyadic)
+  Interference pooling: every 3rd layer (condK+RP style)
+Loading OpenWebText (up to 100,000 docs)...
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+  25,000 docs...
+  50,000 docs...
+  75,000 docs...
+  100,000 docs...
+  100,000 docs | train 95,000 | val 2,500 | test 2,500
+Loaded condI BPE tokenizer (shared vocabulary for comparability)
+  Vocab: 32000 tokens
+Encoding data (max_seq_len=2048)...
+  Train: 52,716 sequences
+  Val: 1,435 sequences
+  Test: 1,459 sequences
+
+condN: 14,116,928 parameters
+  n_offsets:           44
+  Interference blocks: [2, 5]
+  Initial pos_bias range: [-14.675, -0.000]
+  (ALiBi: 0.0 at δ=0, negative elsewhere, steeper for local-head)
+Running causality check...
+  Pre-10:  0.00000000  (expect 0.0)
+  Pos-10:  0.767731  (expect >0)
+  Post-10: 0.438599  (expect >0)
+  PASS — architecture is causal
+/usr/local/lib/python3.11/dist-packages/torch/utils/checkpoint.py:1399: FutureWarning: `torch.cpu.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cpu', args...)` instead.
+  with device_autocast_ctx, torch.cpu.amp.autocast(**cpu_autocast_kwargs), recompute_context:  # type: ignore[attr-defined]
+  Step 200/1648 | Loss 6.6558
+  Step 400/1648 | Loss 5.6650
+  Step 600/1648 | Loss 5.5671
+  Step 800/1648 | Loss 5.3702
+  Step 1000/1648 | Loss 5.6286
+  Step 1200/1648 | Loss 5.1524
+  Step 1400/1648 | Loss 5.0032
+  Step 1600/1648 | Loss 5.2893
+Ep 1/10 | Train 5.0322 | Val 5.0925 PPL 162.8 * BEST | 1200s
+  Pos-bias: |mean|=3.5741 |max|=13.9831 most-local=h7 most-global=h0
+  ── Generation samples ──
+    'It was a dark and stormy' → '. It was a little bit of a little bit. It was a little bit of a little bit of a '
+    'The length of the hypotenuse' → ' of the second half of the year.\n\nThe first time the first time, the first time,'
+    'The President of the United' → ' States, and the United States, and the United States, and the United States, an'
+    'Once upon a time there was' → ' a lot of time.\n\n“I’ve been a lot of time, I’m going to be a lot of time. I’m go'
+    'The results indicate that' → ' the results of the data are not available.\n\nThe results are the results of the '
+  ──
+  Step 200/1648 | Loss 5.0860
+  Step 400/1648 | Loss 5.0272
+  Step 600/1648 | Loss 4.9294
+  Step 800/1648 | Loss 4.9086
+  Step 1000/1648 | Loss 4.7955
+  Step 1200/1648 | Loss 4.7390
+  Step 1400/1648 | Loss 4.8200
+  Step 1600/1648 | Loss 4.8115
+Ep 2/10 | Train 4.8948 | Val 4.7245 PPL 112.7 * BEST | 2407s
+  Pos-bias: |mean|=3.4873 |max|=13.3636 most-local=h7 most-global=h0
+  ── Generation samples ──
+    'It was a dark and stormy' → ', and the sun was a little bit more.\n\nThe sun was a little bit more than a centu'
+    'The length of the hypotenuse' → '.\n\nThe first step of the first step is to make the first step of the first step.'
+    'The President of the United' → ' States, and the United States, the United States, and the United States.\n\nThe U'
+    'Once upon a time there was' → ' a few things that would have been done.\n\nThe first time I was able to get a few'
+    'The results indicate that' → ' the results are not the same.\n\nThe results are the most important of the result'
+  ──
+  Step 200/1648 | Loss 4.6771
+  Step 400/1648 | Loss 4.7005
+  Step 600/1648 | Loss 4.7090
+  Step 800/1648 | Loss 4.4287
+  Step 1000/1648 | Loss 4.4982
+  Step 1200/1648 | Loss 4.5542
+  Step 1400/1648 | Loss 4.7689
+  Step 1600/1648 | Loss 4.5569
+Ep 3/10 | Train 4.5107 | Val 4.5247 PPL 92.3 * BEST | 3613s
+  Pos-bias: |mean|=3.4084 |max|=12.8249 most-local=h7 most-global=h0
+  ── Generation samples ──
+    'It was a dark and stormy' → ' night.\n\nThe first time I was in the middle of the night, I was in the middle of'
+    'The length of the hypotenuse' → '. The second part of the process is the first step in the process of the first s'
+    'The President of the United' → ' States, and the United States, the United States, and the United States, and th'
+    'Once upon a time there was' → ' no doubt that the first time the first time the first time the first time was t'
+    'The results indicate that' → ' the results of the results are not the same.\n\nThe results of the results are th'
+  ──
+  Step 200/1648 | Loss 4.4222
+  Step 400/1648 | Loss 4.6762
+  Step 600/1648 | Loss 4.5749
+  Step 800/1648 | Loss 4.4206
+  Step 1000/1648 | Loss 4.4376
+  Step 1200/1648 | Loss 4.4857
+  Step 1400/1648 | Loss 4.5208
+  Step 1600/1648 | Loss 4.6197
+Ep 4/10 | Train 4.5611 | Val 4.4220 PPL 83.3 * BEST | 4820s
+  Pos-bias: |mean|=3.3409 |max|=12.3823 most-local=h7 most-global=h0
+  ── Generation samples ──
+    'It was a dark and stormy' → ', and it was a very strange, very strange, and very strange, and very strange, a'
+    'The length of the hypotenuse' → ' is the same as the other. The term is the term "poly" and "poly" (the term "pol'
+    'The President of the United' → ' States, and the United States, is the president of the United States.\n\n“I’m not'
+    'Once upon a time there was' → ' no way to get a job done.\n\n“I’m not going to be able to do that,” said the judg'
+    'The results indicate that' → ' the results are not true.\n\nThe results are not true.\n\nThe results are not true.'
+  ──
+  Step 200/1648 | Loss 4.3586
+  Step 400/1648 | Loss 4.3046
+  Step 600/1648 | Loss 4.4647
+  Step 800/1648 | Loss 4.1450
+  Step 1000/1648 | Loss 4.4626
+  Step 1200/1648 | Loss 4.3610
+  Step 1400/1648 | Loss 4.3645
+  Step 1600/1648 | Loss 4.3731
+Ep 5/10 | Train 4.2694 | Val 4.3563 PPL 78.0 * BEST | 6029s
+  Pos-bias: |mean|=3.2865 |max|=12.0482 most-local=h7 most-global=h0
+  ── Generation samples ──
+    'It was a dark and stormy' → ', and it was a very good thing.\n\nThe first thing I was talking about was the fac'
+    'The length of the hypotenuse' → '. The length of the diagonal is the length of the length of the length of the le'
+    'The President of the United' → ' States, and the United States, is a member of the United States and the United '
+    'Once upon a time there was' → ' no way to get a job, the only way to get a job was to get a job done.\n\nThe firs'
+    'The results indicate that' → ' the team is not going to be able to get the team to the playoffs.\n\nThe team is '
+  ──
+  Step 200/1648 | Loss 4.5195
+  Step 400/1648 | Loss 4.3531
+  Step 600/1648 | Loss 4.2548
+  Step 800/1648 | Loss 4.3075
+  Step 1000/1648 | Loss 4.3319
+  Step 1200/1648 | Loss 4.1410
+  Step 1400/1648 | Loss 4.2208
+  Step 1600/1648 | Loss 4.3673
+Ep 6/10 | Train 4.3157 | Val 4.3169 PPL 75.0 * BEST | 7235s
+  Pos-bias: |mean|=3.2464 |max|=11.8029 most-local=h7 most-global=h0
+  ── Generation samples ──
+    'It was a dark and stormy' → ', and it was a very good day.\n\nThe first day of the day, the first day of the da'
+    'The length of the hypotenuse' → ', and the amount of the amount of the amount of the amount of the amount of the '
+    'The President of the United' → ' States is a member of the United States.\n\n“The United States is a great country'
+    'Once upon a time there was' → ' no way to get the money out of the house.\n\n"I think it\'s a great deal of money,'
+    'The results indicate that' → ' the U.S. government is not a “reasonable” option.\n\nThe U.S. government has been'
+  ──
+  Step 200/1648 | Loss 4.2695
+  Step 400/1648 | Loss 4.4060
+  Step 600/1648 | Loss 4.2450
+  Step 800/1648 | Loss 4.4563
+  Step 1000/1648 | Loss 4.2169
+  Step 1200/1648 | Loss 4.4047
+  Step 1400/1648 | Loss 3.9994
+  Step 1600/1648 | Loss 4.0484
+Ep 7/10 | Train 4.1403 | Val 4.2881 PPL 72.8 * BEST | 8441s
+  Pos-bias: |mean|=3.2199 |max|=11.6483 most-local=h7 most-global=h0
+  ── Generation samples ──
+    'It was a dark and stormy' → ', and it was a very dangerous, and it was a very dangerous, and it was a very da'
+    'The length of the hypotenuse' → ', the length of the diagonal, the length of the diagonal, the length of the diag'
+    'The President of the United' → ' States, and his wife, John, was the first to be elected president of the United'
+    'Once upon a time there was' → ' no need for a new system.\n\n“I’m not going to be able to do that,” said the form'
+    'The results indicate that' → ' the team is not going to be able to get the team to the playoffs.\n\nThe team is '
+  ──
+  Step 200/1648 | Loss 4.3809
+  Step 400/1648 | Loss 4.2606
+  Step 600/1648 | Loss 4.4208
+  Step 800/1648 | Loss 4.3079
+  Step 1000/1648 | Loss 4.2318
+  Step 1200/1648 | Loss 4.2895
+  Step 1400/1648 | Loss 4.2476
+  Step 1600/1648 | Loss 4.5029
+Ep 8/10 | Train 4.2904 | Val 4.2726 PPL 71.7 * BEST | 9649s
+  Pos-bias: |mean|=3.2055 |max|=11.5662 most-local=h7 most-global=h0
+  ── Generation samples ──
+    'It was a dark and stormy' → ', and it was a very good night.\n\nThe night was a night of the night, and the nig'
+    'The length of the hypotenuse' → ', the amount of the amount of the amount of the amount of the amount of the amou'
+    'The President of the United' → ' States, and the United States, is a member of the United States.\n\nThe United St'
+    'Once upon a time there was' → ' no way to get a job done.\n\n“I’m not going to be a good person,” said the man wh'
+    'The results indicate that' → ' the team is not going to be able to get the team to the playoffs.\n\nThe team is '
+  ──
+  Step 200/1648 | Loss 4.2336
+  Step 400/1648 | Loss 4.1905
+  Step 600/1648 | Loss 4.4223
+  Step 800/1648 | Loss 4.2581
+  Step 1000/1648 | Loss 4.2507
+  Step 1200/1648 | Loss 4.1447
+  Step 1400/1648 | Loss 4.2268
+  Step 1600/1648 | Loss 4.3504
+Ep 9/10 | Train 4.2719 | Val 4.2651 PPL 71.2 * BEST | 10855s
+  Pos-bias: |mean|=3.2000 |max|=11.5346 most-local=h7 most-global=h0
+  ── Generation samples ──
+    'It was a dark and stormy' → ', and it was a very strange, and very strange, and very strange, and very strang'
+    'The length of the hypotenuse' → ', the length of the diagonal, the length of the diagonal, the length of the diag'
+    'The President of the United' → ' States, and the United States, is a member of the United States.\n\nThe United St'
+    'Once upon a time there was' → ' no way to get a job, the only way to get a job was to get a job.\n\n"I was very h'
+    'The results indicate that' → ' the team is not going to be able to get the team to the playoffs.\n\nThe team is '
+  ──
+  Step 200/1648 | Loss 4.3285
+  Step 400/1648 | Loss 4.3143
+  Step 600/1648 | Loss 4.1775
+  Step 800/1648 | Loss 4.3447
+  Step 1000/1648 | Loss 4.0137
+  Step 1200/1648 | Loss 4.1288
+  Step 1400/1648 | Loss 4.2397
+  Step 1600/1648 | Loss 4.3199
+Ep 10/10 | Train 4.3289 | Val 4.2637 PPL 71.1 * BEST | 12062s
+  Pos-bias: |mean|=3.1991 |max|=11.5302 most-local=h7 most-global=h0
+  ── Generation samples ──
+    'It was a dark and stormy' → ', and it was a very good night.\n\nThe first day of the game, the first day of the'
+    'The length of the hypotenuse' → ', the length of the diagonal, the length of the diagonal, the length of the diag'
+    'The President of the United' → ' States, and the United States, is the president of the United States.\n\nThe Unit'
+    'Once upon a time there was' → ' no way to get a job, the only way to get a job was to get a job.\n\n"I was very h'
+    'The results indicate that' → ' the team is not going to be able to get the team to the playoffs.\n\nThe team is '
+  ──
+
+  condN TEST: PPL 70.8 | Loss 4.2605
+
+======================================================================
+  condN ABLATION SUMMARY
+======================================================================
+  Standard transformer 13M (reference)                     64.5
+  DWARF condK (D4 linear gather)                           84.7
+  DWARF condK+RP (+ interference pool)                     83.3
+  DWARF condL+RP (DSQG 24 dyadic)                       pending
+  condN (dense-32 + dyadic DSQG)                           70.8
+
+  Interpretation:
+    vs standard transformer: +6.3 PPL
+    vs condK (linear):       -13.9 PPL
+    → Softmax + dense coverage closes most of the linearity gap

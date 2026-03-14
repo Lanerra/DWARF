@@ -1,0 +1,51 @@
+============================================================
+  DWARF External Benchmark Evaluator
+============================================================
+  GPU: NVIDIA GeForce RTX 3090
+  Tasks: ['hellaswag', 'piqa', 'arc_easy', 'arc_challenge', 'winogrande', 'lambada']
+  Max examples/task: 500 (--fast)
+  Tokenizer: /home/dlewis3/Desktop/AI/DWARF/results/2048_condI_tokenizer.json
+
+Loading from registry: condx_v2_35m
+  Loaded condX-v2 35M bf16 (learnable bypass gate, condV physics): 38,729,739 params from best.pt
+  Parameters: 38,729,739
+  Label: condX-v2 35M bf16 (learnable bypass gate, condV physics)
+
+  [hellaswag] 10,042 examples...
+    [hellaswag] 200/500 — acc=0.295 | eta 4s
+    [hellaswag] 400/500 — acc=0.302 | eta 1s
+  [hellaswag] accuracy = 0.3100 (31.0%)  [500 examples, 6s]
+  [piqa] 1,838 examples...
+    [piqa] 200/500 — acc=0.575 | eta 2s
+    [piqa] 400/500 — acc=0.560 | eta 1s
+  [piqa] accuracy = 0.5680 (56.8%)  [500 examples, 3s]
+  [arc_easy] 570 examples...
+    [arc_easy] 200/500 — acc=0.290 | eta 3s
+    [arc_easy] 400/500 — acc=0.320 | eta 1s
+  [arc_easy] accuracy = 0.3260 (32.6%)  [500 examples, 5s]
+  [arc_challenge] 299 examples...
+    [arc_challenge] 200/299 — acc=0.200 | eta 1s
+  [arc_challenge] accuracy = 0.1940 (19.4%)  [299 examples, 3s]
+  [winogrande] 1,267 examples...
+    [winogrande] 200/500 — acc=0.525 | eta 2s
+    [winogrande] 400/500 — acc=0.527 | eta 1s
+  [winogrande] accuracy = 0.5460 (54.6%)  [500 examples, 3s]
+  [lambada] 5,153 examples...
+  [lambada] accuracy = 0.0860 (8.6%)  [500 examples, 2s]
+
+============================================================
+  condX-v2 35M bf16 (learnable bypass gate, condV physics)
+============================================================
+  Task                     Accuracy       N
+  ---------------------- ----------  ------
+  hellaswag                   31.0%     500
+  piqa                        56.8%     500
+  arc_easy                    32.6%     500
+  arc_challenge               19.4%     299
+  winogrande                  54.6%     500
+  lambada                      8.6%     500
+  ---------------------- ----------  ------
+  mean (present tasks)        33.8%
+============================================================
+
+  Results -> /home/dlewis3/Desktop/AI/DWARF/evals/logs/eval_external_condX-v2_35M_bf16_(learnable_bypass_gate_20260313_141829.json

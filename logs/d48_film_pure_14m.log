@@ -1,0 +1,28 @@
+======================================================================
+  d48_film_pure_14m -- FiLM-Conditioned FFN + Pure DSQG (14M, FineWeb-Edu)
+======================================================================
+  GPU: NVIDIA GeForce RTX 4090  (23.6 GB)
+  Kernel: dsqg_attention_v3 (d48 offsets)
+  FiLM conditioning: gamma/beta zero-init, detached scale_embed signal
+  Architecture: INTERFERENCE=3, gate=0, ALL DSQG (no full attention)
+  Offsets: dense=48, sparse=[96, 128, 384], J=52
+Loading FineWeb-Edu from cache: benchmarks/logs/condm_fineweb_edu_doc_cache.json
+  Loaded 100,000 docs from cache
+
+Loaded condI BPE tokenizer from /home/dlewis3/Desktop/AI/DWARF/train/../results/2048_condI_tokenizer.json
+Encoding data (max_seq_len=2048)...
+  Train: 121,232 sequences
+  Val: 2,923 sequences
+  Test: 3,464 sequences
+
+d48_film_pure_14m: 14,262,004 parameters (3,072 FiLM)
+  Layer types: ['DSQG', 'DSQG', 'DSQG', 'DSQG', 'DSQG', 'DSQG']
+Running causality check...
+  Pre-10:  0.00000000  (expect 0.0)
+  Pos-10:  1.446485  (expect >0)
+  Post-10: 0.279017  (expect >0)
+  PASS
+
+  Tokens/epoch: 248,161,904
+  Chinchilla:   285,240,080 tokens (epoch ~1.15)
+

@@ -1,0 +1,52 @@
+============================================================
+  DWARF External Benchmark Evaluator
+============================================================
+  GPU: NVIDIA GeForce RTX 3090
+  Tasks: ['hellaswag', 'piqa', 'arc_easy', 'arc_challenge', 'winogrande', 'lambada']
+  Max examples/task: 500 (--fast)
+  Tokenizer: /home/dlewis3/Desktop/AI/DWARF/results/2048_condI_tokenizer.json
+
+Loading from registry: condu_v5_38m
+[kernel] CUDA extension loaded — using compiled CUDA backward
+  Loaded condU-v5 38M (MOVT+QK-OVT+NPCI, D=512): 38,732,856 params from best.pt
+  Parameters: 38,732,856
+  Label: condU-v5 38M (MOVT+QK-OVT+NPCI, D=512)
+
+  [hellaswag] 10,042 examples...
+    [hellaswag] 200/500 — acc=0.280 | eta 3s
+    [hellaswag] 400/500 — acc=0.282 | eta 1s
+  [hellaswag] accuracy = 0.2880 (28.8%)  [500 examples, 5s]
+  [piqa] 1,838 examples...
+    [piqa] 200/500 — acc=0.585 | eta 1s
+    [piqa] 400/500 — acc=0.590 | eta 0s
+  [piqa] accuracy = 0.5860 (58.6%)  [500 examples, 2s]
+  [arc_easy] 570 examples...
+    [arc_easy] 200/500 — acc=0.340 | eta 3s
+    [arc_easy] 400/500 — acc=0.360 | eta 1s
+  [arc_easy] accuracy = 0.3640 (36.4%)  [500 examples, 4s]
+  [arc_challenge] 299 examples...
+    [arc_challenge] 200/299 — acc=0.215 | eta 1s
+  [arc_challenge] accuracy = 0.2107 (21.1%)  [299 examples, 3s]
+  [winogrande] 1,267 examples...
+    [winogrande] 200/500 — acc=0.560 | eta 1s
+    [winogrande] 400/500 — acc=0.527 | eta 0s
+  [winogrande] accuracy = 0.5380 (53.8%)  [500 examples, 2s]
+  [lambada] 5,153 examples...
+  [lambada] accuracy = 0.0860 (8.6%)  [500 examples, 1s]
+
+============================================================
+  condU-v5 38M (MOVT+QK-OVT+NPCI, D=512)
+============================================================
+  Task                     Accuracy       N
+  ---------------------- ----------  ------
+  hellaswag                   28.8%     500
+  piqa                        58.6%     500
+  arc_easy                    36.4%     500
+  arc_challenge               21.1%     299
+  winogrande                  53.8%     500
+  lambada                      8.6%     500
+  ---------------------- ----------  ------
+  mean (present tasks)        34.5%
+============================================================
+
+  Results -> /home/dlewis3/Desktop/AI/DWARF/evals/logs/eval_external_condU-v5_38M_(MOVT+QK-OVT+NPCI,_D=512)_20260313_143118.json

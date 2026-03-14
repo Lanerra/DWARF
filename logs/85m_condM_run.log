@@ -1,0 +1,213 @@
+======================================================================
+  DWARF 85M condM -- 11:1 Hybrid (11 DSQG + 1 Full Causal Attention)
+  D=640  H=8  d_head=80  L=12  FFN=2560  full_layer=11
+======================================================================
+  GPU:    NVIDIA H200  (150.1 GB)
+  CUDA:   12.8
+  PyTorch:2.10.0+cu128
+  Flash SDPA: True
+Loading OpenWebText (up to 100,000 docs)...
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+  25,000 docs...
+  50,000 docs...
+  75,000 docs...
+  100,000 docs...
+Loaded tokenizer: /workspace/DWARF/benchmarks/results/2048_condI_tokenizer.json  (32,000 tokens)
+Encoding data (max_seq_len=2048)...
+  Train: 52,716 sequences
+  Val: 1,435 sequences
+  Test: 1,459 sequences
+
+condM 85M: 88,267,552 parameters
+  Layers:      ['DSQG', 'DSQG', 'DSQG', 'DSQG', 'DSQG', 'DSQG', 'DSQG', 'DSQG', 'DSQG', 'DSQG', 'DSQG', 'FULL']
+  DSQG offsets: 44 (condN set: dense-32 + dyadic)
+  Interference: every 3rd DSQG layer (layers 2, 5, 8)
+  Batch:        B=64 GA=1 (effective 64)
+  LR:           0.0003  warmup=5%  eta_min=10% of LR
+Running causality check...
+  Pre-10:  0.00000000  (expect 0.0)
+  Pos-10:  1.466795  (expect >0)
+  Post-10: 0.681936  (expect >0)
+  PASS
+
+  Total steps: 8240  |  Warmup: 412 steps
+  Step 200/824 | Loss 6.3574 | LR 1.61e-04
+  Step 400/824 | Loss 5.5312 | LR 2.92e-04
+  Step 600/824 | Loss 5.2458 | LR 3.00e-04
+  Step 800/824 | Loss 4.9589 | LR 2.98e-04
+Ep 1/10 | Train 4.9150 | Val 4.9068 PPL 135.2 * BEST | 3474s
+  DSQG pos-bias: |mean|=3.6359 |max|=14.4049 most-local=h7 most-global=h0
+  -- Generation samples (greedy) --
+    'It was a dark and stormy'          -> ', and it was a very good thing.\n\nThe first thing I was, was the first of the war'
+    'The length of the hypotenuse'      -> ' of the water, the water, the water, the water, the water, the water, the water,'
+    'The President of the United'       -> ' States, the United States, and the United States.\n\nThe United States, which is '
+    'Once upon a time there was'        -> ' a chance to be a place where the people were going to be able to get the money '
+    'The results indicate that'         -> ' the results of the study were not reported.\n\nThe study found that the study fou'
+  --
+  Step 200/824 | Loss 4.7367 | LR 2.96e-04
+  Step 400/824 | Loss 4.6168 | LR 2.93e-04
+  Step 600/824 | Loss 4.4265 | LR 2.89e-04
+  Step 800/824 | Loss 4.2739 | LR 2.84e-04
+Ep 2/10 | Train 4.1920 | Val 4.1910 PPL 66.1 * BEST | 6970s
+  DSQG pos-bias: |mean|=3.6011 |max|=14.0659 most-local=h7 most-global=h0
+  -- Generation samples (greedy) --
+    'It was a dark and stormy'          -> ', but it was a little bit of a surprise.\n\nThe first thing I’ve been able to do i'
+    'The length of the hypotenuse'      -> ', which is the most important part of the body.\n\nThe body of the body of the bod'
+    'The President of the United'       -> ' States, who was the first to be president of the United States, was the first t'
+    'Once upon a time there was'        -> ' a time when the first person was in the same place, the second person was in th'
+    'The results indicate that'         -> ' the results of the study were not the same as the results of the study.\n\nThe re'
+  --
+  Step 200/824 | Loss 4.0241 | LR 2.78e-04
+  Step 400/824 | Loss 4.0491 | LR 2.72e-04
+  Step 600/824 | Loss 4.0092 | LR 2.65e-04
+  Step 800/824 | Loss 4.0079 | LR 2.57e-04
+Ep 3/10 | Train 3.8831 | Val 3.9345 PPL 51.1 * BEST | 10458s
+  DSQG pos-bias: |mean|=3.5674 |max|=13.7601 most-local=h7 most-global=h0
+  -- Generation samples (greedy) --
+    'It was a dark and stormy'          -> ' experience.\n\n“I was a little bit shocked by the fact that I was a little bit sh'
+    'The length of the hypotenuse'      -> ' is a bit of a surprise.\n\nThe first thing that I’ve seen is that the amount of t'
+    'The President of the United'       -> ' States, who has been in the past for a long time, has been in the process of ma'
+    'Once upon a time there was'        -> ' a chance that the world would be able to live in a world where the world would '
+    'The results indicate that'         -> ' the number of people who are in the group is more than 1,000.\n\nThe number of pe'
+  --
+  Step 200/824 | Loss 3.8658 | LR 2.48e-04
+  Step 400/824 | Loss 3.8629 | LR 2.39e-04
+  Step 600/824 | Loss 3.8270 | LR 2.30e-04
+  Step 800/824 | Loss 3.7411 | LR 2.20e-04
+Ep 4/10 | Train 3.8415 | Val 3.8140 PPL 45.3 * BEST | 13953s
+  DSQG pos-bias: |mean|=3.5330 |max|=13.4919 most-local=h7 most-global=h0
+  -- Generation samples (greedy) --
+    'It was a dark and stormy'          -> ' day.\n\nThe weather was so great that it was so hard to get to the ground.\n\nThe w'
+    'The length of the hypotenuse'      -> ' is a bit of a stretch.\n\nThe amount of the amount of the amount of the amount of'
+    'The President of the United'       -> ' States, who is a member of the United States, is a member of the United States,'
+    'Once upon a time there was'        -> ' a time when the world was changing, and the world was changing.\n\nThe first time'
+    'The results indicate that'         -> ' the new study is not a new study.\n\nThe study, published in the Journal of the A'
+  --
+  Step 200/824 | Loss 3.7715 | LR 2.09e-04
+  Step 400/824 | Loss 3.7548 | LR 1.99e-04
+  Step 600/824 | Loss 3.7652 | LR 1.88e-04
+  Step 800/824 | Loss 3.7344 | LR 1.77e-04
+Ep 5/10 | Train 3.6359 | Val 3.7395 PPL 42.1 * BEST | 17447s
+  DSQG pos-bias: |mean|=3.5016 |max|=13.2759 most-local=h7 most-global=h0
+  -- Generation samples (greedy) --
+    'It was a dark and stormy'          -> ' day.\n\n“I’m not sure what’s going to happen,” said the man, who was in the car w'
+    'The length of the hypotenuse'      -> ' is a bit lower than the length of the card.\n\nThe length of the card is a bit lo'
+    'The President of the United'       -> ' States, who has been in office for more than two years, has been in office for '
+    'Once upon a time there was'        -> ' a time when the world was changing, and the world was changing.\n\nThe first time'
+    'The results indicate that'         -> ' the number of people who are in the United States is not significantly higher t'
+  --
+  Step 200/824 | Loss 3.6842 | LR 1.65e-04
+  Step 400/824 | Loss 3.6353 | LR 1.54e-04
+  Step 600/824 | Loss 3.6072 | LR 1.44e-04
+  Step 800/824 | Loss 3.6362 | LR 1.33e-04
+Ep 6/10 | Train 3.6326 | Val 3.6897 PPL 40.0 * BEST | 20945s
+  DSQG pos-bias: |mean|=3.4757 |max|=13.1109 most-local=h7 most-global=h0
+  -- Generation samples (greedy) --
+    'It was a dark and stormy'          -> ' day, and it was a very warm day.\n\nThe first day of the week was a very warm day'
+    'The length of the hypotenuse'      -> ' is a bit of a stretch. The length of the hypotenuse is a bit of a stretch. The '
+    'The President of the United'       -> ' States, who has been a member of the U.S. House of Representatives, has been a '
+    'Once upon a time there was'        -> ' a time when the world was in a state of flux, and the world was in a state of f'
+    'The results indicate that'         -> ' the number of people who are in the country who are in the country who are in t'
+  --
+  Step 200/824 | Loss 3.6155 | LR 1.21e-04
+  Step 400/824 | Loss 3.5812 | LR 1.11e-04
+  Step 600/824 | Loss 3.5551 | LR 1.02e-04
+  Step 800/824 | Loss 3.5480 | LR 9.23e-05
+Ep 7/10 | Train 3.6363 | Val 3.6514 PPL 38.5 * BEST | 24444s
+  DSQG pos-bias: |mean|=3.4559 |max|=12.9949 most-local=h7 most-global=h0
+  -- Generation samples (greedy) --
+    'It was a dark and stormy'          -> ' day, and it was a very warm day.\n\n“I was very happy to be here,” she said. “I w'
+    'The length of the hypotenuse'      -> ', which is a very small amount, is a very small amount. The amount of the hypote'
+    'The President of the United'       -> ' States, who has been a leading advocate of the “freedom of expression” of the U'
+    'Once upon a time there was'        -> ' a new kind of "single-layered" object, it was a very different kind of object.\n'
+    'The results indicate that'         -> ' the US is not a member of the European Union.\n\nThe US is not a member of the Eu'
+  --
+  Step 200/824 | Loss 3.5986 | LR 8.23e-05
+  Step 400/824 | Loss 3.5448 | LR 7.40e-05
+  Step 600/824 | Loss 3.5483 | LR 6.63e-05
+  Step 800/824 | Loss 3.5582 | LR 5.93e-05
+Ep 8/10 | Train 3.6063 | Val 3.6303 PPL 37.7 * BEST | 27943s
+  DSQG pos-bias: |mean|=3.4422 |max|=12.9183 most-local=h7 most-global=h0
+  -- Generation samples (greedy) --
+    'It was a dark and stormy'          -> ' day.\n\nThe first thing that made me think about it was that I was a little bit s'
+    'The length of the hypotenuse'      -> ' is a bit short. The lower the hypotenuse, the lower the hypotenuse, and the low'
+    'The President of the United'       -> ' States, who has been a leading advocate of the expansion of the U.S. military, '
+    'Once upon a time there was'        -> ' a new kind of "danger" in the world.\n\n"I think it\'s a very good thing that we\'r'
+    'The results indicate that'         -> ' the number of people who are in the United States is not likely to be the same.'
+  --
+  Step 200/824 | Loss 3.4690 | LR 5.22e-05
+  Step 400/824 | Loss 3.4774 | LR 4.66e-05
+  Step 600/824 | Loss 3.4616 | LR 4.18e-05
+  Step 800/824 | Loss 3.4866 | LR 3.77e-05
+Ep 9/10 | Train 3.5048 | Val 3.6174 PPL 37.2 * BEST | 31445s
+  DSQG pos-bias: |mean|=3.4332 |max|=12.8694 most-local=h7 most-global=h0
+  -- Generation samples (greedy) --
+    'It was a dark and stormy'          -> ' day, and it was a very, very, very, very cold day.\n\nThe weather was very cold, '
+    'The length of the hypotenuse'      -> ' is a bit of a stretch. The length of the hypotenuse is a bit of a stretch. The '
+    'The President of the United'       -> ' States, who is not a member of the House of Representatives, is not a member of'
+    'Once upon a time there was'        -> ' a new kind of "danger" in the world.\n\n"I think it\'s a very important thing to h'
+    'The results indicate that'         -> ' the number of people who are in the country is not significantly higher than th'
+  --
+  Step 200/824 | Loss 3.4443 | LR 3.42e-05
+  Step 400/824 | Loss 3.4914 | LR 3.19e-05
+  Step 600/824 | Loss 3.5001 | LR 3.05e-05
+  Step 800/824 | Loss 3.4447 | LR 3.00e-05
+Ep 10/10 | Train 3.4897 | Val 3.6110 PPL 37.0 * BEST | 34952s
+  DSQG pos-bias: |mean|=3.4269 |max|=12.8342 most-local=h7 most-global=h0
+  -- Generation samples (greedy) --
+    'It was a dark and stormy'          -> ' day, and it was a very, very, very warm day.\n\nThe first thing I noticed was tha'
+    'The length of the hypotenuse'      -> " is the length of the cardinal's head, and the length of the cardinal's head is "
+    'The President of the United'       -> ' States, who has been a leading advocate of the expansion of the U.S. military, '
+    'Once upon a time there was'        -> ' a new kind of "dramatic" or "dramatic" object that was not present in the unive'
+    'The results indicate that'         -> ' the number of people who are in the United States is not likely to be the same '
+  --
+
+  condM 85M TEST: PPL 36.042 | Loss 3.5847
+
+  -- Temperature sweep (best checkpoint) --
+
+  [greedy]
+    'It was a dark and stormy'          -> ' day, and it was a very, very, very warm day.\n\nThe first thing I noticed was tha'
+    'The length of the hypotenuse'      -> " is the length of the cardinal's head, and the length of the cardinal's head is "
+    'The President of the United'       -> ' States, who has been a leading advocate of the expansion of the U.S. military, '
+    'Once upon a time there was'        -> ' a new kind of "dramatic" or "dramatic" object that was not present in the unive'
+    'The results indicate that'         -> ' the number of people who are in the United States is not likely to be the same '
+
+  [T=0.5]
+    'It was a dark and stormy'          -> ' night, and it was a great time to be a part of it. It was a great time to be a '
+    'The length of the hypotenuse'      -> ', the time of the passage, the time of the passage, the time of the passage, the'
+    'The President of the United'       -> ' States, the President of the United States, and the President of the United Sta'
+    'Once upon a time there was'        -> ' a large group of young people in the town, and in some cases, they were mostly '
+    'The results indicate that'         -> ' the US has the highest rate of growth in the world.\n\nThe researchers’ analysis '
+
+  [T=0.7]
+    'It was a dark and stormy'          -> ' day, with the flood of traffic and the storming of the mountain. It was a lull '
+    'The length of the hypotenuse'      -> ' will depend on the length of the creature. When the creature is made to stay al'
+    'The President of the United'       -> ' States, Michael Flynn, expressed that he would "be more concerned about the pre'
+    'Once upon a time there was'        -> ' a small group of people who were working on an online campaign for the Democrat'
+    'The results indicate that'         -> ' the current trend in the financial system is not going to be so high. The reaso'
+
+  [T=1.0]
+    'It was a dark and stormy'          -> ' night in Detroit. It was pretty damn traumatic, all the time. The record is sor'
+    'The length of the hypotenuse'      -> ' is 1,000 ft. in diameter, yet it reaches 100 millimeters.\n\nThe lateral humor so'
+    'The President of the United'       -> ' States, J.E.T. McKenna, who accused Trump of conspiring to attack his national '
+    'Once upon a time there was'        -> ' a rare bit of material about its origin that was likely immaterial, and was it '
+    'The results indicate that'         -> ' a study in the United States was strongly endorsing Senator Bernie Sanders, acc'
+
+======================================================================
+  85M condM ABLATION SUMMARY
+======================================================================
+  Standard 13M (reference)                                64.07
+  Standard 27M                                           50.683
+  Standard 85M (condA baseline)                           57.70
+  condM 13M                                              54.529
+  condM 27M                                              44.500
+  condM 85M (this run)                                   36.042
+
+  vs standard 85M: -21.658 PPL
+  vs standard 27M: -14.641 PPL
+  Total training time: 9.74 h
+
+  Results -> /workspace/DWARF/benchmarks/2048_85m_condM_results.json
+  Best checkpoint -> 2048_85m_condM_checkpoints/best.pt
+

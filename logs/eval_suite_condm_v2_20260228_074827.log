@@ -1,0 +1,64 @@
+
+============================================================
+  eval_suite.py — condm_v2
+  Device: cuda
+============================================================
+
+  Model: condM-v2 13M (SwiGLU+RMSNorm+RoPE, Layer 5)
+
+  Loading tokenizer...
+  Loading model...
+  Loaded condM-v2 13M (SwiGLU+RMSNorm+RoPE, Layer 5): 13,439,200 params from best.pt
+
+  [1/4] Calibration...
+    entropy=7.367 bits  top1=0.186  eff_vocab=27.6  (0.2s)
+
+  [2/4] Distance-conditioned loss (wikitext-103)...
+    Loading wikitext-103 test split...
+    Using 17 full 2048-token chunks
+    Buckets:
+    0-16          PPL= 529.84  n=  289
+    17-64         PPL= 385.51  n=  816
+    65-256        PPL= 292.47  n= 3264
+    257-512       PPL= 259.40  n= 4352
+    513-1024      PPL= 254.24  n= 8704
+    1025-2047     PPL= 254.99  n=17374
+    (3.8s)
+
+  [3/4] Few-shot string copy...
+    exact=1/15  (6.7%)  mean_lev=7.20  (1.9s)
+
+  [4/4] Passkey retrieval...
+    d=    1: accuracy=20.0%
+    d=    2: accuracy=20.0%
+    d=    4: accuracy=20.0%
+    d=    8: accuracy=20.0%
+    d=   16: accuracy=0.0%
+    d=   32: accuracy=0.0%
+    d=   64: accuracy=0.0%
+    d=  128: accuracy=0.0%
+    d=  256: accuracy=0.0%
+    d=  512: accuracy=0.0%
+    d= 1024: accuracy=0.0%
+    d= 1536: accuracy=0.0%
+    mean_accuracy=6.7%  (0.4s)
+
+  Generation samples (greedy + T=0.7)...
+
+  [greedy]
+    'It was a dark and stormy'               → ', and it was a little bit of a little bit of a little bit of a little bit of a l'
+    'The length of the hypotenuse'           → ' of the original original original, the first of the original original, the firs'
+    'The President of the United'            → ' States, has been in the first place since the last two years.\n\nThe president ha'
+    'Once upon a time there was'             → ' a time when the time was to be made.\n\nThe first time I was in the first time I '
+    'The results indicate that'              → ' the results are not the first to be the first to be the first to be the first t'
+
+  [T=0.7]
+    'It was a dark and stormy'               → '. It was the new thing. I saw it and we reached out to the next day.\n\nWhen it lo'
+    'The length of the hypotenuse'           → ' of the device could be very limited to the top of the device.\n\n"The third of th'
+    'The President of the United'            → ' States and the United States has already been a member of the United States and'
+    'Once upon a time there was'             → ' no time for the first time of the next day, the next day.\n\nA few weeks after th'
+    'The results indicate that'              → ' the FCC’s main concern for the FCC is not about the FCC’s own power.\n\nThe FCC’s'
+
+  Results saved to /home/dlewis3/Desktop/AI/DWARF/benchmarks/logs/eval_suite_condm_v2_20260228_074828.json
+============================================================
+

@@ -1,0 +1,105 @@
+======================================================================
+  d48_wavelet_ffn_14m -- Wavelet FFN + Pure DSQG (14M scale, FineWeb-Edu)
+======================================================================
+  GPU: NVIDIA GeForce RTX 4090  (23.6 GB)
+  Kernel: dsqg_attention_v3 (d48 offsets)
+  Wavelet FFN: D4, alternating levels [0,2,4,6], full D=256 transform
+  Architecture: INTERFERENCE=3, gate=0, ALL DSQG (no full attention)
+  Offsets: dense=48, sparse=[96, 128, 384], J=52
+Loading FineWeb-Edu from cache: benchmarks/logs/condm_fineweb_edu_doc_cache.json
+  Loaded 100,000 docs from cache
+
+Loaded condI BPE tokenizer from /home/dlewis3/Desktop/AI/DWARF/train/../results/2048_condI_tokenizer.json
+Encoding data (max_seq_len=2048)...
+  Train: 121,232 sequences
+  Val: 2,923 sequences
+  Test: 3,464 sequences
+
+d48_wavelet_ffn_14m: 11,108,596 parameters (3,072 wavelet FFN)
+  Layer types: ['DSQG', 'DSQG', 'DSQG', 'DSQG', 'DSQG', 'DSQG']
+  Standard FFN would be ~3,153,408 params; wavelet FFN is 3,072 params
+Running DWT invertibility check...
+  ||IDWT(DWT(x)) - x||_inf = 4.77e-07
+  PASS
+Running causality check...
+  Pre-10:  0.00000000  (expect 0.0)
+  Pos-10:  2.023217  (expect >0)
+  Post-10: 0.295727  (expect >0)
+  PASS
+
+  Tokens/epoch: 248,161,904
+  Chinchilla:   222,171,920 tokens (epoch ~0.90)
+
+  Step 200/3789 | Loss 6.6730
+======================================================================
+  d48_wavelet_ffn_14m -- Wavelet FFN + Pure DSQG (14M scale, FineWeb-Edu)
+======================================================================
+  GPU: NVIDIA GeForce RTX 4090  (23.6 GB)
+  Kernel: dsqg_attention_v3 (d48 offsets)
+  Wavelet FFN: D4, alternating levels [0,2,4,6], full D=256 transform
+  Architecture: INTERFERENCE=3, gate=0, ALL DSQG (no full attention)
+  Offsets: dense=48, sparse=[96, 128, 384], J=52
+Loading FineWeb-Edu from cache: benchmarks/logs/condm_fineweb_edu_doc_cache.json
+  Loaded 100,000 docs from cache
+
+Loaded condI BPE tokenizer from /home/dlewis3/Desktop/AI/DWARF/train/../results/2048_condI_tokenizer.json
+Encoding data (max_seq_len=2048)...
+  Train: 121,232 sequences
+  Val: 2,923 sequences
+  Test: 3,464 sequences
+
+d48_wavelet_ffn_14m: 11,108,596 parameters (3,072 wavelet FFN)
+  Layer types: ['DSQG', 'DSQG', 'DSQG', 'DSQG', 'DSQG', 'DSQG']
+  Standard FFN would be ~3,153,408 params; wavelet FFN is 3,072 params
+Running DWT invertibility check...
+  ||IDWT(DWT(x)) - x||_inf = 4.77e-07
+  PASS
+Running causality check...
+  Pre-10:  0.00000000  (expect 0.0)
+  Pos-10:  2.237673  (expect >0)
+  Post-10: 0.433127  (expect >0)
+  PASS
+
+  Tokens/epoch: 248,161,904
+  Chinchilla:   222,171,920 tokens (epoch ~0.90)
+
+  Step 200/3789 | Loss 6.9660
+  Step 400/3789 | Loss 6.4230
+  Step 600/3789 | Loss 5.7955
+  Step 800/3789 | Loss 5.6661
+  Step 1000/3789 | Loss 5.7134
+  Step 1200/3789 | Loss 5.5002
+  Step 1400/3789 | Loss 5.4530
+  Step 1600/3789 | Loss 5.2612
+  Step 1800/3789 | Loss 5.2011
+  Step 2000/3789 | Loss 5.1443
+  Step 2200/3789 | Loss 5.1279
+  Step 2400/3789 | Loss 4.9134
+  Step 2600/3789 | Loss 5.0117
+  Step 2800/3789 | Loss 5.0725
+  Step 3000/3789 | Loss 4.9819
+  Step 3200/3789 | Loss 4.9633
+  Step 3400/3789 | Loss 4.9876
+  Step 3600/3789 | Loss 4.5923
+Ep 1/3 | Train 5.4038 | Val 4.7115 PPL 111.2 * BEST | 1491s (112%C)
+  DSQG pos-bias: |mean|=3.1673 |max|=10.8120 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.1547 |max|=0.5341
+  IF gains:      h0:1.23  h1:1.17  h2:1.14  h3:1.21  h4:1.15  h5:1.17  h6:1.17  h7:1.14
+  Wavelet:       gamma |mean|=0.8226
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ', and a few of the most important things that were in the world.\nThe first thing'
+    'The length of the hypotenuse' -> ' of the two-dimensional and the upper-level of the upper-level-level-level-level'
+    'The President of the United' -> ' States, and the United States, the United States, the United States, and the Un'
+    'Once upon a time there was' -> ' a lot of time, it was a great way to make sure that it was a great way to make '
+    'The results indicate that' -> ' the results of the study are not only the same.\nThe study suggests that the stu'
+  --
+  Passkey...
+  mean=0.0%  (0/6 distances >50%)
+  d=64:0%  d=128:0%  d=256:0%  d=512:0%  d=1024:0%  d=1536:0%
+  Step 200/3789 | Loss 4.7949
+  Step 400/3789 | Loss 4.5735
+  Step 600/3789 | Loss 4.7834
+  Step 800/3789 | Loss 4.6669
+  Step 1000/3789 | Loss 4.8368
+  Step 1200/3789 | Loss 4.8049
+  Step 1400/3789 | Loss 4.7489

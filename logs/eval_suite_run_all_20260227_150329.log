@@ -1,0 +1,354 @@
+====================================================
+ eval_suite — all models — started Fri Feb 27 03:03:29 PM PST 2026
+ Device: RTX 3090 (CUDA_VISIBLE_DEVICES=1)
+====================================================
+
+----------------------------------------------------
+ Starting: standard_27m  (Fri Feb 27 03:03:29 PM PST 2026)
+----------------------------------------------------
+
+============================================================
+  eval_suite.py — standard_27m
+  Device: cuda
+============================================================
+
+  Model: Standard Transformer 27M
+
+  Loading tokenizer...
+  Loading model...
+  Loaded Standard Transformer 27M: 37,971,200 params from 27M.ptrom
+
+  [1/4] Calibration...
+    entropy=7.726 bits  top1=0.155  eff_vocab=35.4  (0.1s)
+
+  [2/4] Distance-conditioned loss (wikitext-103)...
+    Loading wikitext-103 test split...
+    Using 17 full 2048-token chunks
+    Buckets:
+    0-16          PPL= 390.19  n=  289
+    17-64         PPL= 199.23  n=  816
+    65-256        PPL= 122.79  n= 3264
+    257-512       PPL= 106.78  n= 4352
+    513-1024      PPL=  82.19  n= 8704
+    1025-2047     PPL=  84.07  n=17374
+    (3.6s)
+
+  [3/4] Few-shot string copy...
+    exact=6/15  (40.0%)  mean_lev=7.27  (0.5s)
+
+  [4/4] Passkey retrieval...
+    d=    1: accuracy=40.0%
+    d=    2: accuracy=40.0%
+    d=    4: accuracy=40.0%
+    d=    8: accuracy=40.0%
+    d=   16: accuracy=20.0%
+    d=   32: accuracy=40.0%
+    d=   64: accuracy=20.0%
+    d=  128: accuracy=20.0%
+    d=  256: accuracy=40.0%
+    d=  512: accuracy=20.0%
+    d= 1024: accuracy=40.0%
+    d= 1536: accuracy=20.0%
+    mean_accuracy=31.7%  (0.2s)
+
+  Generation samples (greedy + T=0.7)...
+
+  [greedy]
+    'It was a dark and stormy'               → ', and the weather was a big part of the storm.\n\nThe storm was a big part of the '
+    'The length of the hypotenuse'           → ' of the object, and the object is the object. The object is the object, and the '
+    'The President of the United'            → ' States, the United States, and the United States, the United States, and the Un'
+    'Once upon a time there was'             → ' a time when the first time I was in the middle of the night. I was in the middl'
+    'The results indicate that'              → ' the results of the results of the results of the results of the results of the '
+
+  [T=0.7]
+    'It was a dark and stormy'               → ', and the climate change crisis is a matter of urgency.\n\nThe project, which was '
+    'The length of the hypotenuse'           → ' of the CT scans for the second time, a patient’s computer’s computer will take '
+    'The President of the United'            → ' States, I am a member of the United States, and I am a member of the United Sta'
+    'Once upon a time there was'             → ' no problem with the following:\n\nThe human body was so powerful that the body wa'
+    'The results indicate that'              → ' the individuals who were at the time and who were at the time were at the time '
+
+  Results saved to /home/dlewis3/Desktop/AI/DWARF/benchmarks/logs/eval_suite_standard_27m_20260227_150330.json
+============================================================
+
+ Finished: standard_27m  (Fri Feb 27 03:03:37 PM PST 2026)
+
+----------------------------------------------------
+ Starting: condp_27m  (Fri Feb 27 03:03:37 PM PST 2026)
+----------------------------------------------------
+
+============================================================
+  eval_suite.py — condp_27m
+  Device: cuda
+============================================================
+
+  Model: condP 27M (pure DSQG, 74 offsets)
+
+  Loading tokenizer...
+  Loading model...
+  Loaded condP 27M (pure DSQG, 74 offsets): 26,781,152 params from best.ptrom
+
+  [1/4] Calibration...
+    entropy=7.103 bits  top1=0.232  eff_vocab=24.0  (0.2s)
+
+  [2/4] Distance-conditioned loss (wikitext-103)...
+    Loading wikitext-103 test split...
+    Using 17 full 2048-token chunks
+    Buckets:
+    0-16          PPL= 308.93  n=  289
+    17-64         PPL= 165.63  n=  816
+    65-256        PPL= 123.53  n= 3264
+    257-512       PPL= 134.16  n= 4352
+    513-1024      PPL= 118.28  n= 8704
+    1025-2047     PPL= 116.80  n=17374
+    (4.1s)
+
+  [3/4] Few-shot string copy...
+    exact=5/15  (33.3%)  mean_lev=6.93  (2.8s)
+
+  [4/4] Passkey retrieval...
+    d=    1: accuracy=100.0%
+    d=    2: accuracy=100.0%
+    d=    4: accuracy=40.0%
+    d=    8: accuracy=80.0%
+    d=   16: accuracy=60.0%
+    d=   32: accuracy=60.0%
+    d=   64: accuracy=0.0%
+    d=  128: accuracy=0.0%
+    d=  256: accuracy=0.0%
+    d=  512: accuracy=0.0%
+    d= 1024: accuracy=0.0%
+    d= 1536: accuracy=0.0%
+    mean_accuracy=36.7%  (0.8s)
+
+  Generation samples (greedy + T=0.7)...
+
+  [greedy]
+    'It was a dark and stormy'               → ' experience.\n\n"I was a little bit nervous about the fact that I was a little bit'
+    'The length of the hypotenuse'           → ' is a bit more complicated than the length of the card. The length of the card i'
+    'The President of the United'            → ' States, who has been a member of the United States Senate since the election, h'
+    'Once upon a time there was'             → ' a time when the time was right.\n\nThe time was right.\n\nThe time was right.\n\nThe '
+    'The results indicate that'              → ' the number of people who are in the country is more than twice as likely to be '
+
+  [T=0.7]
+    'It was a dark and stormy'               → ' one. The bad guys were trying to make it through the night. They were sitting o'
+    'The length of the hypotenuse'           → ' was set.\n\nThe next step was to provide a visual signal for the person to turn a'
+    'The President of the United'            → ' Nations said in a statement that “the United States is committed to “improvemen'
+    'Once upon a time there was'             → ' no way to go.\n\nFor one thing, I was just an expert on the world of the internet'
+    'The results indicate that'              → ' only 10 percent of Americans support the U.S. economy. The results indicate tha'
+
+  Results saved to /home/dlewis3/Desktop/AI/DWARF/benchmarks/logs/eval_suite_condp_27m_20260227_150338.json
+============================================================
+
+ Finished: condp_27m  (Fri Feb 27 03:03:55 PM PST 2026)
+
+----------------------------------------------------
+ Starting: condm_layer0  (Fri Feb 27 03:03:55 PM PST 2026)
+----------------------------------------------------
+
+============================================================
+  eval_suite.py — condm_layer0
+  Device: cuda
+============================================================
+
+  Model: condM 13M Layer 0 (1 full attn → 5 DSQG)
+
+  Loading tokenizer...
+  Loading model...
+  Loaded condM 13M Layer 0 (1 full attn → 5 DSQG): 14,116,576 params from best.pt
+
+  [1/4] Calibration...
+    entropy=7.322 bits  top1=0.199  eff_vocab=25.8  (0.2s)
+
+  [2/4] Distance-conditioned loss (wikitext-103)...
+    Loading wikitext-103 test split...
+    Using 17 full 2048-token chunks
+    Buckets:
+    0-16          PPL= 380.22  n=  289
+    17-64         PPL= 246.02  n=  816
+    65-256        PPL= 195.66  n= 3264
+    257-512       PPL= 197.65  n= 4352
+    513-1024      PPL= 175.79  n= 8704
+    1025-2047     PPL= 173.87  n=17374
+    (3.5s)
+
+  [3/4] Few-shot string copy...
+    exact=4/15  (26.7%)  mean_lev=8.00  (1.8s)
+
+  [4/4] Passkey retrieval...
+    d=    1: accuracy=20.0%
+    d=    2: accuracy=20.0%
+    d=    4: accuracy=20.0%
+    d=    8: accuracy=20.0%
+    d=   16: accuracy=20.0%
+    d=   32: accuracy=0.0%
+    d=   64: accuracy=0.0%
+    d=  128: accuracy=0.0%
+    d=  256: accuracy=0.0%
+    d=  512: accuracy=0.0%
+    d= 1024: accuracy=0.0%
+    d= 1536: accuracy=0.0%
+    mean_accuracy=8.3%  (0.4s)
+
+  Generation samples (greedy + T=0.7)...
+
+  [greedy]
+    'It was a dark and stormy'               → ', and it was a little bit of a little bit of a little bit of a little bit of a l'
+    'The length of the hypotenuse'           → ', the length of the body, the length of the body, the length of the body, the le'
+    'The President of the United'            → ' States, and his wife, John McCain, who was the first to speak to the United Sta'
+    'Once upon a time there was'             → ' a chance to get a chance to get a chance to get a chance to get a chance to get'
+    'The results indicate that'              → ' the results are not consistent with the results.\n\nThe results are not consisten'
+
+  [T=0.7]
+    'It was a dark and stormy'               → ' night. It was a very small storm, but it was the coldest night of a century.\n\nI'
+    'The length of the hypotenuse'           → ' is the highest of the amount of sodium or anything that is not used to induce s'
+    'The President of the United'            → ' States is responsible for the use of drones and drones to prevent the use of dr'
+    'Once upon a time there was'             → ' a possibility that the first time I had a chance to come home, I had to take a '
+    'The results indicate that'              → ' the best results are for the participants.\n\nThe results were not surprising.\n\nT'
+
+  Results saved to /home/dlewis3/Desktop/AI/DWARF/benchmarks/logs/eval_suite_condm_layer0_20260227_150356.json
+============================================================
+
+ Finished: condm_layer0  (Fri Feb 27 03:04:08 PM PST 2026)
+
+----------------------------------------------------
+ Starting: condm_layer5  (Fri Feb 27 03:04:08 PM PST 2026)
+----------------------------------------------------
+
+============================================================
+  eval_suite.py — condm_layer5
+  Device: cuda
+============================================================
+
+  Model: condM 13M Layer 5 (5 DSQG → 1 full attn)
+
+  Loading tokenizer...
+  Loading model...
+  Loaded condM 13M Layer 5 (5 DSQG → 1 full attn): 13,984,480 params from 13M.pt
+
+  [1/4] Calibration...
+    entropy=7.092 bits  top1=0.223  eff_vocab=25.9  (0.2s)
+
+  [2/4] Distance-conditioned loss (wikitext-103)...
+    Loading wikitext-103 test split...
+    Using 17 full 2048-token chunks
+    Buckets:
+    0-16          PPL= 382.99  n=  289
+    17-64         PPL= 218.07  n=  816
+    65-256        PPL= 132.90  n= 3264
+    257-512       PPL= 115.92  n= 4352
+    513-1024      PPL=  91.64  n= 8704
+    1025-2047     PPL=  92.10  n=17374
+    (3.6s)
+
+  [3/4] Few-shot string copy...
+    exact=5/15  (33.3%)  mean_lev=7.33  (1.8s)
+
+  [4/4] Passkey retrieval...
+    d=    1: accuracy=100.0%
+    d=    2: accuracy=100.0%
+    d=    4: accuracy=100.0%
+    d=    8: accuracy=100.0%
+    d=   16: accuracy=100.0%
+    d=   32: accuracy=100.0%
+    d=   64: accuracy=100.0%
+    d=  128: accuracy=80.0%
+    d=  256: accuracy=100.0%
+    d=  512: accuracy=60.0%
+    d= 1024: accuracy=40.0%
+    d= 1536: accuracy=20.0%
+    mean_accuracy=83.3%  (0.4s)
+
+  Generation samples (greedy + T=0.7)...
+
+  [greedy]
+    'It was a dark and stormy'               → ' night.\n\nThe first time I was in the room, I was in the room. I was in the room.'
+    'The length of the hypotenuse'           → ' is a bit more complicated than the length of the length of the length of the le'
+    'The President of the United'            → ' States, who has been in the works for years, has been a major contributor to th'
+    'Once upon a time there was'             → ' no way to get the ball.\n\nThe first thing that happened was that the ball was a '
+    'The results indicate that'              → ' the results of the study are not statistically significant.\n\nThe study is based'
+
+  [T=0.7]
+    'It was a dark and stormy'               → ' week, but there was a great thing for us. The people of Sishhum, the battle, ar'
+    'The length of the hypotenuse'           → ' is not as clear as the length of the skin as the thickness of the rectangle. It'
+    'The President of the United'            → ' States, and has expressed support for the United States in a different way.\n\nTh'
+    'Once upon a time there was'             → ' no one to see that the Church had been safe and could not be safe. I said that '
+    'The results indicate that'              → ' all three of the participants were affected by the increased activity of the pa'
+
+  Results saved to /home/dlewis3/Desktop/AI/DWARF/benchmarks/logs/eval_suite_condm_layer5_20260227_150409.json
+============================================================
+
+ Finished: condm_layer5  (Fri Feb 27 03:04:21 PM PST 2026)
+
+----------------------------------------------------
+ Starting: condm_27m  (Fri Feb 27 03:04:21 PM PST 2026)
+----------------------------------------------------
+
+============================================================
+  eval_suite.py — condm_27m
+  Device: cuda
+============================================================
+
+  Model: condM 27M Layer 5 (5 DSQG → 1 full attn)
+
+  Loading tokenizer...
+  Loading model...
+  Loaded condM 27M Layer 5 (5 DSQG → 1 full attn): 26,457,760 params from 27M.ptrom
+
+  [1/4] Calibration...
+    entropy=6.919 bits  top1=0.263  eff_vocab=27.2  (0.2s)
+
+  [2/4] Distance-conditioned loss (wikitext-103)...
+    Loading wikitext-103 test split...
+    Using 17 full 2048-token chunks
+    Buckets:
+    0-16          PPL= 322.28  n=  289
+    17-64         PPL= 176.25  n=  816
+    65-256        PPL=  99.65  n= 3264
+    257-512       PPL=  87.78  n= 4352
+    513-1024      PPL=  69.16  n= 8704
+    1025-2047     PPL=  68.87  n=17374
+    (3.7s)
+
+  [3/4] Few-shot string copy...
+    exact=5/15  (33.3%)  mean_lev=7.87  (1.8s)
+
+  [4/4] Passkey retrieval...
+    d=    1: accuracy=100.0%
+    d=    2: accuracy=100.0%
+    d=    4: accuracy=100.0%
+    d=    8: accuracy=100.0%
+    d=   16: accuracy=60.0%
+    d=   32: accuracy=60.0%
+    d=   64: accuracy=60.0%
+    d=  128: accuracy=80.0%
+    d=  256: accuracy=80.0%
+    d=  512: accuracy=40.0%
+    d= 1024: accuracy=60.0%
+    d= 1536: accuracy=20.0%
+    mean_accuracy=71.7%  (0.5s)
+
+  Generation samples (greedy + T=0.7)...
+
+  [greedy]
+    'It was a dark and stormy'               → ', and I was very happy to be there. I was very happy to be there. I was very hap'
+    'The length of the hypotenuse'           → ' is a bit of a shock. The amount of time the cap is spent on the cap is a bit of'
+    'The President of the United'            → ' States, and the President of the United States, have been in the process of mak'
+    'Once upon a time there was'             → ' a time when the world was still in the dark.\n\nThe first time I saw the first ti'
+    'The results indicate that'              → ' the number of people who are in the workforce is at least 10 times higher than '
+
+  [T=0.7]
+    'It was a dark and stormy'               → ', but it was a pleasant experience.\n\nI didn’t know anything about it, but it was'
+    'The length of the hypotenuse'           → ' is a significant, important, and important, issue of the application of the [re'
+    'The President of the United'            → ' States, Bill Clinton and his allies, and the American people are attempting to '
+    'Once upon a time there was'             → ' no more justification for the damage, and I’m going to do it again. The main re'
+    'The results indicate that'              → ' the average American population is obese, and that the total number of people w'
+
+  Results saved to /home/dlewis3/Desktop/AI/DWARF/benchmarks/logs/eval_suite_condm_27m_20260227_150422.json
+============================================================
+
+ Finished: condm_27m  (Fri Feb 27 03:04:35 PM PST 2026)
+
+====================================================
+ All evals complete — Fri Feb 27 03:04:35 PM PST 2026
+ Results in: benchmarks/logs/eval_suite_*.json
+====================================================

@@ -1,0 +1,4 @@
+usage: eval_suite.py [-h] --model
+                     {standard_13m,standard_85m,standard_27m,condp_13m,condp_27m,condm_layer0,condm_layer3,condm_layer5,condm_chinchilla_repeated,condm_27m,condm_v2,condm_85m,condm_chinchilla_13m,condm_periodic_13m,condu_v5_38m,condu_v5_13m}
+                     [--skip_distance]
+eval_suite.py: error: the following arguments are required: --model

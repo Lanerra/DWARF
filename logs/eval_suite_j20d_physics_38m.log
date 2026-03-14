@@ -1,0 +1,64 @@
+
+============================================================
+  eval_suite.py — j20d_physics_38m
+  Device: cuda
+============================================================
+
+  Model: J20D Physics 38.7M
+
+  Loading tokenizer...
+  Loading model...
+  Loaded J20D Physics 38.7M: 38,724,058 params from df0d435_j20d_physics_best.pt
+
+  [1/4] Calibration...
+    entropy=7.170 bits  top1=0.217  eff_vocab=20.8  (0.5s)
+
+  [2/4] Distance-conditioned loss (wikitext-103)...
+    Loading wikitext-103 test split...
+    Using 17 full 2048-token chunks
+    Buckets:
+    0-16          PPL= 254.88  n=  289
+    17-64         PPL= 155.15  n=  816
+    65-256        PPL=  82.84  n= 3264
+    257-512       PPL=  72.96  n= 4352
+    513-1024      PPL=  61.90  n= 8704
+    1025-2047     PPL=  58.89  n=17374
+    (3.7s)
+
+  [3/4] Few-shot string copy...
+    exact=7/15  (46.7%)  mean_lev=6.13  (1.0s)
+
+  [4/4] Passkey retrieval...
+    d=    1: accuracy=60.0%
+    d=    2: accuracy=60.0%
+    d=    4: accuracy=60.0%
+    d=    8: accuracy=60.0%
+    d=   16: accuracy=60.0%
+    d=   32: accuracy=80.0%
+    d=   64: accuracy=80.0%
+    d=  128: accuracy=60.0%
+    d=  256: accuracy=80.0%
+    d=  512: accuracy=40.0%
+    d= 1024: accuracy=60.0%
+    d= 1536: accuracy=40.0%
+    mean_accuracy=61.7%  (0.3s)
+
+  Generation samples (greedy + T=0.7)...
+
+  [greedy]
+    'It was a dark and stormy'               → ' day, and the people were not afraid of it.\nThe people were not afraid of it, bu'
+    'The length of the hypotenuse'           → ' is about 1.5 mm. The length of the hypotenuse is about 1.5 mm. The length of th'
+    'The President of the United'            → ' States, the President of the United States, and the President of the United Sta'
+    'Once upon a time there was'             → ' a great deal of money and money. The money was not a good thing, but a good thi'
+    'The results indicate that'              → ' the use of a single-use device is a key factor in the development of a device.\n'
+
+  [T=0.7]
+    'It was a dark and stormy'               → ' time, and the whole city of Gaul was surrounded by the eastern part of the city'
+    'The length of the hypotenuse'           → ' is equal to the length of the hypotenuse, and the greater the hypotenuse. The h'
+    'The President of the United'            → ' States of America (FDA) and the United States of America (FDA) will not be able'
+    'Once upon a time there was'             → ' a great deal of time when we were told that the people were very poor. But in o'
+    'The results indicate that'              → ' the higher the total number of blood donors, the greater the number of blood do'
+
+  Results saved to /home/dlewis3/Desktop/AI/DWARF/evals/logs/eval_suite_j20d_physics_38m_20260314_080955.json
+============================================================
+

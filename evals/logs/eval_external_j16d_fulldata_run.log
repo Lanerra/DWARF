@@ -1,0 +1,51 @@
+============================================================
+  DWARF External Benchmark Evaluator
+============================================================
+  GPU: NVIDIA GeForce RTX 3090
+  Tasks: ['hellaswag', 'piqa', 'arc_easy', 'arc_challenge', 'winogrande', 'lambada']
+  Max examples/task: 500 (--fast)
+  Tokenizer: /home/dlewis3/Desktop/AI/DWARF/results/2048_condI_tokenizer.json
+
+Loading from registry: j16d_fulldata
+  Loaded J16D fulldata 38.7M (J=16, V6, 121232 seqs, scale_embed_init=0.1): 38,722,296 params from df0d435_j16d_fulldata_best.pt
+  Parameters: 38,722,296
+  Label: J16D fulldata 38.7M (J=16, V6, 121232 seqs, scale_embed_init=0.1)
+
+  [hellaswag] 10,042 examples...
+    [hellaswag] 200/500 — acc=0.280 | eta 50s
+    [hellaswag] 400/500 — acc=0.282 | eta 9s
+  [hellaswag] accuracy = 0.2900 (29.0%)  [500 examples, 36s]
+  [piqa] 1,838 examples...
+    [piqa] 200/500 — acc=0.600 | eta 2s
+    [piqa] 400/500 — acc=0.568 | eta 1s
+  [piqa] accuracy = 0.5680 (56.8%)  [500 examples, 3s]
+  [arc_easy] 570 examples...
+    [arc_easy] 200/500 — acc=0.285 | eta 3s
+    [arc_easy] 400/500 — acc=0.338 | eta 1s
+  [arc_easy] accuracy = 0.3380 (33.8%)  [500 examples, 5s]
+  [arc_challenge] 299 examples...
+    [arc_challenge] 200/299 — acc=0.195 | eta 1s
+  [arc_challenge] accuracy = 0.1806 (18.1%)  [299 examples, 3s]
+  [winogrande] 1,267 examples...
+    [winogrande] 200/500 — acc=0.530 | eta 2s
+    [winogrande] 400/500 — acc=0.525 | eta 1s
+  [winogrande] accuracy = 0.5240 (52.4%)  [500 examples, 3s]
+  [lambada] 5,153 examples...
+  [lambada] accuracy = 0.0740 (7.4%)  [500 examples, 2s]
+
+============================================================
+  J16D fulldata 38.7M (J=16, V6, 121232 seqs, scale_embed_init=0.1)
+============================================================
+  Task                     Accuracy       N
+  ---------------------- ----------  ------
+  hellaswag                   29.0%     500
+  piqa                        56.8%     500
+  arc_easy                    33.8%     500
+  arc_challenge               18.1%     299
+  winogrande                  52.4%     500
+  lambada                      7.4%     500
+  ---------------------- ----------  ------
+  mean (present tasks)        32.9%
+============================================================
+
+  Results -> /home/dlewis3/Desktop/AI/DWARF/evals/logs/eval_external_J16D_fulldata_38.7M_(J=16,_V6,_121232_se_20260313_141923.json

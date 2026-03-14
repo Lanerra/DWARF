@@ -22,7 +22,12 @@ build/
 *.ckpt
 checkpoints/
 
-*.log
+# Noisy/generated logs — training run logs live in autoresearch/logs/ and ARE tracked
+**/*.module_build.log
+autoresearch/loop_*.log
+autoresearch/probe*.log
+autoresearch/run.log
+autoresearch/j_run.log
 
 .ipynb_checkpoints/
 *.ipynb

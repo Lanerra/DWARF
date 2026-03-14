@@ -1,0 +1,21 @@
+============================================================
+  DWARF External Benchmark Evaluator
+============================================================
+  GPU: NVIDIA GeForce RTX 3090
+  Tasks: ['hellaswag', 'piqa', 'arc_easy', 'arc_challenge', 'winogrande', 'lambada']
+  Tokenizer: /home/dlewis3/Desktop/AI/DWARF/results/2048_condI_tokenizer.json
+
+Loading checkpoint: checkpoints/condU/best.pt
+Arch: condu_13m
+Traceback (most recent call last):
+  File "/home/dlewis3/Desktop/AI/DWARF/evals/eval_external.py", line 495, in <module>
+    main()
+  File "/home/dlewis3/Desktop/AI/DWARF/evals/eval_external.py", line 460, in main
+    model = load_model_from_arch(args.arch, args.checkpoint, device)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dlewis3/Desktop/AI/DWARF/evals/eval_external.py", line 160, in load_model_from_arch
+    spec.loader.exec_module(mod)
+  File "<frozen importlib._bootstrap_external>", line 991, in exec_module
+  File "<frozen importlib._bootstrap_external>", line 1128, in get_code
+  File "<frozen importlib._bootstrap_external>", line 1186, in get_data
+FileNotFoundError: [Errno 2] No such file or directory: '/home/dlewis3/Desktop/AI/DWARF/evals/train_2048_condU.py'

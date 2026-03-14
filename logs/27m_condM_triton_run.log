@@ -1,0 +1,26 @@
+======================================================================
+  DWARF 27M condM — 5:1 Hybrid (5 condN DSQG + 1 Full Causal Attention)
+  D=400, H=8, d_head=50, L=6, FFN=1600
+  Full attention at layer 5 (0-indexed)
+======================================================================
+  GPU: NVIDIA GeForce RTX 4090  (23.6 GB)
+  Checkpoint → 2048_27m_condM_checkpoints/
+Loading OpenWebText (up to 100,000 docs)...
+  25,000 docs...
+  50,000 docs...
+  75,000 docs...
+  100,000 docs...
+Loaded condI BPE tokenizer from /home/dlewis3/Desktop/AI/DWARF/benchmarks/results/2048_condI_tokenizer.json
+Encoding data (max_seq_len=2048)...
+  Train: 52,716 sequences
+  Val: 1,435 sequences
+  Test: 1,459 sequences
+
+condM: 26,457,760 parameters
+  Layer types: ['DSQG', 'DSQG', 'DSQG', 'DSQG', 'DSQG', 'FULL']
+  Note: DSQG layers use condN offsets (44); layer 5 is O(N²) causal
+Running causality check...
+  Pre-10:  0.00000000  (expect 0.0)
+  Pos-10:  1.263691  (expect >0)
+  Post-10: 0.656125  (expect >0)
+  PASS

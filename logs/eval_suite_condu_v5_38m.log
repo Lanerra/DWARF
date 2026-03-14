@@ -1,0 +1,65 @@
+
+============================================================
+  eval_suite.py — condu_v5_38m
+  Device: cuda
+============================================================
+
+  Model: condU-v5 38M (MOVT+QK-OVT+NPCI, D=512)
+
+  Loading tokenizer...
+  Loading model...
+[kernel] CUDA extension loaded — using compiled CUDA backward
+  Loaded condU-v5 38M (MOVT+QK-OVT+NPCI, D=512): 38,732,856 params from best.pt
+
+  [1/4] Calibration...
+    entropy=6.987 bits  top1=0.234  eff_vocab=24.5  (0.2s)
+
+  [2/4] Distance-conditioned loss (wikitext-103)...
+    Loading wikitext-103 test split...
+    Using 17 full 2048-token chunks
+    Buckets:
+    0-16          PPL= 280.60  n=  289
+    17-64         PPL= 159.88  n=  816
+    65-256        PPL=  80.67  n= 3264
+    257-512       PPL=  70.49  n= 4352
+    513-1024      PPL=  59.82  n= 8704
+    1025-2047     PPL=  56.05  n=17374
+    (3.6s)
+
+  [3/4] Few-shot string copy...
+    exact=6/15  (40.0%)  mean_lev=6.93  (0.7s)
+
+  [4/4] Passkey retrieval...
+    d=    1: accuracy=100.0%
+    d=    2: accuracy=100.0%
+    d=    4: accuracy=100.0%
+    d=    8: accuracy=100.0%
+    d=   16: accuracy=100.0%
+    d=   32: accuracy=100.0%
+    d=   64: accuracy=100.0%
+    d=  128: accuracy=100.0%
+    d=  256: accuracy=100.0%
+    d=  512: accuracy=80.0%
+    d= 1024: accuracy=100.0%
+    d= 1536: accuracy=80.0%
+    mean_accuracy=96.7%  (0.2s)
+
+  Generation samples (greedy + T=0.7)...
+
+  [greedy]
+    'It was a dark and stormy'               → ' night.\nThe first thing that happened was the first time the sun was shining. Th'
+    'The length of the hypotenuse'           → ' is the same as the length of the hypotenuse. The hypotenuse is the same as the '
+    'The President of the United'            → ' States, the President of the United States, and the President of the United Sta'
+    'Once upon a time there was'             → ' a great deal of work in the field of medicine. The first was the use of the wor'
+    'The results indicate that'              → ' the number of people who are in the United States is not equal to the number of'
+
+  [T=0.7]
+    'It was a dark and stormy'               → ' day, and a few men were out of the woods. The officers were not held by the men'
+    'The length of the hypotenuse'           → ' in the first series of sentences is now a bit lower than the length of the hypo'
+    'The President of the United'            → ' States, the President of the United States, President of the United States, is '
+    'Once upon a time there was'             → ' a greater probability that they would be able to carry the message of the proph'
+    'The results indicate that'              → ' the three countries have different diagnoses, but the two countries have differ'
+
+  Results saved to /home/dlewis3/Desktop/AI/DWARF/evals/logs/eval_suite_condu_v5_38m_20260307_070022.json
+============================================================
+

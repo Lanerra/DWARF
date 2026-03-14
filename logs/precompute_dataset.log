@@ -1,0 +1,20 @@
+Loaded tokenizer from /home/dlewis3/Desktop/AI/DWARF/benchmarks/results/2048_condI_tokenizer.json
+Loading docs from cache: benchmarks/logs/condm_fineweb_edu_doc_cache.json
+  Loaded 100,000 docs
+
+Encoding (MAX_SEQ_LEN=2048)...
+  Train: 10,000/95,000 docs (46s)
+  Train: 20,000/95,000 docs (95s)
+  Train: 30,000/95,000 docs (142s)
+  Train: 40,000/95,000 docs (187s)
+  Train: 50,000/95,000 docs (231s)
+  Train: 60,000/95,000 docs (274s)
+  Train: 70,000/95,000 docs (317s)
+  Train: 80,000/95,000 docs (359s)
+  Train: 90,000/95,000 docs (401s)
+  Train: 212,458 sequences (441.8s)
+  Val: 5,582 sequences (11.1s)
+  Test: 5,473 sequences (11.0s)
+
+Saving to benchmarks/logs/fineweb_encoded_2048.pt ...
+Done. 3662 MB, total time: 469.4s

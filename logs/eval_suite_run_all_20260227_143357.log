@@ -1,0 +1,354 @@
+====================================================
+ eval_suite — all models — started Fri Feb 27 02:33:57 PM PST 2026
+ Device: RTX 3090 (CUDA_VISIBLE_DEVICES=1)
+====================================================
+
+----------------------------------------------------
+ Starting: standard_27m  (Fri Feb 27 02:33:57 PM PST 2026)
+----------------------------------------------------
+
+============================================================
+  eval_suite.py — standard_27m
+  Device: cuda
+============================================================
+
+  Model: Standard Transformer 27M
+
+  Loading tokenizer...
+  Loading model...
+  Loaded Standard Transformer 27M: 37,971,200 params from 27M.ptrom
+
+  [1/4] Calibration...
+    entropy=7.726 bits  top1=0.155  eff_vocab=35.4  (0.1s)
+
+  [2/4] Distance-conditioned loss (wikitext-103)...
+    Loading wikitext-103 test split...
+    Using 17 full 2048-token chunks
+    Buckets:
+    0-16          PPL= 390.19  n=  289
+    17-64         PPL= 199.23  n=  816
+    65-256        PPL= 122.79  n= 3264
+    257-512       PPL= 106.78  n= 4352
+    513-1024      PPL=  82.19  n= 8704
+    1025-2047     PPL=  84.07  n=17374
+    (3.8s)
+
+  [3/4] Few-shot string copy...
+    exact=6/15  (40.0%)  mean_lev=7.27  (0.6s)
+
+  [4/4] Passkey retrieval...
+    d=    1: accuracy=20.0%
+    d=    2: accuracy=20.0%
+    d=    4: accuracy=20.0%
+    d=    8: accuracy=20.0%
+    d=   16: accuracy=20.0%
+    d=   32: accuracy=20.0%
+    d=   64: accuracy=0.0%
+    d=  128: accuracy=0.0%
+    d=  256: accuracy=0.0%
+    d=  512: accuracy=0.0%
+    d= 1024: accuracy=0.0%
+    d= 1536: accuracy=0.0%
+    mean_accuracy=10.0%  (0.2s)
+
+  Generation samples (greedy + T=0.7)...
+
+  [greedy]
+    'It was a dark and stormy'               → ', and the weather was a big part of the storm.\n\nThe storm was a big part of the '
+    'The length of the hypotenuse'           → ' of the object, and the object is the object. The object is the object, and the '
+    'The President of the United'            → ' States, the United States, and the United States, the United States, and the Un'
+    'Once upon a time there was'             → ' a time when the first time I was in the middle of the night. I was in the middl'
+    'The results indicate that'              → ' the results of the results of the results of the results of the results of the '
+
+  [T=0.7]
+    'It was a dark and stormy'               → ', and it was also damaged.\n\nThis is a shock, but it is a shock. It is a shock, a'
+    'The length of the hypotenuse'           → ' of the object. The object is a long length of the object, so the object is a lo'
+    'The President of the United'            → ' States’ “dynamic Action Plan” to secure the U.S. commitment to the U.S. and the'
+    'Once upon a time there was'             → ' a new way of saying:\n\n1. Get rid of the baton of the baton\n\n1. Get rid of the b'
+    'The results indicate that'              → ' the (Sideast Cancer) was a significant factor in the number of deaths in the ca'
+
+  Results saved to /home/dlewis3/Desktop/AI/DWARF/benchmarks/logs/eval_suite_standard_27m_20260227_143359.json
+============================================================
+
+ Finished: standard_27m  (Fri Feb 27 02:34:06 PM PST 2026)
+
+----------------------------------------------------
+ Starting: condp_27m  (Fri Feb 27 02:34:06 PM PST 2026)
+----------------------------------------------------
+
+============================================================
+  eval_suite.py — condp_27m
+  Device: cuda
+============================================================
+
+  Model: condP 27M (pure DSQG, 74 offsets)
+
+  Loading tokenizer...
+  Loading model...
+  Loaded condP 27M (pure DSQG, 74 offsets): 26,781,152 params from best.ptrom
+
+  [1/4] Calibration...
+    entropy=4.169 bits  top1=0.553  eff_vocab=3.6  (0.2s)
+
+  [2/4] Distance-conditioned loss (wikitext-103)...
+    Loading wikitext-103 test split...
+    Using 17 full 2048-token chunks
+    Buckets:
+    0-16          PPL=32406.48  n=  289
+    17-64         PPL=93760.04  n=  816
+    65-256        PPL=87889.11  n= 3264
+    257-512       PPL=83988.51  n= 4352
+    513-1024      PPL=95731.86  n= 8704
+    1025-2047     PPL=92026.06  n=17374
+    (4.0s)
+
+  [3/4] Few-shot string copy...
+    exact=0/15  (0.0%)  mean_lev=6.87  (3.1s)
+
+  [4/4] Passkey retrieval...
+    d=    1: accuracy=0.0%
+    d=    2: accuracy=0.0%
+    d=    4: accuracy=0.0%
+    d=    8: accuracy=0.0%
+    d=   16: accuracy=0.0%
+    d=   32: accuracy=0.0%
+    d=   64: accuracy=0.0%
+    d=  128: accuracy=0.0%
+    d=  256: accuracy=0.0%
+    d=  512: accuracy=0.0%
+    d= 1024: accuracy=0.0%
+    d= 1536: accuracy=0.0%
+    mean_accuracy=0.0%  (0.8s)
+
+  Generation samples (greedy + T=0.7)...
+
+  [greedy]
+    'It was a dark and stormy'               → 'yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy'
+    'The length of the hypotenuse'           → 'useuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseus'
+    'The President of the United'            → ' United United United United United United United United United United United Un'
+    'Once upon a time there was'             → ' was was was was was was was was was was was was was was was was was was was was'
+    'The results indicate that'              → ' that that that that that that that that that that that that that that that that'
+
+  [T=0.7]
+    'It was a dark and stormy'               → 'yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy'
+    'The length of the hypotenuse'           → 'useuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseus'
+    'The President of the United'            → ' United Soccer Soccer Soccer Soccer Soccer Soccer Soccer Soccer Soccer Soccer So'
+    'Once upon a time there was'             → ' was was was was was was was is is is is is is is is is is is is is is is is is '
+    'The results indicate that'              → ' that that that that that that that that that that that that that that that that'
+
+  Results saved to /home/dlewis3/Desktop/AI/DWARF/benchmarks/logs/eval_suite_condp_27m_20260227_143407.json
+============================================================
+
+ Finished: condp_27m  (Fri Feb 27 02:34:25 PM PST 2026)
+
+----------------------------------------------------
+ Starting: condm_layer0  (Fri Feb 27 02:34:25 PM PST 2026)
+----------------------------------------------------
+
+============================================================
+  eval_suite.py — condm_layer0
+  Device: cuda
+============================================================
+
+  Model: condM 13M Layer 0 (1 full attn → 5 DSQG)
+
+  Loading tokenizer...
+  Loading model...
+  Loaded condM 13M Layer 0 (1 full attn → 5 DSQG): 14,116,576 params from best.pt
+
+  [1/4] Calibration...
+    entropy=7.598 bits  top1=0.191  eff_vocab=48.0  (0.2s)
+
+  [2/4] Distance-conditioned loss (wikitext-103)...
+    Loading wikitext-103 test split...
+    Using 17 full 2048-token chunks
+    Buckets:
+    0-16          PPL=4718.63  n=  289
+    17-64         PPL=6804.70  n=  816
+    65-256        PPL=5116.59  n= 3264
+    257-512       PPL=4677.30  n= 4352
+    513-1024      PPL=5166.47  n= 8704
+    1025-2047     PPL=5308.97  n=17374
+    (3.6s)
+
+  [3/4] Few-shot string copy...
+    exact=0/15  (0.0%)  mean_lev=6.87  (1.9s)
+
+  [4/4] Passkey retrieval...
+    d=    1: accuracy=0.0%
+    d=    2: accuracy=0.0%
+    d=    4: accuracy=0.0%
+    d=    8: accuracy=0.0%
+    d=   16: accuracy=0.0%
+    d=   32: accuracy=0.0%
+    d=   64: accuracy=0.0%
+    d=  128: accuracy=0.0%
+    d=  256: accuracy=0.0%
+    d=  512: accuracy=0.0%
+    d= 1024: accuracy=0.0%
+    d= 1536: accuracy=0.0%
+    mean_accuracy=0.0%  (0.5s)
+
+  Generation samples (greedy + T=0.7)...
+
+  [greedy]
+    'It was a dark and stormy'               → 'yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy'
+    'The length of the hypotenuse'           → 'useuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseus'
+    'The President of the United'            → ' States States States States States States States States States States States St'
+    'Once upon a time there was'             → ' taken by by by by by by by by by by by by by by by by by by by by by by by by b'
+    'The results indicate that'              → ' is is is is is is is is is is is is is is is is is is is is is is is is is is i'
+
+  [T=0.7]
+    'It was a dark and stormy'               → '\nIn"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""'
+    'The length of the hypotenuse'           → 'useuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseus'
+    'The President of the United'            → ' States States States States States States States States States States States St'
+    'Once upon a time there was'             → ' found at at a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a'
+    'The results indicate that'              → ' was being deployed to make it that is is being abused and were were kept by by '
+
+  Results saved to /home/dlewis3/Desktop/AI/DWARF/benchmarks/logs/eval_suite_condm_layer0_20260227_143427.json
+============================================================
+
+ Finished: condm_layer0  (Fri Feb 27 02:34:39 PM PST 2026)
+
+----------------------------------------------------
+ Starting: condm_layer5  (Fri Feb 27 02:34:39 PM PST 2026)
+----------------------------------------------------
+
+============================================================
+  eval_suite.py — condm_layer5
+  Device: cuda
+============================================================
+
+  Model: condM 13M Layer 5 (5 DSQG → 1 full attn)
+
+  Loading tokenizer...
+  Loading model...
+  Loaded condM 13M Layer 5 (5 DSQG → 1 full attn): 13,984,480 params from 13M.pt
+
+  [1/4] Calibration...
+    entropy=4.978 bits  top1=0.450  eff_vocab=12.0  (0.2s)
+
+  [2/4] Distance-conditioned loss (wikitext-103)...
+    Loading wikitext-103 test split...
+    Using 17 full 2048-token chunks
+    Buckets:
+    0-16          PPL=10061.75  n=  289
+    17-64         PPL=24279.06  n=  816
+    65-256        PPL=28963.42  n= 3264
+    257-512       PPL=35971.70  n= 4352
+    513-1024      PPL=46820.33  n= 8704
+    1025-2047     PPL=50414.14  n=17374
+    (3.7s)
+
+  [3/4] Few-shot string copy...
+    exact=0/15  (0.0%)  mean_lev=6.87  (1.9s)
+
+  [4/4] Passkey retrieval...
+    d=    1: accuracy=0.0%
+    d=    2: accuracy=0.0%
+    d=    4: accuracy=0.0%
+    d=    8: accuracy=0.0%
+    d=   16: accuracy=0.0%
+    d=   32: accuracy=0.0%
+    d=   64: accuracy=0.0%
+    d=  128: accuracy=0.0%
+    d=  256: accuracy=0.0%
+    d=  512: accuracy=0.0%
+    d= 1024: accuracy=0.0%
+    d= 1536: accuracy=0.0%
+    mean_accuracy=0.0%  (0.4s)
+
+  Generation samples (greedy + T=0.7)...
+
+  [greedy]
+    'It was a dark and stormy'               → 'yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy'
+    'The length of the hypotenuse'           → 'useuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseus'
+    'The President of the United'            → ' Emirates Emirates Emirates Emirates Emirates Emirates Emirates Emirates Emirate'
+    'Once upon a time there was'             → ' was was was was was was was was was was was was was was was was was was was was'
+    'The results indicate that'              → ' is is is is is is is is is is is is is is is is is is is is is is is is is is i'
+
+  [T=0.7]
+    'It was a dark and stormy'               → 'yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy'
+    'The length of the hypotenuse'           → 'useuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseus'
+    'The President of the United'            → ' Emirates Emirates Emirates Emirates Emirates Emirates Emirates Emirates Emirate'
+    'Once upon a time there was'             → ' was was was was was is is is is is is is is is is is is is is is is is is is is'
+    'The results indicate that'              → ' is is is is is is is is is is is is is is is is is is is is is is is is is is i'
+
+  Results saved to /home/dlewis3/Desktop/AI/DWARF/benchmarks/logs/eval_suite_condm_layer5_20260227_143440.json
+============================================================
+
+ Finished: condm_layer5  (Fri Feb 27 02:34:53 PM PST 2026)
+
+----------------------------------------------------
+ Starting: condm_27m  (Fri Feb 27 02:34:53 PM PST 2026)
+----------------------------------------------------
+
+============================================================
+  eval_suite.py — condm_27m
+  Device: cuda
+============================================================
+
+  Model: condM 27M Layer 5 (5 DSQG → 1 full attn)
+
+  Loading tokenizer...
+  Loading model...
+  Loaded condM 27M Layer 5 (5 DSQG → 1 full attn): 26,457,760 params from 27M.ptrom
+
+  [1/4] Calibration...
+    entropy=5.003 bits  top1=0.363  eff_vocab=11.2  (0.2s)
+
+  [2/4] Distance-conditioned loss (wikitext-103)...
+    Loading wikitext-103 test split...
+    Using 17 full 2048-token chunks
+    Buckets:
+    0-16          PPL=10615.95  n=  289
+    17-64         PPL=21876.81  n=  816
+    65-256        PPL=26228.87  n= 3264
+    257-512       PPL=31805.55  n= 4352
+    513-1024      PPL=38724.57  n= 8704
+    1025-2047     PPL=42241.96  n=17374
+    (3.7s)
+
+  [3/4] Few-shot string copy...
+    exact=0/15  (0.0%)  mean_lev=6.87  (1.9s)
+
+  [4/4] Passkey retrieval...
+    d=    1: accuracy=0.0%
+    d=    2: accuracy=0.0%
+    d=    4: accuracy=0.0%
+    d=    8: accuracy=0.0%
+    d=   16: accuracy=0.0%
+    d=   32: accuracy=0.0%
+    d=   64: accuracy=0.0%
+    d=  128: accuracy=0.0%
+    d=  256: accuracy=0.0%
+    d=  512: accuracy=0.0%
+    d= 1024: accuracy=0.0%
+    d= 1536: accuracy=0.0%
+    mean_accuracy=0.0%  (0.5s)
+
+  Generation samples (greedy + T=0.7)...
+
+  [greedy]
+    'It was a dark and stormy'               → 'yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy'
+    'The length of the hypotenuse'           → 'useuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseus'
+    'The President of the United'            → ' United United United United United United United United United United United Un'
+    'Once upon a time there was'             → ' was was was was was was was was was was was was was was was was was was was was'
+    'The results indicate that'              → ' that that that that that that that that that that that that that that that that'
+
+  [T=0.7]
+    'It was a dark and stormy'               → 'yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy'
+    'The length of the hypotenuse'           → 'useuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseuseus'
+    'The President of the United'            → ' United United United United United United United United United United United Un'
+    'Once upon a time there was'             → ' was was was was was was was was was was was was was was was was was was was was'
+    'The results indicate that'              → ' that we we we we we we we we we we we we we we we we we we we we we we we we we'
+
+  Results saved to /home/dlewis3/Desktop/AI/DWARF/benchmarks/logs/eval_suite_condm_27m_20260227_143454.json
+============================================================
+
+ Finished: condm_27m  (Fri Feb 27 02:35:07 PM PST 2026)
+
+====================================================
+ All evals complete — Fri Feb 27 02:35:07 PM PST 2026
+ Results in: benchmarks/logs/eval_suite_*.json
+====================================================

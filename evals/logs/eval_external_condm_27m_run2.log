@@ -1,0 +1,51 @@
+============================================================
+  DWARF External Benchmark Evaluator
+============================================================
+  GPU: NVIDIA GeForce RTX 3090
+  Tasks: ['hellaswag', 'piqa', 'arc_easy', 'arc_challenge', 'winogrande', 'lambada']
+  Max examples/task: 500 (--fast)
+  Tokenizer: /home/dlewis3/Desktop/AI/DWARF/results/2048_condI_tokenizer.json
+
+Loading from registry: condm_27m
+  Loaded condM 27M Layer 5 (5 DSQG → 1 full attn): 26,457,760 params from 27M.ptrom
+  Parameters: 26,457,760
+  Label: condM 27M Layer 5 (5 DSQG → 1 full attn)
+
+  [hellaswag] 10,042 examples...
+    [hellaswag] 200/500 — acc=0.280 | eta 7s
+    [hellaswag] 400/500 — acc=0.282 | eta 2s
+  [hellaswag] accuracy = 0.3000 (30.0%)  [500 examples, 12s]
+  [piqa] 1,838 examples...
+    [piqa] 200/500 — acc=0.575 | eta 3s
+    [piqa] 400/500 — acc=0.557 | eta 1s
+  [piqa] accuracy = 0.5580 (55.8%)  [500 examples, 5s]
+  [arc_easy] 570 examples...
+    [arc_easy] 200/500 — acc=0.260 | eta 6s
+    [arc_easy] 400/500 — acc=0.282 | eta 2s
+  [arc_easy] accuracy = 0.2880 (28.8%)  [500 examples, 10s]
+  [arc_challenge] 299 examples...
+    [arc_challenge] 200/299 — acc=0.205 | eta 2s
+  [arc_challenge] accuracy = 0.2174 (21.7%)  [299 examples, 6s]
+  [winogrande] 1,267 examples...
+    [winogrande] 200/500 — acc=0.550 | eta 3s
+    [winogrande] 400/500 — acc=0.510 | eta 1s
+  [winogrande] accuracy = 0.5200 (52.0%)  [500 examples, 5s]
+  [lambada] 5,153 examples...
+  [lambada] accuracy = 0.0860 (8.6%)  [500 examples, 4s]
+
+============================================================
+  condM 27M Layer 5 (5 DSQG → 1 full attn)
+============================================================
+  Task                     Accuracy       N
+  ---------------------- ----------  ------
+  hellaswag                   30.0%     500
+  piqa                        55.8%     500
+  arc_easy                    28.8%     500
+  arc_challenge               21.7%     299
+  winogrande                  52.0%     500
+  lambada                      8.6%     500
+  ---------------------- ----------  ------
+  mean (present tasks)        32.8%
+============================================================
+
+  Results -> /home/dlewis3/Desktop/AI/DWARF/evals/logs/eval_external_condM_27M_Layer_5_(5_DSQG_→_1_full_attn)_20260313_143303.json

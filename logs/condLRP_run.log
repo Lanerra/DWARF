@@ -1,0 +1,146 @@
+======================================================================
+  DWARF condL+RP — Revised DSQG + Interference Pooling
+  Fair softmax gap test vs condK+RP
+======================================================================
+  GPU: NVIDIA H100 80GB HBM3  (85.0 GB)
+
+  Fixes vs original condL:
+    1. 24 unique offsets (was 44 with 11× duplicate δ=0)
+    2. D4 warm-start pos_bias (max|bias|=0.30, short-range positive)
+    3. Interference pooling every 3rd layer (blocks 2, 5)
+
+  D4 warm-start profile (24 offsets):
+    δ=    0: +0.238  ++++
+    δ=    1: +0.300  +++++
+    δ=    2: +0.261  +++++
+    δ=    3: +0.090  +
+    δ=    4: +0.222  ++++
+    δ=    6: +0.051  +
+    δ=    8: +0.183  +++
+    δ=   12: +0.012  
+    δ=   16: +0.144  ++
+    δ=   24: -0.027  
+    δ=   32: +0.105  ++
+    δ=   48: -0.066  -
+    δ=   64: +0.066  +
+    δ=   96: -0.105  --
+    δ=  128: +0.027  
+    δ=  192: -0.144  --
+    δ=  256: -0.012  
+    δ=  384: -0.183  ---
+    δ=  512: -0.051  -
+    δ=  768: -0.222  ----
+    δ= 1024: -0.090  -
+    δ= 1536: -0.261  -----
+    δ= 2048: -0.238  ----
+    δ= 3072: -0.300  ------
+Loading OpenWebText (up to 100,000 docs)...
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+  25,000 docs...
+  50,000 docs...
+  75,000 docs...
+  100,000 docs...
+
+Loaded shared condI BPE tokenizer
+  Vocab: 32000 tokens
+Encoding data (max_seq_len=2048)...
+  Train: 52,716 sequences
+  Val: 1,435 sequences
+  Test: 1,459 sequences
+
+condL+RP: 14,115,968 parameters
+  6 layers × 8 heads × 256d
+  Attention: softmax over 24 unique dyadic offsets
+  Pooling blocks: [2, 5]
+  Pos-bias: 24 offsets × 8 heads × 6 layers = 1,152 params
+Running causality check...
+  Pre-5:  0.00000000  (expect 0.0)
+  Pos-5:  1.282389  (expect >0)
+  Post-5: 0.302996  (expect >0)
+  PASS — architecture is causal
+/usr/local/lib/python3.11/dist-packages/torch/utils/checkpoint.py:1399: FutureWarning: `torch.cpu.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cpu', args...)` instead.
+  with device_autocast_ctx, torch.cpu.amp.autocast(**cpu_autocast_kwargs), recompute_context:  # type: ignore[attr-defined]
+  Step 200/1648 | Loss 6.3518
+  Step 400/1648 | Loss 5.9284
+  Step 600/1648 | Loss 6.0122
+  Step 800/1648 | Loss 5.7540
+  Step 1000/1648 | Loss 5.4795
+  Step 1200/1648 | Loss 5.7665
+  Step 1400/1648 | Loss 5.3421
+  Step 1600/1648 | Loss 5.3218
+Ep 1/10 | Train 5.2422 | Val 5.2030 PPL 181.8 * BEST | 797s
+  Top-3 attended offsets: δ=1 (+0.697), δ=2 (+0.518), δ=3 (+0.191)
+  Bot-3 attended offsets: δ=768 (-0.600), δ=384 (-0.575), δ=192 (-0.533)
+  Pos-bias |mean|=0.3963  |max|=0.7654
+  ── Generation samples ──
+    'It was a dark and stormy' → ', and it was a little bit of a little bit.\n\nThe first thing I was going to be a '
+    'The length of the hypotenuse' → ' of the surface of the planet.\n\nThe first time of the world was the first time i'
+    'The President of the United' → ' States, the United States, and the United States, the United States, and the Un'
+    'Once upon a time there was' → ' a lot of time.\n\nThe first thing I was in the last few years, I was a good thing'
+    'The results indicate that' → ' the number of people who are not in the same way.\n\nThe number of people who are'
+  ──
+  Step 200/1648 | Loss 5.1681
+  Step 400/1648 | Loss 5.0579
+  Step 600/1648 | Loss 5.0546
+  Step 800/1648 | Loss 4.9645
+  Step 1000/1648 | Loss 4.8560
+  Step 1200/1648 | Loss 4.7200
+  Step 1400/1648 | Loss 4.8460
+  Step 1600/1648 | Loss 4.7959
+Ep 2/10 | Train 4.8462 | Val 4.8071 PPL 122.4 * BEST | 1599s
+  Top-3 attended offsets: δ=1 (+0.950), δ=2 (+0.456), δ=3 (+0.075)
+  Bot-3 attended offsets: δ=768 (-0.848), δ=384 (-0.840), δ=192 (-0.778)
+  Pos-bias |mean|=0.5763  |max|=1.1539
+  ── Generation samples ──
+    'It was a dark and stormy' → ', and it was a very good thing.\n\nThe first time I was in the first place, I was '
+    'The length of the hypotenuse' → ' is the first time the first time the first time the first time the first time t'
+    'The President of the United' → ' States, the United States, and the United States, and the United States, the Un'
+    'Once upon a time there was' → ' a lot of time to do with the fact that the company has been working on the proj'
+    'The results indicate that' → ' the average number of people in the country is a significant factor in the aver'
+  ──
+  Step 200/1648 | Loss 4.6889
+  Step 400/1648 | Loss 4.8799
+  Step 600/1648 | Loss 4.7228
+  Step 800/1648 | Loss 4.5612
+  Step 1000/1648 | Loss 4.6246
+  Step 1200/1648 | Loss 4.6651
+  Step 1400/1648 | Loss 4.7109
+  Step 1600/1648 | Loss 4.7212
+Ep 3/10 | Train 4.6925 | Val 4.6345 PPL 103.0 * BEST | 2402s
+  Top-3 attended offsets: δ=1 (+1.133), δ=2 (+0.422), δ=2048 (+0.148)
+  Bot-3 attended offsets: δ=384 (-1.034), δ=768 (-1.027), δ=512 (-0.954)
+  Pos-bias |mean|=0.6998  |max|=1.4617
+  ── Generation samples ──
+    'It was a dark and stormy' → ', and it was a very good thing.\n\n“I was a very good guy. I was a very good guy. '
+    'The length of the hypotenuse' → ' is the most important thing to do with the most of the time.\n\nThe most importan'
+    'The President of the United' → ' States, the United States and the United States, and the United States, and the'
+    'Once upon a time there was' → ' a chance to get a new job, and it would be a good time to get a new team.\n\nThe '
+    'The results indicate that' → ' the results of the results are not the same.\n\nThe results are not the same as t'
+  ──
+  Step 200/1648 | Loss 4.7018
+  Step 400/1648 | Loss 4.5811
+  Step 600/1648 | Loss 4.5977
+  Step 800/1648 | Loss 4.5241
+  Step 1000/1648 | Loss 4.5966
+  Step 1200/1648 | Loss 4.5810
+  Step 1400/1648 | Loss 4.5568
+  Step 1600/1648 | Loss 3.9569
+Ep 4/10 | Train 4.4279 | Val 4.5362 PPL 93.3 * BEST | 3204s
+  Top-3 attended offsets: δ=1 (+1.234), δ=2 (+0.404), δ=2048 (+0.242)
+  Bot-3 attended offsets: δ=384 (-1.161), δ=768 (-1.152), δ=512 (-1.103)
+  Pos-bias |mean|=0.7844  |max|=1.6694
+  ── Generation samples ──
+    'It was a dark and stormy' → ', and it was a very good thing to do.\n\n"I was a very good guy, but I was a very '
+    'The length of the hypotenuse' → ' is the most important part of the world.\n\nThe first time the first time the fir'
+    'The President of the United' → ' States, the United States and the United States, and the United States, and the'
+    'Once upon a time there was' → ' a lot of pressure on the people to get the money to get the money to get the mo'
+    'The results indicate that' → ' the average number of people in the country is about 1.5 percent.\n\nThe average '
+  ──
+  Step 200/1648 | Loss 4.5942
+  Step 400/1648 | Loss 4.2702
+  Step 600/1648 | Loss 4.5126
+  Step 800/1648 | Loss 4.5799
+  Step 1000/1648 | Loss 4.4841
+  Step 1200/1648 | Loss 4.5018
+  Step 1400/1648 | Loss 4.3468
+

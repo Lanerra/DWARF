@@ -1,0 +1,64 @@
+
+============================================================
+  eval_suite.py — condm_chinchilla_13m
+  Device: cuda
+============================================================
+
+  Model: condM 13M Chinchilla (400K docs, 1 epoch, 31.2 tok/param)
+
+  Loading tokenizer...
+  Loading model...
+  Loaded condM 13M Chinchilla (400K docs, 1 epoch, 31.2 tok/param): 13,984,480 params from best.ptrom
+
+  [1/4] Calibration...
+    entropy=7.277 bits  top1=0.209  eff_vocab=23.1  (0.2s)
+
+  [2/4] Distance-conditioned loss (wikitext-103)...
+    Loading wikitext-103 test split...
+    Using 17 full 2048-token chunks
+    Buckets:
+    0-16          PPL= 462.90  n=  289
+    17-64         PPL= 286.42  n=  816
+    65-256        PPL= 162.20  n= 3264
+    257-512       PPL= 144.60  n= 4352
+    513-1024      PPL= 112.15  n= 8704
+    1025-2047     PPL= 112.81  n=17374
+    (4.8s)
+
+  [3/4] Few-shot string copy...
+    exact=6/15  (40.0%)  mean_lev=7.33  (1.8s)
+
+  [4/4] Passkey retrieval...
+    d=    1: accuracy=20.0%
+    d=    2: accuracy=20.0%
+    d=    4: accuracy=20.0%
+    d=    8: accuracy=20.0%
+    d=   16: accuracy=20.0%
+    d=   32: accuracy=20.0%
+    d=   64: accuracy=20.0%
+    d=  128: accuracy=0.0%
+    d=  256: accuracy=0.0%
+    d=  512: accuracy=0.0%
+    d= 1024: accuracy=0.0%
+    d= 1536: accuracy=0.0%
+    mean_accuracy=11.7%  (0.4s)
+
+  Generation samples (greedy + T=0.7)...
+
+  [greedy]
+    'It was a dark and stormy'               → ', and it was a very good thing to do.\n\nThe first thing I had to do was to get a '
+    'The length of the hypotenuse'           → ' of the brain is a bit more complicated than the brain.\n\nThe brain is a bit more'
+    'The President of the United'            → ' States, and the United States, the United States, and the United States, are no'
+    'Once upon a time there was'             → ' a lot of time to get to the point where the game was going to be a good game.\n\n'
+    'The results indicate that'              → ' the number of people who have been killed is not a significant factor in the nu'
+
+  [T=0.7]
+    'It was a dark and stormy'               → ' moment for the Black Lives Matter movement. In the wake of the protests, the ri'
+    'The length of the hypotenuse'           → ' is as easy as the visual structure. The whole table is designed to be made from'
+    'The President of the United'            → ' States has said that the plan would be to hold the new law on immigration, or b'
+    'Once upon a time there was'             → ' a new "global" for a company that has a population of 100,000 people, who have '
+    'The results indicate that'              → ' the Biggests are not in the comments.\n\nThe Internet is a tool for finding the b'
+
+  Results saved to /home/dlewis3/Desktop/AI/DWARF/benchmarks/logs/eval_suite_condm_chinchilla_13m_20260228_182641.json
+============================================================
+

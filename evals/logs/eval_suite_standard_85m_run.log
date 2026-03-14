@@ -1,0 +1,64 @@
+
+============================================================
+  eval_suite.py — standard_85m
+  Device: cuda
+============================================================
+
+  Model: Standard Transformer 85M
+
+  Loading tokenizer...
+  Loading model...
+  Loaded Standard Transformer 85M: 101,354,240 params from best.pt
+
+  [1/4] Calibration...
+    entropy=7.313 bits  top1=0.201  eff_vocab=28.0  (0.1s)
+
+  [2/4] Distance-conditioned loss (wikitext-103)...
+    Loading wikitext-103 test split...
+    Using 17 full 2048-token chunks
+    Buckets:
+    0-16          PPL= 295.55  n=  289
+    17-64         PPL= 164.14  n=  816
+    65-256        PPL=  86.53  n= 3264
+    257-512       PPL=  78.69  n= 4352
+    513-1024      PPL=  61.78  n= 8704
+    1025-2047     PPL=  61.16  n=17374
+    (4.1s)
+
+  [3/4] Few-shot string copy...
+    exact=5/15  (33.3%)  mean_lev=8.07  (0.9s)
+
+  [4/4] Passkey retrieval...
+    d=    1: accuracy=100.0%
+    d=    2: accuracy=100.0%
+    d=    4: accuracy=100.0%
+    d=    8: accuracy=100.0%
+    d=   16: accuracy=80.0%
+    d=   32: accuracy=100.0%
+    d=   64: accuracy=100.0%
+    d=  128: accuracy=100.0%
+    d=  256: accuracy=100.0%
+    d=  512: accuracy=100.0%
+    d= 1024: accuracy=100.0%
+    d= 1536: accuracy=80.0%
+    mean_accuracy=96.7%  (0.5s)
+
+  Generation samples (greedy + T=0.7)...
+
+  [greedy]
+    'It was a dark and stormy'               → ' night.\n\n"I was just trying to get out of the car and get out of the car and get'
+    'The length of the hypotenuse'           → ' of the human body is approximately 1,000 feet (1,000 feet) long, and is approxi'
+    'The President of the United'            → ' States, the president of the United States, and the United States.\n\nThe preside'
+    'Once upon a time there was'             → ' no way to get the job done.\n\nThe first thing I noticed was that the first thing'
+    'The results indicate that'              → ' the number of people who are in the United States is more than twice as likely '
+
+  [T=0.7]
+    'It was a dark and stormy'               → ' day. I remember it, I was in the hospital, and I was like, ‘I don’t know what t'
+    'The length of the hypotenuse'           → ' of a worker’s life is as large as the rest of us as the work of a military-indu'
+    'The President of the United'            → ' States, the nation has long known that the UN Security Council will remain unde'
+    'Once upon a time there was'             → ' no time to go.\n\nThe British government is a very curious place to start.\n\n"In t'
+    'The results indicate that'              → ' the most important features of the game are the ability to be played.\n\nThe game'
+
+  Results saved to /home/dlewis3/Desktop/AI/DWARF/evals/logs/eval_suite_standard_85m_20260313_135619.json
+============================================================
+

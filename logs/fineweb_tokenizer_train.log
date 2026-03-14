@@ -1,0 +1,31 @@
+
+
+
+Loading FineWeb-Edu cache: /home/dlewis3/Desktop/AI/DWARF/benchmarks/logs/condm_fineweb_edu_doc_cache.json
+  100,000 documents loaded
+
+Training BPE tokenizer (vocab_size=32,000)...
+  Done in 40.2s | vocab: 32,000
+
+Verifying tokenizer...
+  OK [ 6 tok] 'The President of the United States'
+  OK [ 6 tok] 'the secret word is apple .'
+  OK [10 tok] 'the weather was mild and the air was still .'
+  OK [10 tok] 'Mathematical reasoning requires careful attention to detail.'
+  OK [ 9 tok] 'This study examined the effects of educational interventions'
+
+  Passkey word single-token check:
+    OK 'apple': plain=1 spaced=1
+    OK 'banana': plain=2 spaced=1
+    OK 'orange': plain=2 spaced=1
+    OK 'cherry': plain=2 spaced=1
+    OK 'grape': plain=2 spaced=1
+    OK 'lemon': plain=2 spaced=1
+    MULTI 'mango': plain=2 spaced=2
+    MULTI 'peach': plain=2 spaced=2
+    OK 'plum': plain=2 spaced=1
+    OK 'berry': plain=1 spaced=2
+  WARNING: Some passkey words are multi-token. Eval uses first token of each.
+
+Saved -> /home/dlewis3/Desktop/AI/DWARF/benchmarks/results/fineweb_edu_tokenizer.json
+Drop-in replacement: swap 2048_condI_tokenizer.json -> fineweb_edu_tokenizer.json

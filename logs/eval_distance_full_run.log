@@ -1,0 +1,65 @@
+Device: cuda
+
+Loading condM (13M, 5:1 hybrid)...
+  condM: 13,984,480 params
+Loading condP 27M (pure DSQG)...
+  condP 27M: 26,781,152 params
+
+Loading wikitext-103-raw-v1 (test, first 200 non-trivial articles)...
+  Articles: 200
+  Total tokens: 35,048
+  Full 2048-token chunks: 17
+
+========================================================================
+  DISTANCE-CONDITIONED LOSS (full 2048-token range)
+========================================================================
+
+  Evaluating condM over 17 chunks...
+    chunk 5/17...
+    chunk 10/17...
+    chunk 15/17...
+  Done (0.4s)
+
+  condM results:
+    Bucket          Mean loss   Mean PPL   n tokens
+    0-16               5.9715     392.10        289
+    17-64              5.1852     178.61        816
+    65-256             4.8989     134.14      3,264
+    257-512            4.6004      99.52      4,352
+    513-1024           4.5234      92.15      8,704
+    1025-2047          4.5049      90.46     17,374
+
+  Evaluating condP_27M over 17 chunks...
+    chunk 5/17...
+    chunk 10/17...
+    chunk 15/17...
+  Done (0.6s)
+
+  condP_27M results:
+    Bucket          Mean loss   Mean PPL   n tokens
+    0-16               5.7115     302.34        289
+    17-64              4.8499     127.73        816
+    65-256             4.8046     122.07      3,264
+    257-512            4.7877     120.03      4,352
+    513-1024           4.7943     120.82      8,704
+    1025-2047          4.7627     117.06     17,374
+
+========================================================================
+  COMPARISON: PPL delta (condM − condP27M)
+  Negative = condM better; Positive = condP27M better
+========================================================================
+
+  Bucket          condM PPL  condP27 PPL      Δ PPL     winner
+  -------------- ---------- ------------ ---------- ----------
+  0-16               392.10       302.34     +89.76   condP27M
+  17-64              178.61       127.73     +50.89   condP27M
+  65-256             134.14       122.07     +12.06   condP27M
+  257-512             99.52       120.03     -20.51      condM
+  513-1024            92.15       120.82     -28.67      condM
+  1025-2047           90.46       117.06     -26.60      condM
+
+  Weighted aggregate (mean loss across all buckets):
+    condM: mean_loss=4.5866  PPL=98.16  (training test PPL for reference: 54.529)
+    condP_27M: mean_loss=4.7876  PPL=120.01  (training test PPL for reference: 52.756)
+
+Results saved to: /home/dlewis3/Desktop/AI/DWARF/benchmarks/logs/eval_distance_full_20260227_073513.json

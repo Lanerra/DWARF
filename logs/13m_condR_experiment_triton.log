@@ -1,0 +1,275 @@
+======================================================================
+  condR — condM Experiment Run (13M, OpenWebText)
+======================================================================
+  GPU: NVIDIA GeForce RTX 4090  (23.6 GB)
+  Bug fixes: evaluate range, epoch-mean loss, SDPA dropout,
+             VOCAB_SIZE, docstring
+  Experiments:
+    A. Gate weight zero-init (Gemini)
+    B. Gate from out_flat, not x (Opus)
+    C. Gate bias 1.0 (Opus, better gradient flow)
+    D. INTERFERENCE=2 (Opus, more layers get global signal)
+       Interference layers: [1, 3] (was [2] with interval=3)
+    E. LR warmup 200 steps (Opus)
+    F. Checkpoint FullAttentionBlock (Opus)
+Loading FineWeb-Edu from cache: benchmarks/logs/condm_fineweb_edu_doc_cache.json
+  Loaded 100,000 docs from cache
+
+Loaded condI BPE tokenizer from /home/dlewis3/Desktop/AI/DWARF/benchmarks/results/2048_condI_tokenizer.json
+Encoding data (max_seq_len=2048)...
+  Train: 212,458 sequences
+  Capped to 52,716 train sequences (iso-compute)
+  Val: 5,582 sequences
+  Test: 5,473 sequences
+
+condR: 14,116,576 parameters
+  Layer types: ['DSQG', 'DSQG', 'DSQG', 'DSQG', 'DSQG', 'FULL']
+Running causality check...
+  Pre-10:  0.00000000  (expect 0.0)
+  Pos-10:  0.671496  (expect >0)
+  Post-10: 0.213955  (expect >0)
+  PASS
+
+  Tokens/epoch: 107,909,652
+  Chinchilla:   282,331,520 tokens (epoch ~2.62)
+  Warmup:       200 steps then cosine decay
+
+  Step 200/1648 | Loss 7.1128 | LR 9.00e-08
+  Step 400/1648 | Loss 6.1392 | LR 9.00e-08
+  Step 600/1648 | Loss 5.8654 | LR 8.99e-08
+  Step 800/1648 | Loss 5.6745 | LR 8.97e-08
+  Step 1000/1648 | Loss 5.4382 | LR 8.95e-08
+  Step 1200/1648 | Loss 5.5367 | LR 8.92e-08
+  Step 1400/1648 | Loss 5.2984 | LR 8.88e-08
+  Step 1600/1648 | Loss 5.1452 | LR 8.84e-08
+Ep 1/10 | Train 6.0216 | Val 5.0800 PPL 160.8 * BEST | 374s (38%C)
+  DSQG pos-bias: |mean|=3.5850 |max|=14.0171 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' -> '.\nThe first time of the first day, the first day, the first day, the first day, '
+    'The length of the hypotenuse' -> ' of the cervical and the other side of the end of the end of the end of the end '
+    'The President of the United' -> ' States, the United States, the United States, the United States, the United Sta'
+    'Once upon a time there was' -> ' a lot of time, and the time of the time, the time of the time, the time of the '
+    'The results indicate that' -> ' the number of the number of the number of the number of the number of the numbe'
+  ──
+  Passkey...
+  mean=0.0%  (0/12 distances >50%)
+  d=1:0%  d=2:0%  d=4:0%  d=8:0%  d=16:0%  d=32:0%  d=64:0%  d=128:0%  d=256:0%  d=512:0%  d=1024:0%  d=1536:0%
+  Step 200/1648 | Loss 5.0541 | LR 8.77e-08
+  Step 400/1648 | Loss 5.1147 | LR 8.72e-08
+  Step 600/1648 | Loss 5.0551 | LR 8.65e-08
+  Step 800/1648 | Loss 4.6003 | LR 8.58e-08
+  Step 1000/1648 | Loss 4.8410 | LR 8.51e-08
+  Step 1200/1648 | Loss 4.8729 | LR 8.43e-08
+  Step 1400/1648 | Loss 4.8601 | LR 8.34e-08
+  Step 1600/1648 | Loss 4.5735 | LR 8.24e-08
+Ep 2/10 | Train 4.8420 | Val 4.4540 PPL 86.0 * BEST | 743s (76%C)
+  DSQG pos-bias: |mean|=3.5061 |max|=13.3859 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' -> ', and it was a great deal of time.\nThe first thing is that the first thing is th'
+    'The length of the hypotenuse' -> ' is the most important element of the pain. The pain is the pain of the pain. Th'
+    'The President of the United' -> ' States, the United States, and the United States, and the United States, and th'
+    'Once upon a time there was' -> ' a lot of money, but it was a lot of money.\nThe first thing is that it is a lot '
+    'The results indicate that' -> ' the effects of the effects of the effects of the effects of the effects of the '
+  ──
+  Passkey...
+  mean=1.7%  (0/12 distances >50%)
+  d=1:0%  d=2:0%  d=4:0%  d=8:0%  d=16:0%  d=32:20%  d=64:0%  d=128:0%  d=256:0%  d=512:0%  d=1024:0%  d=1536:0%
+  Step 200/1648 | Loss 4.3282 | LR 8.12e-08
+  Step 400/1648 | Loss 4.3665 | LR 8.01e-08
+  Step 600/1648 | Loss 4.3393 | LR 7.90e-08
+  Step 800/1648 | Loss 4.4463 | LR 7.79e-08
+  Step 1000/1648 | Loss 4.4821 | LR 7.67e-08
+  Step 1200/1648 | Loss 4.4079 | LR 7.54e-08
+  Step 1400/1648 | Loss 4.1818 | LR 7.41e-08
+  Step 1600/1648 | Loss 4.3805 | LR 7.28e-08
+Ep 3/10 | Train 4.4063 | Val 4.2194 PPL 68.0 * BEST | 1116s (115%C)
+  DSQG pos-bias: |mean|=3.4327 |max|=12.8393 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' -> ', and the most important of the world’s most important, the most important, and '
+    'The length of the hypotenuse' -> ' is the length of the length of the length of the length of the length of the le'
+    'The President of the United' -> ' States, the president of the United States, and the president of the United Sta'
+    'Once upon a time there was' -> ' a lot of time, the first time was the first time, the first time, the second ti'
+    'The results indicate that' -> ' the number of people who are in the same way are not in the same way that they '
+  ──
+  Passkey...
+  mean=33.3%  (1/12 distances >50%)
+  d=1:40%  d=2:40%  d=4:40%  d=8:40%  d=16:40%  d=32:60%  d=64:40%  d=128:20%  d=256:40%  d=512:20%  d=1024:20%  d=1536:0%
+  Step 200/1648 | Loss 4.3509 | LR 7.10e-08
+  Step 400/1648 | Loss 4.1476 | LR 6.96e-08
+  Step 600/1648 | Loss 4.1857 | LR 6.81e-08
+  Step 800/1648 | Loss 4.0087 | LR 6.66e-08
+  Step 1000/1648 | Loss 4.0163 | LR 6.51e-08
+  Step 1200/1648 | Loss 4.0709 | LR 6.35e-08
+  Step 1400/1648 | Loss 3.9096 | LR 6.19e-08
+  Step 1600/1648 | Loss 4.0609 | LR 6.03e-08
+Ep 4/10 | Train 4.2389 | Val 4.1133 PPL 61.2 * BEST | 1488s (153%C)
+  DSQG pos-bias: |mean|=3.3674 |max|=12.3877 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' -> ' night.\nThe first day of the night, the first night of the night, was the first '
+    'The length of the hypotenuse' -> ' of the blood is determined by the number of blood vessels in the blood. The blo'
+    'The President of the United' -> ' States, the President of the United States, and the United States, the United S'
+    'Once upon a time there was' -> ' a great deal of time, and the people were not able to do so.\nThe first thing wa'
+    'The results indicate that' -> ' the number of people who are in the world are not affected by the problem.\nThe '
+  ──
+  Passkey...
+  mean=30.0%  (0/12 distances >50%)
+  d=1:20%  d=2:40%  d=4:40%  d=8:40%  d=16:40%  d=32:40%  d=64:40%  d=128:20%  d=256:40%  d=512:20%  d=1024:20%  d=1536:0%
+  Step 200/1648 | Loss 4.0966 | LR 5.82e-08
+  Step 400/1648 | Loss 4.1075 | LR 5.66e-08
+  Step 600/1648 | Loss 4.1710 | LR 5.49e-08
+  Step 800/1648 | Loss 4.1754 | LR 5.32e-08
+  Step 1000/1648 | Loss 3.9709 | LR 5.15e-08
+  Step 1200/1648 | Loss 3.8837 | LR 4.97e-08
+  Step 1400/1648 | Loss 4.0845 | LR 4.80e-08
+  Step 1600/1648 | Loss 4.1141 | LR 4.63e-08
+Ep 5/10 | Train 4.1481 | Val 4.0508 PPL 57.4 * BEST | 1857s (191%C)
+  DSQG pos-bias: |mean|=3.3140 |max|=12.0448 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' -> ' night.\nThe first of the first two of the first three of the first three of the '
+    'The length of the hypotenuse' -> ' of the blood is determined by the number of blood vessels that are located in t'
+    'The President of the United' -> ' States, the President of the United States, and the United States, the United S'
+    'Once upon a time there was' -> ' a chance that the people were not able to do so.\nThe first time the people were'
+    'The results indicate that' -> ' the number of people who are not affected by the disease is not affected by the'
+  ──
+  Passkey...
+  mean=33.3%  (0/12 distances >50%)
+  d=1:40%  d=2:40%  d=4:40%  d=8:40%  d=16:40%  d=32:40%  d=64:40%  d=128:20%  d=256:40%  d=512:20%  d=1024:20%  d=1536:20%
+  Step 200/1648 | Loss 4.0407 | LR 4.41e-08
+  Step 400/1648 | Loss 3.9212 | LR 4.24e-08
+  Step 600/1648 | Loss 3.8683 | LR 4.07e-08
+  Step 800/1648 | Loss 4.2961 | LR 3.89e-08
+  Step 1000/1648 | Loss 4.0316 | LR 3.72e-08
+  Step 1200/1648 | Loss 4.0146 | LR 3.55e-08
+  Step 1400/1648 | Loss 4.0931 | LR 3.38e-08
+  Step 1600/1648 | Loss 4.1778 | LR 3.22e-08
+Ep 6/10 | Train 4.0984 | Val 4.0110 PPL 55.2 * BEST | 2228s (229%C)
+  DSQG pos-bias: |mean|=3.2748 |max|=11.8006 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' -> ' day.\nThe first of the first two was the first of the first two of the first two'
+    'The length of the hypotenuse' -> ' of the blood is determined by the fact that the blood is not the same as the bl'
+    'The President of the United' -> ' States, the President of the United States, and the President of the United Sta'
+    'Once upon a time there was' -> ' a great deal of interest in the subject.\nThe first step in the process of the p'
+    'The results indicate that' -> ' the number of people who are not in the world is not in the world.\nThe number o'
+  ──
+  Passkey...
+  mean=40.0%  (5/12 distances >50%)
+  d=1:40%  d=2:40%  d=4:40%  d=8:60%  d=16:60%  d=32:60%  d=64:60%  d=128:60%  d=256:20%  d=512:20%  d=1024:20%  d=1536:0%
+  Step 200/1648 | Loss 4.0586 | LR 3.01e-08
+  Step 400/1648 | Loss 4.1905 | LR 2.85e-08
+  Step 600/1648 | Loss 3.9635 | LR 2.69e-08
+  Step 800/1648 | Loss 4.0096 | LR 2.53e-08
+  Step 1000/1648 | Loss 4.1295 | LR 2.38e-08
+  Step 1200/1648 | Loss 3.8105 | LR 2.22e-08
+  Step 1400/1648 | Loss 3.8496 | LR 2.08e-08
+  Step 1600/1648 | Loss 4.2653 | LR 1.93e-08
+Ep 7/10 | Train 4.0572 | Val 3.9823 PPL 53.6 * BEST | 2607s (268%C)
+  DSQG pos-bias: |mean|=3.2490 |max|=11.6413 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' -> ' night.\nThe first day of the night, the first night of the night, was a night of'
+    'The length of the hypotenuse' -> ' of the hypotenuse is a small fraction of the total volume of the patient.\nThe l'
+    'The President of the United' -> ' States, the President of the United States, and the President of the United Sta'
+    'Once upon a time there was' -> ' a new one, the new one was a new one.\nThe first thing was that the new one was '
+    'The results indicate that' -> ' the number of people who are not in the world is not in the world.\nThe number o'
+  ──
+  Passkey...
+  mean=43.3%  (7/12 distances >50%)
+  d=1:60%  d=2:80%  d=4:60%  d=8:60%  d=16:60%  d=32:60%  d=64:60%  d=128:20%  d=256:20%  d=512:20%  d=1024:20%  d=1536:0%
+  Step 200/1648 | Loss 4.1154 | LR 1.76e-08
+  Step 400/1648 | Loss 3.7162 | LR 1.62e-08
+  Step 600/1648 | Loss 3.9794 | LR 1.49e-08
+  Step 800/1648 | Loss 4.1550 | LR 1.36e-08
+  Step 1000/1648 | Loss 4.0512 | LR 1.24e-08
+  Step 1200/1648 | Loss 3.9806 | LR 1.12e-08
+  Step 1400/1648 | Loss 4.0734 | LR 1.01e-08
+  Step 1600/1648 | Loss 4.1720 | LR 9.05e-09
+Ep 8/10 | Train 4.0284 | Val 3.9653 PPL 52.7 * BEST | 2979s (306%C)
+  DSQG pos-bias: |mean|=3.2349 |max|=11.5566 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' -> ' night.\nThe first day of the night, the first night of the night, was a night of'
+    'The length of the hypotenuse' -> ' of the hypotenuse is determined by the following:\n- The hypotenuse of the hypot'
+    'The President of the United' -> ' States, the President of the United States, and the President of the United Sta'
+    'Once upon a time there was' -> ' a great deal of interest in the subject.\nThe first step was to make a new versi'
+    'The results indicate that' -> ' the number of people who are in the world is not affected by the problem.\nThe n'
+  ──
+  Passkey...
+  mean=28.3%  (0/12 distances >50%)
+  d=1:40%  d=2:40%  d=4:40%  d=8:40%  d=16:40%  d=32:20%  d=64:40%  d=128:20%  d=256:20%  d=512:20%  d=1024:20%  d=1536:0%
+  Step 200/1648 | Loss 4.1550 | LR 7.80e-09
+  Step 400/1648 | Loss 3.8733 | LR 6.85e-09
+  Step 600/1648 | Loss 4.1872 | LR 5.95e-09
+  Step 800/1648 | Loss 4.0785 | LR 5.12e-09
+  Step 1000/1648 | Loss 4.2426 | LR 4.35e-09
+  Step 1200/1648 | Loss 3.9555 | LR 3.63e-09
+  Step 1400/1648 | Loss 3.8474 | LR 2.98e-09
+  Step 1600/1648 | Loss 4.0811 | LR 2.39e-09
+Ep 9/10 | Train 4.0129 | Val 3.9580 PPL 52.4 * BEST | 3355s (344%C)
+  DSQG pos-bias: |mean|=3.2295 |max|=11.5245 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' -> ' night.\nThe first day of the night, the first night of the night, was a night of'
+    'The length of the hypotenuse' -> ' of the blood is determined by the number of blood vessels in the blood vessels.'
+    'The President of the United' -> ' States, the President of the United States, and the President of the United Sta'
+    'Once upon a time there was' -> ' a great deal of interest in the subject.\nThe first step was to make a new versi'
+    'The results indicate that' -> ' the number of people who are in the world is not affected by the problem.\nThe n'
+  ──
+  Passkey...
+  mean=30.0%  (0/12 distances >50%)
+  d=1:40%  d=2:40%  d=4:40%  d=8:40%  d=16:40%  d=32:40%  d=64:40%  d=128:20%  d=256:20%  d=512:20%  d=1024:20%  d=1536:0%
+  Step 200/1648 | Loss 4.0056 | LR 1.75e-09
+  Step 400/1648 | Loss 4.1597 | LR 1.30e-09
+  Step 600/1648 | Loss 4.1633 | LR 9.17e-10
+  Step 800/1648 | Loss 3.8926 | LR 6.01e-10
+  Step 1000/1648 | Loss 4.1966 | LR 3.51e-10
+  Step 1200/1648 | Loss 4.0890 | LR 1.68e-10
+  Step 1400/1648 | Loss 3.8817 | LR 5.15e-11
+  Step 1600/1648 | Loss 3.8922 | LR 1.93e-12
+Ep 10/10 | Train 4.0087 | Val 3.9573 PPL 52.3 * BEST | 3725s (382%C)
+  DSQG pos-bias: |mean|=3.2287 |max|=11.5197 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' -> ' night.\nThe first day of the night, the first night of the night, was a night of'
+    'The length of the hypotenuse' -> ' of the hypotenuse is a very small and very small part of the hypotenuse of the '
+    'The President of the United' -> ' States, the President of the United States, and the President of the United Sta'
+    'Once upon a time there was' -> ' a great deal of interest in the subject.\nThe first step was to make a new versi'
+    'The results indicate that' -> ' the number of people who are in the world is not affected by the problem.\nThe n'
+  ──
+  Passkey...
+  mean=31.7%  (1/12 distances >50%)
+  d=1:40%  d=2:60%  d=4:40%  d=8:40%  d=16:40%  d=32:40%  d=64:40%  d=128:20%  d=256:20%  d=512:20%  d=1024:20%  d=1536:0%
+
+  condR TEST: PPL 52.960 | Loss 3.9695
+  condM reference: 54.529 PPL | delta = -1.569
+
+  ── Temperature sweep (best checkpoint) ──
+
+  [greedy]
+    'It was a dark and stormy' -> ' night.\nThe first day of the night, the first night of the night, was a night of'
+    'The length of the hypotenuse' -> ' of the hypotenuse is a very small and very small part of the hypotenuse of the '
+    'The President of the United' -> ' States, the President of the United States, and the President of the United Sta'
+    'Once upon a time there was' -> ' a great deal of interest in the subject.\nThe first step was to make a new versi'
+    'The results indicate that' -> ' the number of people who are in the world is not affected by the problem.\nThe n'
+
+  [T=0.5]
+    'It was a dark and stormy' -> ' day.\nIn the summer of 1831, the Japanese had taken the first flight of the Japa'
+    'The length of the hypotenuse' -> ' of the limb is about 2.5 to 4.5 cm. The length of the limb is about 1.5 cm. The'
+    'The President of the United' -> ' States, the President of the United States, and the President of the United Sta'
+    'Once upon a time there was' -> ' a need to make a good decision to take the oath.\nThe first step in the first st'
+    'The results indicate that' -> ' the nuclear power of the United States is a major factor in the development of '
+
+  [T=0.7]
+    'It was a dark and stormy' -> ' winter. It was only a long winter for the rest of the world.\nIt was a cold, dry'
+    'The length of the hypotenuse' -> ' is derived from the proportion of the upper blood vessels (all those that are a'
+    'The President of the United' -> ' States, who had been in the hands of the United States, had been a great deal.\n'
+    'Once upon a time there was' -> ' a growing desire for independence and education, the basic principles of the Ca'
+    'The results indicate that' -> ' the contribution of the brain to the brain is not substantially different from '
+
+  [T=1.0]
+    'It was a dark and stormy' -> ' intercession, but one that seemed to agree to change things at once. “It was al'
+    'The length of the hypotenuse' -> ' date for Mesodotamia of the paraspa can be derived from any fossil study or but'
+    'The President of the United' -> ' States Police — perhaps a dozen thousands of American soldiers are killed.\nAmon'
+    'Once upon a time there was' -> ' no third course but they had only completed their courses until the past day in'
+    'The results indicate that' -> ' we may have bigger, less stable, and better life expectancy, with those whose h'
+
+  Final passkey: mean=31.7%  (1/12 distances >50%)
+  d=1:40%  d=2:60%  d=4:40%  d=8:40%  d=16:40%  d=32:40%  d=64:40%  d=128:20%  d=256:20%  d=512:20%  d=1024:20%  d=1536:0%
+  condM reference: 83.3% passkey | condQ: TBD
+
+  Results -> benchmarks/logs/condr_experiment_results.json

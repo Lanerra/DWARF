@@ -1,0 +1,25 @@
+============================================================
+  DWARF External Benchmark Evaluator
+============================================================
+  GPU: NVIDIA GeForce RTX 3090
+  Tasks: ['hellaswag', 'piqa', 'arc_easy', 'arc_challenge', 'winogrande', 'lambada']
+  Max examples/task: 500 (--fast)
+  Tokenizer: /home/dlewis3/Desktop/AI/DWARF/results/2048_condI_tokenizer.json
+
+Loading from registry: condm_27m
+Traceback (most recent call last):
+  File "/home/dlewis3/Desktop/AI/DWARF/evals/eval_external.py", line 607, in <module>
+    main()
+  File "/home/dlewis3/Desktop/AI/DWARF/evals/eval_external.py", line 567, in main
+    model, label = load_model_from_registry(args.model, device)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dlewis3/Desktop/AI/DWARF/evals/eval_external.py", line 144, in load_model_from_registry
+    model, _ = load_model(cfg, device)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dlewis3/Desktop/AI/DWARF/evals/eval_suite.py", line 746, in load_model
+    model = build_model(cfg)
+            ^^^^^^^^^^^^^^^^
+  File "/home/dlewis3/Desktop/AI/DWARF/evals/eval_suite.py", line 669, in build_model
+    return CondMTransformer(D=D, H=H, FFN=FFN, L=L, full_layer=cfg['full_layer'])
+           ^^^^^^^^^^^^^^^^
+UnboundLocalError: cannot access local variable 'CondMTransformer' where it is not associated with a value

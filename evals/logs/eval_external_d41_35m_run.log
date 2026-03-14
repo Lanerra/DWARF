@@ -1,0 +1,51 @@
+============================================================
+  DWARF External Benchmark Evaluator
+============================================================
+  GPU: NVIDIA GeForce RTX 3090
+  Tasks: ['hellaswag', 'piqa', 'arc_easy', 'arc_challenge', 'winogrande', 'lambada']
+  Max examples/task: 500 (--fast)
+  Tokenizer: /home/dlewis3/Desktop/AI/DWARF/results/2048_condI_tokenizer.json
+
+Loading from registry: d41_35m
+  Loaded d41_35m 35M (dense=48, sparse=[96,128,384], J=52): 38,732,618 params from best.pt
+  Parameters: 38,732,618
+  Label: d41_35m 35M (dense=48, sparse=[96,128,384], J=52)
+
+  [hellaswag] 10,042 examples...
+    [hellaswag] 200/500 — acc=0.300 | eta 68s
+    [hellaswag] 400/500 — acc=0.307 | eta 12s
+  [hellaswag] accuracy = 0.3200 (32.0%)  [500 examples, 48s]
+  [piqa] 1,838 examples...
+    [piqa] 200/500 — acc=0.595 | eta 1s
+    [piqa] 400/500 — acc=0.588 | eta 0s
+  [piqa] accuracy = 0.5960 (59.6%)  [500 examples, 2s]
+  [arc_easy] 570 examples...
+    [arc_easy] 200/500 — acc=0.350 | eta 2s
+    [arc_easy] 400/500 — acc=0.375 | eta 1s
+  [arc_easy] accuracy = 0.3880 (38.8%)  [500 examples, 4s]
+  [arc_challenge] 299 examples...
+    [arc_challenge] 200/299 — acc=0.205 | eta 1s
+  [arc_challenge] accuracy = 0.2074 (20.7%)  [299 examples, 2s]
+  [winogrande] 1,267 examples...
+    [winogrande] 200/500 — acc=0.530 | eta 1s
+    [winogrande] 400/500 — acc=0.520 | eta 0s
+  [winogrande] accuracy = 0.5240 (52.4%)  [500 examples, 2s]
+  [lambada] 5,153 examples...
+  [lambada] accuracy = 0.1080 (10.8%)  [500 examples, 1s]
+
+============================================================
+  d41_35m 35M (dense=48, sparse=[96,128,384], J=52)
+============================================================
+  Task                     Accuracy       N
+  ---------------------- ----------  ------
+  hellaswag                   32.0%     500
+  piqa                        59.6%     500
+  arc_easy                    38.8%     500
+  arc_challenge               20.7%     299
+  winogrande                  52.4%     500
+  lambada                     10.8%     500
+  ---------------------- ----------  ------
+  mean (present tasks)        35.7%
+============================================================
+
+  Results -> /home/dlewis3/Desktop/AI/DWARF/evals/logs/eval_external_d41_35m_35M_(dense=48,_sparse=[96,128,38_20260313_143220.json

@@ -1,0 +1,16 @@
+Loading doc cache: benchmarks/logs/condm_fineweb_edu_doc_cache.json
+  100,000 docs loaded in 4.9s
+  Train: 10,000/95,000 docs (46.4M tokens so far)
+  Train: 20,000/95,000 docs (92.0M tokens so far)
+  Train: 30,000/95,000 docs (138.0M tokens so far)
+  Train: 40,000/95,000 docs (184.7M tokens so far)
+  Train: 50,000/95,000 docs (230.9M tokens so far)
+  Train: 60,000/95,000 docs (276.9M tokens so far)
+  Train: 70,000/95,000 docs (322.9M tokens so far)
+  Train: 80,000/95,000 docs (367.8M tokens so far)
+  Train: 90,000/95,000 docs (412.8M tokens so far)
+  Train: 106,229 sequences (435.1M tokens) in 441.6s
+  Val: 2,791 sequences (11.4M tokens) in 11.2s
+  Test: 2,736 sequences (11.2M tokens) in 11.1s
+Saving to benchmarks/logs/fineweb_encoded_4096.pt ...
+Done — 3492 MB, total 474.1s

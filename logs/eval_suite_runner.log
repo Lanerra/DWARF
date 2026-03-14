@@ -1,0 +1,167 @@
+====================================================
+ eval_suite — all models — started Fri Feb 27 02:30:57 PM PST 2026
+ Device: RTX 3090 (CUDA_VISIBLE_DEVICES=1)
+====================================================
+
+----------------------------------------------------
+ Starting: standard_27m  (Fri Feb 27 02:30:57 PM PST 2026)
+----------------------------------------------------
+
+============================================================
+  eval_suite.py — standard_27m
+  Device: cuda
+============================================================
+
+  Model: Standard Transformer 27M
+
+  Loading tokenizer...
+  Loading model...
+  Loaded Standard Transformer 27M: 37,971,200 params from 27M.ptrom
+
+  [1/4] Calibration...
+    entropy=7.726 bits  top1=0.155  eff_vocab=35.4  (0.1s)
+
+  [2/4] Distance-conditioned loss (wikitext-103)...
+    Loading wikitext-103 test split...
+    Using 17 full 2048-token chunks
+    Buckets:
+    0-16          PPL= 390.19  n=  289
+    17-64         PPL= 199.23  n=  816
+    65-256        PPL= 122.79  n= 3264
+    257-512       PPL= 106.78  n= 4352
+    513-1024      PPL=  82.19  n= 8704
+    1025-2047     PPL=  84.07  n=17374
+    (4.0s)
+
+  [3/4] Few-shot string copy...
+Traceback (most recent call last):
+  File "/home/dlewis3/Desktop/AI/DWARF/benchmarks/eval_suite.py", line 863, in <module>
+    main()
+  File "/home/dlewis3/Desktop/AI/DWARF/benchmarks/eval_suite.py", line 835, in main
+    results['few_shot_copy'] = eval_few_shot_copy(model, tokenizer, device)
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dlewis3/Desktop/AI/DWARF/benchmarks/eval_suite.py", line 644, in eval_few_shot_copy
+    gen    = generate_tokens(model, tokenizer, prompt, device,
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dlewis3/Desktop/AI/DWARF/benchmarks/eval_suite.py", line 507, in generate_tokens
+    ids = torch.cat([ids, next_id], dim=1)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: Tensors must have same number of dimensions: got 2 and 3
+ Finished: standard_27m  (Fri Feb 27 02:31:03 PM PST 2026)
+
+----------------------------------------------------
+ Starting: condp_27m  (Fri Feb 27 02:31:03 PM PST 2026)
+----------------------------------------------------
+
+============================================================
+  eval_suite.py — condp_27m
+  Device: cuda
+============================================================
+
+  Model: condP 27M (pure DSQG, 74 offsets)
+
+  Loading tokenizer...
+  Loading model...
+Traceback (most recent call last):
+  File "/home/dlewis3/Desktop/AI/DWARF/benchmarks/eval_suite.py", line 863, in <module>
+    main()
+  File "/home/dlewis3/Desktop/AI/DWARF/benchmarks/eval_suite.py", line 794, in main
+    model, n_params = load_model(cfg, device)
+                      ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dlewis3/Desktop/AI/DWARF/benchmarks/eval_suite.py", line 460, in load_model
+    model.load_state_dict(state)
+  File "/home/dlewis3/Desktop/AI/DWARF/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 2581, in load_state_dict
+    raise RuntimeError(
+RuntimeError: Error(s) in loading state_dict for CondPTransformer:
+	Missing key(s) in state_dict: "blocks.0.attn._offsets_t", "blocks.1.attn._offsets_t", "blocks.2.attn._offsets_t", "blocks.3.attn._offsets_t", "blocks.4.attn._offsets_t", "blocks.5.attn._offsets_t". 
+	Unexpected key(s) in state_dict: "blocks.0.attn.offsets", "blocks.1.attn.offsets", "blocks.2.attn.offsets", "blocks.3.attn.offsets", "blocks.4.attn.offsets", "blocks.5.attn.offsets". 
+ Finished: condp_27m  (Fri Feb 27 02:31:04 PM PST 2026)
+
+----------------------------------------------------
+ Starting: condm_layer0  (Fri Feb 27 02:31:04 PM PST 2026)
+----------------------------------------------------
+
+============================================================
+  eval_suite.py — condm_layer0
+  Device: cuda
+============================================================
+
+  Model: condM 13M Layer 0 (1 full attn → 5 DSQG)
+
+  Loading tokenizer...
+  Loading model...
+Traceback (most recent call last):
+  File "/home/dlewis3/Desktop/AI/DWARF/benchmarks/eval_suite.py", line 863, in <module>
+    main()
+  File "/home/dlewis3/Desktop/AI/DWARF/benchmarks/eval_suite.py", line 794, in main
+    model, n_params = load_model(cfg, device)
+                      ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dlewis3/Desktop/AI/DWARF/benchmarks/eval_suite.py", line 460, in load_model
+    model.load_state_dict(state)
+  File "/home/dlewis3/Desktop/AI/DWARF/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 2581, in load_state_dict
+    raise RuntimeError(
+RuntimeError: Error(s) in loading state_dict for CondMTransformer:
+	Missing key(s) in state_dict: "blocks.1.attn._offsets_t", "blocks.2.attn._offsets_t", "blocks.3.attn._offsets_t", "blocks.4.attn._offsets_t", "blocks.5.attn._offsets_t". 
+	Unexpected key(s) in state_dict: "blocks.1.attn.offsets", "blocks.2.attn.offsets", "blocks.3.attn.offsets", "blocks.4.attn.offsets", "blocks.5.attn.offsets". 
+ Finished: condm_layer0  (Fri Feb 27 02:31:06 PM PST 2026)
+
+----------------------------------------------------
+ Starting: condm_layer5  (Fri Feb 27 02:31:06 PM PST 2026)
+----------------------------------------------------
+
+============================================================
+  eval_suite.py — condm_layer5
+  Device: cuda
+============================================================
+
+  Model: condM 13M Layer 5 (5 DSQG → 1 full attn)
+
+  Loading tokenizer...
+  Loading model...
+Traceback (most recent call last):
+  File "/home/dlewis3/Desktop/AI/DWARF/benchmarks/eval_suite.py", line 863, in <module>
+    main()
+  File "/home/dlewis3/Desktop/AI/DWARF/benchmarks/eval_suite.py", line 794, in main
+    model, n_params = load_model(cfg, device)
+                      ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dlewis3/Desktop/AI/DWARF/benchmarks/eval_suite.py", line 460, in load_model
+    model.load_state_dict(state)
+  File "/home/dlewis3/Desktop/AI/DWARF/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 2581, in load_state_dict
+    raise RuntimeError(
+RuntimeError: Error(s) in loading state_dict for CondMTransformer:
+	Missing key(s) in state_dict: "blocks.0.attn._offsets_t", "blocks.1.attn._offsets_t", "blocks.2.attn._offsets_t", "blocks.3.attn._offsets_t", "blocks.4.attn._offsets_t". 
+	Unexpected key(s) in state_dict: "blocks.0.attn.offsets", "blocks.1.attn.offsets", "blocks.2.attn.offsets", "blocks.3.attn.offsets", "blocks.4.attn.offsets". 
+ Finished: condm_layer5  (Fri Feb 27 02:31:07 PM PST 2026)
+
+----------------------------------------------------
+ Starting: condm_27m  (Fri Feb 27 02:31:07 PM PST 2026)
+----------------------------------------------------
+
+============================================================
+  eval_suite.py — condm_27m
+  Device: cuda
+============================================================
+
+  Model: condM 27M Layer 5 (5 DSQG → 1 full attn)
+
+  Loading tokenizer...
+  Loading model...
+Traceback (most recent call last):
+  File "/home/dlewis3/Desktop/AI/DWARF/benchmarks/eval_suite.py", line 863, in <module>
+    main()
+  File "/home/dlewis3/Desktop/AI/DWARF/benchmarks/eval_suite.py", line 794, in main
+    model, n_params = load_model(cfg, device)
+                      ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dlewis3/Desktop/AI/DWARF/benchmarks/eval_suite.py", line 460, in load_model
+    model.load_state_dict(state)
+  File "/home/dlewis3/Desktop/AI/DWARF/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 2581, in load_state_dict
+    raise RuntimeError(
+RuntimeError: Error(s) in loading state_dict for CondMTransformer:
+	Missing key(s) in state_dict: "blocks.0.attn._offsets_t", "blocks.1.attn._offsets_t", "blocks.2.attn._offsets_t", "blocks.3.attn._offsets_t", "blocks.4.attn._offsets_t". 
+	Unexpected key(s) in state_dict: "blocks.0.attn.offsets", "blocks.1.attn.offsets", "blocks.2.attn.offsets", "blocks.3.attn.offsets", "blocks.4.attn.offsets". 
+ Finished: condm_27m  (Fri Feb 27 02:31:08 PM PST 2026)
+
+====================================================
+ All evals complete — Fri Feb 27 02:31:08 PM PST 2026
+ Results in: benchmarks/logs/eval_suite_*.json
+====================================================

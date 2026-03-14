@@ -1,0 +1,18 @@
+============================================================
+  DWARF External Benchmark Evaluator
+============================================================
+  GPU: NVIDIA GeForce RTX 4090
+  Tasks: ['hellaswag', 'piqa', 'arc_easy', 'arc_challenge', 'winogrande', 'lambada']
+  Tokenizer: /home/dlewis3/Desktop/AI/DWARF/results/2048_condI_tokenizer.json
+
+Loading from registry: condu_v5_13m
+Traceback (most recent call last):
+  File "/home/dlewis3/Desktop/AI/DWARF/evals/eval_external.py", line 516, in <module>
+    main()
+  File "/home/dlewis3/Desktop/AI/DWARF/evals/eval_external.py", line 476, in main
+    model, label = load_model_from_registry(args.model, device)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dlewis3/Desktop/AI/DWARF/evals/eval_external.py", line 129, in load_model_from_registry
+    model = build_model(cfg, device)
+            ^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: build_model() takes 1 positional argument but 2 were given

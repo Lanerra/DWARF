@@ -1,0 +1,23 @@
+
+============================================================
+  eval_suite.py — condm_v2
+  Device: cuda
+============================================================
+
+  Model: condM-v2 13M (SwiGLU+RMSNorm+RoPE, Layer 5)
+
+  Loading tokenizer...
+  Loading model...
+Traceback (most recent call last):
+  File "/home/dlewis3/Desktop/AI/DWARF/benchmarks/eval_suite.py", line 905, in <module>
+    main()
+  File "/home/dlewis3/Desktop/AI/DWARF/benchmarks/eval_suite.py", line 836, in main
+    model, n_params = load_model(cfg, device)
+                      ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dlewis3/Desktop/AI/DWARF/benchmarks/eval_suite.py", line 497, in load_model
+    model = build_model(cfg)
+            ^^^^^^^^^^^^^^^^
+  File "/home/dlewis3/Desktop/AI/DWARF/benchmarks/eval_suite.py", line 484, in build_model
+    return CondMV2Transformer(
+           ^^^^^^^^^^^^^^^^^^^
+TypeError: CondMV2Transformer.__init__() got an unexpected keyword argument 'D'

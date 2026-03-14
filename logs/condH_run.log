@@ -1,0 +1,9 @@
+======================================================================
+  WAVE FIELD 13M — CONDITION I
+  Causal D4 DWT + Query-Conditioned Scale Selection (Pre-Gather)
+  Testing: does per-position scale selection fix query-less gather?
+======================================================================
+
+  Device: cuda
+  GPU: NVIDIA GeForce RTX 4090
+Loading OpenWebText (up to 100,000 docs)...

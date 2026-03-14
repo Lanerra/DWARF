@@ -1,0 +1,64 @@
+
+============================================================
+  eval_suite.py — standard_27m
+  Device: cuda
+============================================================
+
+  Model: Standard Transformer 27M
+
+  Loading tokenizer...
+  Loading model...
+  Loaded Standard Transformer 27M: 37,971,200 params from 27M.ptrom
+
+  [1/4] Calibration...
+    entropy=7.726 bits  top1=0.155  eff_vocab=35.4  (0.1s)
+
+  [2/4] Distance-conditioned loss (wikitext-103)...
+    Loading wikitext-103 test split...
+    Using 17 full 2048-token chunks
+    Buckets:
+    0-16          PPL= 390.19  n=  289
+    17-64         PPL= 199.23  n=  816
+    65-256        PPL= 122.79  n= 3264
+    257-512       PPL= 106.78  n= 4352
+    513-1024      PPL=  82.19  n= 8704
+    1025-2047     PPL=  84.07  n=17374
+    (3.3s)
+
+  [3/4] Few-shot string copy...
+    exact=6/15  (40.0%)  mean_lev=7.33  (0.5s)
+
+  [4/4] Passkey retrieval...
+    d=    1: accuracy=40.0%
+    d=    2: accuracy=40.0%
+    d=    4: accuracy=40.0%
+    d=    8: accuracy=40.0%
+    d=   16: accuracy=20.0%
+    d=   32: accuracy=40.0%
+    d=   64: accuracy=20.0%
+    d=  128: accuracy=20.0%
+    d=  256: accuracy=40.0%
+    d=  512: accuracy=20.0%
+    d= 1024: accuracy=40.0%
+    d= 1536: accuracy=20.0%
+    mean_accuracy=31.7%  (0.2s)
+
+  Generation samples (greedy + T=0.7)...
+
+  [greedy]
+    'It was a dark and stormy'               → ', and the weather was a big part of the storm.\n\nThe storm was a big part of the '
+    'The length of the hypotenuse'           → ' of the object, and the object is the object. The object is the object, and the '
+    'The President of the United'            → ' States, the United States, and the United States, the United States, and the Un'
+    'Once upon a time there was'             → ' a time when the first time I was in the middle of the night. I was in the middl'
+    'The results indicate that'              → ' the results of the results of the results of the results of the results of the '
+
+  [T=0.7]
+    'It was a dark and stormy'               → ', and the impact of the sun.\n\n"The sun will be pretty amazing," said Roger Pécar'
+    'The length of the hypotenuse'           → ' section is completed, and the end of the page is completed, as it is on the pag'
+    'The President of the United'            → ' Nations and the UN, including the United Nations, on the basis of UN peace and '
+    'Once upon a time there was'             → ' no way to return. That was to the point of how many of the people in the buildi'
+    'The results indicate that'              → ' the Russians were fighting for an extension of the Soviet Union. This was the c'
+
+  Results saved to /home/dlewis3/Desktop/AI/DWARF/evals/logs/eval_suite_standard_27m_20260313_135629.json
+============================================================
+

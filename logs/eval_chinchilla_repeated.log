@@ -1,0 +1,20 @@
+
+============================================================
+  eval_suite.py — condm_chinchilla_repeated
+  Device: cuda
+============================================================
+
+  Model: condM 13M Chinchilla-Repeated (100K docs x 10 epochs)
+
+  Loading tokenizer...
+  Loading model...
+  WARNING: unexpected keys: ['blocks.0.ffn.net.0.weight', 'blocks.0.ffn.net.0.bias', 'blocks.0.ffn.net.3.weight', 'blocks.0.ffn.net.3.bias', 'blocks.1.ffn.net.0.weight', 'blocks.1.ffn.net.0.bias', 'blocks.1.ffn.net.3.weight', 'blocks.1.ffn.net.3.bias', 'blocks.2.ffn.net.0.weight', 'blocks.2.ffn.net.0.bias', 'blocks.2.ffn.net.3.weight', 'blocks.2.ffn.net.3.bias', 'blocks.3.ffn.net.0.weight', 'blocks.3.ffn.net.0.bias', 'blocks.3.ffn.net.3.weight', 'blocks.3.ffn.net.3.bias', 'blocks.4.ffn.net.0.weight', 'blocks.4.ffn.net.0.bias', 'blocks.4.ffn.net.3.weight', 'blocks.4.ffn.net.3.bias', 'blocks.5.attn.qkv.weight', 'blocks.5.ffn.net.0.weight', 'blocks.5.ffn.net.0.bias', 'blocks.5.ffn.net.3.weight', 'blocks.5.ffn.net.3.bias']
+Traceback (most recent call last):
+  File "/home/dlewis3/Desktop/AI/DWARF/benchmarks/eval_suite.py", line 972, in <module>
+    main()
+  File "/home/dlewis3/Desktop/AI/DWARF/benchmarks/eval_suite.py", line 903, in main
+    model, n_params = load_model(cfg, device)
+                      ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dlewis3/Desktop/AI/DWARF/benchmarks/eval_suite.py", line 570, in load_model
+    raise RuntimeError(f"Missing non-buffer keys: {other_missing}")
+RuntimeError: Missing non-buffer keys: ['blocks.0.ffn.fc1.weight', 'blocks.0.ffn.fc1.bias', 'blocks.0.ffn.fc2.weight', 'blocks.0.ffn.fc2.bias', 'blocks.1.ffn.fc1.weight', 'blocks.1.ffn.fc1.bias', 'blocks.1.ffn.fc2.weight', 'blocks.1.ffn.fc2.bias', 'blocks.2.ffn.fc1.weight', 'blocks.2.ffn.fc1.bias', 'blocks.2.ffn.fc2.weight', 'blocks.2.ffn.fc2.bias', 'blocks.3.ffn.fc1.weight', 'blocks.3.ffn.fc1.bias', 'blocks.3.ffn.fc2.weight', 'blocks.3.ffn.fc2.bias', 'blocks.4.ffn.fc1.weight', 'blocks.4.ffn.fc1.bias', 'blocks.4.ffn.fc2.weight', 'blocks.4.ffn.fc2.bias', 'blocks.5.attn.qkv_proj.weight', 'blocks.5.attn.qkv_proj.bias', 'blocks.5.attn.out_proj.bias', 'blocks.5.attn.gate_proj.weight', 'blocks.5.attn.gate_proj.bias', 'blocks.5.ffn.fc1.weight', 'blocks.5.ffn.fc1.bias', 'blocks.5.ffn.fc2.weight', 'blocks.5.ffn.fc2.bias']

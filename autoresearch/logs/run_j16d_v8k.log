@@ -1,0 +1,71 @@
+======================================================================
+  🔬 DWARF — J16D 14M V=8K Vocabulary Test
+  Hypothesis: V=8K reduces LM head gradient suppression 98.4%→93.6%
+======================================================================
+  GPU: NVIDIA GeForce RTX 4090
+  D=256, H=8, L=6, FFN=1024
+  scale_embed init=0.1, LR mult=15.0
+  MAX_TRAIN_SEQS=52716, LR=0.0003, Epochs=3
+Loading V=8K tokenizer from results/fineweb_v8k_tokenizer.json
+Tokenizer vocab: 8192
+Gradient suppression: V=32K=98.4%  V=8192=93.7%
+Loading FineWeb-Edu from cache: benchmarks/logs/condm_fineweb_edu_doc_cache.json
+  100,000 docs
+Loading pre-encoded dataset from logs/fineweb_encoded_2048_v8k.pt
+  train: 52,716  val: 5,582 seqs
+Parameters: 7,958,904 (8.0M)
+  Step 200/1648 | Loss 6.1153
+  Step 400/1648 | Loss 5.6796
+  Step 600/1648 | Loss 5.2373
+  Step 800/1648 | Loss 5.0788
+  Step 1000/1648 | Loss 5.0422
+  Step 1200/1648 | Loss 4.8370
+  Step 1400/1648 | Loss 4.7538
+  Step 1600/1648 | Loss 4.5901
+
+Ep 1/3 | Val PPL 88.38 *
+  scale_embed |mean|=0.5152 |max|=2.9663
+  Passkey mean=10.8%
+  d=1:20%  d=2:10%  d=4:10%  d=8:10%  d=16:10%  d=32:10%  d=64:10%  d=128:10%  d=256:10%  d=512:10%  d=1024:10%  d=1536:10%
+  Step 200/1648 | Loss 4.4261
+  Step 400/1648 | Loss 4.4632
+  Step 600/1648 | Loss 4.3372
+  Step 800/1648 | Loss 4.0313
+  Step 1000/1648 | Loss 4.2890
+  Step 1200/1648 | Loss 4.3725
+  Step 1400/1648 | Loss 4.1360
+  Step 1600/1648 | Loss 4.1196
+
+Ep 2/3 | Val PPL 56.27 *
+  scale_embed |mean|=0.5039 |max|=2.6748
+  Passkey mean=25.8%
+  d=1:50%  d=2:60%  d=4:30%  d=8:30%  d=16:30%  d=32:30%  d=64:20%  d=128:20%  d=256:10%  d=512:10%  d=1024:10%  d=1536:10%
+  Step 200/1648 | Loss 4.2408
+  Step 400/1648 | Loss 4.1179
+  Step 600/1648 | Loss 3.9925
+  Step 800/1648 | Loss 4.0975
+  Step 1000/1648 | Loss 4.1564
+  Step 1200/1648 | Loss 4.1375
+  Step 1400/1648 | Loss 4.1115
+  Step 1600/1648 | Loss 3.9792
+
+Ep 3/3 | Val PPL 53.68 *
+  scale_embed |mean|=0.4978 |max|=2.5630
+  Passkey mean=26.7%
+  d=1:60%  d=2:60%  d=4:30%  d=8:30%  d=16:30%  d=32:30%  d=64:20%  d=128:20%  d=256:10%  d=512:10%  d=1024:10%  d=1536:10%
+
+---
+passkey_ep1:    10.8
+passkey_ep2:    25.8
+passkey_ep3:    26.7
+ppl_ep1:        88.38
+ppl_ep2:        56.27
+ppl_ep3:        53.68
+ar_score:       8.37
+memory_mb:      3373.1
+elapsed_s:      1201.0
+num_params_M:   8.0
+vocab_size:     8192
+scale_embed_lr_mult: 15.0
+scale_embed_init: 0.1
+description:    J16D V=8K 14M — D=256, V=8192, scale_embed_init=0.1, lr_mult=15.0

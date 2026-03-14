@@ -1,0 +1,244 @@
+======================================================================
+  DWARF 27M condM — 5:1 Hybrid (5 condN DSQG + 1 Full Causal Attention)
+  D=400, H=8, d_head=50, L=6, FFN=1600
+  Full attention at layer 5 (0-indexed)
+======================================================================
+  GPU: NVIDIA H200  (150.1 GB)
+  Checkpoint → 2048_27m_condM_checkpoints/
+Loading OpenWebText (up to 100,000 docs)...
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+  25,000 docs...
+  50,000 docs...
+  75,000 docs...
+  100,000 docs...
+Loaded condI BPE tokenizer from /root/DWARF/benchmarks/results/2048_condI_tokenizer.json
+Encoding data (max_seq_len=2048)...
+  Train: 52,716 sequences
+  Val: 1,435 sequences
+  Test: 1,459 sequences
+
+condM: 26,457,760 parameters
+  Layer types: ['DSQG', 'DSQG', 'DSQG', 'DSQG', 'DSQG', 'FULL']
+  Note: DSQG layers use condN offsets (44); layer 5 is O(N²) causal
+Running causality check...
+  Pre-10:  0.00000000  (expect 0.0)
+  Pos-10:  1.247121  (expect >0)
+  Post-10: 0.480935  (expect >0)
+  PASS
+/usr/local/lib/python3.11/dist-packages/torch/utils/checkpoint.py:1399: FutureWarning: `torch.cpu.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cpu', args...)` instead.
+  with device_autocast_ctx, torch.cpu.amp.autocast(**cpu_autocast_kwargs), recompute_context:  # type: ignore[attr-defined]
+  Step 200/1648 | Loss 6.1605
+  Step 400/1648 | Loss 5.6830
+  Step 600/1648 | Loss 5.3820
+  Step 800/1648 | Loss 5.3958
+  Step 1000/1648 | Loss 5.1547
+  Step 1200/1648 | Loss 5.0055
+  Step 1400/1648 | Loss 4.9449
+  Step 1600/1648 | Loss 4.8799
+Ep 1/10 | Train 4.8766 | Val 4.7719 PPL 118.1 * BEST | 1634s
+  DSQG pos-bias: |mean|=3.5992 |max|=13.9841 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' → ', and it was a little bit of a little bit of a little bit of a little bit.\n\nThe '
+    'The length of the hypotenuse' → 'ment of the de-dentant, the first time the de-dentant of the de-dentant, the de-'
+    'The President of the United' → ' States, and the United States, the United States, and the United States, and th'
+    'Once upon a time there was' → ' a lot of people who were in the world, and I was in the world. I was a very goo'
+    'The results indicate that' → ' the results of the study were not reported.\n\nThe report found that the report w'
+  ──
+  Step 200/1648 | Loss 4.7712
+  Step 400/1648 | Loss 4.5964
+  Step 600/1648 | Loss 4.5203
+  Step 800/1648 | Loss 4.5085
+  Step 1000/1648 | Loss 4.4000
+  Step 1200/1648 | Loss 4.3573
+  Step 1400/1648 | Loss 4.4009
+  Step 1600/1648 | Loss 4.3225
+Ep 2/10 | Train 4.1753 | Val 4.2178 PPL 67.9 * BEST | 3263s
+  DSQG pos-bias: |mean|=3.5441 |max|=13.3581 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' → ', and the other people were killed.\n\nThe first thing the people were saying was '
+    'The length of the hypotenuse' → ' of the rest of the world.\n\nThe first thing that I’ve seen is that I’ve seen a l'
+    'The President of the United' → ' States, and the United States, the United States, and the United States, the Un'
+    'Once upon a time there was' → ' a chance to be able to get a chance to get a chance to get a chance to get a ch'
+    'The results indicate that' → ' the results of the results are not necessarily true.\n\nThe results of the result'
+  ──
+  Step 200/1648 | Loss 4.2192
+  Step 400/1648 | Loss 4.1025
+  Step 600/1648 | Loss 4.0975
+  Step 800/1648 | Loss 4.1355
+  Step 1000/1648 | Loss 4.0644
+  Step 1200/1648 | Loss 4.2055
+  Step 1400/1648 | Loss 4.1637
+  Step 1600/1648 | Loss 4.1148
+Ep 3/10 | Train 4.0883 | Val 4.0537 PPL 57.6 * BEST | 4908s
+  DSQG pos-bias: |mean|=3.4822 |max|=12.8229 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' → ', and it was a very dark, dark, dark, dark, dark, dark, dark, dark, dark, dark, '
+    'The length of the hypotenuse' → ' of the intestine is the same as the intestine.\n\nThe length of the intestine is '
+    'The President of the United' → ' States has been in the process of making the case for the first time since the '
+    'Once upon a time there was' → ' a time when the first time I was in the room was a little bit of a surprise.\n\nT'
+    'The results indicate that' → ' the results are not statistically significant.\n\nThe results are based on the re'
+  ──
+  Step 200/1648 | Loss 4.1311
+  Step 400/1648 | Loss 4.0547
+  Step 600/1648 | Loss 3.9296
+  Step 800/1648 | Loss 4.0413
+  Step 1000/1648 | Loss 4.0103
+  Step 1200/1648 | Loss 4.0917
+  Step 1400/1648 | Loss 3.9560
+  Step 1600/1648 | Loss 4.0253
+Ep 4/10 | Train 3.8469 | Val 3.9683 PPL 52.9 * BEST | 6557s
+  DSQG pos-bias: |mean|=3.4239 |max|=12.3788 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' → ', and I was very excited about the new season. I was excited to see the new seas'
+    'The length of the hypotenuse' → ' is a bit of a puzzle. The first thing I’ve seen is that the first thing I’ve se'
+    'The President of the United' → ' States, and the United States, have been in the process of making a decision to'
+    'Once upon a time there was' → ' a lot of work to do.\n\nThe first thing I’ve done is to make sure that I’m not go'
+    'The results indicate that' → ' the number of people who are in the workforce is at least half of the workforce'
+  ──
+  Step 200/1648 | Loss 4.0296
+  Step 400/1648 | Loss 4.0002
+  Step 600/1648 | Loss 3.9708
+  Step 800/1648 | Loss 3.8350
+  Step 1000/1648 | Loss 3.7805
+  Step 1200/1648 | Loss 4.0342
+  Step 1400/1648 | Loss 3.9316
+  Step 1600/1648 | Loss 4.0406
+Ep 5/10 | Train 3.8622 | Val 3.9092 PPL 49.9 * BEST | 8200s
+  DSQG pos-bias: |mean|=3.3748 |max|=12.0374 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' → ', but it was a very dark and cold, and it was a very dark and cold, and it was a'
+    'The length of the hypotenuse' → ' is a bit of a surprise.\n\nThe first thing I’ve seen is that the first thing I’ve'
+    'The President of the United' → ' States, and the President of the United States, the President of the United Sta'
+    'Once upon a time there was' → ' no way to go.\n\nThe first thing I’ve seen is that I’ve been able to do a lot of '
+    'The results indicate that' → ' the number of people who are in the workforce is at least at least at least at '
+  ──
+  Step 200/1648 | Loss 3.8955
+  Step 400/1648 | Loss 3.9272
+  Step 600/1648 | Loss 3.8918
+  Step 800/1648 | Loss 3.9139
+  Step 1000/1648 | Loss 3.9305
+  Step 1200/1648 | Loss 3.7203
+  Step 1400/1648 | Loss 3.9592
+  Step 1600/1648 | Loss 3.8706
+Ep 6/10 | Train 3.9284 | Val 3.8716 PPL 48.0 * BEST | 9836s
+  DSQG pos-bias: |mean|=3.3374 |max|=11.7935 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' → ' day.\n\nThe first time I saw the first time I saw the first of the first two days'
+    'The length of the hypotenuse' → ' is a bit of a shock. The amount of time the person has to spend on the rest of '
+    'The President of the United' → ' States, who has been a member of the United States since the 1970s, has been a '
+    'Once upon a time there was' → ' a new one, but it was a very different story.\n\nThe first time I saw the first t'
+    'The results indicate that' → ' the number of people who are in the United States is at least at least at least'
+  ──
+  Step 200/1648 | Loss 3.8886
+  Step 400/1648 | Loss 3.8622
+  Step 600/1648 | Loss 3.8112
+  Step 800/1648 | Loss 3.9052
+  Step 1000/1648 | Loss 3.8460
+  Step 1200/1648 | Loss 3.8994
+  Step 1400/1648 | Loss 3.8221
+  Step 1600/1648 | Loss 3.9194
+Ep 7/10 | Train 3.8981 | Val 3.8431 PPL 46.7 * BEST | 11469s
+  DSQG pos-bias: |mean|=3.3124 |max|=11.6377 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' → ', and it was a very dark and dark, and it was a very dark and dark, and it was a'
+    'The length of the hypotenuse' → ' is a bit of a stretch. The length of the cap is a bit of a stretch. The length '
+    'The President of the United' → ' States, and the president of the United States, have been in the process of mak'
+    'Once upon a time there was' → ' a time when the world was in a different place.\n\nThe first time I saw the first'
+    'The results indicate that' → ' the number of people who are in the workforce is more than half of the workforc'
+  ──
+  Step 200/1648 | Loss 3.8270
+  Step 400/1648 | Loss 3.8418
+  Step 600/1648 | Loss 3.7563
+  Step 800/1648 | Loss 3.7457
+  Step 1000/1648 | Loss 3.7647
+  Step 1200/1648 | Loss 3.8006
+  Step 1400/1648 | Loss 3.8646
+  Step 1600/1648 | Loss 3.8912
+Ep 8/10 | Train 3.5128 | Val 3.8271 PPL 45.9 * BEST | 13078s
+  DSQG pos-bias: |mean|=3.2984 |max|=11.5550 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' → ', and it was a very dark and dark, and it was a very dark and dark, and it was a'
+    'The length of the hypotenuse' → ' is a bit of a shock. The amount of time spent on the hypotenuse is a bit of a s'
+    'The President of the United' → ' States, and the president of the United States, have been in the process of mak'
+    'Once upon a time there was' → ' a time when the world was still in the dark.\n\nThe first time I saw the first ti'
+    'The results indicate that' → ' the number of people who are in the workforce is at least 10 times higher than '
+  ──
+  Step 200/1648 | Loss 3.8988
+  Step 400/1648 | Loss 3.8440
+  Step 600/1648 | Loss 3.7914
+  Step 800/1648 | Loss 3.8909
+  Step 1000/1648 | Loss 3.7515
+  Step 1200/1648 | Loss 3.7242
+  Step 1400/1648 | Loss 3.6930
+  Step 1600/1648 | Loss 3.7760
+Ep 9/10 | Train 3.9568 | Val 3.8192 PPL 45.6 * BEST | 14712s
+  DSQG pos-bias: |mean|=3.2930 |max|=11.5227 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' → ', and I was very happy to be there. I was very happy to be there. I was very hap'
+    'The length of the hypotenuse' → ' is a bit of a shock. The amount of time the cap is spent on the cap is a bit of'
+    'The President of the United' → ' States, and the president of the United States, have been in the process of mak'
+    'Once upon a time there was' → ' a time when the world was still in the dark.\n\nThe first time I saw the first ti'
+    'The results indicate that' → ' the number of people who are in the workforce is at least 10 times higher than '
+  ──
+  Step 200/1648 | Loss 3.8103
+  Step 400/1648 | Loss 3.8081
+  Step 600/1648 | Loss 3.8535
+  Step 800/1648 | Loss 3.6491
+  Step 1000/1648 | Loss 3.8502
+  Step 1200/1648 | Loss 3.7111
+  Step 1400/1648 | Loss 3.8616
+  Step 1600/1648 | Loss 3.9319
+Ep 10/10 | Train 3.8810 | Val 3.8180 PPL 45.5 * BEST | 16343s
+  DSQG pos-bias: |mean|=3.2922 |max|=11.5181 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' → ', and I was very happy to be there. I was very happy to be there. I was very hap'
+    'The length of the hypotenuse' → ' is a bit of a shock. The amount of time the cap is spent on the cap is a bit of'
+    'The President of the United' → ' States, and the President of the United States, have been in the process of mak'
+    'Once upon a time there was' → ' a time when the world was still in the dark.\n\nThe first time I saw the first ti'
+    'The results indicate that' → ' the number of people who are in the workforce is at least 10 times higher than '
+  ──
+
+  condM TEST: PPL 44.5 | Loss 3.7953
+
+  ── Temperature sweep (best checkpoint) ──
+
+  [greedy]
+    'It was a dark and stormy' → ', and I was very happy to be there. I was very happy to be there. I was very hap'
+    'The length of the hypotenuse' → ' is a bit of a shock. The amount of time the cap is spent on the cap is a bit of'
+    'The President of the United' → ' States, and the President of the United States, have been in the process of mak'
+    'Once upon a time there was' → ' a time when the world was still in the dark.\n\nThe first time I saw the first ti'
+    'The results indicate that' → ' the number of people who are in the workforce is at least 10 times higher than '
+
+  [T=0.5]
+    'It was a dark and stormy' → ' night.\n\nThe sun was shining brightly.\n\n“I’m not sure what it’s like to be in th'
+    'The length of the hypotenuse' → ' is less than a half-decade. The length of the hypotenuse is much higher than th'
+    'The President of the United' → ' States, and the president of the United States, have been in charge of Cohen’s '
+    'Once upon a time there was' → ' no such thing as a giant-screen shooter.\n\nBut, as the camera was at the time, i'
+    'The results indicate that' → ' the US is a poor country, and the US is not a poor country.\n\nThe US is not a po'
+
+  [T=0.7]
+    'It was a dark and stormy' → ' place. There was no sunshine, no rain and no sunshine, no rain, no storm, no ra'
+    'The length of the hypotenuse' → ' has been reduced to a 1/2 inch weight loss. The weight loss of the platformer h'
+    'The President of the United' → ' States has refused to address the issue.\n\nThe President said his country has "n'
+    'Once upon a time there was' → ' a new episode in the current episode.\n\nI got into a new episode of Doctor Who, '
+    'The results indicate that' → ' the average age of the population has been at least three times higher than the'
+
+  [T=1.0]
+    'It was a dark and stormy' → ' island and a rush of smoke, air and nuclear weapons could finally be installed '
+    'The length of the hypotenuse' → ' ceiling to a maximum of 120µs and 93µs will be ideal for floating in the leg of'
+    'The President of the United' → ' States becomes the target for punishing violent crimes.”\n\nSo what would the Uni'
+    'Once upon a time there was' → ' no way to visit the bottom of the room. He had only been to the top of the room'
+    'The results indicate that' → ' people are more worried about cars becoming worse.\n\nHealth professionals would '
+
+======================================================================
+  27M condM ABLATION SUMMARY
+======================================================================
+  Standard transformer 13M (reference)                   ~64-68
+  condN (pure DSQG, 44 offsets)                           ~70.7
+  condM (5 DSQG + 1 full attn, hybrid)                     44.5
+
+  condM vs condN (projected): -26.2 PPL
+  → Full attention layer provides critical global context; hybrid is the path
+
+  Results → /root/DWARF/benchmarks/2048_27m_condM_results.json
+

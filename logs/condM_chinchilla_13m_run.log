@@ -1,0 +1,73 @@
+=================================================================
+  condM 13.97M — Chinchilla-Optimized | H200 SXM Edition
+  D=256 H=8 L=6 FFN=1024 full_attn=layer5
+  Docs: 400,000 | Epochs: 1 | B=64 GA=1 | LR=6.0e-04
+  dtype: torch.bfloat16 | device: cuda
+=================================================================
+  GPU: NVIDIA H200  (150GB)
+  Tokenizer: 2048_condI_tokenizer.json  (vocab=32000)
+  Loading tokenized cache (1.83 GB): /workspace/DWARF/benchmarks/.chinchilla_cache_400000docs.pt
+  Train: 212,785 seqs | Val: 5,476 | Test: 5,539
+
+  Params: 13,984,480  (ref condM 13M: 13,984,480 — MATCH)
+  Layers: ['DSQG', 'DSQG', 'DSQG', 'DSQG', 'DSQG', 'FULL']
+  Interference at: [2]
+  Chinchilla tokens/param target: 20 -> 280M tokens minimum
+  Causality: PASS  pre-10 max=0.00000000  pos-10 max=0.6562
+  Running eager (no torch.compile — fast on H200 SXM for small models)
+
+  Total steps:    3325
+  Warmup steps:   166
+  Unique tokens:  436M (31.2 tok/param)
+
+  Step   166/3325 | Loss 8.0233 | LR 6.00e-04 | 0.15M tok/s | 141s elapsed
+  Step   332/3325 | Loss 6.0381 | LR 5.96e-04 | 0.16M tok/s | 280s elapsed
+  Step   498/3325 | Loss 5.5873 | LR 5.85e-04 | 0.15M tok/s | 421s elapsed
+  Step   664/3325 | Loss 5.3364 | LR 5.68e-04 | 0.16M tok/s | 558s elapsed
+  Step   830/3325 | Loss 5.1656 | LR 5.43e-04 | 0.16M tok/s | 696s elapsed
+  Step   996/3325 | Loss 5.0363 | LR 5.13e-04 | 0.16M tok/s | 833s elapsed
+  Step  1162/3325 | Loss 4.9307 | LR 4.78e-04 | 0.16M tok/s | 971s elapsed
+  Step  1328/3325 | Loss 4.8330 | LR 4.39e-04 | 0.16M tok/s | 1108s elapsed
+  Step  1494/3325 | Loss 4.7176 | LR 3.97e-04 | 0.16M tok/s | 1245s elapsed
+  Step  1660/3325 | Loss 4.6162 | LR 3.53e-04 | 0.16M tok/s | 1382s elapsed
+  Step  1826/3325 | Loss 4.5342 | LR 3.08e-04 | 0.16M tok/s | 1519s elapsed
+  Step  1992/3325 | Loss 4.4782 | LR 2.64e-04 | 0.16M tok/s | 1657s elapsed
+  Step  2158/3325 | Loss 4.4391 | LR 2.22e-04 | 0.16M tok/s | 1795s elapsed
+  Step  2324/3325 | Loss 4.4039 | LR 1.83e-04 | 0.16M tok/s | 1933s elapsed
+  Step  2490/3325 | Loss 4.3817 | LR 1.48e-04 | 0.16M tok/s | 2070s elapsed
+  Step  2656/3325 | Loss 4.3699 | LR 1.18e-04 | 0.16M tok/s | 2207s elapsed
+  Step  2822/3325 | Loss 4.3364 | LR 9.31e-05 | 0.16M tok/s | 2344s elapsed
+  Step  2988/3325 | Loss 4.3276 | LR 7.50e-05 | 0.16M tok/s | 2481s elapsed
+  Step  3154/3325 | Loss 4.3140 | LR 6.39e-05 | 0.16M tok/s | 2619s elapsed
+  Step  3320/3325 | Loss 4.3011 | LR 6.00e-05 | 0.16M tok/s | 2756s elapsed
+  Step  3325/3325 | Loss 0.1307 | LR 6.00e-05 | 0.16M tok/s | 2760s elapsed
+
+  Val PPL: 67.785
+  pos-bias: |mean|=3.5356 |max|=13.1791 most-local=h7 most-global=h0
+
+  -- Generation (T=0.7) --
+  'It was a dark and stormy'          -> ' storm that had been coming in for decades, but the storm was still rising.\n\nThe storm was taken hom'
+  'The length of the hypotenuse'      -> ' of the subjects. As a result, the results of the mathematical subsumes, and the probability of the '
+  'The President of the United'       -> ' States in the Western Union, the latter was given concern for the United States as an international'
+  'Once upon a time there was'        -> ' no one to tell.\n\nAccording to the report, “in the course of the day, there is a small number of pos'
+  'The results indicate that'         -> ' the confirmation of the case was a nightmare for the users who think the hackers were as a very goo'
+
+  ==============================================================
+  RESULTS — condM 13M: Undertrained vs Chinchilla
+  ==============================================================
+  Model                                        Test PPL
+  -----------------------------------------------------
+  Standard 13M (100K docs x10 epochs)             64.07
+  condM 13M (100K docs x10 epochs)               54.529
+  condM 27M (100K docs x10 epochs)               44.500
+  condM 13M CHINCHILLA (this run)                68.155  <- NEW
+  -----------------------------------------------------
+  vs undertrained condM 13M: +13.626 PPL (regression)
+
+  Total time:    2828s (0.79h)
+  Unique tokens: 0.436B
+  Tok/param:     31.2
+  ==============================================================
+
+  Results -> /workspace/DWARF/benchmarks/condM_chinchilla_13m_results.json
+

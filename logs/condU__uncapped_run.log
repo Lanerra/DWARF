@@ -1,0 +1,21 @@
+======================================================================
+  condU -- Q-Weighted Scale Gains (13M, FineWeb-Edu)
+======================================================================
+  GPU: NVIDIA GeForce RTX 4090  (23.6 GB)
+  Kernel: dsqg_attention_v3 (scale_embed [44,HD], zero init)
+  Changes vs condT: drop band masking -> soft Q-weighted gains
+  Retained: Huygens K/V injection, IF amplifier
+  Architecture: INTERFERENCE=3, gate=0, 1 FullAttn @ layer 5
+  References: I3G0=52.948 PPL/53.3% pk | condM=54.529/83.3%
+Loading FineWeb-Edu from cache: benchmarks/logs/condm_fineweb_edu_doc_cache.json
+  Loaded 100,000 docs from cache
+
+Loaded condI BPE tokenizer from /home/dlewis3/Desktop/AI/DWARF/benchmarks/results/2048_condI_tokenizer.json
+Loading pre-encoded dataset from benchmarks/logs/fineweb_encoded_2048.pt ...
+Traceback (most recent call last):
+  File "/home/dlewis3/Desktop/AI/DWARF/benchmarks/train_2048_condU_uncapped.py", line 792, in <module>
+    main()
+  File "/home/dlewis3/Desktop/AI/DWARF/benchmarks/train_2048_condU_uncapped.py", line 753, in main
+    if len(train_data) > MAX_TRAIN_SEQS:
+                         ^^^^^^^^^^^^^^
+NameError: name 'MAX_TRAIN_SEQS' is not defined

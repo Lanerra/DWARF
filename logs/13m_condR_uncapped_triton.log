@@ -1,0 +1,83 @@
+======================================================================
+  condR-Uncapped — condR architecture, FineWeb-Edu uncapped (13M)
+======================================================================
+  GPU: NVIDIA GeForce RTX 4090  (23.6 GB)
+  Bug fixes: evaluate range, epoch-mean loss, SDPA dropout,
+             VOCAB_SIZE, docstring
+  Experiments:
+    A. Gate weight zero-init (Gemini)
+    B. Gate from out_flat, not x (Opus)
+    C. Gate bias 1.0 (Opus, better gradient flow)
+    D. INTERFERENCE=2 (Opus, more layers get global signal)
+       Interference layers: [1, 3] (was [2] with interval=3)
+    E. LR warmup 200 steps (Opus)
+    F. Checkpoint FullAttentionBlock (Opus)
+Loading FineWeb-Edu from cache: benchmarks/logs/condm_fineweb_edu_doc_cache.json
+  Loaded 100,000 docs from cache
+
+Loaded condI BPE tokenizer from /home/dlewis3/Desktop/AI/DWARF/benchmarks/results/2048_condI_tokenizer.json
+Encoding data (max_seq_len=2048)...
+  Train: 212,458 sequences
+  Uncapped: using all 212,458 train sequences
+  Val: 5,582 sequences
+  Test: 5,473 sequences
+
+condR: 14,116,576 parameters
+  Layer types: ['DSQG', 'DSQG', 'DSQG', 'DSQG', 'DSQG', 'FULL']
+Running causality check...
+  Pre-10:  0.00000000  (expect 0.0)
+  Pos-10:  0.912759  (expect >0)
+  Post-10: 0.361333  (expect >0)
+  PASS
+
+  Tokens/epoch: 434,901,526
+  Chinchilla:   282,331,520 tokens (epoch ~0.65)
+  Warmup:       200 steps then cosine decay
+
+  Step 200/6640 | Loss 6.9959 | LR 3.00e-04
+  Step 400/6640 | Loss 6.2478 | LR 3.00e-04
+  Step 600/6640 | Loss 5.9446 | LR 3.00e-04
+  Step 800/6640 | Loss 5.6513 | LR 3.00e-04
+  Step 1000/6640 | Loss 5.5761 | LR 3.00e-04
+  Step 1200/6640 | Loss 5.3963 | LR 2.99e-04
+  Step 1400/6640 | Loss 5.2167 | LR 2.99e-04
+  Step 1600/6640 | Loss 5.1645 | LR 2.99e-04
+  Step 1800/6640 | Loss 4.7932 | LR 2.98e-04
+  Step 2000/6640 | Loss 4.9991 | LR 2.98e-04
+  Step 2200/6640 | Loss 4.9499 | LR 2.97e-04
+  Step 2400/6640 | Loss 4.7719 | LR 2.97e-04
+  Step 2600/6640 | Loss 4.8324 | LR 2.96e-04
+  Step 2800/6640 | Loss 4.6442 | LR 2.95e-04
+  Step 3000/6640 | Loss 4.7227 | LR 2.95e-04
+  Step 3200/6640 | Loss 4.4923 | LR 2.94e-04
+  Step 3400/6640 | Loss 4.5743 | LR 2.93e-04
+  Step 3600/6640 | Loss 4.3670 | LR 2.92e-04
+  Step 3800/6640 | Loss 4.4399 | LR 2.91e-04
+  Step 4000/6640 | Loss 4.5180 | LR 2.90e-04
+  Step 4200/6640 | Loss 4.5794 | LR 2.89e-04
+  Step 4400/6640 | Loss 4.5003 | LR 2.88e-04
+  Step 4600/6640 | Loss 4.2693 | LR 2.87e-04
+  Step 4800/6640 | Loss 4.4593 | LR 2.86e-04
+  Step 5000/6640 | Loss 4.3594 | LR 2.85e-04
+  Step 5200/6640 | Loss 4.2580 | LR 2.83e-04
+  Step 5400/6640 | Loss 4.2833 | LR 2.82e-04
+  Step 5600/6640 | Loss 4.1693 | LR 2.81e-04
+  Step 5800/6640 | Loss 4.1826 | LR 2.79e-04
+  Step 6000/6640 | Loss 4.2058 | LR 2.78e-04
+  Step 6200/6640 | Loss 4.2234 | LR 2.76e-04
+  Step 6400/6640 | Loss 4.1616 | LR 2.75e-04
+  Step 6600/6640 | Loss 3.9985 | LR 2.73e-04
+Ep 1/5 | Train 4.8736 | Val 4.0908 PPL 59.8 * BEST | 1400s (154%C)
+  DSQG pos-bias: |mean|=3.3411 |max|=12.1442 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' -> ' storm.\nThe first thing was to be a storm, and the next day, the next day, the n'
+    'The length of the hypotenuse' -> ' is the length of the intestine. The intestine is the length of the intestine, a'
+    'The President of the United' -> ' States, the President of the United States, and the President of the United Sta'
+    'Once upon a time there was' -> ' a great deal of time, and the time was not so much.\nThe first time the first ti'
+    'The results indicate that' -> ' the data is not available.\nThe data is not available in the database. The data '
+  ──
+  Passkey...
+  mean=25.0%  (0/12 distances >50%)
+  d=1:40%  d=2:40%  d=4:40%  d=8:40%  d=16:40%  d=32:40%  d=64:20%  d=128:20%  d=256:20%  d=512:0%  d=1024:0%  d=1536:0%
+  *** New best passkey: 25.0% at epoch 1 ***
+  Step 200/6640 | Loss 4.1113 | LR 2.71e-04

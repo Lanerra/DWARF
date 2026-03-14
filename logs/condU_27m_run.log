@@ -1,0 +1,303 @@
+======================================================================
+  condU 35M — Q-Weighted Scale Gains + IF Amplifier + Huygens K/V
+  D=512, H=8, d_head=64, L=6, FFN=2048
+  Full attention at layer 5 (0-indexed)
+======================================================================
+  GPU: NVIDIA GeForce RTX 4090  (23.6 GB)
+  Kernel: dsqg_attention_v3 (HD=64, BLOCK_HD=64, scale_embed [44,64])
+  Physics: QW scale gains + IF amplifier + Huygens K/V injection
+  Architecture: INTERFERENCE=3, gate=0, 1 FullAttn @ layer 5
+  References: condM_27M=44.500/83.3%pk | condU_13M=52.206/43.3%pk | Standard_13M=64.070
+Loading FineWeb-Edu from cache: logs/condm_fineweb_edu_doc_cache.json
+  Loaded 100,000 docs from cache
+
+Loaded condI BPE tokenizer from /home/dlewis3/Desktop/AI/DWARF/results/2048_condI_tokenizer.json
+Loading pre-encoded dataset from logs/fineweb_encoded_2048.pt ...
+  train: 212,458  val: 5,582  test: 5,473 seqs (from cache, pre-subset)
+
+condU 39M: 38,729,736 parameters
+  Layer types: ['DSQG', 'DSQG', 'DSQG+INT', 'DSQG', 'DSQG', 'FULL']
+  Chinchilla max seqs/epoch: 54,031
+  (= 20 × 38,729,736 params / (7 × 2048 tokens))
+  train: 54,031  val: 5,582  test: 5,473 seqs (after Chinchilla subsetting)
+Running causality check...
+  Pre-10:  0.00000000  (expect 0.0)
+  Pos-10:  1.516944  (expect >0)
+  Post-10: 0.528556  (expect >0)
+  PASS
+  Compiling model with torch.compile (mode=default)...
+  Compile done.
+
+  Tokens/epoch: 110,601,457
+  Chinchilla:   774,594,720 tokens (epoch ~7.00)
+
+  Step 200/1689 | Loss 6.2239
+  Step 400/1689 | Loss 5.6741
+  Step 600/1689 | Loss 5.2936
+  Step 800/1689 | Loss 5.1490
+  Step 1000/1689 | Loss 4.9212
+  Step 1200/1689 | Loss 4.9605
+  Step 1400/1689 | Loss 4.5567
+  Step 1600/1689 | Loss 4.6501
+Ep 1/10 | Train 5.3197 | Val 4.3863 PPL 80.3 * BEST | 1500s (14%C)
+  DSQG pos-bias: |mean|=3.5598 |max|=13.9651 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.1182 |max|=0.3478
+  IF gains:      h0:1.010  h1:0.979  h2:0.995  h3:1.007  h4:0.995  h5:1.008  h6:0.989  h7:0.979
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ', and it was a very small, and it was a very small, and it was a very small, and'
+    'The length of the hypotenuse' -> ' of the blood is the same as the following:\n- The blood of the blood of the bloo'
+    'The President of the United' -> ' States, and the United States, the United States, and the United States, and th'
+    'Once upon a time there was' -> ' a time of a time, the time was a time of a time, and the time was a time of a t'
+    'The results indicate that' -> ' the results are not the same.\nThe results are not the same as the results of th'
+  --
+  Passkey...
+W0304 20:55:27.635000 1627944 torch/_dynamo/convert_frame.py:906] [1/8] torch._dynamo hit config.cache_size_limit (8)
+W0304 20:55:27.635000 1627944 torch/_dynamo/convert_frame.py:906] [1/8]    function: 'forward' (/home/dlewis3/Desktop/AI/DWARF/train/train_2048_27m_condU.py:258)
+W0304 20:55:27.635000 1627944 torch/_dynamo/convert_frame.py:906] [1/8]    last reason: 1/1: len(L['self']._modules) == 8                                
+W0304 20:55:27.635000 1627944 torch/_dynamo/convert_frame.py:906] [1/8] To log all recompilation reasons, use TORCH_LOGS="recompiles".
+W0304 20:55:27.635000 1627944 torch/_dynamo/convert_frame.py:906] [1/8] To diagnose recompilation issues, see https://pytorch.org/docs/main/torch.compiler_troubleshooting.html.
+  mean=21.7%  (0/12 distances >50%)
+  d=1:40%  d=2:40%  d=4:40%  d=8:40%  d=16:20%  d=32:40%  d=64:20%  d=128:20%  d=256:0%  d=512:0%  d=1024:0%  d=1536:0%
+  Step 200/1689 | Loss 4.2931
+  Step 400/1689 | Loss 4.3316
+  Step 600/1689 | Loss 4.4360
+  Step 800/1689 | Loss 4.4319
+  Step 1000/1689 | Loss 4.2996
+  Step 1200/1689 | Loss 3.9149
+  Step 1400/1689 | Loss 4.2130
+  Step 1600/1689 | Loss 4.1423
+Ep 2/10 | Train 4.2171 | Val 4.0143 PPL 55.4 * BEST | 3005s (29%C)
+  DSQG pos-bias: |mean|=3.4254 |max|=13.3292 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.1663 |max|=0.5799
+  IF gains:      h0:1.019  h1:0.959  h2:0.992  h3:1.003  h4:0.974  h5:0.973  h6:0.955  h7:0.951
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ' night.\nThe night was a great night, and the night was a great night.\nThe night '
+    'The length of the hypotenuse' -> ', the length of the hypotenuse, and the length of the hypotenuse, the length of '
+    'The President of the United' -> ' States, the United States, and the United States, was the first to be made to b'
+    'Once upon a time there was' -> ' a great deal of controversy about the importance of the people in the country.\n'
+    'The results indicate that' -> ' the results of the study were not statistically significant.\nThe results of the'
+  --
+  Passkey...
+  mean=53.3%  (9/12 distances >50%)
+  d=1:40%  d=2:60%  d=4:60%  d=8:60%  d=16:60%  d=32:60%  d=64:60%  d=128:60%  d=256:80%  d=512:40%  d=1024:60%  d=1536:0%
+  Step 200/1689 | Loss 4.0643
+  Step 400/1689 | Loss 3.5900
+  Step 600/1689 | Loss 3.9602
+  Step 800/1689 | Loss 3.9259
+  Step 1000/1689 | Loss 3.7791
+  Step 1200/1689 | Loss 3.7940
+  Step 1400/1689 | Loss 3.8197
+  Step 1600/1689 | Loss 3.7465
+Ep 3/10 | Train 3.9856 | Val 3.8666 PPL 47.8 * BEST | 4491s (43%C)
+  DSQG pos-bias: |mean|=3.2994 |max|=12.7781 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.1920 |max|=0.7519
+  IF gains:      h0:1.029  h1:0.948  h2:0.987  h3:0.994  h4:0.950  h5:0.937  h6:0.927  h7:0.925
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ' night.\nThe weather was very cold and the weather was very cold.\nThe weather was'
+    'The length of the hypotenuse' -> ', the length of the hypotenuse, and the length of the hypotenuse.\nThe length of '
+    'The President of the United' -> ' States, the President of the United States, and the President of the United Sta'
+    'Once upon a time there was' -> ' a great deal of confusion.\nThe problem with the problem was that the problem wa'
+    'The results indicate that' -> ' the results of the study are not statistically significant.\nThe results of the '
+  --
+  Passkey...
+  mean=63.3%  (11/12 distances >50%)
+  d=1:80%  d=2:80%  d=4:60%  d=8:80%  d=16:60%  d=32:60%  d=64:60%  d=128:60%  d=256:60%  d=512:60%  d=1024:60%  d=1536:40%
+  Step 200/1689 | Loss 4.0978
+  Step 400/1689 | Loss 3.8467
+  Step 600/1689 | Loss 3.8312
+  Step 800/1689 | Loss 3.9918
+  Step 1000/1689 | Loss 3.8891
+  Step 1200/1689 | Loss 3.9768
+  Step 1400/1689 | Loss 3.8637
+  Step 1600/1689 | Loss 4.0493
+Ep 4/10 | Train 3.8572 | Val 3.7808 PPL 43.8 * BEST | 6001s (57%C)
+  DSQG pos-bias: |mean|=3.1939 |max|=12.3226 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.2064 |max|=0.8567
+  IF gains:      h0:1.032  h1:0.941  h2:0.983  h3:0.986  h4:0.932  h5:0.909  h6:0.908  h7:0.907
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ' night.\nThe first day of the night was the morning of the night of the night. Th'
+    'The length of the hypotenuse' -> ' is determined by the number of points per minute.\nThe length of the hypotenuse '
+    'The President of the United' -> ' States, who was elected to the United States, was elected to the United States.'
+    'Once upon a time there was' -> ' a time when the people were not able to make a decision to do so.\nThe people we'
+    'The results indicate that' -> ' the results are not representative of the results.\nThe results are not represen'
+  --
+  Passkey...
+  mean=96.7%  (12/12 distances >50%)
+  d=1:100%  d=2:100%  d=4:100%  d=8:100%  d=16:100%  d=32:100%  d=64:80%  d=128:100%  d=256:100%  d=512:100%  d=1024:100%  d=1536:80%
+  Step 200/1689 | Loss 4.0295
+  Step 400/1689 | Loss 3.8439
+  Step 600/1689 | Loss 3.7702
+  Step 800/1689 | Loss 3.6987
+  Step 1000/1689 | Loss 3.2800
+  Step 1200/1689 | Loss 3.7482
+  Step 1400/1689 | Loss 3.8654
+  Step 1600/1689 | Loss 3.6971
+Ep 5/10 | Train 3.7691 | Val 3.7269 PPL 41.5 * BEST | 7483s (71%C)
+  DSQG pos-bias: |mean|=3.1116 |max|=11.9704 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.2141 |max|=0.9216
+  IF gains:      h0:1.032  h1:0.937  h2:0.982  h3:0.980  h4:0.920  h5:0.890  h6:0.895  h7:0.895
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ' night, and the sun was so bright that it was not so bright that it was so brigh'
+    'The length of the hypotenuse' -> ', the length of the hypotenuse, and the length of the hypotenuse.\nThe hypotenuse'
+    'The President of the United' -> ' States, the President of the United States, and the President of the United Sta'
+    'Once upon a time there was' -> ' a great deal of work, and the people were not able to get the money. The people'
+    'The results indicate that' -> ' the current state of the Earth is not a single planet, but a planet that is not'
+  --
+  Passkey...
+  mean=88.3%  (11/12 distances >50%)
+  d=1:100%  d=2:100%  d=4:100%  d=8:100%  d=16:100%  d=32:100%  d=64:80%  d=128:100%  d=256:80%  d=512:80%  d=1024:80%  d=1536:40%
+  Step 200/1689 | Loss 3.6421
+  Step 400/1689 | Loss 3.7407
+  Step 600/1689 | Loss 3.8272
+  Step 800/1689 | Loss 3.7344
+  Step 1000/1689 | Loss 3.6518
+  Step 1200/1689 | Loss 3.8277
+  Step 1400/1689 | Loss 3.8192
+  Step 1600/1689 | Loss 3.7337
+Ep 6/10 | Train 3.7080 | Val 3.6871 PPL 39.9 * BEST | 8964s (86%C)
+  DSQG pos-bias: |mean|=3.0522 |max|=11.7189 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.2180 |max|=0.9546
+  IF gains:      h0:1.030  h1:0.937  h2:0.983  h3:0.977  h4:0.914  h5:0.878  h6:0.888  h7:0.889
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ' night.\nThe night was a dark night.\nThe night was a dark night.\nThe night was a '
+    'The length of the hypotenuse' -> ', the angle of the hypotenuse, and the angle of the hypotenuse.\nThe hypotenuse i'
+    'The President of the United' -> ' States, the President of the United States, and the President of the United Sta'
+    'Once upon a time there was' -> ' a great deal of work, and the whole thing was not so much a matter of time.\nThe'
+    'The results indicate that' -> ' the two groups are not necessarily related to the same group.\nThe first group i'
+  --
+  Passkey...
+  mean=88.3%  (11/12 distances >50%)
+  d=1:100%  d=2:100%  d=4:100%  d=8:100%  d=16:100%  d=32:100%  d=64:100%  d=128:100%  d=256:80%  d=512:80%  d=1024:80%  d=1536:20%
+  Step 200/1689 | Loss 3.8586
+  Step 400/1689 | Loss 3.5643
+  Step 600/1689 | Loss 3.5352
+  Step 800/1689 | Loss 3.7509
+  Step 1000/1689 | Loss 3.5908
+  Step 1200/1689 | Loss 3.7178
+  Step 1400/1689 | Loss 3.6516
+  Step 1600/1689 | Loss 3.7774
+Ep 7/10 | Train 3.6671 | Val 3.6576 PPL 38.8 * BEST | 10443s (100%C)
+  DSQG pos-bias: |mean|=3.0137 |max|=11.5597 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.2196 |max|=0.9706
+  IF gains:      h0:1.030  h1:0.937  h2:0.984  h3:0.975  h4:0.911  h5:0.871  h6:0.884  h7:0.886
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ' night, and the sun was a dark and stormy night.\nThe night was a dark night, and'
+    'The length of the hypotenuse' -> ' is determined by the number of beats per minute.\nThe number of beats per minute'
+    'The President of the United' -> ' States, the President of the United States, and the President of the United Sta'
+    'Once upon a time there was' -> ' a great deal of work, and the people of the country were very much in need of i'
+    'The results indicate that' -> ' the two groups are not necessarily related to the same group.\nThe first group i'
+  --
+  Passkey...
+  mean=93.3%  (12/12 distances >50%)
+  d=1:100%  d=2:100%  d=4:100%  d=8:100%  d=16:100%  d=32:100%  d=64:100%  d=128:100%  d=256:100%  d=512:80%  d=1024:80%  d=1536:60%
+  Step 200/1689 | Loss 3.5773
+  Step 400/1689 | Loss 3.3916
+  Step 600/1689 | Loss 3.5189
+  Step 800/1689 | Loss 3.6212
+  Step 1000/1689 | Loss 3.6262
+  Step 1200/1689 | Loss 3.5524
+  Step 1400/1689 | Loss 3.8414
+  Step 1600/1689 | Loss 3.6933
+Ep 8/10 | Train 3.6316 | Val 3.6411 PPL 38.1 * BEST | 11896s (114%C)
+  DSQG pos-bias: |mean|=2.9928 |max|=11.4745 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.2201 |max|=0.9779
+  IF gains:      h0:1.029  h1:0.938  h2:0.985  h3:0.974  h4:0.909  h5:0.867  h6:0.882  h7:0.884
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ' night, and the sun was shining. The sun was shining, and the sun was shining. T'
+    'The length of the hypotenuse' -> ' is determined by the number of beats per minute. The number of beats per minute'
+    'The President of the United' -> ' States, the President of the United States, and the President of the United Sta'
+    'Once upon a time there was' -> ' a great deal of work, and the people were very much in need of it. The people w'
+    'The results indicate that' -> ' the average age of the population is between 5 and 10 years old.\nThe average ag'
+  --
+  Passkey...
+  mean=86.7%  (11/12 distances >50%)
+  d=1:100%  d=2:100%  d=4:100%  d=8:100%  d=16:100%  d=32:100%  d=64:80%  d=128:80%  d=256:80%  d=512:80%  d=1024:80%  d=1536:40%
+  Step 200/1689 | Loss 3.5299
+  Step 400/1689 | Loss 3.8125
+  Step 600/1689 | Loss 3.6753
+  Step 800/1689 | Loss 3.7707
+  Step 1000/1689 | Loss 3.5992
+  Step 1200/1689 | Loss 3.5213
+  Step 1400/1689 | Loss 3.6970
+  Step 1600/1689 | Loss 3.8136
+Ep 9/10 | Train 3.6081 | Val 3.6348 PPL 37.9 * BEST | 13348s (129%C)
+  DSQG pos-bias: |mean|=2.9847 |max|=11.4421 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.2202 |max|=0.9808
+  IF gains:      h0:1.029  h1:0.938  h2:0.986  h3:0.974  h4:0.909  h5:0.866  h6:0.882  h7:0.884
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ' night, and the sun was shining. The sun was shining, and the sun was shining. T'
+    'The length of the hypotenuse' -> ' is determined by the number of beats per minute. The number of beats per minute'
+    'The President of the United' -> ' States, the President of the United States, and the President of the United Sta'
+    'Once upon a time there was' -> ' a great deal of work done by the people, and the people were not very much invo'
+    'The results indicate that' -> ' the two groups are not identical.\nThe first group is the one that is identical '
+  --
+  Passkey...
+  mean=90.0%  (12/12 distances >50%)
+  d=1:100%  d=2:100%  d=4:100%  d=8:100%  d=16:100%  d=32:100%  d=64:80%  d=128:100%  d=256:80%  d=512:80%  d=1024:80%  d=1536:60%
+  Step 200/1689 | Loss 3.4043
+  Step 400/1689 | Loss 3.7379
+  Step 600/1689 | Loss 3.5013
+  Step 800/1689 | Loss 3.7198
+  Step 1000/1689 | Loss 3.5206
+  Step 1200/1689 | Loss 3.4541
+  Step 1400/1689 | Loss 3.5777
+  Step 1600/1689 | Loss 3.5306
+Ep 10/10 | Train 3.5942 | Val 3.6333 PPL 37.8 * BEST | 14800s (143%C)
+  DSQG pos-bias: |mean|=2.9836 |max|=11.4374 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.2202 |max|=0.9812
+  IF gains:      h0:1.029  h1:0.938  h2:0.986  h3:0.974  h4:0.909  h5:0.866  h6:0.881  h7:0.884
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ' night, and the sun was shining. The sun was shining, and the sun was shining. T'
+    'The length of the hypotenuse' -> ' is determined by the number of beats per minute. The number of beats per minute'
+    'The President of the United' -> ' States, the President of the United States, and the President of the United Sta'
+    'Once upon a time there was' -> ' a great deal of work done by the people, and the people were not very much invo'
+    'The results indicate that' -> ' the two groups are not necessarily related to each other.\nThe first group is th'
+  --
+  Passkey...
+  mean=90.0%  (12/12 distances >50%)
+  d=1:100%  d=2:100%  d=4:100%  d=8:100%  d=16:100%  d=32:100%  d=64:80%  d=128:100%  d=256:80%  d=512:80%  d=1024:80%  d=1536:60%
+
+  condU 35M TEST: PPL 38.293 | Loss 3.6453
+  condM 27M reference: 44.500 PPL | delta = -6.207
+  condU 13M reference: 52.206 PPL | delta = -13.913
+  Standard 13M ref:    64.070 PPL | delta = -25.777
+
+  -- Temperature sweep (best checkpoint) --
+
+  [greedy]
+    'It was a dark and stormy' -> ' night, and the sun was shining. The sun was shining, and the sun was shining. T'
+    'The length of the hypotenuse' -> ' is determined by the number of beats per minute. The number of beats per minute'
+    'The President of the United' -> ' States, the President of the United States, and the President of the United Sta'
+    'Once upon a time there was' -> ' a great deal of work done by the people, and the people were not very much invo'
+    'The results indicate that' -> ' the two groups are not necessarily related to each other.\nThe first group is th'
+
+  [T=0.5]
+    'It was a dark and stormy' -> ' day, and the sun was not shining, but it was a dark cloud.\nThe sun was a dark c'
+    'The length of the hypotenuse' -> ', the angle of the hypotenuse, and the angle of the hypotenuse are two-dimension'
+    'The President of the United' -> ' States, William H. Johnson, who was a member of the United States Senate, was a'
+    'Once upon a time there was' -> ' a new school, the school was so successful that it was not a new school. The sc'
+    'The results indicate that' -> ' the price of a product is higher than that of a product. The price of a product'
+
+  [T=0.7]
+    'It was a dark and stormy' -> ' day and the storm was a dark and stormy day.\nThe night was a dark night and the'
+    'The length of the hypotenuse' -> ' and the number of ligaments to be taken in order to determine the level of the '
+    'The President of the United' -> ' States, Robert E. Lee, has had a major role in the United States since the Seco'
+    'Once upon a time there was' -> ' no separation between the two. So, the whole process of the various types of le'
+    'The results indicate that' -> ' in the past, the Chinese government had not taken over the jobs of Chinese resi'
+
+  [T=1.0]
+    'It was a dark and stormy' -> ' night with a great start, a snowy, and a leap nearer for the little pass when t'
+    'The length of the hypotenuse' -> ' is A12E in each of the 12\nx-ons you can see in the images.\nHere, we can illustr'
+    'The President of the United' -> ' Nations Socialist Republic was already in the new world, and he won’t say that '
+    'Once upon a time there was' -> ' such crisis—God loves us. On one of them, things happened to happen first, but '
+    'The results indicate that' -> ' the percentage of female sexual hormones associated with male sexual hormones f'
+
+  Final passkey: mean=90.0%  (12/12 distances >50%)
+  d=1:100%  d=2:100%  d=4:100%  d=8:100%  d=16:100%  d=32:100%  d=64:80%  d=128:100%  d=256:80%  d=512:80%  d=1024:80%  d=1536:60%
+  condM 27M reference: 83.3% passkey
+  condU 13M reference: 43.3% passkey
+
+  Final IF gains: h0:1.029  h1:0.938  h2:0.986  h3:0.974  h4:0.909  h5:0.866  h6:0.881  h7:0.884
+  Final scale_embed: |mean|=0.2202 |max|=0.9812
+
+  Results -> logs/condU_35m_results.json

@@ -1,0 +1,64 @@
+
+============================================================
+  eval_suite.py — condm_layer3
+  Device: cuda
+============================================================
+
+  Model: condM 13M Layer 3 (3 DSQG → 1 full attn → 2 DSQG)
+
+  Loading tokenizer...
+  Loading model...
+  Loaded condM 13M Layer 3 (3 DSQG → 1 full attn → 2 DSQG): 14,116,576 params from best.pt
+
+  [1/4] Calibration...
+    entropy=7.481 bits  top1=0.181  eff_vocab=32.1  (0.2s)
+
+  [2/4] Distance-conditioned loss (wikitext-103)...
+    Loading wikitext-103 test split...
+    Using 17 full 2048-token chunks
+    Buckets:
+    0-16          PPL= 369.00  n=  289
+    17-64         PPL= 245.70  n=  816
+    65-256        PPL= 137.65  n= 3264
+    257-512       PPL= 118.05  n= 4352
+    513-1024      PPL=  91.23  n= 8704
+    1025-2047     PPL=  93.37  n=17374
+    (3.6s)
+
+  [3/4] Few-shot string copy...
+    exact=5/15  (33.3%)  mean_lev=7.53  (1.8s)
+
+  [4/4] Passkey retrieval...
+    d=    1: accuracy=60.0%
+    d=    2: accuracy=60.0%
+    d=    4: accuracy=60.0%
+    d=    8: accuracy=60.0%
+    d=   16: accuracy=100.0%
+    d=   32: accuracy=100.0%
+    d=   64: accuracy=100.0%
+    d=  128: accuracy=80.0%
+    d=  256: accuracy=80.0%
+    d=  512: accuracy=40.0%
+    d= 1024: accuracy=40.0%
+    d= 1536: accuracy=20.0%
+    mean_accuracy=66.7%  (0.4s)
+
+  Generation samples (greedy + T=0.7)...
+
+  [greedy]
+    'It was a dark and stormy'               → ' storm.\n\nThe storm was a huge storm, and the storm was a huge storm.\n\nThe storm '
+    'The length of the hypotenuse'           → ' is a bit more complicated than the length of the equation.\n\nThe length of the e'
+    'The President of the United'            → ' States, who has been in the United States since the beginning of the Cold War, '
+    'Once upon a time there was'             → ' a lot of time to go.\n\nThe first thing I had to do was make sure I was able to g'
+    'The results indicate that'              → ' the number of people who are not in the United States is a significant factor i'
+
+  [T=0.7]
+    'It was a dark and stormy'               → ' place, but it was a very big place, with a huge volume of energy, that was the '
+    'The length of the hypotenuse'           → ' structure, and the enigmatic de-sharp structure, is another example of the deve'
+    'The President of the United'            → ' States, or the other two, the president of the United States, or the American p'
+    'Once upon a time there was'             → ' no justification for the killing. There were no reasons to believe that there w'
+    'The results indicate that'              → ' the number of people who were injured was around 12.5 million people who were i'
+
+  Results saved to /home/dlewis3/Desktop/AI/DWARF/benchmarks/logs/eval_suite_condm_layer3_20260227_184536.json
+============================================================
+

@@ -1,0 +1,51 @@
+============================================================
+  DWARF External Benchmark Evaluator
+============================================================
+  GPU: NVIDIA GeForce RTX 3090
+  Tasks: ['hellaswag', 'piqa', 'arc_easy', 'arc_challenge', 'winogrande', 'lambada']
+  Max examples/task: 500 (--fast)
+  Tokenizer: /home/dlewis3/Desktop/AI/DWARF/results/2048_condI_tokenizer.json
+
+Loading from registry: standard_27m
+  Loaded Standard Transformer 27M: 37,971,200 params from 27M.ptrom
+  Parameters: 37,971,200
+  Label: Standard Transformer 27M
+
+  [hellaswag] 10,042 examples...
+    [hellaswag] 200/500 — acc=0.310 | eta 2s
+    [hellaswag] 400/500 — acc=0.302 | eta 1s
+  [hellaswag] accuracy = 0.3200 (32.0%)  [500 examples, 3s]
+  [piqa] 1,838 examples...
+    [piqa] 200/500 — acc=0.560 | eta 1s
+    [piqa] 400/500 — acc=0.515 | eta 0s
+  [piqa] accuracy = 0.5340 (53.4%)  [500 examples, 1s]
+  [arc_easy] 570 examples...
+    [arc_easy] 200/500 — acc=0.225 | eta 2s
+    [arc_easy] 400/500 — acc=0.278 | eta 1s
+  [arc_easy] accuracy = 0.2980 (29.8%)  [500 examples, 3s]
+  [arc_challenge] 299 examples...
+    [arc_challenge] 200/299 — acc=0.170 | eta 1s
+  [arc_challenge] accuracy = 0.1873 (18.7%)  [299 examples, 2s]
+  [winogrande] 1,267 examples...
+    [winogrande] 200/500 — acc=0.565 | eta 1s
+    [winogrande] 400/500 — acc=0.530 | eta 0s
+  [winogrande] accuracy = 0.5360 (53.6%)  [500 examples, 1s]
+  [lambada] 5,153 examples...
+  [lambada] accuracy = 0.0620 (6.2%)  [500 examples, 1s]
+
+============================================================
+  Standard Transformer 27M
+============================================================
+  Task                     Accuracy       N
+  ---------------------- ----------  ------
+  hellaswag                   32.0%     500
+  piqa                        53.4%     500
+  arc_easy                    29.8%     500
+  arc_challenge               18.7%     299
+  winogrande                  53.6%     500
+  lambada                      6.2%     500
+  ---------------------- ----------  ------
+  mean (present tasks)        32.3%
+============================================================
+
+  Results -> /home/dlewis3/Desktop/AI/DWARF/evals/logs/eval_external_Standard_Transformer_27M_20260313_141754.json

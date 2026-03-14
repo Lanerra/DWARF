@@ -1,0 +1,335 @@
+======================================================================
+  condX-v2 35M — Learnable Bypass Gate, Scaled (FineWeb-Edu)
+======================================================================
+  GPU: NVIDIA GeForce RTX 4090  (23.6 GB)
+  Kernel:    dsqg_attention_v3
+  Base arch: condV (Kalman-EMA + KdV + AGC) + bypass gate, D=512
+  Gate init: bypass_alpha=-10.0 → gate≈0.000045 (effectively condV Q)
+  Sweep:     13M gate sweep showed gate=0 is strictly optimal for passkey
+  Target:    condU 35M = 38.293 PPL / 90.0% passkey
+Loading FineWeb-Edu from cache: benchmarks/logs/condm_fineweb_edu_doc_cache.json
+  Loaded 100,000 docs from cache
+
+Loaded condI BPE tokenizer from /home/dlewis3/Desktop/AI/DWARF/results/2048_condI_tokenizer.json
+Loading pre-encoded dataset from /home/dlewis3/Desktop/AI/DWARF/logs/fineweb_encoded_2048.pt ...
+
+condX 35M: 38,729,739 parameters
+  Layer types:  ['DSQG', 'DSQG', 'DSQG_INT', 'DSQG', 'DSQG', 'FULL_BYPASS']
+  Clean save after block: 1
+  Chinchilla budget:  774,594,780 tokens  (774.6M)
+  Max train seqs:     54,057  (Chinchilla lands at ep7)
+  Tokens/epoch:       110,654,679
+  Chinchilla ep:      1.43
+  train: 54,057  val: 5,582  test: 5,473 seqs
+Running causality check...
+  Pre-10:  0.00000000  (expect 0.0)
+  Pos-10:  1.673474  (expect >0)
+  Post-10: 0.577699  (expect >0)
+  PASS
+
+  Tokens/epoch: 110,654,679
+  Chinchilla:   774,594,780 tokens (epoch ~7.00)
+  Clean residual saved after block: 1
+
+  Step 200/1690 | Loss 6.2324
+  Step 400/1690 | Loss 5.6224
+  Step 600/1690 | Loss 5.2706
+  Step 800/1690 | Loss 5.1410
+  Step 1000/1690 | Loss 4.9455
+  Step 1200/1690 | Loss 4.9492
+  Step 1400/1690 | Loss 4.5763
+  Step 1600/1690 | Loss 4.5470
+Ep 1/10 | Train 5.3196 | Val 4.4034 PPL 81.7 * BEST | 1982s (14%C)
+  DSQG pos-bias: |mean|=3.5663 |max|=13.9691 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.1230 |max|=0.3588
+  IF gains:      h0:1.01  h1:0.98  h2:0.99  h3:1.00  h4:0.98  h5:0.98  h6:1.02  h7:1.00
+  Bypass gate:   alpha=-9.4334  gate=0.000080  (gate→0=condV-like, gate→1=fully-clean-Q)
+  Bypass diag:   clean_norm=23.9869  full_norm=23.9925  q_cosim=1.0000  q_delta_norm=0.0005
+  EMA factors:   b0:0.0125
+  KdV alphas:    b0:-0.0004
+  -- Generation (T=0.7) --
+    'It was a dark and stormy' -> ' scene in which it was a dark. The ice-foot and the light, the light, the eye, t'
+    'The length of the hypotenuse' -> ' and the number of body functioned in the brain that is connected to the brain. '
+    'The President of the United' -> ' Nations and the United States and the United States.\nThe President of the Unite'
+    'Once upon a time there was' -> ' a new knowledge of the nature of the universe. The first thing about the univer'
+    'The results indicate that' -> ' the hypothesis is a reality. The theory is not to be interpreted as a reality, '
+  --
+  Passkey...
+  mean=15.0%  (0/12 distances >50%)
+  d=1:20%  d=2:20%  d=4:20%  d=8:20%  d=16:20%  d=32:20%  d=64:20%  d=128:20%  d=256:20%  d=512:0%  d=1024:0%  d=1536:0%
+  Step 200/1690 | Loss 4.6167
+  Step 400/1690 | Loss 4.3421
+  Step 600/1690 | Loss 4.1929
+  Step 800/1690 | Loss 4.2434
+  Step 1000/1690 | Loss 4.1547
+  Step 1200/1690 | Loss 4.3090
+  Step 1400/1690 | Loss 3.8157
+  Step 1600/1690 | Loss 4.1274
+Ep 2/10 | Train 4.2339 | Val 4.0130 PPL 55.3 * BEST | 4011s (29%C)
+  DSQG pos-bias: |mean|=3.4349 |max|=13.3261 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.1720 |max|=0.5811
+  IF gains:      h0:1.01  h1:0.97  h2:0.98  h3:0.99  h4:0.96  h5:0.94  h6:0.99  h7:0.97
+  Bypass gate:   alpha=-8.7004  gate=0.000166  (gate→0=condV-like, gate→1=fully-clean-Q)
+  Bypass diag:   clean_norm=24.1929  full_norm=24.1865  q_cosim=1.0000  q_delta_norm=0.0011
+  EMA factors:   b0:0.0113
+  KdV alphas:    b0:-0.0003
+  -- Generation (T=0.7) --
+    'It was a dark and stormy' -> ' place, so it was an ice-filled door, and it was a bright-green, dark-brown, bla'
+    'The length of the hypotenuse' -> ' is the last of the most important differences. It is a very important factor in'
+    'The President of the United' -> ' States was a retired, pro-dialent, and active, and active, and respected member'
+    'Once upon a time there was' -> ' no danger.\nMesser took the food of the day and stopped it. He had a pleasant ti'
+    'The results indicate that' -> ' the U.S. is not the only member of the U.S. is the majority of U.S. citizens ha'
+  --
+  Passkey...
+  mean=43.3%  (8/12 distances >50%)
+  d=1:60%  d=2:60%  d=4:60%  d=8:60%  d=16:60%  d=32:60%  d=64:60%  d=128:40%  d=256:60%  d=512:0%  d=1024:0%  d=1536:0%
+  Step 200/1690 | Loss 4.0722
+  Step 400/1690 | Loss 4.0359
+  Step 600/1690 | Loss 3.8870
+  Step 800/1690 | Loss 4.0229
+  Step 1000/1690 | Loss 3.8004
+  Step 1200/1690 | Loss 3.8615
+  Step 1400/1690 | Loss 3.8067
+  Step 1600/1690 | Loss 4.2400
+Ep 3/10 | Train 3.9832 | Val 3.8657 PPL 47.7 * BEST | 5999s (43%C)
+  DSQG pos-bias: |mean|=3.3106 |max|=12.7677 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.1965 |max|=0.7188
+  IF gains:      h0:1.01  h1:0.96  h2:0.97  h3:0.98  h4:0.95  h5:0.92  h6:0.95  h7:0.93
+  Bypass gate:   alpha=-8.1026  gate=0.000303  (gate→0=condV-like, gate→1=fully-clean-Q)
+  Bypass diag:   clean_norm=24.0031  full_norm=23.9926  q_cosim=1.0000  q_delta_norm=0.0020
+  EMA factors:   b0:0.0106
+  KdV alphas:    b0:-0.0003
+  -- Generation (T=0.7) --
+    'It was a dark and stormy' -> ' day and a great day, and a great day, and a great day, that was a great day.\nTh'
+    'The length of the hypotenuse' -> ' is proportional to the number of times the hypotenuse is proportional to the nu'
+    'The President of the United' -> ' States, the President of the United States, and the President of the United Sta'
+    'Once upon a time there was' -> ' no clear proof of the truth and no such truth was true. The fact that the autho'
+    'The results indicate that' -> ' people with a number of diseases have a significantly higher risk of developing'
+  --
+  Passkey...
+  mean=78.3%  (11/12 distances >50%)
+  d=1:80%  d=2:80%  d=4:100%  d=8:100%  d=16:80%  d=32:80%  d=64:80%  d=128:80%  d=256:100%  d=512:60%  d=1024:60%  d=1536:40%
+  Step 200/1690 | Loss 4.0847
+  Step 400/1690 | Loss 3.8688
+  Step 600/1690 | Loss 3.9587
+  Step 800/1690 | Loss 3.8676
+  Step 1000/1690 | Loss 3.8728
+  Step 1200/1690 | Loss 3.8217
+  Step 1400/1690 | Loss 3.8232
+  Step 1600/1690 | Loss 3.8635
+Ep 4/10 | Train 3.8550 | Val 3.7824 PPL 43.9 * BEST | 8020s (57%C)
+  DSQG pos-bias: |mean|=3.2061 |max|=12.3100 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.2106 |max|=0.8174
+  IF gains:      h0:1.01  h1:0.96  h2:0.96  h3:0.97  h4:0.94  h5:0.90  h6:0.92  h7:0.90
+  Bypass gate:   alpha=-7.6328  gate=0.000484  (gate→0=condV-like, gate→1=fully-clean-Q)
+  Bypass diag:   clean_norm=23.8204  full_norm=23.8098  q_cosim=1.0000  q_delta_norm=0.0032
+  EMA factors:   b0:0.0100
+  KdV alphas:    b0:-0.0003
+  -- Generation (T=0.7) --
+    'It was a dark and stormy' -> ' island. It was a huge landfall and the land was not growing. It was a difficult'
+    'The length of the hypotenuse' -> ' is as follows:\n- I have a complete list of my questions on the following questi'
+    'The President of the United' -> ' States, it is clear that the American Constitution is not a constitutional, and'
+    'Once upon a time there was' -> ' a huge fire, and there was no fire, it was a fire, it was a fire. The fire was '
+    'The results indicate that' -> ' the main purpose of this study was to examine the role of language in the struc'
+  --
+  Passkey...
+  mean=95.0%  (12/12 distances >50%)
+  d=1:100%  d=2:100%  d=4:100%  d=8:100%  d=16:100%  d=32:100%  d=64:100%  d=128:100%  d=256:100%  d=512:80%  d=1024:100%  d=1536:60%
+  Step 200/1690 | Loss 3.7985
+  Step 400/1690 | Loss 3.8683
+  Step 600/1690 | Loss 3.7480
+  Step 800/1690 | Loss 3.7379
+  Step 1000/1690 | Loss 3.5811
+  Step 1200/1690 | Loss 3.7909
+  Step 1400/1690 | Loss 3.7978
+  Step 1600/1690 | Loss 3.6960
+Ep 5/10 | Train 3.7700 | Val 3.7245 PPL 41.5 * BEST | 10073s (71%C)
+  DSQG pos-bias: |mean|=3.1245 |max|=11.9584 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.2189 |max|=0.8837
+  IF gains:      h0:1.01  h1:0.96  h2:0.96  h3:0.96  h4:0.93  h5:0.88  h6:0.91  h7:0.88
+  Bypass gate:   alpha=-7.2964  gate=0.000677  (gate→0=condV-like, gate→1=fully-clean-Q)
+  Bypass diag:   clean_norm=23.6856  full_norm=23.6679  q_cosim=1.0000  q_delta_norm=0.0046
+  EMA factors:   b0:0.0098
+  KdV alphas:    b0:-0.0003
+  -- Generation (T=0.7) --
+    'It was a dark and stormy' -> ' night in which the large, snowy trees were gathered and washed away by the smok'
+    'The length of the hypotenuse' -> ' in a car accident is 174 pounds, and the rate of the hypotenuse is 18.5 pounds.'
+    'The President of the United' -> ' States, including the President, is the first President to have a complete gove'
+    'Once upon a time there was' -> ' a crisis in the city.\nThe government had to maintain the peace with the city, a'
+    'The results indicate that' -> ' the cost of the equipment is low, or even that it is the equipment which is not'
+  --
+  Passkey...
+  mean=96.7%  (12/12 distances >50%)
+  d=1:100%  d=2:100%  d=4:100%  d=8:100%  d=16:100%  d=32:100%  d=64:100%  d=128:100%  d=256:100%  d=512:100%  d=1024:100%  d=1536:60%
+  Step 200/1690 | Loss 3.7821
+  Step 400/1690 | Loss 3.9023
+  Step 600/1690 | Loss 3.6609
+  Step 800/1690 | Loss 3.6988
+  Step 1000/1690 | Loss 3.9554
+  Step 1200/1690 | Loss 3.7527
+  Step 1400/1690 | Loss 3.5224
+  Step 1600/1690 | Loss 3.9355
+Ep 6/10 | Train 3.7111 | Val 3.6840 PPL 39.8 * BEST | 12054s (86%C)
+  DSQG pos-bias: |mean|=3.0655 |max|=11.7091 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.2233 |max|=0.9303
+  IF gains:      h0:1.01  h1:0.96  h2:0.95  h3:0.96  h4:0.93  h5:0.88  h6:0.90  h7:0.87
+  Bypass gate:   alpha=-7.0771  gate=0.000844  (gate→0=condV-like, gate→1=fully-clean-Q)
+  Bypass diag:   clean_norm=23.6038  full_norm=23.5758  q_cosim=1.0000  q_delta_norm=0.0058
+  EMA factors:   b0:0.0097
+  KdV alphas:    b0:-0.0003
+  -- Generation (T=0.7) --
+    'It was a dark and stormy' -> ' place. It was very beautiful, and the people were handsome. It was a very beaut'
+    'The length of the hypotenuse' -> ' is the size of the area and the hypotenuse is the number of units of the hypote'
+    'The President of the United' -> ' States, the United States, and the United States have been in charge of the adm'
+    'Once upon a time there was' -> ' a gradual shift in the way of the musical life of the university. The other hal'
+    'The results indicate that' -> ' the central nervous system is the main part of the brain that controls the moto'
+  --
+  Passkey...
+  mean=96.7%  (12/12 distances >50%)
+  d=1:100%  d=2:100%  d=4:100%  d=8:100%  d=16:100%  d=32:100%  d=64:100%  d=128:100%  d=256:100%  d=512:100%  d=1024:100%  d=1536:60%
+  Step 200/1690 | Loss 3.6794
+  Step 400/1690 | Loss 3.8485
+  Step 600/1690 | Loss 3.7543
+  Step 800/1690 | Loss 3.6290
+  Step 1000/1690 | Loss 3.4189
+  Step 1200/1690 | Loss 3.7850
+  Step 1400/1690 | Loss 3.6234
+  Step 1600/1690 | Loss 3.2999
+Ep 7/10 | Train 3.6599 | Val 3.6554 PPL 38.7 * BEST | 14009s (100%C)
+  DSQG pos-bias: |mean|=3.0271 |max|=11.5490 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.2252 |max|=0.9555
+  IF gains:      h0:1.00  h1:0.96  h2:0.95  h3:0.95  h4:0.92  h5:0.87  h6:0.89  h7:0.86
+  Bypass gate:   alpha=-6.9505  gate=0.000957  (gate→0=condV-like, gate→1=fully-clean-Q)
+  Bypass diag:   clean_norm=23.5677  full_norm=23.5415  q_cosim=1.0000  q_delta_norm=0.0066
+  EMA factors:   b0:0.0096
+  KdV alphas:    b0:-0.0003
+  -- Generation (T=0.7) --
+    'It was a dark and stormy' -> ' day in the south of the Great Lakes in 1832. It was also a very hot, rainy day.'
+    'The length of the hypotenuse' -> ' is 5.5 cm, while the hypotenuse is 3.4 cm. The hypotenuse is 3.5 cm. The hypote'
+    'The President of the United' -> ' States, the United States and the US are the first President to make a ruling o'
+    'Once upon a time there was' -> ' a small, very large, and, in a few moments, a little older, with a good number '
+    'The results indicate that' -> ', for the majority of human beings, the majority of human beings were either dir'
+  --
+  Passkey...
+  mean=95.0%  (12/12 distances >50%)
+  d=1:100%  d=2:100%  d=4:100%  d=8:100%  d=16:100%  d=32:100%  d=64:100%  d=128:100%  d=256:100%  d=512:100%  d=1024:80%  d=1536:60%
+  Step 200/1690 | Loss 3.5389
+  Step 400/1690 | Loss 3.7557
+  Step 600/1690 | Loss 3.6196
+  Step 800/1690 | Loss 3.8183
+  Step 1000/1690 | Loss 3.7278
+  Step 1200/1690 | Loss 3.5959
+  Step 1400/1690 | Loss 3.6155
+  Step 1600/1690 | Loss 3.5750
+Ep 8/10 | Train 3.6307 | Val 3.6393 PPL 38.1 * BEST | 15992s (114%C)
+  DSQG pos-bias: |mean|=3.0062 |max|=11.4641 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.2259 |max|=0.9693
+  IF gains:      h0:1.00  h1:0.96  h2:0.95  h3:0.95  h4:0.92  h5:0.87  h6:0.89  h7:0.86
+  Bypass gate:   alpha=-6.8899  gate=0.001017  (gate→0=condV-like, gate→1=fully-clean-Q)
+  Bypass diag:   clean_norm=23.5627  full_norm=23.5365  q_cosim=1.0000  q_delta_norm=0.0070
+  EMA factors:   b0:0.0094
+  KdV alphas:    b0:-0.0003
+  -- Generation (T=0.7) --
+    'It was a dark and stormy' -> ' day with a heavy rainstorm. It was a bright day and it was a nice day and I had'
+    'The length of the hypotenuse' -> ' is approximately 1.5 cm (3.5 m) long. The hypotenuse is about 1.2 cm (4.5 m) wi'
+    'The President of the United' -> ' States, the President of the United States, and a President of the United State'
+    'Once upon a time there was' -> ' no need for a rain water supply.\n- The top of the water supply was 1.0 litres p'
+    'The results indicate that' -> ' there was a large increase in the number of people who had been infected with t'
+  --
+  Passkey...
+  mean=96.7%  (12/12 distances >50%)
+  d=1:100%  d=2:100%  d=4:100%  d=8:100%  d=16:100%  d=32:100%  d=64:100%  d=128:100%  d=256:100%  d=512:100%  d=1024:100%  d=1536:60%
+  Step 200/1690 | Loss 3.7804
+  Step 400/1690 | Loss 3.5315
+  Step 600/1690 | Loss 3.5699
+  Step 800/1690 | Loss 3.8168
+  Step 1000/1690 | Loss 3.7632
+  Step 1200/1690 | Loss 3.7274
+  Step 1400/1690 | Loss 3.7868
+  Step 1600/1690 | Loss 3.6081
+Ep 9/10 | Train 3.6091 | Val 3.6318 PPL 37.8 * BEST | 17952s (129%C)
+  DSQG pos-bias: |mean|=2.9982 |max|=11.4316 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.2260 |max|=0.9739
+  IF gains:      h0:1.00  h1:0.96  h2:0.95  h3:0.95  h4:0.92  h5:0.87  h6:0.89  h7:0.86
+  Bypass gate:   alpha=-6.8688  gate=0.001039  (gate→0=condV-like, gate→1=fully-clean-Q)
+  Bypass diag:   clean_norm=23.5656  full_norm=23.5371  q_cosim=1.0000  q_delta_norm=0.0072
+  EMA factors:   b0:0.0093
+  KdV alphas:    b0:-0.0003
+  -- Generation (T=0.7) --
+    'It was a dark and stormy' -> ' day in July of 1839. The ship had been built at the spot of the 16th century. T'
+    'The length of the hypotenuse' -> ' is 2.0, and the hypotenuse is 1.0. The hypotenuse is 2.0, and the hypotenuse is'
+    'The President of the United' -> ' States, Mr. Jefferson, and Mr. Jefferson, are to be the first President of the '
+    'Once upon a time there was' -> ' no sound that might be heard. The word ‘neighbourhood’ was used for the purpose'
+    'The results indicate that' -> ' the dominant influence of the state has been due to the growing influence of th'
+  --
+  Passkey...
+  mean=96.7%  (12/12 distances >50%)
+  d=1:100%  d=2:100%  d=4:100%  d=8:100%  d=16:100%  d=32:100%  d=64:100%  d=128:100%  d=256:100%  d=512:100%  d=1024:100%  d=1536:60%
+  Step 200/1690 | Loss 3.6814
+  Step 400/1690 | Loss 3.9121
+  Step 600/1690 | Loss 3.7799
+  Step 800/1690 | Loss 3.5996
+  Step 1000/1690 | Loss 3.4535
+  Step 1200/1690 | Loss 3.6740
+  Step 1400/1690 | Loss 3.4598
+  Step 1600/1690 | Loss 3.6824
+Ep 10/10 | Train 3.5917 | Val 3.6304 PPL 37.7 * BEST | 19922s (143%C)
+  DSQG pos-bias: |mean|=2.9970 |max|=11.4269 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.2261 |max|=0.9746
+  IF gains:      h0:1.00  h1:0.96  h2:0.95  h3:0.95  h4:0.92  h5:0.87  h6:0.89  h7:0.86
+  Bypass gate:   alpha=-6.8661  gate=0.001041  (gate→0=condV-like, gate→1=fully-clean-Q)
+  Bypass diag:   clean_norm=23.5657  full_norm=23.5375  q_cosim=1.0000  q_delta_norm=0.0072
+  EMA factors:   b0:0.0093
+  KdV alphas:    b0:-0.0003
+  -- Generation (T=0.7) --
+    'It was a dark and stormy' -> ' storm. But the storm was hot enough to create a storm that would not be fully u'
+    'The length of the hypotenuse' -> ' is 5.5 mm in diameter. It is the length of the hypotenuse, the length of the hy'
+    'The President of the United' -> ' States, the U.S. Senate, and the United States House of Representatives were de'
+    'Once upon a time there was' -> ' no need to be the\nidea of the poem, but it was a real "star". As a result, the\n'
+    'The results indicate that' -> ' in addition to the severity of the condition, the risk of the individual’s dise'
+  --
+  Passkey...
+  mean=96.7%  (12/12 distances >50%)
+  d=1:100%  d=2:100%  d=4:100%  d=8:100%  d=16:100%  d=32:100%  d=64:100%  d=128:100%  d=256:100%  d=512:100%  d=1024:100%  d=1536:60%
+
+  condX TEST: PPL 38.171 | Loss 3.6421
+  condV (Huygens+Kalman):  52.207 PPL | delta = -14.036
+  condU (V3 baseline):     52.237 PPL | delta = -14.066
+  condM (reference):       54.529 PPL | delta = -16.358
+
+  -- Temperature sweep (best checkpoint) --
+
+  [greedy]
+    'It was a dark and stormy' -> ' day, and the sun was shining. The sun was shining, and the sun was shining. The'
+    'The length of the hypotenuse' -> ' is approximately 1.5 mm. The hypotenuse is the most common hypotenuse in the Un'
+    'The President of the United' -> ' States, the President of the United States, and the President of the United Sta'
+    'Once upon a time there was' -> ' a great deal of confusion and confusion between the two. The first was that the'
+    'The results indicate that' -> ' the study was conducted in a small sample of the population of the United State'
+
+  [T=0.7]
+    'It was a dark and stormy' -> ' day. It was a hot day. The storm was not so hot and the sun was falling. It was'
+    'The length of the hypotenuse' -> ' is 15.4 mm, as measured in the left side of the hypotenuse.\nThis is the 2-point'
+    'The President of the United' -> ' States, the United States and the United States of America, is the only person '
+    'Once upon a time there was' -> ' a sudden change in the shape of the artery. The artery was not too large, and a'
+    'The results indicate that' -> ' the observed decrease in the number of infected persons with HIV is due to a lo'
+
+  [T=1.0]
+    'It was a dark and stormy' -> ' afternoon at the tomb of Sinaloa, perhaps with a real appearance, which itself '
+    'The length of the hypotenuse' -> ': 200 parts\nEach method should be run using first steps:\nExpressions: Cut height'
+    'The President of the United' -> ' States and Republican General Gallatin had the potential to confound his nation'
+    'Once upon a time there was' -> ' a war of mutiny and forced conversion to a World War I refuge. The rapidly grow'
+    'The results indicate that' -> ' the students exhibit a similar sensation of firing. They can also assume that t'
+
+  Final passkey: mean=96.7%  (12/12 distances >50%)
+  d=1:100%  d=2:100%  d=4:100%  d=8:100%  d=16:100%  d=32:100%  d=64:100%  d=128:100%  d=256:100%  d=512:100%  d=1024:100%  d=1536:60%
+  condV ref:  36.7% passkey
+  condU ref:  38.3% passkey
+  condM ref:  83.3% passkey
+
+  Final IF gains: h0:1.004  h1:0.964  h2:0.951  h3:0.951  h4:0.923  h5:0.869  h6:0.886  h7:0.859
+  Final scale_embed: |mean|=0.2261 |max|=0.9746
+  Final EMA factors: b0:0.0093
+  Final KdV alphas:  b0:-0.0003
+  Final bypass: clean_norm=23.5489  full_norm=23.5884  q_cosim=1.0000  q_delta_norm=0.0084
+
+  Results -> benchmarks/logs/condX_v2_35m_bf16_results.json

@@ -1,0 +1,206 @@
+Device: cuda
+condM checkpoint:    /home/dlewis3/Desktop/AI/DWARF/checkpoints/2048_condM_checkpoints/best.pt
+condP 27M checkpoint: /home/dlewis3/Desktop/AI/DWARF/checkpoints/27m_2048__condP_checkpoints/best.ptrom
+Tokenizer: 32000 tokens
+
+Loading condM (13M, 5:1 hybrid)...
+  condM: 13,984,480 params
+Loading condP 27M (pure DSQG)...
+  condP 27M: 26,781,152 params
+
+========================================================================
+  1. CALIBRATION (logit entropy, top-1 confidence)
+========================================================================
+
+  Running calibration: condM...
+  condM (10.2s):
+    Entropy (bits): mean=5.816
+    Top-1 prob:     mean=0.3053
+    Top-5 mass:     mean=0.5196
+    Eff vocab:      mean=193.2
+    Entropy pct:    p10=2.27 p25=4.29 p50=5.96 p75=7.66 p90=9.10
+
+  Running calibration: condP_27M...
+  condP_27M (17.2s):
+    Entropy (bits): mean=5.845
+    Top-1 prob:     mean=0.3188
+    Top-5 mass:     mean=0.5248
+    Eff vocab:      mean=196.3
+    Entropy pct:    p10=2.17 p25=4.19 p50=6.07 p75=7.79 p90=9.15
+
+  ── Calibration delta (condM − condP27M) ──
+    Entropy:   -0.029 bits  (positive = condM more uncertain)
+    Top-1 prob:-0.0135      (negative = condM less peaked)
+    Eff vocab: -3.1
+
+========================================================================
+  2. DISTANCE-CONDITIONED LOSS (per-position CE bucketed by lookback)
+========================================================================
+
+  Running distance loss: condM...
+  condM (0.0s):
+    Bucket           Mean PPL   n tokens
+    0-16                78.11         17
+    17-64               67.07         48
+    65-256              87.14        192
+    257-512             82.40        256
+    513-1024            78.01         97
+
+  Running distance loss: condP_27M...
+  condP_27M (0.0s):
+    Bucket           Mean PPL   n tokens
+    0-16                80.77         17
+    17-64               33.80         48
+    65-256              66.74        192
+    257-512             61.68        256
+    513-1024            55.56         97
+
+  ── Distance-loss delta (condM − condP27M), PPL ──
+    Bucket          condM PPL condP27 PPL      Δ PPL
+    0-16                78.11       80.77      -2.66
+    17-64               67.07       33.80     +33.27
+    65-256              87.14       66.74     +20.40
+    257-512             82.40       61.68     +20.71
+    513-1024            78.01       55.56     +22.44
+
+========================================================================
+  3. FEW-SHOT STRING COPY (template following / induction heads)
+========================================================================
+
+  Running few-shot copy: condM...
+  condM (0.7s):  exact=1/10 (10%)  prefix=1/10 (10%)  mean_edit=4.00
+    ✗ alphanumeric_3shot                  exp='QWRT'   got='XKCD'
+    ✗ number_2shot                        exp='847'    got='***'
+    ✓ word_copy_at_distance               exp='ZEPHYR' got='ZEPHYR'
+    ✗ uppercase_3shot                     exp='DRAGON' got='・・・・・・・�'
+    ✗ pipe_copy_2shot                     exp='bird'   got='dog'
+    ✗ mixed_alphanum_2shot                exp='Z3Z'    got='***'
+    ✗ repeated_keyword_recall             exp='ALPHA7' got='The'
+    ✗ equals_copy_2shot                   exp='green'  got='blue'
+    ✗ code_copy_4shot                     exp='E5M'    got='***'
+    ✗ position_indexed_copy               exp='apple'  got='[2]'
+
+  Running few-shot copy: condP_27M...
+  condP_27M (1.0s):  exact=3/10 (30%)  prefix=3/10 (30%)  mean_edit=4.50
+    ✗ alphanumeric_3shot                  exp='QWRT'   got='XKCD'
+    ✗ number_2shot                        exp='847'    got='ions'
+    ✓ word_copy_at_distance               exp='ZEPHYR' got='ZEPHYR'
+    ✗ uppercase_3shot                     exp='DRAGON' got='icky'
+    ✗ pipe_copy_2shot                     exp='bird'   got='dog|dog|dog|dog|dog|'
+    ✗ mixed_alphanum_2shot                exp='Z3Z'    got='ioX1X'
+    ✓ repeated_keyword_recall             exp='ALPHA7' got='ALPHA7'
+    ✗ equals_copy_2shot                   exp='green'  got='red'
+    ✗ code_copy_4shot                     exp='E5M'    got='ions'
+    ✓ position_indexed_copy               exp='apple'  got='apple'
+
+  ── Few-shot summary ──
+    condM:     1/10 exact  (10%)  mean_edit=4.00
+    condP 27M: 3/10 exact  (30%)  mean_edit=4.50
+
+========================================================================
+  4. PASSKEY RETRIEVAL (content-addressed memory at distance)
+========================================================================
+
+  Running passkey: condM...
+  condM (0.9s):  mean_accuracy=71.2%  over 25 distances
+      Distance    Accuracy   Mean logP
+             0        100%      -3.305
+             5        100%      -3.090
+            16        100%      -2.756
+            32        100%      -2.653
+            48        100%      -2.237
+            50        100%      -2.693
+            64        100%      -1.998
+            96        100%      -2.102
+           100        100%      -2.174
+           128        100%      -2.905
+           192        100%      -3.099
+           200        100%      -2.458
+           256        100%      -2.257
+           300        100%      -2.437
+           384         80%      -3.451
+           500         40%      -6.216
+           512         60%      -5.952
+           750         60%      -5.465
+           768         40%      -6.877
+          1000         40%      -7.324
+          1024         40%      -7.405
+          1250          0%     -11.163
+          1500         20%      -9.540
+          1536          0%     -11.534
+          1700          0%     -11.698
+
+  Running passkey: condP_27M...
+  condP_27M (2.0s):  mean_accuracy=15.2%  over 25 distances
+      Distance    Accuracy   Mean logP
+             0        100%      -2.164
+             5         80%      -4.911
+            16         60%      -6.120
+            32         60%      -6.331
+            48         60%      -5.288
+            50         20%     -10.410
+            64          0%     -12.190
+            96          0%     -12.766
+           100          0%     -12.829
+           128          0%     -12.970
+           192          0%     -13.337
+           200          0%     -13.076
+           256          0%     -13.209
+           300          0%     -13.290
+           384          0%     -13.261
+           500          0%     -13.505
+           512          0%     -13.198
+           750          0%     -13.302
+           768          0%     -13.344
+          1000          0%     -13.432
+          1024          0%     -13.268
+          1250          0%     -13.430
+          1500          0%     -13.622
+          1536          0%     -13.417
+          1700          0%     -13.202
+
+  ── Passkey summary ──
+    condM:     mean_accuracy=71.2%
+    condP 27M: mean_accuracy=15.2%
+
+      Dist   condM acc   condP27 acc
+         0        100%          100%
+         5        100%           80%
+        16        100%           60%
+        32        100%           60%
+        48        100%           60%
+        50        100%           20%
+        64        100%            0%
+        96        100%            0%
+       100        100%            0%
+       128        100%            0%
+       192        100%            0%
+       200        100%            0%
+       256        100%            0%
+       300        100%            0%
+       384         80%            0%
+       500         40%            0%
+       512         60%            0%
+       750         60%            0%
+       768         40%            0%
+      1000         40%            0%
+      1024         40%            0%
+      1250          0%            0%
+      1500         20%            0%
+      1536          0%            0%
+      1700          0%            0%
+
+
+Results saved to: /home/dlewis3/Desktop/AI/DWARF/benchmarks/logs/eval_condM_vs_condP27m_20260227_072012.json
+
+========================================================================
+  FINAL COMPARISON SUMMARY
+========================================================================
+  Metric                                  condM (13M)     condP 27M
+  -----------------------------------  --------------  ------------
+  Test PPL                                     54.529        52.756
+  Params                                   13,984,480    26,781,152
+  Calibration: mean entropy (bits)              5.816         5.845
+  Calibration: top-1 prob                      0.3053        0.3188
+  Few-shot exact match                 1/10 (10%)      3/10 (30%)
+  Passkey mean accuracy                         71.2%         15.2%

@@ -1,0 +1,64 @@
+
+============================================================
+  eval_suite.py — condm_27m
+  Device: cuda
+============================================================
+
+  Model: condM 27M Layer 5 (5 DSQG → 1 full attn)
+
+  Loading tokenizer...
+  Loading model...
+  Loaded condM 27M Layer 5 (5 DSQG → 1 full attn): 26,457,760 params from 27M.ptrom
+
+  [1/4] Calibration...
+    entropy=6.919 bits  top1=0.263  eff_vocab=27.2  (0.2s)
+
+  [2/4] Distance-conditioned loss (wikitext-103)...
+    Loading wikitext-103 test split...
+    Using 17 full 2048-token chunks
+    Buckets:
+    0-16          PPL= 322.28  n=  289
+    17-64         PPL= 176.25  n=  816
+    65-256        PPL=  99.65  n= 3264
+    257-512       PPL=  87.78  n= 4352
+    513-1024      PPL=  69.16  n= 8704
+    1025-2047     PPL=  68.87  n=17374
+    (3.5s)
+
+  [3/4] Few-shot string copy...
+    exact=5/15  (33.3%)  mean_lev=7.87  (1.8s)
+
+  [4/4] Passkey retrieval...
+    d=    1: accuracy=100.0%
+    d=    2: accuracy=100.0%
+    d=    4: accuracy=100.0%
+    d=    8: accuracy=100.0%
+    d=   16: accuracy=60.0%
+    d=   32: accuracy=60.0%
+    d=   64: accuracy=60.0%
+    d=  128: accuracy=80.0%
+    d=  256: accuracy=80.0%
+    d=  512: accuracy=40.0%
+    d= 1024: accuracy=60.0%
+    d= 1536: accuracy=20.0%
+    mean_accuracy=71.7%  (0.5s)
+
+  Generation samples (greedy + T=0.7)...
+
+  [greedy]
+    'It was a dark and stormy'               → ', and I was very happy to be there. I was very happy to be there. I was very hap'
+    'The length of the hypotenuse'           → ' is a bit of a shock. The amount of time the cap is spent on the cap is a bit of'
+    'The President of the United'            → ' States, and the President of the United States, have been in the process of mak'
+    'Once upon a time there was'             → ' a time when the world was still in the dark.\n\nThe first time I saw the first ti'
+    'The results indicate that'              → ' the number of people who are in the workforce is at least 10 times higher than '
+
+  [T=0.7]
+    'It was a dark and stormy'               → ' time.\n\nIn the past, the car had been undergoing a special operation and had bee'
+    'The length of the hypotenuse'           → ' is about one in five per cent. For example, the current measurement of the quan'
+    'The President of the United'            → ' States, John Kerry, said that it was "very unfortunate" that he would remain in'
+    'Once upon a time there was'             → ' a place for an intense conversation. The second was a meeting with two people w'
+    'The results indicate that'              → ' the U.S. Department of Homeland Security has a veto power, which it says is “in'
+
+  Results saved to /home/dlewis3/Desktop/AI/DWARF/evals/logs/eval_suite_condm_27m_20260313_142401.json
+============================================================
+

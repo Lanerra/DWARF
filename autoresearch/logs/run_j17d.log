@@ -1,0 +1,66 @@
+======================================================================
+  🔬 DWARF Autoresearch — Pure J17D
+======================================================================
+  GPU: NVIDIA GeForce RTX 4090
+  D=512, H=8, L=6, FFN=2048
+  IF interval=3, Full attn layer=5
+  scale_embed init=0.0, LR mult=15.0
+  LR=0.0003, Epochs=3
+  git=df0d435
+Loading FineWeb-Edu (sample-10BT)...
+Loaded tokenizer from results/2048_condI_tokenizer.json
+Loading pre-encoded dataset from logs/fineweb_encoded_2048.pt
+  train: 52,716  val: 5,582 seqs
+Parameters: 38,722,816 (38.7M)
+  Step 200/1648 | Loss 6.3303
+  Step 400/1648 | Loss 5.6333
+  Step 600/1648 | Loss 5.2859
+  Step 800/1648 | Loss 5.1993
+  Step 1000/1648 | Loss 4.9359
+  Step 1200/1648 | Loss 4.7940
+  Step 1400/1648 | Loss 4.6357
+  Step 1600/1648 | Loss 4.3845
+Ep 1/3 | Val PPL 90.24 *
+  scale_embed |mean|=0.4113 |max|=1.9095
+  Passkey mean=10.8%
+  d=1:10%  d=2:10%  d=4:10%  d=8:20%  d=16:10%  d=32:10%  d=64:10%  d=128:10%  d=256:10%  d=512:10%  d=1024:10%  d=1536:10%
+  Step 200/1648 | Loss 4.4327
+  Step 400/1648 | Loss 4.2895
+  Step 600/1648 | Loss 4.2341
+  Step 800/1648 | Loss 4.5251
+  Step 1000/1648 | Loss 4.3547
+  Step 1200/1648 | Loss 4.5442
+  Step 1400/1648 | Loss 4.3354
+  Step 1600/1648 | Loss 4.2646
+Ep 2/3 | Val PPL 64.70 *
+  scale_embed |mean|=0.4094 |max|=2.1273
+  Passkey mean=12.5%
+  d=1:10%  d=2:20%  d=4:20%  d=8:20%  d=16:10%  d=32:10%  d=64:10%  d=128:10%  d=256:10%  d=512:10%  d=1024:10%  d=1536:10%
+  Step 200/1648 | Loss 4.3439
+  Step 400/1648 | Loss 4.2065
+  Step 600/1648 | Loss 4.2343
+  Step 800/1648 | Loss 4.1377
+  Step 1000/1648 | Loss 4.2312
+  Step 1200/1648 | Loss 4.2491
+  Step 1400/1648 | Loss 4.1902
+  Step 1600/1648 | Loss 4.1316
+Ep 3/3 | Val PPL 61.30 *
+  scale_embed |mean|=0.4050 |max|=2.1597
+  Passkey mean=14.2%
+  d=1:10%  d=2:20%  d=4:20%  d=8:30%  d=16:10%  d=32:20%  d=64:10%  d=128:10%  d=256:10%  d=512:10%  d=1024:10%  d=1536:10%
+
+---
+passkey_ep1:    10.8
+passkey_ep2:    12.5
+passkey_ep3:    14.2
+ppl_ep1:        90.24
+ppl_ep2:        64.70
+ppl_ep3:        61.30
+ar_score:       -4.13
+memory_mb:      10202.0
+elapsed_s:      5929.6
+num_params_M:   38.7
+num_layers:     6
+num_offsets:    17
+scale_embed_lr_mult: 15.0
+description:    38.7M pure J17D (J16D+δ=1536) — relay-optimal J=16 + direct d=1536 1-hop

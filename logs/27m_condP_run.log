@@ -1,0 +1,250 @@
+======================================================================
+  DWARF 27M condP — Scaling Validation
+  D=400, H=8, d_head=50, L=6, FFN=1600
+======================================================================
+  GPU: NVIDIA H100 80GB HBM3  (85.0 GB)
+  Offsets: {0..64} ∪ {96,128,...,1536} = 74 (same as 13M condP)
+  Interference: every 3rd layer
+  Checkpoint → 2048_27m_condP_checkpoints/
+Loaded condI BPE tokenizer from /workspace/DWARF/benchmarks/results/2048_condI_tokenizer.json
+Loading OpenWebText (up to 100,000 docs)...
+  25,000 docs...
+  50,000 docs...
+  75,000 docs...
+  100,000 docs...
+Encoding data (max_seq_len=2048)...
+  Train: 52,716 sequences
+  Val: 1,435 sequences
+  Test: 1,459 sequences
+
+27M condP: 26,781,152 parameters  (26.78M)
+  D=400, H=8, d_head=50, L=6, FFN=1600
+  n_offsets: 74 (identical to 13M condP)
+Running causality check...
+  Pre-10:  0.00000000  (expect 0.0)
+  Pos-10:  1.375775  (expect >0)
+  Post-10: 0.523471  (expect >0)
+  PASS
+/usr/local/lib/python3.11/dist-packages/torch/utils/checkpoint.py:1399: FutureWarning: `torch.cpu.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cpu', args...)` instead.
+  with device_autocast_ctx, torch.cpu.amp.autocast(**cpu_autocast_kwargs), recompute_context:  # type: ignore[attr-defined]
+  Step 200/1648 | Loss 6.0948
+  Step 400/1648 | Loss 5.6499
+  Step 600/1648 | Loss 5.4164
+  Step 800/1648 | Loss 5.2239
+  Step 1000/1648 | Loss 5.1492
+  Step 1200/1648 | Loss 4.9554
+  Step 1400/1648 | Loss 4.9623
+  Step 1600/1648 | Loss 4.9471
+Ep 1/10 | Train 4.6548 | Val 4.8227 PPL 124.3 * BEST | 2750s
+  Pos-bias: |mean|=3.8195 |max|=13.9775 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' → ', and it was a little bit of a little bit of a little bit of a little bit of a l'
+    'The length of the hypotenuse' → ', the first of the two-dimensional, the first-in-the-one-one-one, the first-in-o'
+    'The President of the United' → ' States, and the United States, the United States, and the United States, and th'
+    'Once upon a time there was' → ' no way to do so.\n\nThe first time I was to start with the first time I was to st'
+    'The results indicate that' → ' the two of the two two are the two two.\n\nThe two are the two two, the two are t'
+  ──
+  Step 200/1648 | Loss 4.7334
+  Step 400/1648 | Loss 4.6133
+  Step 600/1648 | Loss 4.5902
+  Step 800/1648 | Loss 4.6184
+  Step 1000/1648 | Loss 4.4975
+  Step 1200/1648 | Loss 4.4277
+  Step 1400/1648 | Loss 4.4720
+  Step 1600/1648 | Loss 4.4193
+Ep 2/10 | Train 4.4748 | Val 4.3924 PPL 80.8 * BEST | 5511s
+  Pos-bias: |mean|=3.7268 |max|=13.3494 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' → ', and it was a little bit of a surprise.\n\nThe first time I was in the middle of '
+    'The length of the hypotenuse' → ' is the same as the other two.\n\nThe first time the function is the same as the o'
+    'The President of the United' → ' States, the president of the United States, said in a statement.\n\n"The presiden'
+    'Once upon a time there was' → ' a chance to get a chance to get a chance to get a chance to win.\n\nThe first tim'
+    'The results indicate that' → ' the results are not necessarily the same.\n\nThe results are not the same.\n\nThe r'
+  ──
+  Step 200/1648 | Loss 4.3232
+  Step 400/1648 | Loss 4.3212
+  Step 600/1648 | Loss 4.3417
+  Step 800/1648 | Loss 4.3704
+  Step 1000/1648 | Loss 4.2612
+  Step 1200/1648 | Loss 4.3473
+  Step 1400/1648 | Loss 4.3133
+  Step 1600/1648 | Loss 4.2646
+Ep 3/10 | Train 4.1709 | Val 4.2303 PPL 68.7 * BEST | 8271s
+  Pos-bias: |mean|=3.6366 |max|=12.8067 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' → ', and it was a very dark and dark and dark and dark.\n\nThe dark and dark and dark'
+    'The length of the hypotenuse' → ' is the same as the length of the diabetic. The length of the diabetic is the sa'
+    'The President of the United' → ' States, who has been a member of the United States, has been a member of the Un'
+    'Once upon a time there was' → ' a chance to be a great place to live in.\n\nThe first time I was in the room, I w'
+    'The results indicate that' → ' the results are not statistically significant.\n\nThe results are based on the re'
+  ──
+  Step 200/1648 | Loss 4.2061
+  Step 400/1648 | Loss 4.1559
+  Step 600/1648 | Loss 4.1081
+  Step 800/1648 | Loss 4.2651
+  Step 1000/1648 | Loss 4.1915
+  Step 1200/1648 | Loss 4.1694
+  Step 1400/1648 | Loss 4.1862
+  Step 1600/1648 | Loss 4.1384
+Ep 4/10 | Train 4.2410 | Val 4.1388 PPL 62.7 * BEST | 11032s
+  Pos-bias: |mean|=3.5579 |max|=12.3626 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' → ' day.\n\nThe first time I saw the first time I saw the first time I saw the first '
+    'The length of the hypotenuse' → ' is a bit more complicated than the length of the diagonal. The length of the di'
+    'The President of the United' → ' States, who has been a member of the United States for over a decade, has been '
+    'Once upon a time there was' → ' a chance that the next day would be a great day for the next generation.\n\nThe n'
+    'The results indicate that' → ' the results are not consistent with the results.\n\nThe results are consistent wi'
+  ──
+  Step 200/1648 | Loss 4.1486
+  Step 400/1648 | Loss 4.0919
+  Step 600/1648 | Loss 4.1077
+  Step 800/1648 | Loss 3.9434
+  Step 1000/1648 | Loss 4.0707
+  Step 1200/1648 | Loss 4.1029
+  Step 1400/1648 | Loss 4.1111
+  Step 1600/1648 | Loss 4.0598
+Ep 5/10 | Train 4.0132 | Val 4.0788 PPL 59.1 * BEST | 13796s
+  Pos-bias: |mean|=3.4949 |max|=12.0204 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' → ' experience.\n\nThe first time I saw the show, I was able to see the show, and I w'
+    'The length of the hypotenuse' → ' is a bit more complicated than the length of the length of the material. The le'
+    'The President of the United' → ' States, the president of the United States, and the president of the United Sta'
+    'Once upon a time there was' → ' a chance that the team would be able to get the ball to the ground.\n\nThe team w'
+    'The results indicate that' → ' the results are not necessarily true.\n\nThe results are based on the results of '
+  ──
+  Step 200/1648 | Loss 4.0467
+  Step 400/1648 | Loss 3.8941
+  Step 600/1648 | Loss 4.0391
+  Step 800/1648 | Loss 4.0657
+  Step 1000/1648 | Loss 4.1150
+  Step 1200/1648 | Loss 4.0697
+  Step 1400/1648 | Loss 4.0373
+  Step 1600/1648 | Loss 4.0616
+Ep 6/10 | Train 3.9144 | Val 4.0372 PPL 56.7 * BEST | 16558s
+  Pos-bias: |mean|=3.4485 |max|=11.7766 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' → ' experience.\n\n"I was a little bit confused with the way I was doing it," he said'
+    'The length of the hypotenuse' → ' is a bit more complicated than the length of the card. The length of the card i'
+    'The President of the United' → ' States, the president of the United States, and the president of the United Sta'
+    'Once upon a time there was' → ' a time when the time was right.\n\nThe time was right.\n\nThe time was right.\n\nThe '
+    'The results indicate that' → ' the results are not consistent with the results.\n\nThe results are consistent wi'
+  ──
+  Step 200/1648 | Loss 4.0145
+  Step 400/1648 | Loss 4.0182
+  Step 600/1648 | Loss 4.0371
+  Step 800/1648 | Loss 4.0177
+  Step 1000/1648 | Loss 4.0137
+  Step 1200/1648 | Loss 3.8324
+  Step 1400/1648 | Loss 4.0329
+  Step 1600/1648 | Loss 4.0209
+Ep 7/10 | Train 4.0554 | Val 4.0109 PPL 55.2 * BEST | 19319s
+  Pos-bias: |mean|=3.4180 |max|=11.6218 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' → ' experience.\n\n"I was a little bit surprised that I was in the middle of the nigh'
+    'The length of the hypotenuse' → ' is determined by the number of people who are in the same position.\n\nThe number'
+    'The President of the United' → ' States, who has been a member of the United States Senate, has been a member of'
+    'Once upon a time there was' → ' a time when the time was right.\n\nThe time was right.\n\nThe time was right.\n\nThe '
+    'The results indicate that' → ' the number of people who are in the country is more than twice as likely to be '
+  ──
+  Step 200/1648 | Loss 3.8746
+  Step 400/1648 | Loss 4.0021
+  Step 600/1648 | Loss 4.0900
+  Step 800/1648 | Loss 4.0130
+  Step 1000/1648 | Loss 3.9867
+  Step 1200/1648 | Loss 4.0567
+  Step 1400/1648 | Loss 3.9480
+  Step 1600/1648 | Loss 3.9465
+Ep 8/10 | Train 4.0102 | Val 3.9939 PPL 54.3 * BEST | 22080s
+  Pos-bias: |mean|=3.4012 |max|=11.5395 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' → ' experience.\n\n"I was a little bit surprised by the fact that I was a little bit '
+    'The length of the hypotenuse' → ' is a bit more complicated than the length of the card. The length of the card i'
+    'The President of the United' → ' States, the president of the United States, and the president of the United Sta'
+    'Once upon a time there was' → ' a time when the time was right.\n\nThe time was right.\n\nThe time was right.\n\nThe '
+    'The results indicate that' → ' the number of people who are in the United States is more than twice as large a'
+  ──
+  Step 200/1648 | Loss 3.9970
+  Step 400/1648 | Loss 3.9702
+  Step 600/1648 | Loss 3.9532
+  Step 800/1648 | Loss 3.8886
+  Step 1000/1648 | Loss 3.9172
+  Step 1200/1648 | Loss 3.8906
+  Step 1400/1648 | Loss 3.9396
+  Step 1600/1648 | Loss 3.8991
+Ep 9/10 | Train 3.9806 | Val 3.9858 PPL 53.8 * BEST | 24840s
+  Pos-bias: |mean|=3.3948 |max|=11.5080 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' → ' experience.\n\n"I was a little bit surprised by the fact that I was a little bit '
+    'The length of the hypotenuse' → ' is a bit more complicated than the length of the card. The length of the card i'
+    'The President of the United' → ' States, who has been a member of the United States Senate since the election, h'
+    'Once upon a time there was' → ' a time when the time was right.\n\nThe first time I saw the first time I saw the '
+    'The results indicate that' → ' the number of people who are in the race is more than twice as likely to be in '
+  ──
+  Step 200/1648 | Loss 3.8234
+  Step 400/1648 | Loss 3.9279
+  Step 600/1648 | Loss 3.8950
+  Step 800/1648 | Loss 3.8551
+  Step 1000/1648 | Loss 3.9775
+  Step 1200/1648 | Loss 3.9484
+  Step 1400/1648 | Loss 3.8631
+  Step 1600/1648 | Loss 3.7754
+Ep 10/10 | Train 3.8781 | Val 3.9845 PPL 53.8 * BEST | 27601s
+  Pos-bias: |mean|=3.3938 |max|=11.5034 most-local=h7 most-global=h0
+  ── Generation samples (greedy) ──
+    'It was a dark and stormy' → ' experience.\n\n"I was a little bit nervous about the fact that I was a little bit'
+    'The length of the hypotenuse' → ' is a bit more complicated than the length of the card. The length of the card i'
+    'The President of the United' → ' States, who has been a member of the United States Senate since the election, h'
+    'Once upon a time there was' → ' a time when the time was right.\n\nThe time was right.\n\nThe time was right.\n\nThe '
+    'The results indicate that' → ' the number of people who are in the country is more than twice as likely to be '
+  ──
+
+  27M condP TEST: PPL 52.756 | Loss 3.9657
+
+  ── Temperature sweep (best checkpoint) ──
+
+  [greedy]
+    'It was a dark and stormy' → ' experience.\n\n"I was a little bit nervous about the fact that I was a little bit'
+    'The length of the hypotenuse' → ' is a bit more complicated than the length of the card. The length of the card i'
+    'The President of the United' → ' States, who has been a member of the United States Senate since the election, h'
+    'Once upon a time there was' → ' a time when the time was right.\n\nThe time was right.\n\nThe time was right.\n\nThe '
+    'The results indicate that' → ' the number of people who are in the country is more than twice as likely to be '
+
+  [T=0.5]
+    'It was a dark and stormy' → ' day in the early hours of the evening.\n\nThe event was set to begin on 9/11, and'
+    'The length of the hypotenuse' → ' is a bit less than the length of the material. The length of the material is a '
+    'The President of the United' → ' States, Donald Trump, has said that he is “very proud of the country” and that '
+    'Once upon a time there was' → ' a moment of silence.\n\n"It was a great moment of silence," said E. Lee. "It was '
+    'The results indicate that' → ' the team has not been able to find the best team in the league, and that the te'
+
+  [T=0.7]
+    'It was a dark and stormy' → ' scene for the whole season and I felt like it would be all a bit of a surprise '
+    'The length of the hypotenuse' → ' is a massive sum of human resources that we can use to fund the construction of'
+    'The President of the United' → ' States has been called a "complexing act of terror," according to the Republica'
+    'Once upon a time there was' → ' a very good chance that the best thing to do is to make sure that you’re really'
+    'The results indicate that' → ' the "pain of the Korean Peninsula" is a significant improvement over the past y'
+
+  [T=1.0]
+    'It was a dark and stormy' → ' enchantment. Especially given the tired, manipulative stuff of the past that do'
+    'The length of the hypotenuse' → ' is attributable to Riddick et al. 1989. It is recommended in 2016 to be compati'
+    'The President of the United' → ' States, Kim Sharpton, declared as little as a U.S. adviser to President Barack '
+    'Once upon a time there was' → ' one another ending the show; hence, it was the premiere of the series before th'
+    'The results indicate that' → ' a traditional part of the agreement is within the reach of the EU. The EU has a'
+
+======================================================================
+  27M condP SCALING SUMMARY
+======================================================================
+  Model                                           Params   Test PPL      Gap
+  ─────────────────────────────────────────────  ────────  ─────────  ───────
+  condP 13M (dense-64 + dyadic)                   ~13.5M     65.057    +0.99
+  condP 27M (this run)                              ~27M     52.756        ?
+  condP 85M (condB)                                 ~85M       58.1    +0.40
+
+  13M gap vs baseline: +0.987 PPL
+  27M test PPL:        52.756
+  85M gap vs baseline: +0.40 PPL
+
+  Scaling gain vs 13M: 12.30 PPL ↓
+  Expected (log-linear mid 13M/85M): 61.5
+  → Deviation from log-linear; investigate scaling law fit
+
+  Results → /workspace/DWARF/benchmarks/results/2048_27m_condP_results.json

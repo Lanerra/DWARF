@@ -1,0 +1,158 @@
+======================================================================
+  DWARF condK — POOLING RESTORED ABLATION
+  Question: was removing interference pooling the key condK win?
+======================================================================
+  GPU: NVIDIA GeForce RTX 4090  (23.6 GB)
+  Interference pooling: RESTORED every 3rd layer (blocks 2, 5)
+  Everything else: identical to condK
+Loading OpenWebText (up to 100,000 docs)...
+  25,000 docs...
+  50,000 docs...
+  75,000 docs...
+  100,000 docs...
+  100,000 docs | train 95,000 | val 2,500 | test 2,500
+Loaded condI BPE tokenizer (shared vocabulary for comparability)
+  Vocab: 32000 tokens
+Encoding data (max_seq_len=2048)...
+  Train: 52,716 sequences
+  Val: 1,435 sequences
+  Test: 1,459 sequences
+
+DWARF condK_pooling: 14,119,616 parameters
+  Interference blocks: [2, 5]
+  Extra params vs condK: -70,367,840  (2 × inter_norm + inter_gate + inter_pool per pooling block)
+Running causality check...
+  Pre-5:  0.00000000  (expect 0.0)
+  Pos-5:  0.990919  (expect >0)
+  Post-5: 0.299588  (expect >0)
+  PASS — architecture is causal
+  Step 200/1648 | Loss 6.4214
+  Step 400/1648 | Loss 6.0760
+  Step 600/1648 | Loss 5.9511
+  Step 800/1648 | Loss 5.6309
+  Step 1000/1648 | Loss 5.4626
+  Step 1200/1648 | Loss 5.1972
+  Step 1400/1648 | Loss 5.3345
+  Step 1600/1648 | Loss 5.3164
+Ep 1/10 | Train 5.4559 | Val 5.1723 PPL 176.3 * BEST | 1480s
+  Scale prior (top-3): j=0 rf=4tok gain=0.122, j=1 rf=8tok gain=0.111, j=2 rf=16tok gain=0.105
+  Bypass mean: 0.0212 | Pos-bias max: 0.4249
+  ── Generation samples ──
+    'It was a dark and stormy' → ', and I was a very good, I was a very good, I was a very good, I was a very good'
+    'The length of the hypotenuse' → ' of the the the most important of the the most important. The most important thi'
+    'The President of the United' → ' States, and the United States, the United States, and the United States, and th'
+    'Once upon a time there was' → ' a lot of time to get to the end of the game.\n\nThe first time I was in the first'
+    'The results indicate that' → ' the number of the data are not available.\n\nThe data is not the case.\n\nThe data '
+  ──
+  Step 200/1648 | Loss 5.0428
+  Step 400/1648 | Loss 4.9955
+  Step 600/1648 | Loss 5.1159
+  Step 800/1648 | Loss 4.9294
+  Step 1000/1648 | Loss 5.0825
+  Step 1200/1648 | Loss 4.9039
+  Step 1400/1648 | Loss 4.8093
+  Step 1600/1648 | Loss 4.8464
+Ep 2/10 | Train 4.7638 | Val 4.8228 PPL 124.3 * BEST | 2975s
+  Scale prior (top-3): j=0 rf=4tok gain=0.130, j=1 rf=8tok gain=0.114, j=2 rf=16tok gain=0.105
+  Bypass mean: 0.0228 | Pos-bias max: 0.8393
+  ── Generation samples ──
+    'It was a dark and stormy' → ', and it was a very good thing. It was a great thing. I was a great guy. I was a'
+    'The length of the hypotenuse' → ' is the most important part of the brain.\n\nThe researchers have shown that the r'
+    'The President of the United' → ' States, and the United States, and the United States, and the United States, an'
+    'Once upon a time there was' → ' a lot of time to get a lot of time to get a lot of time to get a lot of time to'
+    'The results indicate that' → ' the results are not likely to be reported.\n\nThe report said the report is not e'
+  ──
+  Step 200/1648 | Loss 4.6519
+  Step 400/1648 | Loss 4.7816
+  Step 600/1648 | Loss 4.7705
+  Step 800/1648 | Loss 4.7526
+  Step 1000/1648 | Loss 4.7670
+  Step 1200/1648 | Loss 4.7317
+  Step 1400/1648 | Loss 4.6433
+  Step 1600/1648 | Loss 4.8767
+Ep 3/10 | Train 5.0423 | Val 4.6629 PPL 105.9 * BEST | 4465s
+  Scale prior (top-3): j=0 rf=4tok gain=0.134, j=1 rf=8tok gain=0.116, j=2 rf=16tok gain=0.105
+  Bypass mean: 0.0243 | Pos-bias max: 1.2010
+  ── Generation samples ──
+    'It was a dark and stormy' → ', and it was a very cool, and it was a very good thing. It was a great thing. It'
+    'The length of the hypotenuse' → ' of the p.m. in the p.m.\n\n[2]\n\n[2]\n\n[2] [2]\n\n[2] [2]\n\n[2] [3]\n\n[2] [3] [3] [3] ['
+    'The President of the United' → ' States, the United States, and the United States, and the United States.\n\nThe U'
+    'Once upon a time there was' → ' no time to get a look at the time.\n\nI was able to get a few minutes to get a lo'
+    'The results indicate that' → ' the results are not consistent with the results.\n\nThe results are not clear.\n\nT'
+  ──
+  Step 200/1648 | Loss 4.6938
+  Step 400/1648 | Loss 4.6784
+  Step 600/1648 | Loss 4.9819
+  Step 800/1648 | Loss 4.4949
+  Step 1000/1648 | Loss 4.4917
+  Step 1200/1648 | Loss 4.4157
+  Step 1400/1648 | Loss 4.5752
+  Step 1600/1648 | Loss 4.5712
+Ep 4/10 | Train 4.6566 | Val 4.5734 PPL 96.9 * BEST | 5956s
+  Scale prior (top-3): j=0 rf=4tok gain=0.136, j=1 rf=8tok gain=0.117, j=2 rf=16tok gain=0.105
+  Bypass mean: 0.0259 | Pos-bias max: 1.4955
+  ── Generation samples ──
+    'It was a dark and stormy' → ', and it was a little bit of a little bit of a little bit of a little bit of a l'
+    'The length of the hypotenuse' → ' is the one that is the most important part of the life of the brain. The brain '
+    'The President of the United' → ' States, the United States, and the United States, have been in the United State'
+    'Once upon a time there was' → ' no way to get a job.\n\nI was a little nervous. I was a little nervous. I was a l'
+    'The results indicate that' → ' the data is not data-based, and the data is not data-based.\n\nThe data is data f'
+  ──
+  Step 200/1648 | Loss 4.6718
+  Step 400/1648 | Loss 4.5119
+  Step 600/1648 | Loss 4.6443
+  Step 800/1648 | Loss 4.5313
+  Step 1000/1648 | Loss 4.7610
+  Step 1200/1648 | Loss 4.3031
+  Step 1400/1648 | Loss 4.5194
+  Step 1600/1648 | Loss 4.3676
+Ep 5/10 | Train 4.6484 | Val 4.5144 PPL 91.3 * BEST | 7412s
+  Scale prior (top-3): j=0 rf=4tok gain=0.138, j=1 rf=8tok gain=0.118, j=2 rf=16tok gain=0.105
+  Bypass mean: 0.0273 | Pos-bias max: 1.7204
+  ── Generation samples ──
+    'It was a dark and stormy' → ' day. It was a day of rain. It was a day of rain. It was a day of rain. It was a'
+    'The length of the hypotenuse' → ' is the most important part of the body. The body is the most important part of '
+    'The President of the United' → ' States, the United States, and the United States, the United States, the United'
+    'Once upon a time there was' → ' a time when the game was released, the game was a game that was not a game. The'
+    'The results indicate that' → ' the results are not confirmed.\n\nThe report said the report was not published in'
+  ──
+  Step 200/1648 | Loss 4.7869
+  Step 400/1648 | Loss 4.0486
+  Step 600/1648 | Loss 4.4826
+  Step 800/1648 | Loss 4.5511
+  Step 1000/1648 | Loss 4.4447
+  Step 1200/1648 | Loss 4.3643
+  Step 1400/1648 | Loss 4.4361
+  Step 1600/1648 | Loss 4.6218
+Ep 6/10 | Train 4.5243 | Val 4.4761 PPL 87.9 * BEST | 8909s
+  Scale prior (top-3): j=0 rf=4tok gain=0.138, j=1 rf=8tok gain=0.118, j=2 rf=16tok gain=0.104
+  Bypass mean: 0.0285 | Pos-bias max: 1.8805
+  ── Generation samples ──
+    'It was a dark and stormy' → ', and it was a little bit of a storm. It was a huge storm. It was a storm. It wa'
+    'The length of the hypotenuse' → ' is the most important part of the body. The body is the body of the body, which'
+    'The President of the United' → ' States, the United States, and the United States, and the United States, have b'
+    'Once upon a time there was' → ' a lot of room for a lot of room to work.\n\nI was able to get a lot of time to ge'
+    'The results indicate that' → ' the results are not statistically significant. The results are not consistent w'
+  ──
+  Step 200/1648 | Loss 4.3238
+  Step 400/1648 | Loss 4.3575
+  Step 600/1648 | Loss 4.5181
+  Step 800/1648 | Loss 4.4931
+  Step 1000/1648 | Loss 4.3580
+  Step 1200/1648 | Loss 4.5547
+  Step 1400/1648 | Loss 4.4892
+  Step 1600/1648 | Loss 4.3032
+Ep 7/10 | Train 4.3102 | Val 4.4485 PPL 85.5 * BEST | 10394s
+  Scale prior (top-3): j=0 rf=4tok gain=0.139, j=1 rf=8tok gain=0.118, j=2 rf=16tok gain=0.104
+  Bypass mean: 0.0294 | Pos-bias max: 1.9832
+  ── Generation samples ──
+    'It was a dark and stormy' → ', and it was a little bit of a storm. It was a little bit of a storm. It was a l'
+    'The length of the hypotenuse' → ' of the cervical is the same as the the cervical. The theorem is the theorem of '
+    'The President of the United' → ' States, the United States, and the United States, and the United States, and th'
+    'Once upon a time there was' → ' a time when the game was played, it was a game that was a game that was played '
+    'The results indicate that' → ' the number of deaths in the deaths of the victims is the highest in the populat'
+  ──
+  Step 200/1648 | Loss 4.2837
+  Step 400/1648 | Loss 4.3484
+  Step 600/1648 | Loss 4.4831
+  Step 800/1648 | Loss 4.2909

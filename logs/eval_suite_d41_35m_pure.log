@@ -1,0 +1,64 @@
+
+============================================================
+  eval_suite.py — d41_35m_pure
+  Device: cuda
+============================================================
+
+  Model: d41_35m_pure 35M pure DSQG (FULL_ATTN_LAYER=-1, dense=41, sparse=[48,128,384])
+
+  Loading tokenizer...
+  Loading model...
+  Loaded d41_35m_pure 35M pure DSQG (FULL_ATTN_LAYER=-1, dense=41, sparse=[48,128,384]): 39,525,364 params from best.pt
+
+  [1/4] Calibration...
+    entropy=7.178 bits  top1=0.197  eff_vocab=29.1  (0.4s)
+
+  [2/4] Distance-conditioned loss (wikitext-103)...
+    Loading wikitext-103 test split...
+    Using 17 full 2048-token chunks
+    Buckets:
+    0-16          PPL= 224.00  n=  289
+    17-64         PPL= 132.77  n=  816
+    65-256        PPL=  89.27  n= 3264
+    257-512       PPL=  91.45  n= 4352
+    513-1024      PPL=  87.19  n= 8704
+    1025-2047     PPL=  83.22  n=17374
+    (3.3s)
+
+  [3/4] Few-shot string copy...
+    exact=6/15  (40.0%)  mean_lev=7.13  (0.9s)
+
+  [4/4] Passkey retrieval...
+    d=    1: accuracy=100.0%
+    d=    2: accuracy=100.0%
+    d=    4: accuracy=100.0%
+    d=    8: accuracy=100.0%
+    d=   16: accuracy=40.0%
+    d=   32: accuracy=40.0%
+    d=   64: accuracy=20.0%
+    d=  128: accuracy=0.0%
+    d=  256: accuracy=0.0%
+    d=  512: accuracy=0.0%
+    d= 1024: accuracy=0.0%
+    d= 1536: accuracy=0.0%
+    mean_accuracy=41.7%  (0.2s)
+
+  Generation samples (greedy + T=0.7)...
+
+  [greedy]
+    'It was a dark and stormy'               → ' night.\nThe first day of the month was the first day of the month. The first day'
+    'The length of the hypotenuse'           → ' is determined by the number of times the hypotenuse is applied. The hypotenuse '
+    'The President of the United'            → ' States, John F. Kennedy, was elected President of the United States in 1964.\nTh'
+    'Once upon a time there was'             → ' a great deal of confusion, and the people were not able to get the news. The pe'
+    'The results indicate that'              → ' the use of the Internet has been a major source of concern for the development '
+
+  [T=0.7]
+    'It was a dark and stormy'               → ' day.\n“So, on the other side of the moon, there was a storm that was not like th'
+    'The length of the hypotenuse'           → ' is often greater than the length of the hypotenuse, which is a measure of the v'
+    'The President of the United'            → ' States, John F. Kennedy, was elected to the presidency in January 1963, and he '
+    'Once upon a time there was'             → ' a year or two in the past, the time of the day was lost. The first day was held'
+    'The results indicate that'              → ' the scientific community is still working on this issue.\nIn the United States, '
+
+  Results saved to /home/dlewis3/Desktop/AI/DWARF/evals/logs/eval_suite_d41_35m_pure_20260310_194304.json
+============================================================
+

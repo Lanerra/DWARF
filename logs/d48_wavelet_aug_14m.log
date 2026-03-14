@@ -1,0 +1,252 @@
+======================================================================
+  d48_wavelet_aug_14m -- Wavelet-Augmented FFN + Pure DSQG (14M scale, FineWeb-Edu)
+======================================================================
+  GPU: NVIDIA GeForce RTX 4090  (23.6 GB)
+  Kernel: dsqg_attention_v3 (d48 offsets)
+  Wavelet-Augmented FFN: lattice θ=1.1377, alternating levels [0,2,4,6], full D=256 transform
+  Filter coefficients: [0.5261, 0.8228, 0.1810, -0.1157]
+  Initial wavelet mix α: 0.1192 (sigmoid(-2.0))
+  Architecture: INTERFERENCE=3, gate=0, ALL DSQG (no full attention)
+  Offsets: dense=48, sparse=[96, 128, 384], J=52
+Loading FineWeb-Edu from cache: benchmarks/logs/condm_fineweb_edu_doc_cache.json
+  Loaded 100,000 docs from cache
+
+Loaded condI BPE tokenizer from /home/dlewis3/Desktop/AI/DWARF/train/../results/2048_condI_tokenizer.json
+Encoding data (max_seq_len=2048)...
+  Train: 121,232 sequences
+  Val: 2,923 sequences
+  Test: 3,464 sequences
+
+d48_wavelet_aug_14m: 14,262,010 parameters
+  Standard FFN params: 3,153,408 (525,568/block)
+  Wavelet path params: 3,078 (513/block = scale + bias + mix)
+  Layer types: ['DSQG', 'DSQG', 'DSQG', 'DSQG', 'DSQG', 'DSQG']
+Running DWT invertibility check...
+  ||IDWT(DWT(x)) - x||_inf = 7.15e-07
+  PASS
+Running causality check...
+  Pre-10:  0.00000000  (expect 0.0)
+  Pos-10:  2.050062  (expect >0)
+  Post-10: 0.314488  (expect >0)
+  PASS
+
+  Tokens/epoch: 248,161,904
+  Chinchilla:   285,240,200 tokens (epoch ~1.15)
+
+  Step 200/3789 | Loss 6.4614
+======================================================================
+  d48_wavelet_aug_14m -- Wavelet-Augmented FFN + Pure DSQG (14M scale, FineWeb-Edu)
+======================================================================
+  GPU: NVIDIA GeForce RTX 4090  (23.6 GB)
+  Kernel: dsqg_attention_v3 (d48 offsets)
+  Wavelet-Augmented FFN: lattice θ=1.1377, alternating levels [0,2,4,6], full D=256 transform
+  Filter coefficients: [0.5261, 0.8228, 0.1810, -0.1157]
+  Initial wavelet mix α: 0.1192 (sigmoid(-2.0))
+  Architecture: INTERFERENCE=3, gate=0, ALL DSQG (no full attention)
+  Offsets: dense=48, sparse=[96, 128, 384], J=52
+Loading FineWeb-Edu from cache: benchmarks/logs/condm_fineweb_edu_doc_cache.json
+  Loaded 100,000 docs from cache
+
+Loaded condI BPE tokenizer from /home/dlewis3/Desktop/AI/DWARF/train/../results/2048_condI_tokenizer.json
+Encoding data (max_seq_len=2048)...
+======================================================================
+  d48_wavelet_aug_14m -- Wavelet-Augmented FFN + Pure DSQG (14M scale, FineWeb-Edu)
+======================================================================
+  GPU: NVIDIA GeForce RTX 4090  (23.6 GB)
+  Kernel: dsqg_attention_v3 (d48 offsets)
+  Wavelet-Augmented FFN: lattice θ=1.1377, alternating levels [0,2,4,6], full D=256 transform
+  Filter coefficients: [0.5261, 0.8228, 0.1810, -0.1157]
+  Initial wavelet mix α: 0.1192 (sigmoid(-2.0))
+  Architecture: INTERFERENCE=3, gate=0, ALL DSQG (no full attention)
+  Offsets: dense=48, sparse=[96, 128, 384], J=52
+Loading FineWeb-Edu from cache: benchmarks/logs/condm_fineweb_edu_doc_cache.json
+  Loaded 100,000 docs from cache
+
+Loaded condI BPE tokenizer from /home/dlewis3/Desktop/AI/DWARF/train/../results/2048_condI_tokenizer.json
+Encoding data (max_seq_len=2048)...
+  Train: 121,232 sequences
+  Capped to 52,716 train sequences (iso-compute)
+  Val: 2,923 sequences
+  Test: 3,464 sequences
+
+d48_wavelet_aug_14m: 14,262,010 parameters
+  Standard FFN params: 3,153,408 (525,568/block)
+  Wavelet path params: 3,078 (513/block = scale + bias + mix)
+  Layer types: ['DSQG', 'DSQG', 'DSQG', 'DSQG', 'DSQG', 'DSQG']
+Running DWT invertibility check...
+  ||IDWT(DWT(x)) - x||_inf = 7.15e-07
+  PASS
+Running causality check...
+  Pre-10:  0.00000000  (expect 0.0)
+  Pos-10:  2.020952  (expect >0)
+  Post-10: 0.343577  (expect >0)
+  PASS
+
+  Tokens/epoch: 107,909,652
+  Chinchilla:   285,240,200 tokens (epoch ~2.64)
+
+  Step 200/1648 | Loss 6.5294
+  Step 400/1648 | Loss 6.1012
+  Step 600/1648 | Loss 5.8117
+  Step 800/1648 | Loss 5.5481
+  Step 1000/1648 | Loss 5.4312
+  Step 1200/1648 | Loss 5.2611
+  Step 1400/1648 | Loss 5.1669
+  Step 1600/1648 | Loss 5.2028
+Ep 1/3 | Train 5.7661 | Val 4.9692 PPL 143.9 * BEST | 673s (38%C)
+  DSQG pos-bias: |mean|=3.3086 |max|=11.4379 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.1042 |max|=0.3242
+  IF gains:      h0:1.01  h1:1.03  h2:1.03  h3:1.02  h4:1.02  h5:1.01  h6:1.01  h7:1.01
+  Wavelet mix α: 0.1023  (higher = more wavelet)
+  Wavelet scale |mean|: 0.9182 |max|: 0.9740
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ', and it was a great way to make it.\nThe first thing to do is is that the first '
+    'The length of the hypotenuse' -> ' of the ginging of the ginging of the ginging of the ginging of the ginging of t'
+    'The President of the United' -> ' States, the United States, the United States, the United States, the United Sta'
+    'Once upon a time there was' -> ' a lot of time to make a lot of time.\nThe first time the first time was to be a '
+    'The results indicate that' -> ' the results of the study were not only in the study.\nThe study found that the s'
+  --
+  Passkey...
+  mean=0.0%  (0/6 distances >50%)
+  d=64:0%  d=128:0%  d=256:0%  d=512:0%  d=1024:0%  d=1536:0%
+  Step 200/1648 | Loss 4.9606
+  Step 400/1648 | Loss 4.9782
+  Step 600/1648 | Loss 4.8196
+  Step 800/1648 | Loss 4.8372
+  Step 1000/1648 | Loss 4.9182
+  Step 1200/1648 | Loss 4.8937
+  Step 1400/1648 | Loss 4.7127
+  Step 1600/1648 | Loss 4.7819
+Ep 2/3 | Train 4.8505 | Val 4.6282 PPL 102.3 * BEST | 1348s (76%C)
+  DSQG pos-bias: |mean|=3.2436 |max|=11.2223 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.1307 |max|=0.4361
+  IF gains:      h0:1.02  h1:1.05  h2:1.04  h3:1.02  h4:1.02  h5:0.99  h6:1.00  h7:1.00
+  Wavelet mix α: 0.0927  (higher = more wavelet)
+  Wavelet scale |mean|: 0.8763 |max|: 0.9467
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ', and it was a great way to get the world to the world.\nThe world was a world of'
+    'The length of the hypotenuse' -> ' is a very small amount of time. The length of the time is about to be a bit mor'
+    'The President of the United' -> ' States, the United States, and the United States, and the United States.\nThe Un'
+    'Once upon a time there was' -> ' a lot of time to get a lot of time.\nThe first time the first time the first tim'
+    'The results indicate that' -> ' the body is not a good source of the body.\nThe body is a good source of energy.'
+  --
+  Passkey...
+  mean=0.0%  (0/6 distances >50%)
+  d=64:0%  d=128:0%  d=256:0%  d=512:0%  d=1024:0%  d=1536:0%
+  Step 200/1648 | Loss 4.7469
+  Step 400/1648 | Loss 4.4656
+  Step 600/1648 | Loss 4.7382
+  Step 800/1648 | Loss 4.5727
+  Step 1000/1648 | Loss 4.6059
+======================================================================
+  d48_wavelet_aug_14m -- Wavelet-Augmented FFN + Pure DSQG (14M scale, FineWeb-Edu)
+======================================================================
+  GPU: NVIDIA GeForce RTX 4090  (23.6 GB)
+  Kernel: dsqg_attention_v3 (d48 offsets)
+  Wavelet-Augmented FFN: lattice θ=1.1377, alternating levels [0,2,4,6], full D=256 transform
+  Filter coefficients: [0.5261, 0.8228, 0.1810, -0.1157]
+  Wavelet path: zero-init (ReZero-style) — starts at 0, grows as scale learns
+  Architecture: INTERFERENCE=3, gate=0, ALL DSQG (no full attention)
+  Offsets: dense=48, sparse=[96, 128, 384], J=52
+Loading FineWeb-Edu from cache: benchmarks/logs/condm_fineweb_edu_doc_cache.json
+  Loaded 100,000 docs from cache
+
+Loaded condI BPE tokenizer from /home/dlewis3/Desktop/AI/DWARF/train/../results/2048_condI_tokenizer.json
+Encoding data (max_seq_len=2048)...
+  Train: 121,232 sequences
+  Capped to 52,716 train sequences (iso-compute)
+  Val: 2,923 sequences
+  Test: 3,464 sequences
+
+d48_wavelet_aug_14m: 14,262,004 parameters
+  Standard FFN params: 3,153,408 (525,568/block)
+  Wavelet path params: 3,078 (513/block = scale + bias (zero-init ReZero))
+  Layer types: ['DSQG', 'DSQG', 'DSQG', 'DSQG', 'DSQG', 'DSQG']
+Running DWT invertibility check...
+  ||IDWT(DWT(x)) - x||_inf = 7.15e-07
+  PASS
+Running causality check...
+  Pre-10:  0.00000000  (expect 0.0)
+  Pos-10:  1.581652  (expect >0)
+  Post-10: 0.299788  (expect >0)
+  PASS
+
+  Tokens/epoch: 107,909,652
+  Chinchilla:   285,240,080 tokens (epoch ~2.64)
+
+  Step 200/1648 | Loss 6.3589
+  Step 400/1648 | Loss 5.9414
+  Step 600/1648 | Loss 5.7279
+  Step 800/1648 | Loss 5.5081
+  Step 1000/1648 | Loss 5.4536
+  Step 1200/1648 | Loss 5.2502
+  Step 1400/1648 | Loss 5.1444
+  Step 1600/1648 | Loss 4.9361
+Ep 1/3 | Train 5.7140 | Val 4.9488 PPL 141.0 * BEST | 673s (38%C)
+  DSQG pos-bias: |mean|=3.3031 |max|=11.4583 most-local=h7 most-global=h0
+  scale_embed:   |mean|=0.1020 |max|=0.3267
+  IF gains:      h0:1.00  h1:0.99  h2:0.98  h3:1.00  h4:0.99  h5:0.99  h6:1.00  h7:0.97
+  Wavelet scale |mean|: 0.0139  |max|: 0.0368
+  Wavelet scale |mean|: 0.0139 |max|: 0.0368
+  -- Generation samples (greedy) --
+    'It was a dark and stormy' -> ', and the most beautiful, and the most beautiful, and beautiful, and beautiful, '
+    'The length of the hypotenuse' -> ' of the pH of the pH of the pH of the pH of the pH of the pH of the pH of the pH'
+    'The President of the United' -> ' States, the United States, and the United States.\nThe United States, the United'
+    'Once upon a time there was' -> ' a lot of people who had been in the world.\nThe first time I had to be a good th'
+    'The results indicate that' -> ' the results of the results were not necessarily true.\nThe results of the result'
+  --
+  Passkey...
+  mean=0.0%  (0/6 distances >50%)
+  d=64:0%  d=128:0%  d=256:0%  d=512:0%  d=1024:0%  d=1536:0%
+Traceback (most recent call last):
+  File "/home/dlewis3/Desktop/AI/DWARF/train/train_2048_14m_d48_wavelet_aug_ffn.py", line 959, in <module>
+    main()
+  File "/home/dlewis3/Desktop/AI/DWARF/train/train_2048_14m_d48_wavelet_aug_ffn.py", line 955, in main
+    train(model, train_data, val_data, test_data, tokenizer, device=device)
+  File "/home/dlewis3/Desktop/AI/DWARF/train/train_2048_14m_d48_wavelet_aug_ffn.py", line 795, in train
+    'wavelet_mix_alpha': ss['wavelet_mix_alpha'],
+                         ~~^^^^^^^^^^^^^^^^^^^^^
+KeyError: 'wavelet_mix_alpha'
+======================================================================
+  d48_wavelet_aug_14m -- Wavelet-Augmented FFN + Pure DSQG (14M scale, FineWeb-Edu)
+======================================================================
+  GPU: NVIDIA GeForce RTX 3090  (25.3 GB)
+  Kernel: dsqg_attention_v3 (d48 offsets)
+  Wavelet-Augmented FFN: lattice θ=1.1377, alternating levels [0,2,4,6], full D=256 transform
+  Filter coefficients: [0.5261, 0.8228, 0.1810, -0.1157]
+  Wavelet path: zero-init (ReZero-style) — starts at 0, grows as scale learns
+  Architecture: INTERFERENCE=3, gate=0, ALL DSQG (no full attention)
+  Offsets: dense=48, sparse=[96, 128, 384], J=52
+Loading FineWeb-Edu from cache: benchmarks/logs/condm_fineweb_edu_doc_cache.json
+  Loaded 100,000 docs from cache
+
+Loaded condI BPE tokenizer from /home/dlewis3/Desktop/AI/DWARF/train/../results/2048_condI_tokenizer.json
+Encoding data (max_seq_len=2048)...
+  Train: 121,232 sequences
+  Capped to 52,716 train sequences (iso-compute)
+  Val: 2,923 sequences
+  Test: 3,464 sequences
+
+d48_wavelet_aug_14m: 14,262,004 parameters
+  Standard FFN params: 3,153,408 (525,568/block)
+  Wavelet path params: 3,078 (513/block = scale + bias (zero-init ReZero))
+  Layer types: ['DSQG', 'DSQG', 'DSQG', 'DSQG', 'DSQG', 'DSQG']
+Running DWT invertibility check...
+  ||IDWT(DWT(x)) - x||_inf = 5.36e-07
+  PASS
+Running causality check...
+  Pre-10:  0.00000000  (expect 0.0)
+  Pos-10:  1.042367  (expect >0)
+  Post-10: 0.294909  (expect >0)
+  PASS
+
+  Tokens/epoch: 107,909,652
+  Chinchilla:   285,240,080 tokens (epoch ~2.64)
+
+  Step 200/1648 | Loss 6.4365
+  Step 400/1648 | Loss 5.9284
+  Step 600/1648 | Loss 5.7017
+  Step 800/1648 | Loss 5.5548
+  Step 1000/1648 | Loss 5.4284
+  Step 1200/1648 | Loss 5.2808
+  Step 1400/1648 | Loss 4.9748

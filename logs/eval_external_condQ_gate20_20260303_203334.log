@@ -1,0 +1,1 @@
+/tmp/run_benchmarks.sh: line 16: CUDA_VISIBLE_DEVICES=1: command not found

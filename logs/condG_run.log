@@ -1,0 +1,228 @@
+
+
+
+======================================================================
+  WAVE FIELD 13M — CONDITION G: CAUSAL MULTI-SCALE DWT FIELD
+  D4 filter | 11 scales | dilations 1..1024 | RF up to 4096 tokens
+  Causality: structural (left-pad only, no circular wrap)
+======================================================================
+
+  Device: cuda
+  GPU: NVIDIA GeForce RTX 4090
+Loading OpenWebText (up to 100,000 docs)...
+  25,000 docs...
+  50,000 docs...
+  75,000 docs...
+  100,000 docs...
+  100,000 docs | train 95,000 | val 2,500 | test 2,500
+
+Training BPE tokenizer (vocab=32000)...
+  Vocab: 32000 tokens
+Encoding data (max_seq_len=2048)...
+  Train: 52,716 sequences
+  Val: 1,435 sequences
+  Test: 1,459 sequences
+
+Condition G: 14,115,728 params
+  Architecture: 6 layers × 8 heads × 256d | FFN 1024
+  Wave field: G=seq_len=2048, stride=1 (identity scatter/gather)
+  Convolution: 11 causal D4 dilated convs, dilation ∈ {1..1024}
+
+  Scale receptive fields:
+    j= 0: dilation=   1, RF=    4 tokens (  0.2% of context)
+    j= 1: dilation=   2, RF=    8 tokens (  0.4% of context)
+    j= 2: dilation=   4, RF=   16 tokens (  0.8% of context)
+    j= 3: dilation=   8, RF=   32 tokens (  1.6% of context)
+    j= 4: dilation=  16, RF=   64 tokens (  3.1% of context)
+    j= 5: dilation=  32, RF=  128 tokens (  6.2% of context)
+    j= 6: dilation=  64, RF=  256 tokens ( 12.5% of context)
+    j= 7: dilation= 128, RF=  512 tokens ( 25.0% of context)
+    j= 8: dilation= 256, RF= 1024 tokens ( 50.0% of context)
+    j= 9: dilation= 512, RF= 2048 tokens (100.0% of context)
+    j=10: dilation=1024, RF= 4096 tokens (200.0% of context)
+  Step 200/1648 | Loss 6.3611
+  Step 400/1648 | Loss 6.1787
+  Step 600/1648 | Loss 5.8704
+  Step 800/1648 | Loss 5.8587
+  Step 1000/1648 | Loss 5.5968
+  Step 1200/1648 | Loss 5.4446
+  Step 1400/1648 | Loss 5.5179
+  Step 1600/1648 | Loss 5.4032
+Ep 1/10 | Train 5.5393 | Val 5.4180 PPL 225.4 * BEST | 626s
+  Scale gains (top-3): j=0 rf=4tok gain=0.164, j=1 rf=8tok gain=0.150, j=2 rf=16tok gain=0.109
+  ── Generation samples (greedy, 150 tokens) ──
+    'It was a dark and stormy' → '.\n\n“I think I was a lot of people who was going to do it. I was a lot of people '
+    'The length of the hypotenuse' → ' of the same time of the same-based and the world of the world.\n\nThe first time '
+    'The President of the United' → ' States, the United States, and the United States, and the United States, and th'
+    'Once upon a time there was' → ' a lot of people who have been a lot of people who have been able to be able to '
+    'The results indicate that' → ' the number of the number of the number of the number of the number of the numbe'
+  ──
+  Step 200/1648 | Loss 5.2028
+  Step 400/1648 | Loss 5.2160
+  Step 600/1648 | Loss 5.4304
+  Step 800/1648 | Loss 5.1759
+  Step 1000/1648 | Loss 5.2439
+  Step 1200/1648 | Loss 5.1235
+  Step 1400/1648 | Loss 5.1285
+  Step 1600/1648 | Loss 5.0567
+Ep 2/10 | Train 5.1483 | Val 5.0422 PPL 154.8 * BEST | 1252s
+  Scale gains (top-3): j=0 rf=4tok gain=0.261, j=1 rf=8tok gain=0.138, j=2 rf=16tok gain=0.103
+  ── Generation samples (greedy, 150 tokens) ──
+    'It was a dark and stormy' → ', and I was a lot of a lot of people who had been in the world. I was a lot of p'
+    'The length of the hypotenuse' → ' of the original version of the original version of the original version of the '
+    'The President of the United' → ' States, the United States, and the United States, and the United States, and th'
+    'Once upon a time there was' → ' a lot of people who had to be able to do something to do with the way that we c'
+    'The results indicate that' → ' the number of the number of the number of the number of the number of the numbe'
+  ──
+  Step 200/1648 | Loss 4.9196
+  Step 400/1648 | Loss 4.9876
+  Step 600/1648 | Loss 4.8586
+  Step 800/1648 | Loss 4.7353
+  Step 1000/1648 | Loss 5.0626
+  Step 1200/1648 | Loss 4.7979
+  Step 1400/1648 | Loss 4.8566
+  Step 1600/1648 | Loss 4.8288
+Ep 3/10 | Train 5.1662 | Val 4.8703 PPL 130.4 * BEST | 1877s
+  Scale gains (top-3): j=0 rf=4tok gain=0.338, j=1 rf=8tok gain=0.118, j=2 rf=16tok gain=0.101
+  ── Generation samples (greedy, 150 tokens) ──
+    'It was a dark and stormy' → '.\n\nThe first time I was to see the first time I was to see the first time I was '
+    'The length of the hypotenuse' → ' of the brain is the result of the brain. The brain is the same as the brain, th'
+    'The President of the United' → ' States, the United States, and the United States, the United States, and the Un'
+    'Once upon a time there was' → ' no way to be able to get a new way to get a new way to get a new way to get a n'
+    'The results indicate that' → ' the number of people who have been killed in the past is not the same as the po'
+  ──
+  Step 200/1648 | Loss 4.8975
+  Step 400/1648 | Loss 4.8043
+  Step 600/1648 | Loss 5.0243
+  Step 800/1648 | Loss 4.8643
+  Step 1000/1648 | Loss 4.8765
+  Step 1200/1648 | Loss 4.6919
+  Step 1400/1648 | Loss 5.0175
+  Step 1600/1648 | Loss 4.8648
+Ep 4/10 | Train 4.9028 | Val 4.7647 PPL 117.3 * BEST | 2503s
+  Scale gains (top-3): j=0 rf=4tok gain=0.383, j=1 rf=8tok gain=0.110, j=2 rf=16tok gain=0.101
+  ── Generation samples (greedy, 150 tokens) ──
+    'It was a dark and stormy' → ', and it was a very good thing.\n\nThe first time I was to be a man who was a very'
+    'The length of the hypotenuse' → ' of the entire body is the same as the other the other. The other is the most co'
+    'The President of the United' → ' States, the United States, and the United States, the United States, and the Un'
+    'Once upon a time there was' → ' no reason to be able to get the game to the next step.\n\nThe next time I was to '
+    'The results indicate that' → ' the team is not able to get the team to the team.\n\nThe team is expected to be a'
+  ──
+  Step 200/1648 | Loss 4.6130
+  Step 400/1648 | Loss 4.6933
+  Step 600/1648 | Loss 4.6312
+  Step 800/1648 | Loss 4.6840
+  Step 1000/1648 | Loss 4.6624
+  Step 1200/1648 | Loss 4.6007
+  Step 1400/1648 | Loss 4.5897
+  Step 1600/1648 | Loss 4.6868
+Ep 5/10 | Train 4.7006 | Val 4.6993 PPL 109.9 * BEST | 3138s
+  Scale gains (top-3): j=0 rf=4tok gain=0.409, j=1 rf=8tok gain=0.107, j=2 rf=16tok gain=0.100
+  ── Generation samples (greedy, 150 tokens) ──
+    'It was a dark and stormy' → ', and it was a very good thing.\n\nThe first time I was to go to the gym, I was a '
+    'The length of the hypotenuse' → ' of the body is the same as the body of the body. The body is the body of the bo'
+    'The President of the United' → ' States, the United States, and the United States, the United States, and the Un'
+    'Once upon a time there was' → ' a chance to be a good idea.\n\nThe first time I was to go to the gym, I was able '
+    'The results indicate that' → ' the team is not able to be able to get the team to the team.\n\n“We’re going to b'
+  ──
+  Step 200/1648 | Loss 4.5695
+  Step 400/1648 | Loss 4.6998
+  Step 600/1648 | Loss 4.7259
+  Step 800/1648 | Loss 4.8428
+  Step 1000/1648 | Loss 4.6676
+  Step 1200/1648 | Loss 4.6958
+  Step 1400/1648 | Loss 4.5853
+  Step 1600/1648 | Loss 4.6450
+Ep 6/10 | Train 4.6256 | Val 4.6576 PPL 105.4 * BEST | 3775s
+  Scale gains (top-3): j=0 rf=4tok gain=0.425, j=1 rf=8tok gain=0.105, j=2 rf=16tok gain=0.099
+  ── Generation samples (greedy, 150 tokens) ──
+    'It was a dark and stormy' → ', and it was a very good thing.\n\n“I’m not going to be a good person,” he said.\n\n'
+    'The length of the hypotenuse' → ' of the body is the same as the body of the body. The body is the body of the bo'
+    'The President of the United' → ' States, the United States, the United States, the United States, the United Sta'
+    'Once upon a time there was' → ' no doubt that the team had been able to do so.\n\nThe team was able to get the te'
+    'The results indicate that' → ' the team is not able to get the team to the team.\n\nThe team is expected to be t'
+  ──
+  Step 200/1648 | Loss 4.8181
+  Step 400/1648 | Loss 4.6535
+  Step 600/1648 | Loss 4.6381
+  Step 800/1648 | Loss 4.6526
+  Step 1000/1648 | Loss 4.7543
+  Step 1200/1648 | Loss 4.5825
+  Step 1400/1648 | Loss 4.5174
+  Step 1600/1648 | Loss 4.3587
+Ep 7/10 | Train 4.5961 | Val 4.6280 PPL 102.3 * BEST | 4416s
+  Scale gains (top-3): j=0 rf=4tok gain=0.433, j=1 rf=8tok gain=0.104, j=2 rf=16tok gain=0.099
+  ── Generation samples (greedy, 150 tokens) ──
+    'It was a dark and stormy' → ', and it was a very good thing.\n\nThe first time I was in the middle of the night'
+    'The length of the hypotenuse' → ' of the body is the same as the body of the body. The body is the body of the bo'
+    'The President of the United' → ' States, the United States, the United States, and the United States, the United'
+    'Once upon a time there was' → ' no doubt that the team had been able to get the game to the game.\n\nThe game was'
+    'The results indicate that' → ' the team is not able to get the team to the team.\n\nThe team has been working on'
+  ──
+  Step 200/1648 | Loss 4.4495
+  Step 400/1648 | Loss 4.6384
+  Step 600/1648 | Loss 4.5766
+  Step 800/1648 | Loss 4.5480
+  Step 1000/1648 | Loss 4.7919
+  Step 1200/1648 | Loss 4.5553
+  Step 1400/1648 | Loss 4.7616
+  Step 1600/1648 | Loss 4.6512
+Ep 8/10 | Train 4.6452 | Val 4.6106 PPL 100.5 * BEST | 5056s
+  Scale gains (top-3): j=0 rf=4tok gain=0.438, j=1 rf=8tok gain=0.104, j=2 rf=16tok gain=0.099
+  ── Generation samples (greedy, 150 tokens) ──
+    'It was a dark and stormy' → ', and it was a very good thing.\n\nThe first thing about the world was that it was'
+    'The length of the hypotenuse' → ' of the body is the same as the body of the body. The body is the body of the bo'
+    'The President of the United' → ' States, the United States, and the United States, the United States, and the Un'
+    'Once upon a time there was' → ' no doubt that the team had been able to get the game to the game.\n\nThe game was'
+    'The results indicate that' → ' the government has been able to make a decision to the government to take actio'
+  ──
+  Step 200/1648 | Loss 4.9172
+  Step 400/1648 | Loss 4.4468
+  Step 600/1648 | Loss 4.5942
+  Step 800/1648 | Loss 4.5092
+  Step 1000/1648 | Loss 4.3961
+  Step 1200/1648 | Loss 4.4750
+  Step 1400/1648 | Loss 4.5809
+  Step 1600/1648 | Loss 4.4439
+Ep 9/10 | Train 4.5846 | Val 4.6028 PPL 99.8 * BEST | 5696s
+  Scale gains (top-3): j=0 rf=4tok gain=0.440, j=1 rf=8tok gain=0.104, j=2 rf=16tok gain=0.098
+  ── Generation samples (greedy, 150 tokens) ──
+    'It was a dark and stormy' → ', and it was a very good thing.\n\nThe first thing about the world was that it was'
+    'The length of the hypotenuse' → ' of the body is the same as the body of the body. The body is the body of the bo'
+    'The President of the United' → ' States, the United States, is a member of the United States, the United States,'
+    'Once upon a time there was' → ' no time to go to the door to the door.\n\nThe next day I was able to get a little'
+    'The results indicate that' → ' the government has been able to make a new case for the government to be able t'
+  ──
+  Step 200/1648 | Loss 4.5401
+  Step 400/1648 | Loss 4.4791
+  Step 600/1648 | Loss 4.5388
+  Step 800/1648 | Loss 4.6704
+  Step 1000/1648 | Loss 4.7252
+  Step 1200/1648 | Loss 4.6377
+  Step 1400/1648 | Loss 4.6185
+  Step 1600/1648 | Loss 4.5569
+Ep 10/10 | Train 4.5218 | Val 4.6013 PPL 99.6 * BEST | 6348s
+  Scale gains (top-3): j=0 rf=4tok gain=0.440, j=1 rf=8tok gain=0.104, j=2 rf=16tok gain=0.098
+  ── Generation samples (greedy, 150 tokens) ──
+    'It was a dark and stormy' → ', and it was a very good thing.\n\nThe first thing about the world was that it was'
+    'The length of the hypotenuse' → ' of the body is the same as the body of the body. The body is the body of the bo'
+    'The President of the United' → ' States, the United States, is a member of the United States, the United States,'
+    'Once upon a time there was' → ' no time to go to the door to the door.\n\nThe next day I was able to get a little'
+    'The results indicate that' → ' the government has been able to make a new case for the government to be able t'
+  ──
+
+  CONDITION G TEST: PPL 99.4 | Loss 4.5991
+  Final dominant scale: j=0 (RF=4 tokens)
+  Full gains: j0=0.440 j1=0.104 j2=0.098 j3=0.075 j4=0.059 j5=0.048 j6=0.037 j7=0.028 j8=0.024 j9=0.027 j10=0.060
+
+======================================================================
+  CONDITION G RESULTS vs. ABLATION TABLE
+======================================================================
+  Model                                               PPL
+  ────────────────────────────────────────────────────────
+  Standard transformer 13M baseline                  64.5
+  Wave V4 [A] (G=4096, FFT, floor=0.05)              86.8
+  Wave V4D [B] (+ dispersion β)                      87.9
+  Wave V4 + Morlet [C] (causal wavelet)              87.2
+  Wave V4 + KdV [D] (nonlinear)                      99.6
+  Condition G (causal D4 DWT, G=seq_len)             99.4
