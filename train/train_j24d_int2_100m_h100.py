@@ -490,7 +490,10 @@ def train():
 
     if args.resume:
         print(f'Resuming from checkpoint: {args.resume}')
-        model.load_state_dict(torch.load(args.resume, map_location=device))
+        state = torch.load(args.resume, map_location=device, weights_only=True)
+        # Strip _orig_mod. infix left by torch.compile before saving
+        state = {k.replace('._orig_mod.', '.'): v for k, v in state.items()}
+        model.load_state_dict(state)
 
     try:
         model.blocks[FULL_ATTN_LAYER] = torch.compile(
@@ -563,7 +566,9 @@ def train():
         marker = ''
         if val_loss < best_val_loss:
             best_val_loss = val_loss
-            torch.save(model.state_dict(),
+            clean_state = {k.replace('._orig_mod.', '.'): v
+                           for k, v in model.state_dict().items()}
+            torch.save(clean_state,
                        os.path.join(CHECKPOINT_DIR, CHECKPOINT_NAME))
             marker = ' *'
 
