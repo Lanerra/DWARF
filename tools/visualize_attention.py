@@ -48,6 +48,8 @@ _OFFSET_SETS = {
     'condw':     _J44,  # condW 13M — pure DSQG, no FA layer
     'std_85m':   [],    # Standard 85M transformer — no DSQG offsets
     'std_13m':   [],    # Standard 13M transformer — no DSQG offsets
+    # J-series autoresearch models
+    'j24d_int2_physics': [1,2,3,4,5,6,7,8,9,10,13,15,16,21,23,28,48,64,96,192,384,512,768,1024],
 }
 
 _TRAIN_SCRIPTS = {
@@ -63,6 +65,8 @@ _TRAIN_SCRIPTS = {
     'condw':    'train/train_2048_condW.py',
     'std_85m':  'train/train_2048_85m_standard_baseline.py',
     'std_13m':  'train/train_2048_85m_standard_baseline.py',  # same class, same script
+    # J-series autoresearch models
+    'j24d_int2_physics': 'train/train_j24d_int2_physics_bf16.py',
 }
 
 # Model class name to instantiate from the train script
@@ -78,6 +82,8 @@ _MODEL_CLASSES = {
     'condw':    'CondWTransformer',
     'std_85m':  'StandardTransformer85M',
     'std_13m':  'StandardTransformer85M',
+    # J-series autoresearch models
+    'j24d_int2_physics': 'AutoresearchTransformerPhysics',
 }
 
 # Archs without DSQG layers (standard transformers only)
@@ -261,8 +267,9 @@ def plot_dsqg_combs(alpha, offsets, title_prefix, out_path, token_texts=None):
         ax.set_yticks(list(label_positions))
         ax.set_yticklabels(list(label_texts), fontsize=7)
 
-        # Dividing line between dense local (0-32) and dyadic long-range
-        dense_last = offsets.index(32)
+        # Dividing line between dense local and long-range (use last offset ≤32, else largest <64)
+        _bnd = 32 if 32 in offsets else max((o for o in offsets if o < 64), default=offsets[-1])
+        dense_last = offsets.index(_bnd)
         ax.axhline(dense_last + 0.5, color='cyan', linewidth=0.8, linestyle='--', alpha=0.7)
         plt.colorbar(im, ax=ax, shrink=0.6)
 
@@ -328,7 +335,8 @@ def plot_pos_bias(pos_bias, offsets, out_path):
     ax.set_yticks(list(label_positions))
     ax.set_yticklabels(list(label_texts), fontsize=8)
 
-    dense_last = offsets.index(32)
+    _bnd2 = 32 if 32 in offsets else max((o for o in offsets if o < 64), default=offsets[-1])
+    dense_last = offsets.index(_bnd2)
     ax.axhline(dense_last + 0.5, color='black', linewidth=1.2, linestyle='--', alpha=0.6,
                label='Dense/dyadic boundary')
     ax.legend(fontsize=8, loc='upper right')
@@ -386,7 +394,10 @@ def plot_side_by_side(dsqg_alpha, full_attn, offsets, out_path):
     label_positions, label_texts = zip(*offset_labels(offsets))
     ax1.set_yticks(list(label_positions))
     ax1.set_yticklabels(list(label_texts), fontsize=8)
-    dense_last = offsets.index(32)
+    # Find boundary between dense-local and long-range offsets.
+    # Use the last offset ≤ 32 if 32 is present, otherwise the largest offset < 64.
+    _boundary = 32 if 32 in offsets else max((o for o in offsets if o < 64), default=offsets[-1])
+    dense_last = offsets.index(_boundary)
     ax1.axhline(dense_last + 0.5, color='cyan', linewidth=1, linestyle='--', alpha=0.8)
     ax1.text(N_show * 0.02, dense_last - 2, 'dense\nlocal', color='cyan', fontsize=7)
     ax1.text(N_show * 0.02, dense_last + 2, 'dyadic\nlong', color='cyan', fontsize=7)
@@ -485,6 +496,10 @@ def load_and_extract(checkpoint_path, arch, ids_tensor, device, root):
     model = _instantiate_model(m, arch, ckpt_path=abs_ckpt)
     ck = torch.load(abs_ckpt, map_location='cpu', weights_only=False)
     state = ck.get('model_state_dict', ck)
+    # Strip torch.compile _orig_mod prefixes if present
+    if any('_orig_mod' in k for k in state):
+        state = {k.replace('._orig_mod', '').replace('_orig_mod.', ''): v
+                 for k, v in state.items()}
     model.load_state_dict(state, strict=False)
     model.to(device)
     model.eval()

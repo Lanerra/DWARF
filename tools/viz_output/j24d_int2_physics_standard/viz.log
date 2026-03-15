@@ -1,0 +1,24 @@
+Loading model...
+  Loaded: /tmp/dwarf-j17d/autoresearch/checkpoints/df0d435_j24d_int2_physics_best.pt  (val_ppl=?)
+  Sequence length: 269 tokens
+Extracting attention weights...
+  Loaded: /tmp/dwarf-j17d/autoresearch/checkpoints/df0d435_j24d_int2_physics_best.pt  (val_ppl=?)
+  Layer 0 DSQG: alpha shape torch.Size([1, 8, 269, 24]), max=1.0000, mean=0.0415
+  Layer 1 DSQG: alpha shape torch.Size([1, 8, 269, 24]), max=1.0000, mean=0.0415
+  Layer 2 DSQG: alpha shape torch.Size([1, 8, 269, 24]), max=1.0000, mean=0.0415
+  Layer 3 DSQG: alpha shape torch.Size([1, 8, 269, 24]), max=1.0000, mean=0.0415
+  Layer 4 DSQG: alpha shape torch.Size([1, 8, 269, 24]), max=1.0000, mean=0.0415
+
+Generating visualizations in /home/dlewis3/Desktop/AI/DWARF/tools/viz_output/j24d_int2_physics_standard/
+  Saved: /home/dlewis3/Desktop/AI/DWARF/tools/viz_output/j24d_int2_physics_standard/checkpoints_df0d435_j24d_int2_physics_best_comparison.png
+  Saved: /home/dlewis3/Desktop/AI/DWARF/tools/viz_output/j24d_int2_physics_standard/checkpoints_df0d435_j24d_int2_physics_best_dsqg_layer0.png
+  Saved: /home/dlewis3/Desktop/AI/DWARF/tools/viz_output/j24d_int2_physics_standard/checkpoints_df0d435_j24d_int2_physics_best_dsqg_layer1.png
+  Saved: /home/dlewis3/Desktop/AI/DWARF/tools/viz_output/j24d_int2_physics_standard/checkpoints_df0d435_j24d_int2_physics_best_dsqg_layer2.png
+  Saved: /home/dlewis3/Desktop/AI/DWARF/tools/viz_output/j24d_int2_physics_standard/checkpoints_df0d435_j24d_int2_physics_best_dsqg_layer3.png
+  Saved: /home/dlewis3/Desktop/AI/DWARF/tools/viz_output/j24d_int2_physics_standard/checkpoints_df0d435_j24d_int2_physics_best_dsqg_layer4.png
+  Saved: /home/dlewis3/Desktop/AI/DWARF/tools/viz_output/j24d_int2_physics_standard/checkpoints_df0d435_j24d_int2_physics_best_full_attn.png
+  Saved: /home/dlewis3/Desktop/AI/DWARF/tools/viz_output/j24d_int2_physics_standard/checkpoints_df0d435_j24d_int2_physics_best_pos_bias.png
+  Saved: /home/dlewis3/Desktop/AI/DWARF/tools/viz_output/j24d_int2_physics_standard/checkpoints_df0d435_j24d_int2_physics_best_if_gains.png
+
+Done. Files in /home/dlewis3/Desktop/AI/DWARF/tools/viz_output/j24d_int2_physics_standard/
+Key file: *_comparison.png — the DSQG comb vs full attention side-by-side
