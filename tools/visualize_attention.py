@@ -33,18 +33,61 @@ import matplotlib.colors as mcolors
 from matplotlib.gridspec import GridSpec
 
 # DSQG offset sets per arch (set at runtime via --arch)
+_J44 = list(range(33)) + [48, 64, 96, 128, 192, 256, 384, 512, 768, 1024, 1536]  # J=44
+
 _OFFSET_SETS = {
-    'condu':  list(range(33)) + [48, 64, 96, 128, 192, 256, 384, 512, 768, 1024, 1536],  # J=44
-    'd41s3':  list(range(42)) + [48, 128, 384],                                           # J=44 (dense=41 + 3 sparse)
-    'd41s5':  list(range(42)) + [48, 128, 384, 768, 1536],                                # J=47 (dense=41 + 5 sparse)
-    'd41_35m': list(range(49)) + [96, 128, 384],                                          # J=52 (dense=48 + 3 sparse)
+    'condu':    _J44,
+    'd41s3':    list(range(42)) + [48, 128, 384],           # J=44 (dense=41 + 3 sparse)
+    'd41s5':    list(range(42)) + [48, 128, 384, 768, 1536], # J=47 (dense=41 + 5 sparse)
+    'd41_35m':  list(range(49)) + [96, 128, 384],            # J=52 (dense=48 + 3 sparse)
+    # Extended archs
+    'condx_v2': _J44,   # condX-v2 35M BF16 — bypass gate, same offsets as condU
+    'condm_85m': _J44,  # condM 85M — 12 layers, no scale_embed
+    'condu_v5':  _J44,  # condU-v5 38M — MOVT/QK-OVT/NPCI, same offsets
+    'condv':     _J44,  # condV 13M — Huygens K/V injection
+    'condw':     _J44,  # condW 13M — pure DSQG, no FA layer
+    'std_85m':   [],    # Standard 85M transformer — no DSQG offsets
+    'std_13m':   [],    # Standard 13M transformer — no DSQG offsets
 }
+
 _TRAIN_SCRIPTS = {
-    'condu':  'train/train_2048_condU.py',
-    'd41s3':  'train/train_2048_14m_d41s3.py',
-    'd41s5':  'train/train_2048_14m_d41s5.py',
-    'd41_35m': 'train/train_2048_35m_d41.py',
+    'condu':    'train/train_2048_condU.py',
+    'd41s3':    'train/train_2048_14m_d41s3.py',
+    'd41s5':    'train/train_2048_14m_d41s5.py',
+    'd41_35m':  'train/train_2048_35m_d41.py',
+    # Extended
+    'condx_v2': 'train/train_2048_35m_condX_v2_bf16.py',
+    'condm_85m': 'train/train_2048_85m_condM.py',
+    'condu_v5': 'train/train_2048_condU_v5.py',
+    'condv':    'train/train_2048_condV.py',
+    'condw':    'train/train_2048_condW.py',
+    'std_85m':  'train/train_2048_85m_standard_baseline.py',
+    'std_13m':  'train/train_2048_85m_standard_baseline.py',  # same class, same script
 }
+
+# Model class name to instantiate from the train script
+_MODEL_CLASSES = {
+    'condu':    'CondMTransformer',
+    'd41s3':    'CondMTransformer',
+    'd41s5':    'CondMTransformer',
+    'd41_35m':  'CondMTransformer',
+    'condx_v2': 'CondXTransformer',
+    'condm_85m': 'CondMTransformer',
+    'condu_v5': 'CondUV5Transformer',
+    'condv':    'CondMTransformer',
+    'condw':    'CondWTransformer',
+    'std_85m':  'StandardTransformer85M',
+    'std_13m':  'StandardTransformer85M',
+}
+
+# Archs without DSQG layers (standard transformers only)
+_IS_STANDARD = {'std_85m', 'std_13m'}
+
+# Archs without a full attention layer (pure DSQG)
+_NO_FULL_ATTN = {'condw'}
+
+# Archs whose DSQG kernel lacks scale_embed — pass zeros during extraction
+_NO_SCALE_EMBED = {'condm_85m'}
 # Default — overridden in main() via --arch
 ALL_OFFSETS = _OFFSET_SETS['condu']
 
@@ -134,24 +177,37 @@ def dsqg_attention_weights(q, k, pos_bias, scale_embed):
 
 
 def capture_full_attention(model, x, full_layer_idx):
-    """Hook into full attention layer to capture attention weights."""
+    """Hook into full attention layer to capture attention weights.
+
+    Handles two projection styles:
+      - Standard: combined qkv_proj (FullCausalAttention)
+      - Bypass:   separate q_proj + kv_proj (FullCausalAttentionBypass)
+    """
     weights_store = {}
 
     def hook_fn(module, inp, out):
-        # Recompute attention weights from the input (no_grad, cheap)
         with torch.no_grad():
             h_inp = inp[0]                                   # [B, N, D]
             B, N, D = h_inp.shape
-            qkv = module.qkv_proj(h_inp)
-            q, k, v = qkv.split(D, dim=-1)
             H = module.num_heads
             HD = D // H
-            q = q.view(B, N, H, HD).permute(0, 2, 1, 3)    # [B, H, N, HD]
-            k = k.view(B, N, H, HD).permute(0, 2, 1, 3)
             scale = math.sqrt(HD)
-            # Causal mask
+
+            if hasattr(module, 'qkv_proj'):
+                # Standard: FullCausalAttention
+                qkv = module.qkv_proj(h_inp)
+                q, k, _ = qkv.split(D, dim=-1)
+            elif hasattr(module, 'q_proj') and hasattr(module, 'kv_proj'):
+                # Bypass: FullCausalAttentionBypass (condX-v2)
+                q = module.q_proj(h_inp)
+                k, _ = module.kv_proj(h_inp).split(D, dim=-1)
+            else:
+                return  # Unknown attention type — skip
+
+            q = q.view(B, N, H, HD).permute(0, 2, 1, 3)
+            k = k.view(B, N, H, HD).permute(0, 2, 1, 3)
             mask = torch.triu(torch.full((N, N), float('-inf'), device=h_inp.device), diagonal=1)
-            attn = torch.matmul(q, k.transpose(-2, -1)) / scale + mask   # [B, H, N, N]
+            attn = torch.matmul(q, k.transpose(-2, -1)) / scale + mask
             attn_w = torch.softmax(attn, dim=-1)
             weights_store['full_attn'] = attn_w.detach().cpu()
 
@@ -359,6 +415,51 @@ def plot_side_by_side(dsqg_alpha, full_attn, offsets, out_path):
 # Main
 # ---------------------------------------------------------------------------
 
+def _dims_from_checkpoint(ckpt_path):
+    """Infer StandardTransformer dimensions from checkpoint state dict keys/shapes."""
+    ck = torch.load(ckpt_path, map_location='cpu', weights_only=False)
+    sd = ck.get('model_state_dict', ck)
+    # Count layers
+    num_layers = sum(1 for k in sd if k.startswith('blocks.') and k.endswith('.ln1.weight'))
+    # Embedding dim from token embedding
+    D = sd['token_emb.weight'].shape[1]
+    # FFN dim from first block's fc1
+    F = sd['blocks.0.ffn.fc1.weight'].shape[0]
+    # Num heads: can't read directly, infer from qkv_proj (3*D*H / D = 3*H... actually 3*D)
+    # Head count stored in checkpoint indirectly; default 8 works for all our runs
+    return {'embedding_dim': D, 'num_layers': num_layers, 'ffn_dim': F, 'num_heads': 8}
+
+
+def _instantiate_model(m, arch, vocab_size=None, ckpt_path=None):
+    """Instantiate the correct model class for the given arch."""
+    class_name = _MODEL_CLASSES[arch]
+    cls = getattr(m, class_name)
+    vs = vocab_size or m.VOCAB_SIZE
+    D  = getattr(m, 'EMBEDDING_DIM', 256)
+    L  = getattr(m, 'NUM_LAYERS', 6)
+    H  = getattr(m, 'NUM_HEADS', 8)
+    F  = getattr(m, 'FFN_DIM', 1024)
+    fa = getattr(m, 'FULL_ATTN_LAYER', 5)
+    iv = getattr(m, 'INTERFERENCE', 3)
+
+    if arch in _IS_STANDARD:
+        # Infer exact dims from checkpoint to handle 13M vs 85M differences
+        if ckpt_path is not None:
+            dims = _dims_from_checkpoint(ckpt_path)
+            D, L, H, F = dims['embedding_dim'], dims['num_layers'], dims['num_heads'], dims['ffn_dim']
+        return cls(vocab_size=vs, embedding_dim=D, num_layers=L,
+                   num_heads=H, ffn_dim=F, seq_len=2048)
+    elif arch in _NO_FULL_ATTN:
+        # Pure DSQG — no full_attn_layer arg
+        return cls(vocab_size=vs, embedding_dim=D, num_layers=L,
+                   num_heads=H, ffn_dim=F, seq_len=2048,
+                   interference_interval=iv)
+    else:
+        return cls(vocab_size=vs, embedding_dim=D, num_layers=L,
+                   num_heads=H, ffn_dim=F, seq_len=2048,
+                   full_attn_layer=fa, interference_interval=iv)
+
+
 def load_and_extract(checkpoint_path, arch, ids_tensor, device, root):
     """
     Load a checkpoint for the given arch, run inference, and return all
@@ -370,9 +471,8 @@ def load_and_extract(checkpoint_path, arch, ids_tensor, device, root):
     import importlib.util
 
     offsets = _OFFSET_SETS[arch]
-
     global ALL_OFFSETS
-    ALL_OFFSETS = offsets
+    ALL_OFFSETS = offsets if offsets else _J44  # use J44 as fallback for DSQG weight fn
 
     spec = importlib.util.spec_from_file_location(
         f'train_script_{arch}',
@@ -381,24 +481,9 @@ def load_and_extract(checkpoint_path, arch, ids_tensor, device, root):
     m = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(m)
 
-    embedding_dim = getattr(m, 'EMBEDDING_DIM', 256)
-    num_layers = getattr(m, 'NUM_LAYERS', 6)
-    num_heads = getattr(m, 'NUM_HEADS', 8)
-    ffn_dim = getattr(m, 'FFN_DIM', 1024)
-    full_attn_layer = getattr(m, 'FULL_ATTN_LAYER', 5)
-    interference_interval = getattr(m, 'INTERFERENCE', 3)
-
-    model = m.CondMTransformer(
-        vocab_size=m.VOCAB_SIZE,
-        embedding_dim=embedding_dim,
-        num_layers=num_layers,
-        num_heads=num_heads,
-        ffn_dim=ffn_dim,
-        seq_len=2048,
-        full_attn_layer=full_attn_layer,
-        interference_interval=interference_interval,
-    )
-    ck = torch.load(os.path.join(root, checkpoint_path), map_location='cpu', weights_only=False)
+    abs_ckpt = os.path.join(root, checkpoint_path)
+    model = _instantiate_model(m, arch, ckpt_path=abs_ckpt)
+    ck = torch.load(abs_ckpt, map_location='cpu', weights_only=False)
     state = ck.get('model_state_dict', ck)
     model.load_state_dict(state, strict=False)
     model.to(device)
@@ -413,13 +498,48 @@ def load_and_extract(checkpoint_path, arch, ids_tensor, device, root):
 
     N = ids_tensor.shape[1]
 
+    # ── Standard transformer path (no DSQG) ──────────────────────────────────
+    if arch in _IS_STANDARD:
+        # Hook full attention on the last block
+        last_block_idx = len(model.blocks) - 1
+        full_weights_store = {}
+        def _std_hook(module, inp, out):
+            with torch.no_grad():
+                h_inp = inp[0]
+                B2, N2, D2 = h_inp.shape
+                q2, k2, _ = module.qkv_proj(h_inp).split(D2, dim=-1)
+                H2 = module.num_heads; HD2 = D2 // H2
+                q2 = q2.view(B2,N2,H2,HD2).permute(0,2,1,3)
+                k2 = k2.view(B2,N2,H2,HD2).permute(0,2,1,3)
+                scale2 = math.sqrt(HD2)
+                mask2 = torch.triu(torch.full((N2,N2), float('-inf'), device=h_inp.device), diagonal=1)
+                attn2 = torch.matmul(q2, k2.transpose(-2,-1)) / scale2 + mask2
+                full_weights_store['full_attn'] = torch.softmax(attn2, dim=-1).detach().cpu()
+        handle = model.blocks[last_block_idx].attn.register_forward_hook(_std_hook)
+        with torch.no_grad():
+            # Standard models use token_emb/pos_emb, not embedding/pos_embed
+            _ = model(ids_tensor)
+        handle.remove()
+        print(f'  Standard transformer: captured full attention on layer {last_block_idx}')
+        return {
+            'dsqg_alphas': {}, 'dsqg_layers': [], 'if_gains': {}, 'pos_bias': None,
+            'full_attn': full_weights_store.get('full_attn'),
+            'checkpoint_name': checkpoint_name, 'offsets': [], 'val_ppl': val_ppl,
+        }
+
+    # ── DSQG path (all other archs) ───────────────────────────────────────────
     with torch.no_grad():
         pos = torch.arange(N, device=device).unsqueeze(0)
 
-        full_layer_idx = model.full_attn_layer
-        full_weights_store, hook_handle = capture_full_attention(model, None, full_layer_idx)
+        # Full attention capture (skip for pure DSQG archs)
+        full_weights_store = {}
+        hook_handle = None
+        if arch not in _NO_FULL_ATTN:
+            full_layer_idx = model.full_attn_layer
+            full_weights_store, hook_handle = capture_full_attention(model, None, full_layer_idx)
         _ = model(ids_tensor)
-        hook_handle.remove()
+        if hook_handle is not None:
+            hook_handle.remove()
 
         x_running = model.embedding(ids_tensor) + model.pos_embed(pos)
         x_running = model.drop(x_running)
@@ -437,10 +557,17 @@ def load_and_extract(checkpoint_path, arch, ids_tensor, device, root):
                 q = q.view(*x_running.shape[:2], H, HD).permute(0, 2, 1, 3)
                 k = k.view(*x_running.shape[:2], H, HD).permute(0, 2, 1, 3)
 
+                # Handle archs without scale_embed (e.g. condm_85m)
+                if arch in _NO_SCALE_EMBED or not hasattr(attn, 'scale_embed'):
+                    J = len(ALL_OFFSETS)
+                    se = torch.zeros(J, HD)
+                else:
+                    se = attn.scale_embed.float().cpu()
+
                 alpha, _ = dsqg_attention_weights(
                     q.float().cpu(), k.float().cpu(),
                     attn.pos_bias.float().cpu(),
-                    attn.scale_embed.float().cpu(),
+                    se,
                 )
                 dsqg_alphas[i] = alpha[0].cpu()
                 dsqg_layers.append(i)
@@ -454,7 +581,12 @@ def load_and_extract(checkpoint_path, arch, ids_tensor, device, root):
         if hasattr(block, 'attn') and hasattr(block.attn, 'if_gain'):
             if_gains[i] = block.attn.if_gain.detach().cpu().tolist()
 
-    pos_bias = model.blocks[0].attn.pos_bias.detach().cpu()
+    # pos_bias from first DSQG layer
+    pos_bias = None
+    for block in model.blocks:
+        if hasattr(block, 'attn') and hasattr(block.attn, 'pos_bias'):
+            pos_bias = block.attn.pos_bias.detach().cpu()
+            break
 
     return {
         'dsqg_alphas': dsqg_alphas,
@@ -621,7 +753,9 @@ def _run_compare(args, root):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--arch', default='condu', choices=list(_OFFSET_SETS.keys()),
-                        help='Model architecture: condu, d41s3, d41s5, d41_35m')
+                        help=('Model architecture: condu, d41s3, d41s5, d41_35m, '
+                              'condx_v2, condm_85m, condu_v5, condv, condw, '
+                              'std_85m, std_13m'))
 
     checkpoint_group = parser.add_mutually_exclusive_group()
     checkpoint_group.add_argument('--checkpoint', default=None)
@@ -671,17 +805,9 @@ def main():
     m = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(m)
 
-    model = m.CondMTransformer(
-        vocab_size=m.VOCAB_SIZE,
-        embedding_dim=getattr(m, 'EMBEDDING_DIM', 256),
-        num_layers=getattr(m, 'NUM_LAYERS', 6),
-        num_heads=getattr(m, 'NUM_HEADS', 8),
-        ffn_dim=getattr(m, 'FFN_DIM', 1024),
-        seq_len=2048,
-        full_attn_layer=getattr(m, 'FULL_ATTN_LAYER', 5),
-        interference_interval=getattr(m, 'INTERFERENCE', 3),
-    )
-    ck = torch.load(os.path.join(root, args.checkpoint), map_location='cpu', weights_only=False)
+    abs_ckpt_main = os.path.join(root, args.checkpoint)
+    model = _instantiate_model(m, args.arch, ckpt_path=abs_ckpt_main)
+    ck = torch.load(abs_ckpt_main, map_location='cpu', weights_only=False)
     state = ck.get('model_state_dict', ck)
     model.load_state_dict(state, strict=False)
     model.to(device)
@@ -711,65 +837,22 @@ def main():
     N = ids_t.shape[1]
     print(f'  Sequence length: {N} tokens')
 
-    # Extract weights from each DSQG layer
-    print('Extracting DSQG attention weights (pure Python reference)...')
+    # Use load_and_extract for unified extraction logic
+    print('Extracting attention weights...')
 
     checkpoint_name = os.path.splitext(os.path.basename(args.checkpoint))[0]
     if '/' in args.checkpoint:
         ck_dir = os.path.basename(os.path.dirname(args.checkpoint))
         checkpoint_name = f'{ck_dir}_{checkpoint_name}'
 
-    with torch.no_grad():
-        # Get embeddings
-        pos = torch.arange(N, device=device).unsqueeze(0)
-        x = model.embedding(ids_t) + model.pos_embed(pos)
-
-        # Hook full attention
-        full_layer_idx = model.full_attn_layer
-        full_weights_store, hook_handle = capture_full_attention(model, x, full_layer_idx)
-
-        # Forward pass to capture full attention
-        _ = model(ids_t)
-        hook_handle.remove()
-
-        # Now extract DSQG weights layer by layer
-        x_running = model.embedding(ids_t) + model.pos_embed(pos)
-        x_running = model.drop(x_running)
-
-        dsqg_alphas = {}
-        dsqg_layers = []
-        for i, block in enumerate(model.blocks):
-            if hasattr(block, 'attn') and hasattr(block.attn, 'pos_bias'):
-                # DSQG block — extract weights
-                attn = block.attn
-                qkv = attn.qkv_proj(x_running)
-                D = x_running.shape[-1]
-                q, k, v = qkv.split(D, dim=-1)
-                H = attn.num_heads
-                HD = D // H
-                q = q.view(*x_running.shape[:2], H, HD).permute(0, 2, 1, 3)
-                k = k.view(*x_running.shape[:2], H, HD).permute(0, 2, 1, 3)
-
-                alpha, _ = dsqg_attention_weights(
-                    q.float().cpu(), k.float().cpu(),
-                    attn.pos_bias.float().cpu(),
-                    attn.scale_embed.float().cpu(),
-                )  # [B, H, N, 44]
-                dsqg_alphas[i] = alpha[0].cpu()  # [H, N, 44]
-                dsqg_layers.append(i)
-                print(f'  Layer {i} DSQG: alpha shape {alpha.shape}, '
-                      f'max={alpha.max():.4f}, mean={alpha.mean():.4f}')
-
-            x_running = block(x_running)
-
-    # Collect IF gains
-    if_gains_per_layer = {}
-    for i, block in enumerate(model.blocks):
-        if hasattr(block, 'attn') and hasattr(block.attn, 'if_gain'):
-            if_gains_per_layer[i] = block.attn.if_gain.detach().cpu().tolist()
-
-    # Collect pos_bias (from all DSQG layers, use layer 0 for canonical)
-    pos_bias_l0 = model.blocks[0].attn.pos_bias.detach().cpu()  # [44, H]
+    extracted = load_and_extract(args.checkpoint, args.arch, ids_t, device, root)
+    dsqg_alphas     = extracted['dsqg_alphas']
+    dsqg_layers     = extracted['dsqg_layers']
+    full_attn_store = extracted['full_attn']
+    if_gains_per_layer = extracted['if_gains']
+    pos_bias_l0     = extracted['pos_bias']    # may be None for std archs
+    full_weights_store = {'full_attn': full_attn_store}
+    full_layer_idx  = getattr(model, 'full_attn_layer', len(model.blocks) - 1)
 
     # ---------------------------------------------------------------------------
     # Generate plots
@@ -777,9 +860,9 @@ def main():
     out_dir = os.path.join(root, args.out_dir)
     print(f'\nGenerating visualizations in {out_dir}/')
 
-    # 1. Side-by-side money shot
-    mean_dsqg = dsqg_alphas[dsqg_layers[0]]  # first DSQG layer
-    if full_weights_store.get('full_attn') is not None:
+    # 1. Side-by-side money shot (DSQG archs only)
+    if dsqg_layers and full_weights_store.get('full_attn') is not None:
+        mean_dsqg = dsqg_alphas[dsqg_layers[0]]
         plot_side_by_side(
             mean_dsqg,
             full_weights_store['full_attn'],
@@ -787,19 +870,20 @@ def main():
             os.path.join(out_dir, f'{checkpoint_name}_comparison.png')
         )
 
-    # 2. DSQG per-layer per-head combs
-    layer_choice = args.layer if args.layer is not None else dsqg_layers
-    if isinstance(layer_choice, int):
-        layer_choice = [layer_choice]
+    # 2. DSQG per-layer per-head combs (DSQG archs only)
+    if dsqg_layers:
+        layer_choice = args.layer if args.layer is not None else dsqg_layers
+        if isinstance(layer_choice, int):
+            layer_choice = [layer_choice]
 
-    for layer_idx in layer_choice:
-        if layer_idx in dsqg_alphas:
-            plot_dsqg_combs(
-                dsqg_alphas[layer_idx],
-                ALL_OFFSETS,
-                f'Layer {layer_idx}',
-                os.path.join(out_dir, f'{checkpoint_name}_dsqg_layer{layer_idx}.png')
-            )
+        for layer_idx in layer_choice:
+            if layer_idx in dsqg_alphas:
+                plot_dsqg_combs(
+                    dsqg_alphas[layer_idx],
+                    ALL_OFFSETS,
+                    f'Layer {layer_idx}',
+                    os.path.join(out_dir, f'{checkpoint_name}_dsqg_layer{layer_idx}.png')
+                )
 
     # 3. Full attention
     if full_weights_store.get('full_attn') is not None:
@@ -809,14 +893,15 @@ def main():
             os.path.join(out_dir, f'{checkpoint_name}_full_attn.png')
         )
 
-    # 4. pos_bias heatmap
-    plot_pos_bias(
-        pos_bias_l0,
-        ALL_OFFSETS,
-        os.path.join(out_dir, f'{checkpoint_name}_pos_bias.png')
-    )
+    # 4. pos_bias heatmap (DSQG only)
+    if pos_bias_l0 is not None and ALL_OFFSETS:
+        plot_pos_bias(
+            pos_bias_l0,
+            ALL_OFFSETS,
+            os.path.join(out_dir, f'{checkpoint_name}_pos_bias.png')
+        )
 
-    # 5. IF gains
+    # 5. IF gains (DSQG only)
     if if_gains_per_layer:
         plot_if_gains(
             if_gains_per_layer,
@@ -829,7 +914,7 @@ def main():
         'n_tokens': N,
         'dsqg_layers': dsqg_layers,
         'if_gains': if_gains_per_layer,
-        'pos_bias_l0_per_head_mean': pos_bias_l0.mean(0).tolist(),
+        'pos_bias_l0_per_head_mean': pos_bias_l0.mean(0).tolist() if pos_bias_l0 is not None else [],
         'offsets': ALL_OFFSETS,
     }
     with open(os.path.join(out_dir, f'{checkpoint_name}_summary.json'), 'w') as f:
