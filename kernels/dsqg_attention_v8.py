@@ -527,7 +527,17 @@ class _DSQGFnV8(torch.autograd.Function):
         assert y_pre.shape       == (B, H, N, R_PLANES)
         assert z_pre.shape       == (B, H, N, R_PLANES)
 
-        BLOCK_N  = 128 if HD <= 64 else 64
+        # Block size tuning: H100 SXM (SM 9.0) can handle BLOCK_N=128 at HD=128
+        # due to 228KB SRAM per SM; 4090 (SM 8.9) tops out at 64 for HD>64.
+        _cc = torch.cuda.get_device_capability()
+        _sm90 = (_cc[0] > 8) or (_cc[0] == 9)
+        if HD <= 64:
+            BLOCK_N = 128
+        elif _sm90:
+            BLOCK_N = 128   # H100: larger SRAM, more warps
+        else:
+            BLOCK_N = 64    # 4090 / older
+        _num_warps = 8 if _sm90 else 4
         BLOCK_HD = _next_pow2(HD)
         out = torch.empty_like(q)
         lse = torch.empty(B, H, N, device=q.device, dtype=torch.float32)
@@ -548,11 +558,13 @@ class _DSQGFnV8(torch.autograd.Function):
             y_pre.stride(0),       y_pre.stride(1),       y_pre.stride(2),
             z_pre.stride(0),       z_pre.stride(1),       z_pre.stride(2),
             H=H, N=N, HD=HD, BLOCK_N=BLOCK_N, BLOCK_HD=BLOCK_HD,
+            num_warps=_num_warps,
         )
         ctx.save_for_backward(q, k, v, pos_bias, scale_embed,
                               phase_base, phase_gain, y_pre, z_pre, out, lse)
-        ctx.BLOCK_N  = BLOCK_N
-        ctx.BLOCK_HD = BLOCK_HD
+        ctx.BLOCK_N   = BLOCK_N
+        ctx.BLOCK_HD  = BLOCK_HD
+        ctx.num_warps = _num_warps
         return out
 
     @staticmethod
@@ -560,7 +572,7 @@ class _DSQGFnV8(torch.autograd.Function):
         (q, k, v, pb, se, phase_base, phase_gain,
          y_pre, z_pre, out, lse) = ctx.saved_tensors
         B, H, N, HD = q.shape
-        BN, BHD = ctx.BLOCK_N, ctx.BLOCK_HD
+        BN, BHD, NW = ctx.BLOCK_N, ctx.BLOCK_HD, ctx.num_warps
         dout = dout.contiguous()
 
         D  = torch.empty(B, H, N, device=q.device, dtype=torch.float32)
@@ -572,6 +584,7 @@ class _DSQGFnV8(torch.autograd.Function):
             out.stride(0),  out.stride(1),  out.stride(2),  out.stride(3),
             D.stride(0),    D.stride(1),    D.stride(2),
             H=H, N=N, HD=HD, BLOCK_N=BN, BLOCK_HD=BHD,
+            num_warps=NW,
         )
 
         dq     = torch.empty_like(q)
@@ -601,6 +614,7 @@ class _DSQGFnV8(torch.autograd.Function):
             z_pre.stride(0),      z_pre.stride(1),      z_pre.stride(2),
             dy_pre.stride(0),     dy_pre.stride(1),     dy_pre.stride(2),
             H=H, N=N, HD=HD, BLOCK_N=BN, BLOCK_HD=BHD,
+            num_warps=NW,
         )
 
         dk     = torch.empty_like(k)
@@ -639,6 +653,7 @@ class _DSQGFnV8(torch.autograd.Function):
             stride_buf_bh, stride_buf_blk,
             dz_pre.stride(0),     dz_pre.stride(1),     dz_pre.stride(2),
             H=H, N=N, HD=HD, BLOCK_M=BN, BLOCK_HD=BHD,
+            num_warps=NW,
         )
 
         def _reduce_phase_buf(buf):
