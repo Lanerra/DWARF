@@ -1,0 +1,12 @@
+Loading model...
+  Loaded: checkpoints/2048_standard_baseline_checkpoints/13M.pt  (val_ppl=?)
+  Sequence length: 269 tokens
+Extracting attention weights...
+  Loaded: checkpoints/2048_standard_baseline_checkpoints/13M.pt  (val_ppl=?)
+  Standard transformer: captured full attention on layer 5
+
+Generating visualizations in /home/dlewis3/Desktop/AI/DWARF/tools/viz_output/std_13m/
+  Saved: /home/dlewis3/Desktop/AI/DWARF/tools/viz_output/std_13m/2048_standard_baseline_checkpoints_13M_full_attn.png
+
+Done. Files in /home/dlewis3/Desktop/AI/DWARF/tools/viz_output/std_13m/
+Key file: *_comparison.png — the DSQG comb vs full attention side-by-side

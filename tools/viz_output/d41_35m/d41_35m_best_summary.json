@@ -1,6 +1,6 @@
 {
   "checkpoint": "checkpoints/d41_35m/best.pt",
-  "n_tokens": 42,
+  "n_tokens": 269,
   "dsqg_layers": [
     0,
     1,
