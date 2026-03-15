@@ -422,6 +422,8 @@ def train():
     parser = argparse.ArgumentParser()
     parser.add_argument('--resume', type=str, default=None,
                         help='Path to checkpoint to resume from')
+    parser.add_argument('--start_epoch', type=int, default=1,
+                        help='Epoch to start from (use with --resume to skip completed epochs)')
     args = parser.parse_args()
 
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -513,13 +515,18 @@ def train():
     total_steps = SCREEN_EPOCHS * math.ceil(len(train_loader) / GRAD_ACCUM)
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
         optimizer, T_max=total_steps)
+    # Fast-forward scheduler past already-completed epochs
+    if args.start_epoch > 1:
+        steps_done = (args.start_epoch - 1) * math.ceil(len(train_loader) / GRAD_ACCUM)
+        for _ in range(steps_done):
+            scheduler.step()
 
     best_val_loss   = float('inf')
     passkey_results = {}
     ppl_results     = {}
     os.makedirs(CHECKPOINT_DIR, exist_ok=True)
 
-    for epoch in range(1, SCREEN_EPOCHS + 1):
+    for epoch in range(args.start_epoch, SCREEN_EPOCHS + 1):
         model.train()
         step = 0
         optimizer.zero_grad()
