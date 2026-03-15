@@ -127,6 +127,20 @@ def _import_j20d_physics():
     spec.loader.exec_module(mod)
     return mod.AutoresearchTransformerPhysics
 
+def _import_j24d_int2_physics():
+    """Import AutoresearchTransformerPhysics from train_j24d_int2_physics_bf16.py (V8 kernel, J=24 offsets, condV physics, IF=2)."""
+    import importlib.util
+    repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    for _d in [os.path.join('/tmp/dwarf-j17d', 'kernels'), '/tmp/dwarf-j17d',
+               os.path.join(repo_root, 'kernels'), repo_root]:
+        if _d not in sys.path:
+            sys.path.insert(0, _d)
+    script = os.path.join(repo_root, 'train', 'train_j24d_int2_physics_bf16.py')
+    spec = importlib.util.spec_from_file_location('j24d_int2_physics_train', script)
+    mod  = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod.AutoresearchTransformerPhysics
+
 # ─── Paths ────────────────────────────────────────────────────────────────────
 
 SCRIPT_DIR  = os.path.dirname(os.path.abspath(__file__))
@@ -345,6 +359,15 @@ MODEL_REGISTRY = {
         'strip_orig_mod':   False,
         'allow_missing_keys': True,
         'params_ref':       None,
+    },
+    # j24d_int2_physics: J24D relay-optimal offsets, V8 kernel, J=24, IF=2, condV physics, 39.5M
+    'j24d_int2_physics_39m': {
+        'arch':       'j24d_int2_physics',
+        'D':          512, 'H': 8, 'FFN': 2048, 'L': 6, 'full_layer': 5,
+        'interference': 2,
+        'checkpoint': '/tmp/dwarf-j17d/autoresearch/checkpoints/df0d435_j24d_int2_physics_best.pt',
+        'label':      'J24D-int2 Physics 39.5M (J=24, V8, IF=2, condV physics)',
+        'params_ref': None,
     },
     # d41_35m_pure: pure DSQG (FULL_ATTN_LAYER=-1), dense=41, sparse=[48,128,384], J=45, 35M (D=512)
     'd41_35m_pure': {
@@ -781,6 +804,15 @@ def build_model(cfg):
             ffn_dim=FFN, seq_len=MAX_SEQ_LEN,
             full_attn_layer=cfg.get('full_layer', 5),
             interference_interval=cfg.get('interference', 3),
+            scale_embed_init_val=0.1,
+        )
+    elif arch == 'j24d_int2_physics':
+        AutoresearchTransformerPhysics = _import_j24d_int2_physics()
+        return AutoresearchTransformerPhysics(
+            vocab_size=VOCAB_SIZE, embedding_dim=D, num_layers=L, num_heads=H,
+            ffn_dim=FFN, seq_len=MAX_SEQ_LEN,
+            full_attn_layer=cfg.get('full_layer', 5),
+            interference_interval=cfg.get('interference', 2),
             scale_embed_init_val=0.1,
         )
     elif arch == 'd41_35m_pure':

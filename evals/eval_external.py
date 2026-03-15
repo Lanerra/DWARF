@@ -113,6 +113,9 @@ ARCH_CONFIGS = {
     # j20d_physics: J20D relay-optimal offsets, V7 kernel, 121232 seqs, condV physics (EMA+KdV+AGC), 38.7M
     'j20d_physics': {'arch': 'j20d_physics', 'D': 512, 'H': 8, 'FFN': 2048, 'L': 6, 'full_layer': 5, 'interference': 3,
                      'checkpoint': '/tmp/dwarf-j17d/autoresearch/checkpoints/df0d435_j20d_physics_best.pt'},
+    # j24d_int2_physics: J24D relay-optimal offsets, V8 kernel, J=24, IF=2, condV physics, 39.5M
+    'j24d_int2_physics': {'arch': 'j24d_int2_physics', 'D': 512, 'H': 8, 'FFN': 2048, 'L': 6, 'full_layer': 5, 'interference': 2,
+                          'checkpoint': '/tmp/dwarf-j17d/autoresearch/checkpoints/df0d435_j24d_int2_physics_best.pt'},
 }
 
 TASKS = ['hellaswag', 'piqa', 'arc_easy', 'arc_challenge', 'winogrande', 'lambada']
@@ -322,6 +325,25 @@ def load_model_from_arch(arch_name, checkpoint_path, device):
             num_heads=H, ffn_dim=FFN, seq_len=MAX_SEQ_LEN,
             full_attn_layer=cfg.get('full_layer', 5),
             interference_interval=cfg.get('interference', 3),
+            scale_embed_init_val=0.1,
+        ).to(device)
+
+    elif arch == 'j24d_int2_physics':
+        import importlib.util
+        repo_root = os.path.normpath(os.path.join(SCRIPT_DIR, '..'))
+        for _d in [os.path.join('/tmp/dwarf-j17d', 'kernels'), '/tmp/dwarf-j17d',
+                   os.path.join(repo_root, 'kernels'), repo_root]:
+            if _d not in sys.path:
+                sys.path.insert(0, _d)
+        train_script = os.path.join(repo_root, 'train', 'train_j24d_int2_physics_bf16.py')
+        spec = importlib.util.spec_from_file_location('j24d_int2_physics_train', train_script)
+        mod  = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        model = mod.AutoresearchTransformerPhysics(
+            vocab_size=VOCAB_SIZE, embedding_dim=D, num_layers=L,
+            num_heads=H, ffn_dim=FFN, seq_len=MAX_SEQ_LEN,
+            full_attn_layer=cfg.get('full_layer', 5),
+            interference_interval=cfg.get('interference', 2),
             scale_embed_init_val=0.1,
         ).to(device)
 
