@@ -63,7 +63,7 @@ NUM_DOCS       = 100_000
 MAX_VAL_SEQS   = 5_582
 
 FW_CACHE_FILE     = '/workspace/DWARF/logs/condm_fineweb_edu_doc_cache.json'
-TOKENIZER_PATH    = '/workspace/DWARF/logs/2048_condI_tokenizer.json'
+TOKENIZER_PATH    = '/workspace/DWARF/results/2048_condI_tokenizer.json'
 ENCODED_CACHE     = '/workspace/DWARF/logs/fineweb_encoded_2048.pt'
 CHECKPOINT_DIR    = '/workspace/DWARF/checkpoints'
 CHECKPOINT_NAME   = 'j24d_int2_100m_best.pt'
