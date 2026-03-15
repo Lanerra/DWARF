@@ -207,19 +207,14 @@ class FullCausalAttentionH100(nn.Module):
 
         dp = self.dropout_p if self.training else 0.0
 
-        try:
-            with torch.backends.cuda.sdp_kernel(
-                enable_flash=True, enable_math=False, enable_mem_efficient=False
-            ):
-                out = F.scaled_dot_product_attention(q, k, v, dropout_p=dp, is_causal=True)
-        except RuntimeError:
-            if not self._flash_warned:
-                print("  ⚠ Flash kernel unavailable, falling back to math SDPA")
-                self._flash_warned = True
-            with torch.backends.cuda.sdp_kernel(
-                enable_flash=False, enable_math=True, enable_mem_efficient=False
-            ):
-                out = F.scaled_dot_product_attention(q, k, v, dropout_p=dp, is_causal=True)
+        # Explicitly cast to BF16 so flash attention fires regardless of
+        # whether autocast is active in the calling context (e.g. evaluate()).
+        orig_dtype = q.dtype
+        q = q.to(torch.bfloat16)
+        k = k.to(torch.bfloat16)
+        v = v.to(torch.bfloat16)
+        out = F.scaled_dot_product_attention(q, k, v, dropout_p=dp, is_causal=True)
+        out = out.to(orig_dtype)
 
         out_flat = out.permute(0, 2, 1, 3).reshape(B, N, D)
         return F.dropout(self.out_proj(out_flat * torch.sigmoid(self.gate_proj(x))),
@@ -381,8 +376,9 @@ def evaluate(model, dataloader, device):
     for (batch,) in dataloader:
         x = batch[:, :-1].to(device)
         y = batch[:, 1:].to(device)
-        logits = model(x)
-        loss   = F.cross_entropy(logits.reshape(-1, logits.size(-1)), y.reshape(-1))
+        with torch.amp.autocast('cuda', dtype=torch.bfloat16):
+            logits = model(x)
+            loss   = F.cross_entropy(logits.reshape(-1, logits.size(-1)), y.reshape(-1))
         total_loss   += loss.item() * y.numel()
         total_tokens += y.numel()
     return total_loss / max(total_tokens, 1)
