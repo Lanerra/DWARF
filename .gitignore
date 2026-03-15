@@ -83,3 +83,19 @@ autoresearch/modules/
 autoresearch/probe*.log
 autoresearch/*.pyc
 exploration/
+# autoresearch internals — keep off public repo
+autoresearch/math_loop*.py
+autoresearch/math_loop*.log
+autoresearch/math_history*.jsonl
+autoresearch/loop_*.py
+autoresearch/loop_*.sh
+autoresearch/tui.py
+autoresearch/probe_run.py
+autoresearch/*.sh
+autoresearch/populate_research_graph.py
+autoresearch/kernel_generator.py
+autoresearch/*_program.md
+autoresearch/program_*.md
+autoresearch/ar_agent.log
+autoresearch/math_summary.py
+autoresearch/analyze_j.py
