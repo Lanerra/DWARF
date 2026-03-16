@@ -1,0 +1,102 @@
+
+========================================================================
+  Champion Ablation Probe: curve_27m
+  Checkpoint: checkpoints/curve_27m_best.pt
+========================================================================
+
+Tokenizer: results/2048_condI_tokenizer.json  (vocab=32000)
+Val data: 5582 sequences
+  Loaded checkpoints/curve_27m_best.pt  (val_ppl=?)
+  Offsets: J=24, max=1024, dense=[0..48], sparse=[64, 96, 192, 384, 512, 768, 1024]
+  Arch: D=512, L=6, H=8, FFN=768, FA=L5, IF=/2
+  Passkey words from script: ['apple', 'banana', 'orange', 'cherry']...
+
+─── Baseline ───────────────────────────────────────────────────────────
+  Passkey: 95.0%  |  PPL: 44.3732  (2s)
+
+─── Section 1: Offset Importance ───────────────────────────────────────
+  δ=    1: passkey=86.7% (-8.3%)  ppl=46.6711 (+2.30)  [1s]
+  δ=    2: passkey=95.0% (+0.0%)  ppl=46.8812 (+2.51)  [1s]
+  δ=    3: passkey=35.0% (-60.0%)  ppl=49.1637 (+4.79)  [1s]
+  δ=    4: passkey=35.0% (-60.0%)  ppl=50.5463 (+6.17)  [1s]
+  δ=    5: passkey=84.2% (-10.8%)  ppl=51.5715 (+7.20)  [1s]
+  δ=    6: passkey=81.7% (-13.3%)  ppl=52.4041 (+8.03)  [1s]
+  δ=    7: passkey=80.8% (-14.2%)  ppl=52.97 (+8.60)  [1s]
+  δ=    8: passkey=87.5% (-7.5%)  ppl=53.7916 (+9.42)  [1s]
+  δ=    9: passkey=85.8% (-9.2%)  ppl=54.0971 (+9.72)  [1s]
+  δ=   10: passkey=84.2% (-10.8%)  ppl=54.4661 (+10.09)  [1s]
+  δ=   13: passkey=85.8% (-9.2%)  ppl=55.0651 (+10.69)  [1s]
+  δ=   15: passkey=85.8% (-9.2%)  ppl=55.5425 (+11.17)  [1s]
+  δ=   16: passkey=85.0% (-10.0%)  ppl=55.6467 (+11.27)  [1s]
+  δ=   21: passkey=86.7% (-8.3%)  ppl=56.2521 (+11.88)  [1s]
+  δ=   23: passkey=86.7% (-8.3%)  ppl=56.6203 (+12.25)  [1s]
+  δ=   28: passkey=84.2% (-10.8%)  ppl=56.7243 (+12.35)  [1s]
+  δ=   48: passkey=90.0% (-5.0%)  ppl=57.4513 (+13.08)  [1s]
+  δ=   64: passkey=88.3% (-6.7%)  ppl=57.5366 (+13.16)  [1s]
+  δ=   96: passkey=91.7% (-3.3%)  ppl=57.6716 (+13.30)  [1s]
+  δ=  192: passkey=90.0% (-5.0%)  ppl=57.1826 (+12.81)  [1s]
+  δ=  384: passkey=92.5% (-2.5%)  ppl=56.0722 (+11.70)  [1s]
+  δ=  512: passkey=87.5% (-7.5%)  ppl=55.2353 (+10.86)  [1s]
+  δ=  768: passkey=90.0% (-5.0%)  ppl=53.842 (+9.47)  [1s]
+  δ= 1024: passkey=90.0% (-5.0%)  ppl=52.212 (+7.84)  [1s]
+
+  Group ablations:
+  dense[33-48] (n=1): passkey=90.0% (-5.0%)  ppl=57.4513 (+13.08)
+  all_sparse (n=7): passkey=67.5% (-27.5%)  ppl=100.6256 (+56.25)
+  ultra-long (≥512, n=3): passkey=79.2% (-15.8%)  ppl=68.4092 (+24.04)
+
+─── Section 2: Layer Residual Knockouts ────────────────────────────────
+  L0 (DSQG) skip: passkey=10.0% (-85.0%)  ppl=11674.4299 (+11630.06)  [1s]
+  L1 (DSQG) skip: passkey=10.0% (-85.0%)  ppl=11945.6802 (+11901.31)  [1s]
+  L2 (DSQG) skip: passkey=10.0% (-85.0%)  ppl=13500.3211 (+13455.95)  [1s]
+  L3 (DSQG) skip: passkey=10.0% (-85.0%)  ppl=10154.8137 (+10110.44)  [1s]
+  L4 (DSQG) skip: passkey=10.0% (-85.0%)  ppl=11324736.9309 (+11324692.56)  [1s]
+  L5 (FULL) skip: passkey=10.0% (-85.0%)  ppl=6438.1725 (+6393.80)  [1s]
+
+─── Section 3: Head Knockouts ──────────────────────────────────────────
+  L4-H0 (penultimate-DSQG): passkey=95.8% (+0.8%)  ppl=43.8851 (-0.49)  [1s]
+  L4-H1 (penultimate-DSQG): passkey=95.0% (+0.0%)  ppl=43.8851 (-0.49)  [1s]
+  L4-H2 (penultimate-DSQG): passkey=95.0% (+0.0%)  ppl=43.6259 (-0.75)  [1s]
+  L4-H3 (penultimate-DSQG): passkey=94.2% (-0.8%)  ppl=43.8366 (-0.54)  [1s]
+  L4-H4 (penultimate-DSQG): passkey=91.7% (-3.3%)  ppl=43.7425 (-0.63)  [1s]
+  L4-H5 (penultimate-DSQG): passkey=94.2% (-0.8%)  ppl=43.6486 (-0.72)  [1s]
+  L4-H6 (penultimate-DSQG): passkey=95.0% (+0.0%)  ppl=43.6742 (-0.70)  [1s]
+  L4-H7 (penultimate-DSQG): passkey=94.2% (-0.8%)  ppl=43.5493 (-0.82)  [1s]
+  L5-H0 (FULL): passkey=88.3% (-6.7%)  ppl=44.2178 (-0.15)  [1s]
+  L5-H1 (FULL): passkey=95.0% (+0.0%)  ppl=44.0454 (-0.33)  [1s]
+  L5-H2 (FULL): passkey=95.8% (+0.8%)  ppl=43.9738 (-0.40)  [1s]
+  L5-H3 (FULL): passkey=91.7% (-3.3%)  ppl=44.034 (-0.34)  [1s]
+  L5-H4 (FULL): passkey=83.3% (-11.7%)  ppl=44.2466 (-0.13)  [1s]
+  L5-H5 (FULL): passkey=78.3% (-16.7%)  ppl=44.3504 (-0.02)  [1s]
+  L5-H6 (FULL): passkey=95.0% (+0.0%)  ppl=44.7623 (+0.39)  [1s]
+  L5-H7 (FULL): passkey=93.3% (-1.7%)  ppl=44.2898 (-0.08)  [1s]
+
+─── Section 5: EMA Differential (b1 vs b3 isolation) ───────────────────
+  Interference blocks at layers: [1, 3]
+  b1 (L1) EMA-gate zeroed: passkey=91.7% (-3.3%)  ppl=45.4868 (+1.11)  [1s]
+  b1 (L1) full block zeroed: passkey=10.0% (-85.0%)  ppl=11945.6802 (+11901.31)  [1s]
+    → EMA-only contribution to b1: -81.7% passkey (full_zeroed − ema_zeroed)
+  b2 (L3) EMA-gate zeroed: passkey=92.5% (-2.5%)  ppl=45.244 (+0.87)  [1s]
+  b2 (L3) full block zeroed: passkey=10.0% (-85.0%)  ppl=10154.8137 (+10110.44)  [1s]
+    → EMA-only contribution to b2: -82.5% passkey (full_zeroed − ema_zeroed)
+
+─── Section 6: Interference Layer Position ─────────────────────────────
+  Testing each IF block in isolation (full residual zero)
+  IF at L1 (b1) full knockout: -85.0% passkey, +11901.31 PPL
+  IF at L3 (b2) full knockout: -85.0% passkey, +10110.44 PPL
+  Most critical IF position: L1_b1 (-85.0% passkey)
+  Less critical IF position: L3_b2 (-85.0% passkey)
+
+─── Summary ────────────────────────────────────────────────────────────
+  Most critical offsets (by passkey loss):
+    δ=3: -60.0% passkey, +4.79 PPL
+    δ=4: -60.0% passkey, +6.17 PPL
+    δ=7: -14.2% passkey, +8.60 PPL
+    δ=6: -13.3% passkey, +8.03 PPL
+    δ=5: -10.8% passkey, +7.20 PPL
+  Most critical layers (by passkey loss):
+    L0 (DSQG): -85.0% passkey, +11630.06 PPL
+    L1 (DSQG): -85.0% passkey, +11901.31 PPL
+    L2 (DSQG): -85.0% passkey, +13455.95 PPL
+
+  Saved → logs/probe_curve_27m_results.json

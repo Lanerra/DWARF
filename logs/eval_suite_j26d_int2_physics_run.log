@@ -1,0 +1,64 @@
+
+============================================================
+  eval_suite.py — j26d_int2_physics_39m
+  Device: cuda
+============================================================
+
+  Model: J26D-int2 Physics 39.5M (J=26, V6, IF=2, condV physics, EMA dead-zone fix)
+
+  Loading tokenizer...
+  Loading model...
+  Loaded J26D-int2 Physics 39.5M (J=26, V6, IF=2, condV physics, EMA dead-zone fix): 39,514,492 params from 99437df_j26d_int2_physics_best.pt
+
+  [1/4] Calibration...
+    entropy=6.803 bits  top1=0.241  eff_vocab=22.1  (0.6s)
+
+  [2/4] Distance-conditioned loss (wikitext-103)...
+    Loading wikitext-103 test split...
+    Using 17 full 2048-token chunks
+    Buckets:
+    0-16          PPL= 241.47  n=  289
+    17-64         PPL= 146.04  n=  816
+    65-256        PPL=  77.09  n= 3264
+    257-512       PPL=  68.25  n= 4352
+    513-1024      PPL=  56.90  n= 8704
+    1025-2047     PPL=  55.20  n=17374
+    (3.8s)
+
+  [3/4] Few-shot string copy...
+    exact=5/15  (33.3%)  mean_lev=6.40  (3.4s)
+
+  [4/4] Passkey retrieval...
+    d=    1: accuracy=100.0%
+    d=    2: accuracy=100.0%
+    d=    4: accuracy=100.0%
+    d=    8: accuracy=100.0%
+    d=   16: accuracy=100.0%
+    d=   32: accuracy=100.0%
+    d=   64: accuracy=80.0%
+    d=  128: accuracy=80.0%
+    d=  256: accuracy=60.0%
+    d=  512: accuracy=80.0%
+    d= 1024: accuracy=60.0%
+    d= 1536: accuracy=60.0%
+    mean_accuracy=85.0%  (1.0s)
+
+  Generation samples (greedy + T=0.7)...
+
+  [greedy]
+    'It was a dark and stormy'               → ' night, and the night was a great storm.\nThe night was a great storm, and the ni'
+    'The length of the hypotenuse'           → ' is determined by the length of the tube. The length of the tube is determined b'
+    'The President of the United'            → ' States, the President of the United States, and the President of the United Sta'
+    'Once upon a time there was'             → ' a great deal of confusion between the two men. The first was the first of the m'
+    'The results indicate that'              → ' the number of people who are in the hospital is higher than the number of peopl'
+
+  [T=0.7]
+    'It was a dark and stormy'               → ' night, with a great mountain from the west. The storm was first seen on the mor'
+    'The length of the hypotenuse'           → ' is measured in the middle of the night. In the middle of the night the hypotenu'
+    'The President of the United'            → ' States at the time, the President of the United States was the first to recogni'
+    'Once upon a time there was'             → ' a man who had lost his entire life. And when he found his father, he was called'
+    'The results indicate that'              → ' some patients are not at risk for the disease, and the patient is still likely '
+
+  Results saved to /home/dlewis3/Desktop/AI/DWARF/evals/logs/eval_suite_j26d_int2_physics_39m_20260316_101846.json
+============================================================
+

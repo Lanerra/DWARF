@@ -1,0 +1,51 @@
+{
+  "label": "Curve 27M (J=24, V8, D=512, FFN=768, IF=2, condV physics)",
+  "n_params": 31642492,
+  "timestamp": "20260316_102506",
+  "tasks": [
+    "hellaswag",
+    "piqa",
+    "arc_easy",
+    "arc_challenge",
+    "winogrande",
+    "lambada"
+  ],
+  "results": {
+    "hellaswag": {
+      "accuracy": 0.24736108344951205,
+      "correct": 2484,
+      "total": 10042,
+      "elapsed_s": 248.46104168891907
+    },
+    "piqa": {
+      "accuracy": 0.5549510337323177,
+      "correct": 1020,
+      "total": 1838,
+      "elapsed_s": 20.71716284751892
+    },
+    "arc_easy": {
+      "accuracy": 0.34210526315789475,
+      "correct": 195,
+      "total": 570,
+      "elapsed_s": 12.69137692451477
+    },
+    "arc_challenge": {
+      "accuracy": 0.21070234113712374,
+      "correct": 63,
+      "total": 299,
+      "elapsed_s": 6.689144134521484
+    },
+    "winogrande": {
+      "accuracy": 0.5224940805051302,
+      "correct": 662,
+      "total": 1267,
+      "elapsed_s": 12.69157600402832
+    },
+    "lambada": {
+      "accuracy": 0.10188239860275568,
+      "correct": 525,
+      "total": 5153,
+      "elapsed_s": 29.45053482055664
+    }
+  }
+}

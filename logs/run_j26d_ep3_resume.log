@@ -1,0 +1,57 @@
+======================================================================
+  🔬 DWARF Autoresearch — J26D Full-Dataset + Physics
+  V8 kernel (J=26) + condV: Kalman-EMA + KdV + AGC  [EMA dead-zone fix]
+======================================================================
+  GPU: NVIDIA GeForce RTX 4090
+  D=512, H=8, L=6, FFN=2048
+  IF interval=2, Full attn layer=5
+  scale_embed init=0.1, LR mult=15.0
+  EMA α₀=0.00035 (window≈2857t), floor=1e-05
+  MAX_TRAIN_SEQS=121232, LR=0.0003, Epochs=1
+  git=99437df
+Loading FineWeb-Edu from cache: benchmarks/logs/condm_fineweb_edu_doc_cache.json
+  Loaded 100,000 docs from cache
+Loaded tokenizer from results/2048_condI_tokenizer.json
+Loading pre-encoded dataset from logs/fineweb_encoded_2048.pt
+  train: 121,232  val: 5,582 seqs
+  Loading ep2 checkpoint: autoresearch/checkpoints/f52350c_j26d_int2_physics_best.pt
+  Resume: 0 missing, 0 unexpected keys
+  compiled FullAttnBlock at layer 5
+  torch.compile applied to FullAttnBlock(s)
+Parameters: 39,514,492 (39.5M)
+  Step 200/3789 | Loss 3.5535
+  Step 400/3789 | Loss 3.7729
+  Step 600/3789 | Loss 3.8097
+  Step 800/3789 | Loss 3.8486
+  Step 1000/3789 | Loss 3.9630
+  Step 1200/3789 | Loss 3.9206
+  Step 1400/3789 | Loss 3.9213
+  Step 1600/3789 | Loss 3.6741
+  Step 1800/3789 | Loss 3.7539
+  Step 2000/3789 | Loss 3.5296
+  Step 2200/3789 | Loss 4.0037
+  Step 2400/3789 | Loss 3.6884
+  Step 2600/3789 | Loss 3.6524
+  Step 2800/3789 | Loss 3.6129
+  Step 3000/3789 | Loss 3.9137
+  Step 3200/3789 | Loss 3.7645
+  Step 3400/3789 | Loss 3.5519
+  Step 3600/3789 | Loss 3.9005
+Ep 3/3 | Val PPL 38.54 *
+  scale_embed |mean|=0.3541 |max|=2.0727
+  Physics: b1: α=0.0151(w≈66t) kdv=-0.0000  b3: α=-0.0013(w≈100000t) kdv=-0.0000
+  Passkey mean=94.2%
+  d=1:100%  d=2:100%  d=4:100%  d=8:100%  d=16:100%  d=32:100%  d=64:100%  d=128:100%  d=256:80%  d=512:90%  d=1024:80%  d=1536:80%
+
+---
+passkey_ep1:    94.2
+ppl_ep1:        38.54
+ar_score:       75.87
+memory_mb:      11085.4
+elapsed_s:      6335.7
+num_params_M:   39.5
+num_layers:     6
+num_offsets:    26
+scale_embed_lr_mult: 15.0
+ema_init:       0.00035
+description:    J26D-int2 physics — 39.5M, V8+condV, J=26 (+δ=11+δ=32 over J24D), EMA_init=0.00035 floor=1e-05 (dead-zone fix), 121232 seqs, scale_embed_init=0.1

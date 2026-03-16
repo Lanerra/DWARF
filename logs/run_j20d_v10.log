@@ -1,0 +1,20 @@
+======================================================================
+  🔬 DWARF Autoresearch — J20D V10 Full-Dataset + Physics
+  V10 kernel (J=20) + condV: Kalman-EMA + AGC  [tiled coalesced, 2.87x faster]
+======================================================================
+  GPU: NVIDIA GeForce RTX 4090
+  D=512, H=8, L=6, FFN=2048
+  IF interval=2, Full attn layer=5
+  scale_embed init=0.1, LR mult=15.0
+  EMA α₀=0.00035 (window≈2857t), floor=1e-05
+  MAX_TRAIN_SEQS=121232, LR=0.0003, Epochs=3
+  git=5dfa5ea
+Loading FineWeb-Edu from cache: benchmarks/logs/condm_fineweb_edu_doc_cache.json
+  Loaded 100,000 docs from cache
+Loaded tokenizer from results/2048_condI_tokenizer.json
+Loading pre-encoded dataset from logs/fineweb_encoded_2048.pt
+  train: 121,232  val: 5,582 seqs
+  compiled FullAttnBlock at layer 5
+  torch.compile applied to FullAttnBlock(s)
+Parameters: 39,510,090 (39.5M)
+  Step 200/3789 | Loss 10.8301

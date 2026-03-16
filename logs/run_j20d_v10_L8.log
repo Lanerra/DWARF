@@ -1,0 +1,52 @@
+======================================================================
+  🔬 DWARF Autoresearch — J20D V10 L8 Depth Experiment
+  V10 kernel (J=20) + condV: Kalman-EMA + AGC  [tiled coalesced, 2.87x faster]
+======================================================================
+  GPU: NVIDIA GeForce RTX 4090
+  D=512, H=8, L=8, FFN=2048
+  IF interval=2, Full attn layer=7
+  scale_embed init=0.1, LR mult=15.0
+  EMA α₀=0.00035 (window≈2857t), floor=1e-05
+  MAX_TRAIN_SEQS=121232, LR=0.0003, Epochs=3
+  git=99437df
+Loading FineWeb-Edu from cache: benchmarks/logs/condm_fineweb_edu_doc_cache.json
+  Loaded 100,000 docs from cache
+Loaded tokenizer from results/2048_condI_tokenizer.json
+Loading pre-encoded dataset from logs/fineweb_encoded_2048.pt
+  train: 121,232  val: 5,582 seqs
+  compiled FullAttnBlock at layer 7
+  torch.compile applied to FullAttnBlock(s)
+Parameters: 47,132,059 (47.1M)
+  Step 200/3789 | Loss 6.3871
+  Step 400/3789 | Loss 5.7016
+  Step 600/3789 | Loss 5.3323
+  Step 800/3789 | Loss 5.1328
+  Step 1000/3789 | Loss 5.0168
+  Step 1200/3789 | Loss 4.6467
+  Step 1400/3789 | Loss 4.7428
+  Step 1600/3789 | Loss 4.6210
+  Step 1800/3789 | Loss 4.5392
+  Step 2000/3789 | Loss 4.1400
+  Step 2200/3789 | Loss 4.2488
+  Step 2400/3789 | Loss 4.0442
+  Step 2600/3789 | Loss 4.1013
+  Step 2800/3789 | Loss 4.1529
+  Step 3000/3789 | Loss 4.0248
+  Step 3200/3789 | Loss 4.2915
+  Step 3400/3789 | Loss 4.2401
+  Step 3600/3789 | Loss 4.0979
+Ep 1/3 | Val PPL 51.35 *
+  scale_embed |mean|=0.3901 |max|=2.1782
+  Physics: b1: α=0.0051(w≈196t)  b3: α=0.0777(w≈13t)  b5: α=0.0211(w≈47t)
+  Passkey mean=60.0%
+  d=1:70%  d=2:70%  d=4:70%  d=8:70%  d=16:70%  d=32:70%  d=64:70%  d=128:60%  d=256:70%  d=512:50%  d=1024:40%  d=1536:10%
+  Step 200/3789 | Loss 4.1234
+  Step 400/3789 | Loss 4.0434
+  Step 600/3789 | Loss 3.9249
+  Step 800/3789 | Loss 3.6649
+  Step 1000/3789 | Loss 4.0612
+  Step 1200/3789 | Loss 3.8237
+  Step 1400/3789 | Loss 3.9266
+  Step 1600/3789 | Loss 3.8563
+  Step 1800/3789 | Loss 3.8598
+  Step 2000/3789 | Loss 3.7552

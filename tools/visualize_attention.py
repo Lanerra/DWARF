@@ -50,6 +50,8 @@ _OFFSET_SETS = {
     'std_13m':   [],    # Standard 13M transformer — no DSQG offsets
     # J-series autoresearch models
     'j24d_int2_physics': [1,2,3,4,5,6,7,8,9,10,13,15,16,21,23,28,48,64,96,192,384,512,768,1024],
+    'j26d_int2_physics': [1,2,3,4,5,6,7,8,9,10,13,15,16,21,23,28,48,64,96,192,384,512,768,1024],  # pos_bias J=24 (δ=11,δ=32 handled in kernel, not pos_bias)
+    'curve_27m':         [1,2,3,4,5,6,7,8,9,10,13,15,16,21,23,28,48,64,96,192,384,512,768,1024],
 }
 
 _TRAIN_SCRIPTS = {
@@ -67,6 +69,8 @@ _TRAIN_SCRIPTS = {
     'std_13m':  'train/train_2048_85m_standard_baseline.py',  # same class, same script
     # J-series autoresearch models
     'j24d_int2_physics': 'train/train_j24d_int2_physics_bf16.py',
+    'j26d_int2_physics': 'train/train_j26d_int2_physics_bf16.py',
+    'curve_27m':         'train/train_curve_27m_bf16.py',
 }
 
 # Model class name to instantiate from the train script
@@ -84,6 +88,8 @@ _MODEL_CLASSES = {
     'std_13m':  'StandardTransformer85M',
     # J-series autoresearch models
     'j24d_int2_physics': 'AutoresearchTransformerPhysics',
+    'j26d_int2_physics': 'AutoresearchTransformerPhysics',
+    'curve_27m':         'CurveTransformer',
 }
 
 # Archs without DSQG layers (standard transformers only)

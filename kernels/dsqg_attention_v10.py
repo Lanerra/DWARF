@@ -232,7 +232,7 @@ def _dsqg_bwd_dkdv(
     dob = DO + b * stride_ob + h * stride_oh
     ob  = O  + b * stride_ob + h * stride_oh
     lb  = LSE + b * stride_lb + h * stride_lh
-    db  = D  + b * stride_db + h * stride_dn
+    db  = D  + b * stride_db + h * stride_dh
 
     kt  = tl.load(kb + ks[:, None] * stride_kn + ds[None, :] * stride_kd,
                   mask=km[:, None] & dm[None, :], other=0.0).to(tl.float32)
@@ -252,8 +252,6 @@ def _dsqg_bwd_dkdv(
                       mask=qm[:, None] & dm[None, :], other=0.0).to(tl.float32)
         do  = tl.load(dob + qs[:, None] * stride_on + ds[None, :] * stride_od,
                       mask=qm[:, None] & dm[None, :], other=0.0).to(tl.float32)
-        ot  = tl.load(ob  + qs[:, None] * stride_on + ds[None, :] * stride_od,
-                      mask=qm[:, None] & dm[None, :], other=0.0).to(tl.float32)
         lse = tl.load(lb + qs * stride_ln, mask=qm, other=0.0)
         Dv  = tl.load(db + qs * stride_dn, mask=qm, other=0.0)
 
@@ -271,10 +269,11 @@ def _dsqg_bwd_dkdv(
         # dV accumulate: dV[kn] += p[q,j] * dO[q]
         dv  = dv + p[:, None] * do
 
-        # dK accumulate: delta_q = dO·O per query
-        delta_q = tl.sum(do * ot, axis=1)                       # [BLOCK_M]
-        dkterm  = tl.where(qm, p * (delta_q - Dv), tl.zeros_like(p))
-        dk      = dk + dkterm[:, None] * qt * sc
+        # dK accumulate: ds[qs,j] = p[qs,j] * (dO[qs]·V[kn] - D[qs])
+        # dL/dK[kn] = ds[qs,j] * Q[qs] * sc
+        dov_k   = tl.sum(do * vt, axis=1)                       # dO·V[kn] [BLOCK_M]
+        ds_k    = tl.where(qm, p * (dov_k - Dv), tl.zeros_like(p))
+        dk      = dk + ds_k[:, None] * qt * sc
 
     dkb = DK + b * stride_kb + h * stride_kh
     dvb = DV + b * stride_vb + h * stride_vh
@@ -359,13 +358,13 @@ def _dsqg_bwd_dq(
         # p[m] = exp(s - lse)
         p  = tl.where(val, tl.exp(s - lse), tl.zeros_like(s))   # [BLOCK_M]
 
-        # dq += p * (dO·V[kp] - D) * K[kp] * sc
-        dov   = tl.sum(do * vt, axis=1)                          # [BLOCK_M]
-        delta_term = tl.where(val, p * (dov - Dv), tl.zeros_like(p))
-        dq    = dq + delta_term[:, None] * kt * sc
+        # ds[j] = p[j] * (dO·V[kp_j] - D)    (softmax backward, per query)
+        dov        = tl.sum(do * vt, axis=1)                     # [BLOCK_M]
+        ds_j       = tl.where(val, p * (dov - Dv), tl.zeros_like(p))  # [BLOCK_M]
 
-        # dq += p * se[j] * sc
-        dq    = dq + p[:, None] * se[None, :] * sc
+        # dQ += ds[j] * (K[kp_j] + se[j]) * sc
+        # Both K and se are in the score formula: s = Q·K*sc + Q·se*sc
+        dq    = dq + ds_j[:, None] * (kt + se[None, :]) * sc
 
     dqb = DQ + b * stride_dqb + h * stride_dqh
     tl.store(dqb + ms[:, None] * stride_dqn + ds[None, :] * stride_dqd,
@@ -468,9 +467,6 @@ def _dsqg_bwd_params(
         # Accumulate dse[j,d] += sum_m ds_j[m] * q[m,d] * sc
         # ds_j: [BLOCK_M], q: [BLOCK_M, HD] → outer product sum → [HD]
         dse_j = tl.sum(ds_j[:, None] * q * sc, axis=0)  # [HD]
-        for d in tl.static_range(0):  # placeholder — use atomic_add per dim below
-            pass
-        # atomic_add for each d in HD — done via vector atomic
         tl.atomic_add(DSE + i * stride_sei + ds * stride_sed, dse_j, mask=dm)
 
 

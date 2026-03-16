@@ -1,0 +1,51 @@
+{
+  "label": "J26D-int2 Physics 39.5M (J=26, V6, IF=2, condV physics, EMA dead-zone fix)",
+  "n_params": 39514492,
+  "timestamp": "20260316_102547",
+  "tasks": [
+    "hellaswag",
+    "piqa",
+    "arc_easy",
+    "arc_challenge",
+    "winogrande",
+    "lambada"
+  ],
+  "results": {
+    "hellaswag": {
+      "accuracy": 0.24985062736506672,
+      "correct": 2509,
+      "total": 10042,
+      "elapsed_s": 311.57038474082947
+    },
+    "piqa": {
+      "accuracy": 0.5669205658324266,
+      "correct": 1042,
+      "total": 1838,
+      "elapsed_s": 29.40203070640564
+    },
+    "arc_easy": {
+      "accuracy": 0.3473684210526316,
+      "correct": 198,
+      "total": 570,
+      "elapsed_s": 13.97993779182434
+    },
+    "arc_challenge": {
+      "accuracy": 0.19063545150501673,
+      "correct": 57,
+      "total": 299,
+      "elapsed_s": 4.660632371902466
+    },
+    "winogrande": {
+      "accuracy": 0.5122336227308603,
+      "correct": 649,
+      "total": 1267,
+      "elapsed_s": 9.692254066467285
+    },
+    "lambada": {
+      "accuracy": 0.10828643508635746,
+      "correct": 558,
+      "total": 5153,
+      "elapsed_s": 23.344890117645264
+    }
+  }
+}

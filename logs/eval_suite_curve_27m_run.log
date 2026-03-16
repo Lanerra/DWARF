@@ -1,0 +1,64 @@
+
+============================================================
+  eval_suite.py — curve_27m
+  Device: cuda
+============================================================
+
+  Model: Curve 27M (J=24, V8, D=512, FFN=768, IF=2, condV physics)
+
+  Loading tokenizer...
+  Loading model...
+  Loaded Curve 27M (J=24, V8, D=512, FFN=768, IF=2, condV physics): 31,642,492 params from curve_27m_best.pt
+
+  [1/4] Calibration...
+    entropy=7.259 bits  top1=0.208  eff_vocab=23.4  (0.4s)
+
+  [2/4] Distance-conditioned loss (wikitext-103)...
+    Loading wikitext-103 test split...
+    Using 17 full 2048-token chunks
+    Buckets:
+    0-16          PPL= 264.25  n=  289
+    17-64         PPL= 166.27  n=  816
+    65-256        PPL=  87.84  n= 3264
+    257-512       PPL=  77.87  n= 4352
+    513-1024      PPL=  64.06  n= 8704
+    1025-2047     PPL=  61.84  n=17374
+    (3.3s)
+
+  [3/4] Few-shot string copy...
+    exact=8/15  (53.3%)  mean_lev=6.20  (1.1s)
+
+  [4/4] Passkey retrieval...
+    d=    1: accuracy=100.0%
+    d=    2: accuracy=80.0%
+    d=    4: accuracy=60.0%
+    d=    8: accuracy=60.0%
+    d=   16: accuracy=100.0%
+    d=   32: accuracy=100.0%
+    d=   64: accuracy=100.0%
+    d=  128: accuracy=100.0%
+    d=  256: accuracy=100.0%
+    d=  512: accuracy=100.0%
+    d= 1024: accuracy=100.0%
+    d= 1536: accuracy=100.0%
+    mean_accuracy=91.7%  (0.3s)
+
+  Generation samples (greedy + T=0.7)...
+
+  [greedy]
+    'It was a dark and stormy'               → ' day, and the people were not afraid of the people.\nThe people were not afraid o'
+    'The length of the hypotenuse'           → ' is about 1.5 cm. The length of the hypotenuse is about 1.5 cm. The length of th'
+    'The President of the United'            → ' States, and the President of the United States, was the first to be elected pre'
+    'Once upon a time there was'             → ' a great deal of effort to get the people to work together.\nThe first thing that'
+    'The results indicate that'              → ' the average age of the study was about 1.5 years.\nThe study was conducted in a '
+
+  [T=0.7]
+    'It was a dark and stormy'               → ' night, the day was not a bad thing.\nI had to call me a bit of a warm and quiet '
+    'The length of the hypotenuse'           → ' ratio (m = 10) to the length of the hypotenuse ratio (m = 0.05) to the length o'
+    'The President of the United'            → ' States and the United States, she was the first president of the United States '
+    'Once upon a time there was'             → ' a general attack on the Taucer, but the Mayan troops were very weak.\nThis was a'
+    'The results indicate that'              → ' the soil surface was too high for the soil to be lost. The soil surface was not'
+
+  Results saved to /home/dlewis3/Desktop/AI/DWARF/evals/logs/eval_suite_curve_27m_20260316_101911.json
+============================================================
+
