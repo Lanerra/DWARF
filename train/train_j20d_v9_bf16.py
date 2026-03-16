@@ -82,8 +82,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 VOCAB_SIZE     = 32000
-BATCH_SIZE     = 8
-GRAD_ACCUM     = 4
+BATCH_SIZE     = 16   # H100 has 80GB; BS=16 uses ~36GB (safe), halves steps/epoch
+GRAD_ACCUM     = 4    # effective batch = 64; ~14 min/epoch on H100
 MAX_SEQ_LEN    = 2048
 NUM_DOCS       = 100_000
 MAX_VAL_SEQS   = 5_582
