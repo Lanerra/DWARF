@@ -285,24 +285,17 @@ class AutoresearchTransformerPhysics(nn.Module):
 
     def forward(self, idx):
         B, N = idx.shape
-        pos     = torch.arange(N, device=idx.device).unsqueeze(0)
-        pos_emb = self.pos_embed(pos)                   # [1, N, D]
-        x       = self.drop(self.embedding(idx) + pos_emb)
-        for i, block in enumerate(self.blocks):
-            if i == self.full_attn_layer:
-                # NoPE: strip position embedding before full attention.
-                # pos_emb is static (no nonlinear transform), so x - pos_emb
-                # exactly recovers the position-free residual stream.
-                # Full attention thus sees content only, not absolute position
-                # → enables length generalisation (Kazemnejad NeurIPS 2023;
-                #   HypeNet/HALO ICML 2026 NoPE motivation).
-                # Residual is added back to x (full stream), keeping downstream
-                # layers position-aware.
-                x_nope = x - pos_emb                   # [B, N, D] — no pos info
-                x = x + block.attn(block.norm1(x_nope))
-                x = x + block.ffn(block.norm2(x))
-            else:
-                x = block(x)
+        pos  = torch.arange(N, device=idx.device).unsqueeze(0)
+        x    = self.drop(self.embedding(idx) + self.pos_embed(pos))
+        # NoPE for full attention: our full attention already has no RoPE and no
+        # per-layer positional re-injection. pos_emb is added only once at the
+        # token embedding layer; by L5 the residual stream's position info is
+        # entirely implicit in the DSQG-transformed representations. Passing x
+        # directly to full attention IS the NoPE configuration — no subtraction
+        # needed (subtracting the original pos_emb from a nonlinearly-transformed
+        # x adds noise, not position removal).
+        for block in self.blocks:
+            x = block(x)
         return self.out(self.norm(x))
 
     def param_count(self):
@@ -320,14 +313,13 @@ class AutoresearchTransformerPhysics(nn.Module):
                 yield p
 
     def physics_summary(self):
-        """Log EMA and KdV state for all interference blocks."""
+        """Log EMA state for all interference blocks (KdV removed)."""
         entries = []
         for i, block in enumerate(self.blocks):
             if isinstance(block, DSQGBlockV6Physics) and block.interference:
                 alpha = block.ema_factor.item()
-                kdv   = block.kdv_alpha.item()
-                win   = round(1.0 / max(alpha, EMA_FLOOR))
-                entries.append(f'b{i}: α={alpha:.4f}(w≈{win}t) kdv={kdv:.4f}')
+                win   = round(1.0 / max(abs(alpha), EMA_FLOOR))
+                entries.append(f'b{i}: α={alpha:.4f}(w≈{win}t)')
         return '  '.join(entries)
 
 
