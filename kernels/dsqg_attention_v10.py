@@ -284,6 +284,196 @@ def _dsqg_bwd_dkdv(
              dv.to(tl.bfloat16), mask=km[:, None] & dm[None, :])
 
 
+
+# ── Backward kernel — dQ ──────────────────────────────────────────────────────
+#
+# Same tiling as forward: BLOCK_M queries per program.
+# For each query tile, recompute p[q,j] from saved LSE, then accumulate dQ.
+# All KV loads are coalesced (same pattern as forward).
+
+@triton.jit
+def _dsqg_bwd_dq(
+    Q, K, V, POS_BIAS, SCALE_EMBED, DO, LSE, D,
+    DQ,
+    stride_qb, stride_qh, stride_qn, stride_qd,
+    stride_kb, stride_kh, stride_kn, stride_kd,
+    stride_vb, stride_vh, stride_vn, stride_vd,
+    stride_ob, stride_oh, stride_on, stride_od,
+    stride_lb, stride_lh, stride_ln,
+    stride_db, stride_dh, stride_dn,
+    stride_pbi, stride_pbh,
+    stride_sei, stride_sed,
+    stride_dqb, stride_dqh, stride_dqn, stride_dqd,
+    H: tl.constexpr, N, HD: tl.constexpr,
+    BLOCK_M: tl.constexpr,
+):
+    bh   = tl.program_id(0)
+    tile = tl.program_id(1)
+    b    = bh // H;  h = bh % H
+    n0   = tile * BLOCK_M
+
+    ms   = n0 + tl.arange(0, BLOCK_M)
+    mm   = ms < N
+    ds   = tl.arange(0, HD)
+    dm   = ds < HD
+    sc   = 1.0 / (HD ** 0.5)
+
+    qb  = Q  + b * stride_qb + h * stride_qh
+    dob = DO + b * stride_ob + h * stride_oh
+
+    # Load Q, dO, LSE, D for this tile — stays in registers
+    q   = tl.load(qb  + ms[:, None] * stride_qn + ds[None, :] * stride_qd,
+                  mask=mm[:, None] & dm[None, :], other=0.0).to(tl.float32)
+    do  = tl.load(dob + ms[:, None] * stride_on + ds[None, :] * stride_od,
+                  mask=mm[:, None] & dm[None, :], other=0.0).to(tl.float32)
+    lse = tl.load(LSE + b * stride_lb + h * stride_lh + ms * stride_ln,
+                  mask=mm, other=0.0)
+    Dv  = tl.load(D   + b * stride_db + h * stride_dh + ms * stride_dn,
+                  mask=mm, other=0.0)
+
+    kb = K + b * stride_kb + h * stride_kh
+    vb = V + b * stride_vb + h * stride_vh
+
+    dq  = tl.zeros([BLOCK_M, HD], tl.float32)
+
+    for i in tl.static_range(20):
+        delta = (1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 13, 15, 16, 23, 32, 64, 128, 256, 512, 1024)[i]
+
+        kp  = ms - delta
+        val = (kp >= 0) & mm
+
+        # Load K[kp], V[kp] — coalesced tiles
+        kt = tl.load(kb + kp[:, None] * stride_kn + ds[None, :] * stride_kd,
+                     mask=val[:, None] & dm[None, :], other=0.0).to(tl.float32)
+        vt = tl.load(vb + kp[:, None] * stride_vn + ds[None, :] * stride_vd,
+                     mask=val[:, None] & dm[None, :], other=0.0).to(tl.float32)
+
+        # Recompute score
+        s  = tl.sum(q * kt, axis=1) * sc
+        pb = tl.load(POS_BIAS + i * stride_pbi + h * stride_pbh)
+        se = tl.load(SCALE_EMBED + i * stride_sei + ds * stride_sed,
+                     mask=dm, other=0.0).to(tl.float32)
+        s  = s + pb + tl.sum(q * se[None, :], axis=1) * sc
+        s  = tl.where(val, s, float('-inf'))
+
+        # p[m] = exp(s - lse)
+        p  = tl.where(val, tl.exp(s - lse), tl.zeros_like(s))   # [BLOCK_M]
+
+        # dq += p * (dO·V[kp] - D) * K[kp] * sc
+        dov   = tl.sum(do * vt, axis=1)                          # [BLOCK_M]
+        delta_term = tl.where(val, p * (dov - Dv), tl.zeros_like(p))
+        dq    = dq + delta_term[:, None] * kt * sc
+
+        # dq += p * se[j] * sc
+        dq    = dq + p[:, None] * se[None, :] * sc
+
+    dqb = DQ + b * stride_dqb + h * stride_dqh
+    tl.store(dqb + ms[:, None] * stride_dqn + ds[None, :] * stride_dqd,
+             dq.to(tl.bfloat16), mask=mm[:, None] & dm[None, :])
+
+
+# ── Backward kernel — dpb + dse (param grads) ────────────────────────────────
+#
+# dpb[j,h]   = sum_{b,n} ds[b,h,n,j]
+# dse[j,d]   = sum_{b,h,n} ds[b,h,n,j] * Q[b,h,n,d] * sc
+# where ds[b,h,n,j] = p[b,h,n,j] * (dO[b,h,n]·V[kp_j] - sum_k(p[k]*dO·V[kp_k]))
+#
+# We compute this per-tile and atomically accumulate into DPB, DSE.
+# Grid: (B*H, ceil(N/BLOCK_M))
+
+@triton.jit
+def _dsqg_bwd_params(
+    Q, K, V, POS_BIAS, SCALE_EMBED, DO, LSE,
+    DPB, DSE,
+    stride_qb, stride_qh, stride_qn, stride_qd,
+    stride_kb, stride_kh, stride_kn, stride_kd,
+    stride_vb, stride_vh, stride_vn, stride_vd,
+    stride_ob, stride_oh, stride_on, stride_od,
+    stride_lb, stride_lh, stride_ln,
+    stride_pbi, stride_pbh,
+    stride_sei, stride_sed,
+    H: tl.constexpr, N, HD: tl.constexpr,
+    BLOCK_M: tl.constexpr,
+):
+    bh   = tl.program_id(0)
+    tile = tl.program_id(1)
+    b    = bh // H;  h = bh % H
+    n0   = tile * BLOCK_M
+
+    ms   = n0 + tl.arange(0, BLOCK_M)
+    mm   = ms < N
+    ds   = tl.arange(0, HD)
+    dm   = ds < HD
+    sc   = 1.0 / (HD ** 0.5)
+
+    qb  = Q  + b * stride_qb + h * stride_qh
+    dob = DO + b * stride_ob + h * stride_oh
+
+    q   = tl.load(qb  + ms[:, None] * stride_qn + ds[None, :] * stride_qd,
+                  mask=mm[:, None] & dm[None, :], other=0.0).to(tl.float32)
+    do  = tl.load(dob + ms[:, None] * stride_on + ds[None, :] * stride_od,
+                  mask=mm[:, None] & dm[None, :], other=0.0).to(tl.float32)
+    lse = tl.load(LSE + b * stride_lb + h * stride_lh + ms * stride_ln, mask=mm, other=0.0)
+
+    kb = K + b * stride_kb + h * stride_kh
+    vb = V + b * stride_vb + h * stride_vh
+
+    # First pass: compute dL/dw[m,j] = dO[m]·V[kp_j] for each j  [BLOCK_M, J]
+    # Then: running_sum = sum_j(p[j] * dL/dw[j]) for softmax backward
+    # Then: ds[m,j] = p[m,j] * (dL/dw[m,j] - running_sum[m])
+
+    # Compute p[m,j] and dL/dw[m,j] in parallel loops, accumulate sums
+    p_times_dlw_sum = tl.zeros([BLOCK_M], tl.float32)   # sum_j p[j]*dL/dw[j]
+
+    # First pass: accumulate p*dLdw sum (needed for softmax bwd)
+    for i in tl.static_range(20):
+        delta = (1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 13, 15, 16, 23, 32, 64, 128, 256, 512, 1024)[i]
+        kp  = ms - delta
+        val = (kp >= 0) & mm
+        kt  = tl.load(kb + kp[:, None] * stride_kn + ds[None, :] * stride_kd,
+                      mask=val[:, None] & dm[None, :], other=0.0).to(tl.float32)
+        vt  = tl.load(vb + kp[:, None] * stride_vn + ds[None, :] * stride_vd,
+                      mask=val[:, None] & dm[None, :], other=0.0).to(tl.float32)
+        s   = tl.sum(q * kt, axis=1) * sc
+        pb  = tl.load(POS_BIAS + i * stride_pbi + h * stride_pbh)
+        se  = tl.load(SCALE_EMBED + i * stride_sei + ds * stride_sed, mask=dm, other=0.0).to(tl.float32)
+        s   = s + pb + tl.sum(q * se[None, :], axis=1) * sc
+        s   = tl.where(val, s, float('-inf'))
+        p   = tl.where(val, tl.exp(s - lse), tl.zeros_like(s))
+        dlw = tl.where(val, tl.sum(do * vt, axis=1), tl.zeros_like(s))
+        p_times_dlw_sum = p_times_dlw_sum + p * dlw
+
+    # Second pass: compute ds[j] and accumulate into DPB/DSE
+    for i in tl.static_range(20):
+        delta = (1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 13, 15, 16, 23, 32, 64, 128, 256, 512, 1024)[i]
+        kp  = ms - delta
+        val = (kp >= 0) & mm
+        kt  = tl.load(kb + kp[:, None] * stride_kn + ds[None, :] * stride_kd,
+                      mask=val[:, None] & dm[None, :], other=0.0).to(tl.float32)
+        vt  = tl.load(vb + kp[:, None] * stride_vn + ds[None, :] * stride_vd,
+                      mask=val[:, None] & dm[None, :], other=0.0).to(tl.float32)
+        s   = tl.sum(q * kt, axis=1) * sc
+        pb  = tl.load(POS_BIAS + i * stride_pbi + h * stride_pbh)
+        se  = tl.load(SCALE_EMBED + i * stride_sei + ds * stride_sed, mask=dm, other=0.0).to(tl.float32)
+        s   = s + pb + tl.sum(q * se[None, :], axis=1) * sc
+        s   = tl.where(val, s, float('-inf'))
+        p   = tl.where(val, tl.exp(s - lse), tl.zeros_like(s))
+        dlw = tl.where(val, tl.sum(do * vt, axis=1), tl.zeros_like(s))
+        ds_j = p * (dlw - p_times_dlw_sum)  # [BLOCK_M] — softmax backward
+
+        # Accumulate dpb[j,h] += sum_m ds_j[m] (masked)
+        dpb_j = tl.sum(tl.where(mm, ds_j, tl.zeros_like(ds_j)))
+        tl.atomic_add(DPB + i * stride_pbi + h * stride_pbh, dpb_j)
+
+        # Accumulate dse[j,d] += sum_m ds_j[m] * q[m,d] * sc
+        # ds_j: [BLOCK_M], q: [BLOCK_M, HD] → outer product sum → [HD]
+        dse_j = tl.sum(ds_j[:, None] * q * sc, axis=0)  # [HD]
+        for d in tl.static_range(0):  # placeholder — use atomic_add per dim below
+            pass
+        # atomic_add for each d in HD — done via vector atomic
+        tl.atomic_add(DSE + i * stride_sei + ds * stride_sed, dse_j, mask=dm)
+
+
 # ── D vector (for backward dK computation) ───────────────────────────────────
 @triton.jit
 def _compute_D(
@@ -313,7 +503,9 @@ class _DSQGTiled(torch.autograd.Function):
     @staticmethod
     def forward(ctx, q, k, v, pos_bias, scale_embed, BLOCK_M=16):
         B, H, N, HD = q.shape
-        assert q.dtype == torch.bfloat16
+        # Ensure bfloat16 — cast if needed (e.g. when called outside autocast)
+        if q.dtype != torch.bfloat16:
+            q = q.bfloat16(); k = k.bfloat16(); v = v.bfloat16()
         assert HD in (32, 64, 128), f"HD={HD} not supported (must be 32/64/128)"
 
         out = torch.empty_like(q)
@@ -343,9 +535,8 @@ class _DSQGTiled(torch.autograd.Function):
         B, H, N, HD = q.shape
         BLOCK_M = ctx.BLOCK_M
         do = do.contiguous()
-        sc = 1.0 / (HD ** 0.5)
 
-        # ── D vector: D[b,h,n] = sum_d(dO * O) ─────────────────────────────
+        # ── D vector ────────────────────────────────────────────────────────
         D = torch.empty(B, H, N, device=q.device, dtype=torch.float32)
         tiles = triton.cdiv(N, BLOCK_M)
         grid  = (B * H, tiles)
@@ -356,82 +547,50 @@ class _DSQGTiled(torch.autograd.Function):
             H=H, N=N, HD=HD, BLOCK_M=BLOCK_M,
         )
 
-        # ── dK, dV via Triton kernel ─────────────────────────────────────────
+        # Common strides for all kernels
+        common = dict(
+            stride_qb=q.stride(0), stride_qh=q.stride(1), stride_qn=q.stride(2), stride_qd=q.stride(3),
+            stride_kb=k.stride(0), stride_kh=k.stride(1), stride_kn=k.stride(2), stride_kd=k.stride(3),
+            stride_vb=v.stride(0), stride_vh=v.stride(1), stride_vn=v.stride(2), stride_vd=v.stride(3),
+            stride_ob=o.stride(0), stride_oh=o.stride(1), stride_on=o.stride(2), stride_od=o.stride(3),
+            stride_lb=lse.stride(0), stride_lh=lse.stride(1), stride_ln=lse.stride(2),
+            stride_pbi=pos_bias.stride(0), stride_pbh=pos_bias.stride(1),
+            stride_sei=scale_embed.stride(0), stride_sed=scale_embed.stride(1),
+            H=H, N=N, HD=HD, BLOCK_M=BLOCK_M,
+        )
+
+        # ── dQ — tiled Triton kernel ─────────────────────────────────────────
+        dq = torch.empty_like(q)
+        _dsqg_bwd_dq[grid](
+            q, k, v, pos_bias, scale_embed, do, lse, D, dq,
+            **common,
+            stride_db=D.stride(0), stride_dh=D.stride(1), stride_dn=D.stride(2),
+            stride_dqb=dq.stride(0), stride_dqh=dq.stride(1),
+            stride_dqn=dq.stride(2), stride_dqd=dq.stride(3),
+        )
+
+        # ── dK, dV — tiled Triton kernel ─────────────────────────────────────
         dk = torch.zeros_like(k)
         dv = torch.zeros_like(v)
         _dsqg_bwd_dkdv[grid](
             q, k, v, pos_bias, scale_embed, do, o, lse, D, dk, dv,
-            q.stride(0), q.stride(1), q.stride(2), q.stride(3),
-            k.stride(0), k.stride(1), k.stride(2), k.stride(3),
-            v.stride(0), v.stride(1), v.stride(2), v.stride(3),
-            o.stride(0), o.stride(1), o.stride(2), o.stride(3),
-            lse.stride(0), lse.stride(1), lse.stride(2),
-            D.stride(0), D.stride(1), D.stride(2),
-            pos_bias.stride(0), pos_bias.stride(1),
-            scale_embed.stride(0), scale_embed.stride(1),
-            H=H, N=N, HD=HD, BLOCK_M=BLOCK_M,
+            **common,
+            stride_db=D.stride(0), stride_dh=D.stride(1), stride_dn=D.stride(2),
         )
 
-        # ── Shared: recompute softmax weights p[B,H,N,J] ────────────────────
-        # Used for both dQ and param grads.
-        qf = q.float(); kf = k.float(); vf = v.float()
-        dof = do.float(); Df = D.float()
-        arange_N = torch.arange(N, device=q.device)
-
-        scores_all = torch.full((B, H, N, J), float('-inf'), device=q.device, dtype=torch.float32)
-        for idx, delta in enumerate(ALL_OFFSETS):
-            kp    = arange_N - delta
-            valid = kp >= 0
-            kp_c  = kp.clamp(0)
-            s = (qf * kf[:, :, kp_c]).sum(-1) * sc
-            s = s + pos_bias[idx].float().view(1, H, 1)
-            s = s + (qf * scale_embed[idx].float()).sum(-1) * sc
-            s = torch.where(valid[None, None, :].expand(B, H, N), s,
-                            torch.full_like(s, float('-inf')))
-            scores_all[:, :, :, idx] = s
-
-        # Guard against all-masked positions (n < min_delta) to prevent NaN
-        all_inf = (scores_all == float('-inf')).all(-1, keepdim=True)
-        scores_safe = scores_all.masked_fill(all_inf.expand_as(scores_all), 0.0)
-        p = torch.softmax(scores_safe, dim=-1)                   # [B,H,N,J]
-        p = p.masked_fill(all_inf.expand_as(p), 0.0)            # zero out masked positions
-
-        # ── dQ (PyTorch, avoids another Triton kernel) ───────────────────────
-        dq = torch.zeros_like(qf)
-        for idx, delta in enumerate(ALL_OFFSETS):
-            kp   = arange_N - delta
-            kp_c = kp.clamp(0)
-            pj   = p[:, :, :, idx]                               # [B,H,N]
-            # dL/dQ contribution from score: p[j] * delta_term * K[kp] * sc
-            delta_term = (dof * vf[:, :, kp_c]).sum(-1) - Df    # [B,H,N]
-            dq += (pj * delta_term).unsqueeze(-1) * kf[:, :, kp_c] * sc
-            # dL/dQ contribution from scale_embed term: p[j] * se[j] * sc
-            dq += pj.unsqueeze(-1) * scale_embed[idx].float() * sc
-        dq = dq.to(q.dtype)
-
-        # ── param grads: pos_bias and scale_embed ───────────────────────────
+        # ── pos_bias and scale_embed gradients — Triton kernel ───────────────
         dpos_bias    = None
         dscale_embed = None
         if pos_bias.requires_grad or scale_embed.requires_grad:
-            # dL/dw[b,h,n,j] = dO[b,h,n] · V[b,h,kp_j]
-            dloss_dw = torch.zeros_like(p)
-            for idx, delta in enumerate(ALL_OFFSETS):
-                kp_c = (arange_N - delta).clamp(0)
-                dloss_dw[:, :, :, idx] = (dof * vf[:, :, kp_c]).sum(-1)
-
-            # Softmax backward: ds[b,h,n,j] = p[j] * (dw[j] - sum_j(p[j]*dw[j]))
-            dw_sum = (dloss_dw * p).sum(-1, keepdim=True)
-            ds_grad = p * (dloss_dw - dw_sum)                   # [B,H,N,J]
-
-            if pos_bias.requires_grad:
-                # dpb[j,h] = sum_{b,n} ds[b,h,n,j]
-                dpos_bias = ds_grad.sum(0).sum(1).t()            # [J,H]
-                dpos_bias = dpos_bias.to(pos_bias.dtype)
-
-            if scale_embed.requires_grad:
-                # dse[j,d] = sum_{b,h,n} ds[b,h,n,j] * Q[b,h,n,d] * sc
-                dscale_embed = torch.einsum('bhnj,bhnd->jd', ds_grad, qf) * sc
-                dscale_embed = dscale_embed.to(scale_embed.dtype)
+            dpb = torch.zeros_like(pos_bias)
+            dse = torch.zeros_like(scale_embed)
+            _dsqg_bwd_params[grid](
+                q, k, v, pos_bias, scale_embed, do, lse,
+                dpb, dse,
+                **common,
+            )
+            if pos_bias.requires_grad:    dpos_bias    = dpb
+            if scale_embed.requires_grad: dscale_embed = dse
 
         return dq, dk, dv, dpos_bias, dscale_embed, None
 
