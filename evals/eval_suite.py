@@ -141,6 +141,45 @@ def _import_j24d_int2_physics():
     spec.loader.exec_module(mod)
     return mod.AutoresearchTransformerPhysics
 
+def _import_j20d_v10_L(num_layers):
+    """Import AutoresearchTransformerPhysics from train_j20d_v10_L{N}_bf16.py (V10 kernel, J=20, condV physics, depth experiment)."""
+    import importlib.util
+    repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    for _d in [os.path.join(repo_root, 'kernels'), repo_root]:
+        if _d not in sys.path:
+            sys.path.insert(0, _d)
+    script = os.path.join(repo_root, 'train', f'train_j20d_v10_L{num_layers}_bf16.py')
+    spec = importlib.util.spec_from_file_location(f'j20d_v10_L{num_layers}_train', script)
+    mod  = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod.AutoresearchTransformerPhysics
+
+def _import_j26d_int2_physics():
+    """Import AutoresearchTransformerPhysics from train_j26d_int2_physics_bf16.py (V6 kernel, J=26 offsets (+δ=11+δ=32), condV physics, EMA dead-zone fix)."""
+    import importlib.util
+    repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    for _d in [os.path.join(repo_root, 'kernels'), repo_root]:
+        if _d not in sys.path:
+            sys.path.insert(0, _d)
+    script = os.path.join(repo_root, 'train', 'train_j26d_int2_physics_bf16.py')
+    spec = importlib.util.spec_from_file_location('j26d_int2_physics_train', script)
+    mod  = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod.AutoresearchTransformerPhysics
+
+def _import_curve_27m():
+    """Import CurveTransformer from train_curve_27m_bf16.py (V8 kernel, J=24 offsets, D=512, FFN=768, condV physics)."""
+    import importlib.util
+    repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    for _d in [os.path.join(repo_root, 'kernels'), repo_root]:
+        if _d not in sys.path:
+            sys.path.insert(0, _d)
+    script = os.path.join(repo_root, 'train', 'train_curve_27m_bf16.py')
+    spec = importlib.util.spec_from_file_location('curve_27m_train', script)
+    mod  = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod.CurveTransformer
+
 # ─── Paths ────────────────────────────────────────────────────────────────────
 
 SCRIPT_DIR  = os.path.dirname(os.path.abspath(__file__))
@@ -367,6 +406,51 @@ MODEL_REGISTRY = {
         'interference': 2,
         'checkpoint': '/tmp/dwarf-j17d/autoresearch/checkpoints/df0d435_j24d_int2_physics_best.pt',
         'label':      'J24D-int2 Physics 39.5M (J=24, V8, IF=2, condV physics)',
+        'params_ref': None,
+    },
+    # j20d_v10_L8: J20D V10 kernel, L=8, D=512, FFN=2048, IF=2, FA=L7, depth experiment
+    'j20d_v10_L8': {
+        'arch':       'j20d_v10_L8',
+        'D':          512, 'H': 8, 'FFN': 2048, 'L': 8, 'full_layer': 7,
+        'interference': 2,
+        'checkpoint': os.path.join(CKPT_ROOT, '..', 'autoresearch', 'checkpoints', '99437df_j20d_v10_L8_best.pt'),
+        'label':      'J20D V10 L=8 Depth (47.1M, J=20, V10, IF=2, FA=L7)',
+        'params_ref': None,
+    },
+    # j20d_v10_L10: J20D V10 kernel, L=10, D=512, FFN=2048, IF=2, FA=L9, depth experiment
+    'j20d_v10_L10': {
+        'arch':       'j20d_v10_L10',
+        'D':          512, 'H': 8, 'FFN': 2048, 'L': 10, 'full_layer': 9,
+        'interference': 2,
+        'checkpoint': os.path.join(CKPT_ROOT, '..', 'autoresearch', 'checkpoints', 'bf948d1_j20d_v10_L10_best.pt'),
+        'label':      'J20D V10 L=10 Depth (54.8M, J=20, V10, IF=2, FA=L9)',
+        'params_ref': None,
+    },
+    # j20d_v10_L12: J20D V10 kernel, L=12, D=512, FFN=2048, IF=2, FA=L11, depth experiment
+    'j20d_v10_L12': {
+        'arch':       'j20d_v10_L12',
+        'D':          512, 'H': 8, 'FFN': 2048, 'L': 12, 'full_layer': 11,
+        'interference': 2,
+        'checkpoint': os.path.join(CKPT_ROOT, '..', 'autoresearch', 'checkpoints', 'bf948d1_j20d_v10_L12_best.pt'),
+        'label':      'J20D V10 L=12 Depth (62.4M, J=20, V10, IF=2, FA=L11)',
+        'params_ref': None,
+    },
+    # j26d_int2_physics: J26D offsets (+δ=11+δ=32 over J24D), V6 kernel, J=26, IF=2, condV physics, EMA dead-zone fix, 39.5M
+    'j26d_int2_physics_39m': {
+        'arch':       'j26d_int2_physics',
+        'D':          512, 'H': 8, 'FFN': 2048, 'L': 6, 'full_layer': 5,
+        'interference': 2,
+        'checkpoint': os.path.join(CKPT_ROOT, '..', 'autoresearch', 'checkpoints', '99437df_j26d_int2_physics_best.pt'),
+        'label':      'J26D-int2 Physics 39.5M (J=26, V6, IF=2, condV physics, EMA dead-zone fix)',
+        'params_ref': None,
+    },
+    # curve_27m: J24D offsets, V8 kernel, J=24, D=512, FFN=768 (27M), IF=2, condV physics
+    'curve_27m': {
+        'arch':       'curve_27m',
+        'D':          512, 'H': 8, 'FFN': 768, 'L': 6, 'full_layer': 5,
+        'interference': 2,
+        'checkpoint': os.path.join(CKPT_ROOT, 'curve_27m_best.pt'),
+        'label':      'Curve 27M (J=24, V8, D=512, FFN=768, IF=2, condV physics)',
         'params_ref': None,
     },
     # d41_35m_pure: pure DSQG (FULL_ATTN_LAYER=-1), dense=41, sparse=[48,128,384], J=45, 35M (D=512)
@@ -823,6 +907,34 @@ def build_model(cfg):
             full_attn_layer=cfg.get('full_layer', -1),
             interference_interval=cfg.get('interference', 3),
         )
+    elif arch in ('j20d_v10_L8', 'j20d_v10_L10', 'j20d_v10_L12', 'j20d_v10_L32'):
+        num_layers = int(arch.split('_L')[1])
+        ATP = _import_j20d_v10_L(num_layers)
+        return ATP(
+            vocab_size=VOCAB_SIZE, embedding_dim=D, num_layers=num_layers, num_heads=H,
+            ffn_dim=FFN, seq_len=MAX_SEQ_LEN,
+            full_attn_layer=num_layers - 1,
+            interference_interval=cfg.get('interference', 2),
+            scale_embed_init_val=0.1,
+        )
+    elif arch == 'j26d_int2_physics':
+        AutoresearchTransformerPhysics = _import_j26d_int2_physics()
+        return AutoresearchTransformerPhysics(
+            vocab_size=VOCAB_SIZE, embedding_dim=D, num_layers=L, num_heads=H,
+            ffn_dim=FFN, seq_len=MAX_SEQ_LEN,
+            full_attn_layer=cfg.get('full_layer', 5),
+            interference_interval=cfg.get('interference', 2),
+            scale_embed_init_val=0.1,
+        )
+    elif arch == 'curve_27m':
+        CurveTransformer = _import_curve_27m()
+        return CurveTransformer(
+            vocab_size=VOCAB_SIZE, embedding_dim=D, num_layers=L, num_heads=H,
+            ffn_dim=FFN, seq_len=MAX_SEQ_LEN,
+            full_attn_layer=cfg.get('full_layer', 5),
+            interference_interval=cfg.get('interference', 2),
+            scale_embed_init_val=0.1,
+        )
     else:
         raise ValueError(f"Unknown arch: {arch}")
 
@@ -1069,7 +1181,7 @@ _FILLER_SENTENCE = 'the weather was mild and the air was still . '
 _INTRO_TEMPLATE  = 'the secret word is {word} .'
 _RETRIEVAL_CUE   = 'the secret word is'  # model predicts " <word>" next (space-prefixed)
 
-def eval_passkey_at_distance(model, tokenizer, distance, device, n_trials=5):
+def eval_passkey_at_distance(model, tokenizer, distance, device, n_trials=50):
     """Exact format from eval_condM_vs_condP27m.py (proven correct)."""
     filler_ids = tokenizer.encode(_FILLER_SENTENCE)
     cue_ids    = tokenizer.encode(_RETRIEVAL_CUE)
