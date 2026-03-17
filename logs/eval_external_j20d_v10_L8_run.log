@@ -1,0 +1,109 @@
+============================================================
+  DWARF External Benchmark Evaluator
+============================================================
+  GPU: NVIDIA GeForce RTX 3090
+  Tasks: ['hellaswag', 'piqa', 'arc_easy', 'arc_challenge', 'winogrande', 'lambada']
+  Tokenizer: /home/dlewis3/Desktop/AI/DWARF/results/2048_condI_tokenizer.json
+
+Loading from registry: j20d_v10_L8
+  Loaded J20D V10 L=8 Depth (47.1M, J=20, V10, IF=2, FA=L7): 47,132,059 params from 99437df_j20d_v10_L8_best.pt
+  Parameters: 47,132,059
+  Label: J20D V10 L=8 Depth (47.1M, J=20, V10, IF=2, FA=L7)
+
+  [hellaswag] 10,042 examples...
+    [hellaswag] 200/10042 — acc=0.275 | eta 280s
+    [hellaswag] 400/10042 — acc=0.278 | eta 247s
+    [hellaswag] 600/10042 — acc=0.287 | eta 253s
+    [hellaswag] 800/10042 — acc=0.292 | eta 238s
+    [hellaswag] 1000/10042 — acc=0.296 | eta 218s
+    [hellaswag] 1200/10042 — acc=0.297 | eta 204s
+    [hellaswag] 1400/10042 — acc=0.293 | eta 192s
+    [hellaswag] 1600/10042 — acc=0.292 | eta 183s
+    [hellaswag] 1800/10042 — acc=0.283 | eta 173s
+    [hellaswag] 2000/10042 — acc=0.276 | eta 164s
+    [hellaswag] 2200/10042 — acc=0.276 | eta 157s
+    [hellaswag] 2400/10042 — acc=0.278 | eta 151s
+    [hellaswag] 2600/10042 — acc=0.278 | eta 143s
+    [hellaswag] 2800/10042 — acc=0.280 | eta 138s
+    [hellaswag] 3000/10042 — acc=0.282 | eta 132s
+    [hellaswag] 3200/10042 — acc=0.286 | eta 126s
+    [hellaswag] 3400/10042 — acc=0.284 | eta 123s
+    [hellaswag] 3600/10042 — acc=0.280 | eta 120s
+    [hellaswag] 3800/10042 — acc=0.278 | eta 116s
+    [hellaswag] 4000/10042 — acc=0.273 | eta 114s
+    [hellaswag] 4200/10042 — acc=0.271 | eta 114s
+    [hellaswag] 4400/10042 — acc=0.270 | eta 111s
+    [hellaswag] 4600/10042 — acc=0.267 | eta 107s
+    [hellaswag] 4800/10042 — acc=0.264 | eta 103s
+    [hellaswag] 5000/10042 — acc=0.263 | eta 99s
+    [hellaswag] 5200/10042 — acc=0.260 | eta 95s
+    [hellaswag] 5400/10042 — acc=0.259 | eta 91s
+    [hellaswag] 5600/10042 — acc=0.258 | eta 87s
+    [hellaswag] 5800/10042 — acc=0.258 | eta 84s
+    [hellaswag] 6000/10042 — acc=0.257 | eta 80s
+    [hellaswag] 6200/10042 — acc=0.256 | eta 77s
+    [hellaswag] 6400/10042 — acc=0.255 | eta 73s
+    [hellaswag] 6600/10042 — acc=0.256 | eta 69s
+    [hellaswag] 6800/10042 — acc=0.254 | eta 65s
+    [hellaswag] 7000/10042 — acc=0.252 | eta 61s
+    [hellaswag] 7200/10042 — acc=0.251 | eta 57s
+    [hellaswag] 7400/10042 — acc=0.251 | eta 53s
+    [hellaswag] 7600/10042 — acc=0.249 | eta 49s
+    [hellaswag] 7800/10042 — acc=0.250 | eta 45s
+    [hellaswag] 8000/10042 — acc=0.249 | eta 41s
+    [hellaswag] 8200/10042 — acc=0.248 | eta 37s
+    [hellaswag] 8400/10042 — acc=0.249 | eta 33s
+    [hellaswag] 8600/10042 — acc=0.248 | eta 29s
+    [hellaswag] 8800/10042 — acc=0.248 | eta 25s
+    [hellaswag] 9000/10042 — acc=0.248 | eta 21s
+    [hellaswag] 9200/10042 — acc=0.248 | eta 17s
+    [hellaswag] 9400/10042 — acc=0.248 | eta 13s
+    [hellaswag] 9600/10042 — acc=0.247 | eta 9s
+    [hellaswag] 9800/10042 — acc=0.246 | eta 5s
+    [hellaswag] 10000/10042 — acc=0.246 | eta 1s
+  [hellaswag] accuracy = 0.2456 (24.6%)  [10042 examples, 201s]
+  [piqa] 1,838 examples...
+    [piqa] 200/1838 — acc=0.595 | eta 14s
+    [piqa] 400/1838 — acc=0.575 | eta 12s
+    [piqa] 600/1838 — acc=0.567 | eta 11s
+    [piqa] 800/1838 — acc=0.547 | eta 10s
+    [piqa] 1000/1838 — acc=0.542 | eta 8s
+    [piqa] 1200/1838 — acc=0.549 | eta 6s
+    [piqa] 1400/1838 — acc=0.549 | eta 4s
+    [piqa] 1600/1838 — acc=0.556 | eta 2s
+    [piqa] 1800/1838 — acc=0.556 | eta 0s
+  [piqa] accuracy = 0.5560 (55.6%)  [1838 examples, 18s]
+  [arc_easy] 570 examples...
+    [arc_easy] 200/570 — acc=0.320 | eta 9s
+    [arc_easy] 400/570 — acc=0.338 | eta 4s
+  [arc_easy] accuracy = 0.3509 (35.1%)  [570 examples, 14s]
+  [arc_challenge] 299 examples...
+    [arc_challenge] 200/299 — acc=0.180 | eta 2s
+  [arc_challenge] accuracy = 0.1739 (17.4%)  [299 examples, 7s]
+  [winogrande] 1,267 examples...
+    [winogrande] 200/1267 — acc=0.540 | eta 13s
+    [winogrande] 400/1267 — acc=0.527 | eta 10s
+    [winogrande] 600/1267 — acc=0.508 | eta 8s
+    [winogrande] 800/1267 — acc=0.501 | eta 6s
+    [winogrande] 1000/1267 — acc=0.503 | eta 3s
+    [winogrande] 1200/1267 — acc=0.503 | eta 1s
+  [winogrande] accuracy = 0.5051 (50.5%)  [1267 examples, 15s]
+  [lambada] 5,153 examples...
+  [lambada] accuracy = 0.1029 (10.3%)  [5153 examples, 33s]
+
+============================================================
+  J20D V10 L=8 Depth (47.1M, J=20, V10, IF=2, FA=L7)
+============================================================
+  Task                     Accuracy       N
+  ---------------------- ----------  ------
+  hellaswag                   24.6%   10042
+  piqa                        55.6%    1838
+  arc_easy                    35.1%     570
+  arc_challenge               17.4%     299
+  winogrande                  50.5%    1267
+  lambada                     10.3%    5153
+  ---------------------- ----------  ------
+  mean (present tasks)        32.2%
+============================================================
+
+  Results -> /home/dlewis3/Desktop/AI/DWARF/evals/logs/eval_external_J20D_V10_L=8_Depth_(47.1M,_J=20,_V10,_IF_20260316_172840.json

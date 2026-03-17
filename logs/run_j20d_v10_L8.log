@@ -50,3 +50,56 @@ Ep 1/3 | Val PPL 51.35 *
   Step 1600/3789 | Loss 3.8563
   Step 1800/3789 | Loss 3.8598
   Step 2000/3789 | Loss 3.7552
+  Step 2200/3789 | Loss 3.7132
+  Step 2400/3789 | Loss 3.8014
+  Step 2600/3789 | Loss 3.7283
+  Step 2800/3789 | Loss 3.7014
+  Step 3000/3789 | Loss 3.8218
+  Step 3200/3789 | Loss 3.9170
+  Step 3400/3789 | Loss 3.6754
+  Step 3600/3789 | Loss 4.0275
+Ep 2/3 | Val PPL 41.19 *
+  scale_embed |mean|=0.3566 |max|=2.2150
+  Physics: b1: α=0.0048(w≈210t)  b3: α=0.0792(w≈13t)  b5: α=0.0202(w≈50t)
+  Passkey mean=90.8%
+  d=1:100%  d=2:100%  d=4:100%  d=8:100%  d=16:100%  d=32:100%  d=64:100%  d=128:100%  d=256:100%  d=512:60%  d=1024:80%  d=1536:50%
+  Step 200/3789 | Loss 3.8329
+  Step 400/3789 | Loss 3.6085
+  Step 600/3789 | Loss 3.9906
+  Step 800/3789 | Loss 3.7277
+  Step 1000/3789 | Loss 3.8542
+  Step 1200/3789 | Loss 3.7620
+  Step 1400/3789 | Loss 3.8165
+  Step 1600/3789 | Loss 3.6816
+  Step 1800/3789 | Loss 3.7412
+  Step 2000/3789 | Loss 3.9381
+  Step 2200/3789 | Loss 3.7431
+  Step 2400/3789 | Loss 3.6143
+  Step 2600/3789 | Loss 3.6546
+  Step 2800/3789 | Loss 3.8489
+  Step 3000/3789 | Loss 3.6419
+  Step 3200/3789 | Loss 3.6068
+  Step 3400/3789 | Loss 3.7465
+  Step 3600/3789 | Loss 3.8524
+Ep 3/3 | Val PPL 39.40 *
+  scale_embed |mean|=0.3451 |max|=2.1603
+  Physics: b1: α=0.0046(w≈215t)  b3: α=0.0773(w≈13t)  b5: α=0.0194(w≈52t)
+  Passkey mean=93.3%
+  d=1:100%  d=2:100%  d=4:100%  d=8:100%  d=16:100%  d=32:100%  d=64:100%  d=128:100%  d=256:100%  d=512:70%  d=1024:100%  d=1536:50%
+
+---
+passkey_ep1:    60.0
+passkey_ep2:    90.8
+passkey_ep3:    93.3
+ppl_ep1:        51.35
+ppl_ep2:        41.19
+ppl_ep3:        39.40
+ar_score:       75.03
+memory_mb:      11097.9
+elapsed_s:      12213.0
+num_params_M:   47.1
+num_layers:     8
+num_offsets:    20
+scale_embed_lr_mult: 15.0
+ema_init:       0.00035
+description:    J20D V10 L8 depth — 47.1M, V8+condV, J=20 V9 Frobenius-optimal, KdV removed, NoPE full-attn, EMA_init=0.00035 floor=1e-05, 121232 seqs, scale_embed_init=0.1

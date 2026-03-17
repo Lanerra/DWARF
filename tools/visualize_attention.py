@@ -51,6 +51,10 @@ _OFFSET_SETS = {
     # J-series autoresearch models
     'j24d_int2_physics': [1,2,3,4,5,6,7,8,9,10,13,15,16,21,23,28,48,64,96,192,384,512,768,1024],
     'j26d_int2_physics': [1,2,3,4,5,6,7,8,9,10,13,15,16,21,23,28,48,64,96,192,384,512,768,1024],  # pos_bias J=24 (δ=11,δ=32 handled in kernel, not pos_bias)
+    'j20d_v10_L8':  [1,2,3,4,5,6,7,8,9,11,13,15,16,23,32,64,128,256,512,1024],  # J=20 V10 offsets
+    'j20d_v10_L10': [1,2,3,4,5,6,7,8,9,11,13,15,16,23,32,64,128,256,512,1024],
+    'j20d_v10_L12': [1,2,3,4,5,6,7,8,9,11,13,15,16,23,32,64,128,256,512,1024],
+    'j20d_v10_L32': [1,2,3,4,5,6,7,8,9,11,13,15,16,23,32,64,128,256,512,1024],
     'curve_27m':         [1,2,3,4,5,6,7,8,9,10,13,15,16,21,23,28,48,64,96,192,384,512,768,1024],
 }
 
@@ -70,6 +74,10 @@ _TRAIN_SCRIPTS = {
     # J-series autoresearch models
     'j24d_int2_physics': 'train/train_j24d_int2_physics_bf16.py',
     'j26d_int2_physics': 'train/train_j26d_int2_physics_bf16.py',
+    'j20d_v10_L8':  'train/train_j20d_v10_L8_bf16.py',
+    'j20d_v10_L10': 'train/train_j20d_v10_L10_bf16.py',
+    'j20d_v10_L12': 'train/train_j20d_v10_L12_bf16.py',
+    'j20d_v10_L32': 'train/train_j20d_v10_L32_bf16.py',
     'curve_27m':         'train/train_curve_27m_bf16.py',
 }
 
@@ -89,6 +97,10 @@ _MODEL_CLASSES = {
     # J-series autoresearch models
     'j24d_int2_physics': 'AutoresearchTransformerPhysics',
     'j26d_int2_physics': 'AutoresearchTransformerPhysics',
+    'j20d_v10_L8':  'AutoresearchTransformerPhysics',
+    'j20d_v10_L10': 'AutoresearchTransformerPhysics',
+    'j20d_v10_L12': 'AutoresearchTransformerPhysics',
+    'j20d_v10_L32': 'AutoresearchTransformerPhysics',
     'curve_27m':         'CurveTransformer',
 }
 

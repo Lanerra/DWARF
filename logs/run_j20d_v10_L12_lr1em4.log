@@ -1,0 +1,105 @@
+======================================================================
+  🔬 DWARF Autoresearch — J20D V10 L12 Depth Experiment
+  V10 kernel (J=20) + condV: Kalman-EMA + AGC  [tiled coalesced, 2.87x faster]
+======================================================================
+  GPU: NVIDIA GeForce RTX 4090
+  D=512, H=8, L=12, FFN=2048
+  IF interval=2, Full attn layer=11
+  scale_embed init=0.1, LR mult=15.0
+  EMA α₀=0.00035 (window≈2857t), floor=1e-05
+  MAX_TRAIN_SEQS=121232, LR=0.0001, Epochs=3
+  git=bf948d1
+Loading FineWeb-Edu from cache: benchmarks/logs/condm_fineweb_edu_doc_cache.json
+  Loaded 100,000 docs from cache
+Loaded tokenizer from results/2048_condI_tokenizer.json
+Loading pre-encoded dataset from logs/fineweb_encoded_2048.pt
+  train: 121,232  val: 5,582 seqs
+  compiled FullAttnBlock at layer 11
+  torch.compile applied to FullAttnBlock(s)
+Parameters: 62,375,997 (62.4M)
+  Step 200/3789 | Loss 6.7715
+  Step 400/3789 | Loss 6.0120
+  Step 600/3789 | Loss 5.9278
+  Step 800/3789 | Loss 5.8311
+  Step 1000/3789 | Loss 5.5461
+  Step 1200/3789 | Loss 5.4617
+  Step 1400/3789 | Loss 5.3303
+  Step 1600/3789 | Loss 5.1284
+  Step 1800/3789 | Loss 5.1657
+  Step 2000/3789 | Loss 5.2026
+  Step 2200/3789 | Loss 5.0006
+  Step 2400/3789 | Loss 4.8724
+  Step 2600/3789 | Loss 5.0476
+  Step 2800/3789 | Loss 5.0237
+  Step 3000/3789 | Loss 4.9205
+  Step 3200/3789 | Loss 4.8257
+  Step 3400/3789 | Loss 4.7983
+  Step 3600/3789 | Loss 4.6692
+Ep 1/3 | Val PPL 91.70 *
+  scale_embed |mean|=0.3235 |max|=1.5943
+  Physics: b1: α=0.0071(w≈142t)  b3: α=0.0406(w≈25t)  b5: α=-0.0004(w≈2275t)  b7: α=-0.0008(w≈1299t)  b9: α=0.0314(w≈32t)
+  Passkey mean=10.0%
+  d=1:10%  d=2:10%  d=4:10%  d=8:10%  d=16:10%  d=32:10%  d=64:10%  d=128:10%  d=256:10%  d=512:10%  d=1024:10%  d=1536:10%
+  Step 200/3789 | Loss 4.3765
+  Step 400/3789 | Loss 4.5977
+  Step 600/3789 | Loss 4.3157
+  Step 800/3789 | Loss 4.4975
+  Step 1000/3789 | Loss 4.5456
+  Step 1200/3789 | Loss 4.1586
+  Step 1400/3789 | Loss 4.2408
+  Step 1600/3789 | Loss 4.3030
+  Step 1800/3789 | Loss 4.3444
+  Step 2000/3789 | Loss 4.5574
+  Step 2200/3789 | Loss 4.4336
+  Step 2400/3789 | Loss 4.2842
+  Step 2600/3789 | Loss 4.4413
+  Step 2800/3789 | Loss 4.3747
+  Step 3000/3789 | Loss 4.2445
+  Step 3200/3789 | Loss 4.1803
+  Step 3400/3789 | Loss 4.3338
+  Step 3600/3789 | Loss 4.1907
+Ep 2/3 | Val PPL 59.60 *
+  scale_embed |mean|=0.3270 |max|=1.7773
+  Physics: b1: α=0.0071(w≈141t)  b3: α=0.0431(w≈23t)  b5: α=-0.0004(w≈2319t)  b7: α=-0.0008(w≈1323t)  b9: α=0.0322(w≈31t)
+  Passkey mean=19.2%
+  d=1:20%  d=2:20%  d=4:10%  d=8:30%  d=16:20%  d=32:30%  d=64:30%  d=128:20%  d=256:20%  d=512:10%  d=1024:10%  d=1536:10%
+  Step 200/3789 | Loss 4.2310
+  Step 400/3789 | Loss 4.1471
+  Step 600/3789 | Loss 4.0616
+  Step 800/3789 | Loss 4.1528
+  Step 1000/3789 | Loss 4.2135
+  Step 1200/3789 | Loss 3.9547
+  Step 1400/3789 | Loss 4.1427
+  Step 1600/3789 | Loss 3.7665
+  Step 1800/3789 | Loss 4.1873
+  Step 2000/3789 | Loss 4.1398
+  Step 2200/3789 | Loss 4.0484
+  Step 2400/3789 | Loss 3.9934
+  Step 2600/3789 | Loss 4.0858
+  Step 2800/3789 | Loss 4.0989
+  Step 3000/3789 | Loss 4.0938
+  Step 3200/3789 | Loss 4.2251
+  Step 3400/3789 | Loss 4.1806
+  Step 3600/3789 | Loss 4.0562
+Ep 3/3 | Val PPL 56.67 *
+  scale_embed |mean|=0.3249 |max|=1.7948
+  Physics: b1: α=0.0071(w≈142t)  b3: α=0.0428(w≈23t)  b5: α=-0.0004(w≈2326t)  b7: α=-0.0008(w≈1328t)  b9: α=0.0318(w≈31t)
+  Passkey mean=22.5%
+  d=1:20%  d=2:20%  d=4:30%  d=8:30%  d=16:30%  d=32:30%  d=64:30%  d=128:30%  d=256:20%  d=512:10%  d=1024:10%  d=1536:10%
+
+---
+passkey_ep1:    10.0
+passkey_ep2:    19.2
+passkey_ep3:    22.5
+ppl_ep1:        91.70
+ppl_ep2:        59.60
+ppl_ep3:        56.67
+ar_score:       4.20
+memory_mb:      13429.0
+elapsed_s:      18287.6
+num_params_M:   62.4
+num_layers:     12
+num_offsets:    20
+scale_embed_lr_mult: 15.0
+ema_init:       0.00035
+description:    J20D V10 L12 depth — 62.4M, V8+condV, J=20 V9 Frobenius-optimal, KdV removed, NoPE full-attn, EMA_init=0.00035 floor=1e-05, 121232 seqs, scale_embed_init=0.1

@@ -1,0 +1,64 @@
+
+============================================================
+  eval_suite.py — j24d_int2_physics_39m
+  Device: cuda
+============================================================
+
+  Model: J24D-int2 Physics 39.5M (J=24, V8, IF=2, condV physics)
+
+  Loading tokenizer...
+  Loading model...
+  Loaded J24D-int2 Physics 39.5M (J=24, V8, IF=2, condV physics): 39,514,492 params from df0d435_j24d_int2_physics_best.pt
+
+  [1/4] Calibration...
+    entropy=6.918 bits  top1=0.225  eff_vocab=19.8  (0.5s)
+
+  [2/4] Distance-conditioned loss (wikitext-103)...
+    Loading wikitext-103 test split...
+    Using 17 full 2048-token chunks
+    Buckets:
+    0-16          PPL= 255.12  n=  289
+    17-64         PPL= 155.28  n=  816
+    65-256        PPL=  82.08  n= 3264
+    257-512       PPL=  72.16  n= 4352
+    513-1024      PPL=  59.51  n= 8704
+    1025-2047     PPL=  57.47  n=17374
+    (4.6s)
+
+  [3/4] Few-shot string copy...
+    exact=6/15  (40.0%)  mean_lev=6.80  (3.1s)
+
+  [4/4] Passkey retrieval...
+    d=    1: accuracy=90.0%
+    d=    2: accuracy=100.0%
+    d=    4: accuracy=100.0%
+    d=    8: accuracy=100.0%
+    d=   16: accuracy=80.0%
+    d=   32: accuracy=100.0%
+    d=   64: accuracy=90.0%
+    d=  128: accuracy=90.0%
+    d=  256: accuracy=90.0%
+    d=  512: accuracy=90.0%
+    d= 1024: accuracy=90.0%
+    d= 1536: accuracy=90.0%
+    mean_accuracy=92.5%  (9.2s)
+
+  Generation samples (greedy + T=0.7)...
+
+  [greedy]
+    'It was a dark and stormy'               → ' day.\nThe first day of the week was the first day of the week. The first day of '
+    'The length of the hypotenuse'           → ' is approximately 1.5 m. The length of the hypotenuse is approximately 1.5 m. Th'
+    'The President of the United'            → ' States, the President of the United States, was the first President of the Unit'
+    'Once upon a time there was'             → ' a great deal of excitement and excitement.\nThe first thing that was left of the'
+    'The results indicate that'              → ' the current state of the world is not a problem.\nThe current state of the world'
+
+  [T=0.7]
+    'It was a dark and stormy'               → ' place and could not be found in the town of Athena, and the people of Athena we'
+    'The length of the hypotenuse'           → ' is as follows:\n- A square or rectangle is formed around the hypotenuse of the h'
+    'The President of the United'            → ' States, George Washington, had a constitutional right to vote, and he believed '
+    'Once upon a time there was'             → ' a period of time that had been more important than that of the rest of the worl'
+    'The results indicate that'              → ' the incidence of a tumor is almost always low. The possibility of a tumor at th'
+
+  Results saved to /home/dlewis3/Desktop/AI/DWARF/evals/logs/eval_suite_j24d_int2_physics_39m_20260316_173526.json
+============================================================
+

@@ -1,0 +1,64 @@
+
+============================================================
+  eval_suite.py — j20d_v10_L8
+  Device: cuda
+============================================================
+
+  Model: J20D V10 L=8 Depth (47.1M, J=20, V10, IF=2, FA=L7)
+
+  Loading tokenizer...
+  Loading model...
+  Loaded J20D V10 L=8 Depth (47.1M, J=20, V10, IF=2, FA=L7): 47,132,059 params from 99437df_j20d_v10_L8_best.pt
+
+  [1/4] Calibration...
+    entropy=7.094 bits  top1=0.236  eff_vocab=20.2  (4.7s)
+
+  [2/4] Distance-conditioned loss (wikitext-103)...
+    Loading wikitext-103 test split...
+    Using 17 full 2048-token chunks
+    Buckets:
+    0-16          PPL= 246.39  n=  289
+    17-64         PPL= 152.46  n=  816
+    65-256        PPL=  80.25  n= 3264
+    257-512       PPL=  70.74  n= 4352
+    513-1024      PPL=  58.71  n= 8704
+    1025-2047     PPL=  55.99  n=17374
+    (6.1s)
+
+  [3/4] Few-shot string copy...
+    exact=6/15  (40.0%)  mean_lev=6.80  (1.6s)
+
+  [4/4] Passkey retrieval...
+    d=    1: accuracy=100.0%
+    d=    2: accuracy=100.0%
+    d=    4: accuracy=100.0%
+    d=    8: accuracy=100.0%
+    d=   16: accuracy=100.0%
+    d=   32: accuracy=100.0%
+    d=   64: accuracy=100.0%
+    d=  128: accuracy=100.0%
+    d=  256: accuracy=100.0%
+    d=  512: accuracy=40.0%
+    d= 1024: accuracy=60.0%
+    d= 1536: accuracy=40.0%
+    mean_accuracy=86.7%  (0.8s)
+
+  Generation samples (greedy + T=0.7)...
+
+  [greedy]
+    'It was a dark and stormy'               → ' place, and the people were not afraid of the sun. The people were afraid of the'
+    'The length of the hypotenuse'           → ' is about 1.5 mm. The hypotenuse is about 1.5 mm. The hypotenuse is about 1.5 mm'
+    'The President of the United'            → ' States, John W. Kennedy, was a member of the United States Congress. He was a m'
+    'Once upon a time there was'             → ' a great deal of confusion and confusion.\nThe first thing that was going on was '
+    'The results indicate that'              → ' the average age of the population is about 1.5 years old. The average age of th'
+
+  [T=0.7]
+    'It was a dark and stormy'               → ' place in the month of May and it was the most recent of the Bering communities.'
+    'The length of the hypotenuse'           → ' is also known as the I-O.\nThe hypotenuse is caused by the electrolyte electrode'
+    'The President of the United'            → ' States, he was the first president of the United States, and the first Presiden'
+    'Once upon a time there was'             → ' no one in the city, or any other town, or any other town, or any of the surroun'
+    'The results indicate that'              → ' the final product of a series of experiments is a significant part of the overa'
+
+  Results saved to /home/dlewis3/Desktop/AI/DWARF/evals/logs/eval_suite_j20d_v10_L8_20260316_172250.json
+============================================================
+

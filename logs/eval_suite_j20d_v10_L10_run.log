@@ -1,0 +1,64 @@
+
+============================================================
+  eval_suite.py — j20d_v10_L10
+  Device: cuda
+============================================================
+
+  Model: J20D V10 L=10 Depth (54.8M, J=20, V10, IF=2, FA=L9)
+
+  Loading tokenizer...
+  Loading model...
+  Loaded J20D V10 L=10 Depth (54.8M, J=20, V10, IF=2, FA=L9): 54,754,028 params from bf948d1_j20d_v10_L10_best.pt
+
+  [1/4] Calibration...
+    entropy=7.121 bits  top1=0.220  eff_vocab=23.6  (0.4s)
+
+  [2/4] Distance-conditioned loss (wikitext-103)...
+    Loading wikitext-103 test split...
+    Using 17 full 2048-token chunks
+    Buckets:
+    0-16          PPL= 229.08  n=  289
+    17-64         PPL= 149.09  n=  816
+    65-256        PPL=  76.71  n= 3264
+    257-512       PPL=  69.52  n= 4352
+    513-1024      PPL=  56.54  n= 8704
+    1025-2047     PPL=  54.86  n=17374
+    (3.5s)
+
+  [3/4] Few-shot string copy...
+    exact=5/15  (33.3%)  mean_lev=6.73  (1.3s)
+
+  [4/4] Passkey retrieval...
+    d=    1: accuracy=70.0%
+    d=    2: accuracy=100.0%
+    d=    4: accuracy=100.0%
+    d=    8: accuracy=80.0%
+    d=   16: accuracy=100.0%
+    d=   32: accuracy=100.0%
+    d=   64: accuracy=100.0%
+    d=  128: accuracy=100.0%
+    d=  256: accuracy=90.0%
+    d=  512: accuracy=100.0%
+    d= 1024: accuracy=60.0%
+    d= 1536: accuracy=60.0%
+    mean_accuracy=88.3%  (3.4s)
+
+  Generation samples (greedy + T=0.7)...
+
+  [greedy]
+    'It was a dark and stormy'               → ' day, and the people were not afraid of the sun.\nThe people were not afraid of t'
+    'The length of the hypotenuse'           → ' is approximately 1.5 mm. The length of the hypotenuse is approximately 1.5 mm. '
+    'The President of the United'            → ' States, the President of the United States, and the President of the United Sta'
+    'Once upon a time there was'             → ' a great deal of confusion between the two groups. The first was the fact that t'
+    'The results indicate that'              → ' the average annual temperature of the United States is about 1.5 degrees Fahren'
+
+  [T=0.7]
+    'It was a dark and stormy'               → ' night, but it was never a matter of what was going on. This was because the cli'
+    'The length of the hypotenuse'           → ' is of the order of the dendrites (so the rate is greater than the point of the '
+    'The President of the United'            → ' States was a man of power who had no role in the election.\nThe President was a '
+    'Once upon a time there was'             → ' a momentous experience that was still in place, and a plan was made that was to'
+    'The results indicate that'              → ' this is not an absolute standard for the overall health of the individual.\nThe '
+
+  Results saved to /home/dlewis3/Desktop/AI/DWARF/evals/logs/eval_suite_j20d_v10_L10_20260316_192919.json
+============================================================
+

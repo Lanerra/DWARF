@@ -1,0 +1,105 @@
+======================================================================
+  🔬 DWARF Autoresearch — J20D V10 L10 Depth Experiment
+  V10 kernel (J=20) + condV: Kalman-EMA + AGC  [tiled coalesced, 2.87x faster]
+======================================================================
+  GPU: NVIDIA GeForce RTX 4090
+  D=512, H=8, L=10, FFN=2048
+  IF interval=2, Full attn layer=9
+  scale_embed init=0.1, LR mult=15.0
+  EMA α₀=0.00035 (window≈2857t), floor=1e-05
+  MAX_TRAIN_SEQS=121232, LR=0.0003, Epochs=3
+  git=bf948d1
+Loading FineWeb-Edu from cache: benchmarks/logs/condm_fineweb_edu_doc_cache.json
+  Loaded 100,000 docs from cache
+Loaded tokenizer from results/2048_condI_tokenizer.json
+Loading pre-encoded dataset from logs/fineweb_encoded_2048.pt
+  train: 121,232  val: 5,582 seqs
+  compiled FullAttnBlock at layer 9
+  torch.compile applied to FullAttnBlock(s)
+Parameters: 54,754,028 (54.8M)
+  Step 200/3789 | Loss 6.2097
+  Step 400/3789 | Loss 5.7922
+  Step 600/3789 | Loss 5.4824
+  Step 800/3789 | Loss 5.2992
+  Step 1000/3789 | Loss 5.0293
+  Step 1200/3789 | Loss 4.7584
+  Step 1400/3789 | Loss 4.7621
+  Step 1600/3789 | Loss 4.4559
+  Step 1800/3789 | Loss 4.3398
+  Step 2000/3789 | Loss 4.4967
+  Step 2200/3789 | Loss 4.1451
+  Step 2400/3789 | Loss 4.1409
+  Step 2600/3789 | Loss 4.1283
+  Step 2800/3789 | Loss 4.3710
+  Step 3000/3789 | Loss 4.0829
+  Step 3200/3789 | Loss 4.2010
+  Step 3400/3789 | Loss 3.8301
+  Step 3600/3789 | Loss 4.1073
+Ep 1/3 | Val PPL 50.15 *
+  scale_embed |mean|=0.3863 |max|=2.1664
+  Physics: b1: α=0.0058(w≈174t)  b3: α=0.0942(w≈11t)  b5: α=0.0239(w≈42t)  b7: α=-0.0018(w≈570t)
+  Passkey mean=64.2%
+  d=1:80%  d=2:70%  d=4:70%  d=8:70%  d=16:80%  d=32:70%  d=64:70%  d=128:70%  d=256:70%  d=512:60%  d=1024:30%  d=1536:30%
+  Step 200/3789 | Loss 4.0551
+  Step 400/3789 | Loss 3.9469
+  Step 600/3789 | Loss 4.0475
+  Step 800/3789 | Loss 3.6941
+  Step 1000/3789 | Loss 3.8271
+  Step 1200/3789 | Loss 3.6737
+  Step 1400/3789 | Loss 3.8037
+  Step 1600/3789 | Loss 3.8432
+  Step 1800/3789 | Loss 3.8789
+  Step 2000/3789 | Loss 3.8671
+  Step 2200/3789 | Loss 3.9154
+  Step 2400/3789 | Loss 3.7794
+  Step 2600/3789 | Loss 3.9385
+  Step 2800/3789 | Loss 3.7759
+  Step 3000/3789 | Loss 3.6168
+  Step 3200/3789 | Loss 3.7598
+  Step 3400/3789 | Loss 3.7957
+  Step 3600/3789 | Loss 3.3982
+Ep 2/3 | Val PPL 40.03 *
+  scale_embed |mean|=0.3529 |max|=2.0370
+  Physics: b1: α=0.0059(w≈169t)  b3: α=0.0960(w≈10t)  b5: α=0.0231(w≈43t)  b7: α=-0.0017(w≈604t)
+  Passkey mean=88.3%
+  d=1:90%  d=2:100%  d=4:100%  d=8:100%  d=16:100%  d=32:100%  d=64:100%  d=128:100%  d=256:80%  d=512:90%  d=1024:50%  d=1536:50%
+  Step 200/3789 | Loss 3.9018
+  Step 400/3789 | Loss 3.6646
+  Step 600/3789 | Loss 3.8870
+  Step 800/3789 | Loss 3.8725
+  Step 1000/3789 | Loss 3.7682
+  Step 1200/3789 | Loss 3.8987
+  Step 1400/3789 | Loss 3.5304
+  Step 1600/3789 | Loss 3.6194
+  Step 1800/3789 | Loss 3.8753
+  Step 2000/3789 | Loss 3.6601
+  Step 2200/3789 | Loss 3.5908
+  Step 2400/3789 | Loss 3.6493
+  Step 2600/3789 | Loss 3.6971
+  Step 2800/3789 | Loss 3.6810
+  Step 3000/3789 | Loss 3.5353
+  Step 3200/3789 | Loss 3.7936
+  Step 3400/3789 | Loss 3.6330
+  Step 3600/3789 | Loss 3.6481
+Ep 3/3 | Val PPL 38.19 *
+  scale_embed |mean|=0.3412 |max|=1.9799
+  Physics: b1: α=0.0057(w≈174t)  b3: α=0.0948(w≈11t)  b5: α=0.0218(w≈46t)  b7: α=-0.0016(w≈610t)
+  Passkey mean=87.5%
+  d=1:80%  d=2:100%  d=4:100%  d=8:80%  d=16:100%  d=32:100%  d=64:100%  d=128:100%  d=256:90%  d=512:100%  d=1024:50%  d=1536:50%
+
+---
+passkey_ep1:    64.2
+passkey_ep2:    88.3
+passkey_ep3:    87.5
+ppl_ep1:        50.15
+ppl_ep2:        40.03
+ppl_ep3:        38.19
+ar_score:       69.20
+memory_mb:      12254.5
+elapsed_s:      15685.7
+num_params_M:   54.8
+num_layers:     10
+num_offsets:    20
+scale_embed_lr_mult: 15.0
+ema_init:       0.00035
+description:    J20D V10 L10 depth — 54.8M, V8+condV, J=20 V9 Frobenius-optimal, KdV removed, NoPE full-attn, EMA_init=0.00035 floor=1e-05, 121232 seqs, scale_embed_init=0.1

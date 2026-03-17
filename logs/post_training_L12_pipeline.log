@@ -1,0 +1,40 @@
+========================================================
+  Post-training pipeline: J20D V10 L=12
+  Tue Mar 17 12:40:59 AM PDT 2026
+========================================================
+Checkpoint: autoresearch/checkpoints/bf948d1_j20d_v10_L12_best.pt
+Patched eval_suite.py
+
+── Eval suite (50-trial passkey) ───────────────────────
+eval_suite done.
+    mean_accuracy=89.2%  (3.9s)
+
+── External benchmarks ─────────────────────────────────
+eval_external done.
+  mean (present tasks)        33.1%
+
+── Attention visualization ─────────────────────────────
+viz done. 15 images generated.
+
+── Ablation probe (Sections 1-6) ───────────────────────
+Added j20d_v10_L12 to probe registry
+Probe done.
+  Most critical offsets (by passkey loss):
+    δ=4: -41.7% passkey, +3.95 PPL
+    δ=3: -32.5% passkey, +2.86 PPL
+    δ=1: -12.5% passkey, +2.01 PPL
+    δ=8: -10.0% passkey, +6.85 PPL
+    δ=7: -9.2% passkey, +6.21 PPL
+
+── LR sweep at L=12: {1e-4, 1.5e-4, 2.12e-4} ──────────
+   (Rust-recommended: 2.12e-4 | current: 3e-4)
+   Running sequentially on 4090...
+
+  LR=1e-4 → train/train_j20d_v10_L12_lr1em4_bf16.py
+  Done. Results:
+passkey_ep3:    22.5
+ppl_ep3:        56.67
+ar_score:       4.20
+
+  LR=1.5e-4 → train/train_j20d_v10_L12_lr1p5em4_bf16.py
+Terminated

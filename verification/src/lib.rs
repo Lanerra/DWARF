@@ -25,6 +25,7 @@
 //! (3 known failures in cond_d_db4: KdV instability, correct behavior)
 
 // ─── Exploratory sweep infrastructure (see EXPLORATION_ROADMAP.md) ────────────
+pub mod depth_scaling_optimizer; // Depth-variant hyperparameter analysis (LR, SE_mult, batch, coverage, IF blocks)
 pub mod sweep_engine;           // Generic parallel sweep engine (Rayon, progress, JSON output)
 pub mod offset_space_explorer;  // Offset set design space: path counts, coverage, budget analysis
 pub mod layer_placement_explorer; // Interference/full-attn layer placement scoring
@@ -75,3 +76,5 @@ pub mod scale_embed_second_crossing; // scale_embed >1.0 threshold: per-head Q-m
 pub mod ema_window_retrieval_snr;   // EMA window b0 × retrieval distance SNR: d41s3 vs d41s5
 pub mod d41_scale_search;           // Optimal sparse set for d41s3 at 35M-scale dense widths
 pub mod softmax_gain_competition;   // Softmax gain-weight competition: why pos_bias init kills long offsets
+pub mod frobenius_offset_search;
+pub mod frobenius_coopt_search;

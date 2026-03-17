@@ -1,0 +1,64 @@
+
+============================================================
+  eval_suite.py — j20d_v10_L12
+  Device: cuda
+============================================================
+
+  Model: J20D V10 L=12 Depth (62.4M, J=20, V10, IF=2, FA=L11)
+
+  Loading tokenizer...
+  Loading model...
+  Loaded J20D V10 L=12 Depth (62.4M, J=20, V10, IF=2, FA=L11): 62,375,997 params from bf948d1_j20d_v10_L12_best.pt
+
+  [1/4] Calibration...
+    entropy=7.046 bits  top1=0.232  eff_vocab=19.8  (0.4s)
+
+  [2/4] Distance-conditioned loss (wikitext-103)...
+    Loading wikitext-103 test split...
+    Using 17 full 2048-token chunks
+    Buckets:
+    0-16          PPL= 241.31  n=  289
+    17-64         PPL= 144.78  n=  816
+    65-256        PPL=  75.52  n= 3264
+    257-512       PPL=  66.55  n= 4352
+    513-1024      PPL=  55.65  n= 8704
+    1025-2047     PPL=  53.07  n=17374
+    (4.0s)
+
+  [3/4] Few-shot string copy...
+    exact=6/15  (40.0%)  mean_lev=6.73  (1.5s)
+
+  [4/4] Passkey retrieval...
+    d=    1: accuracy=90.0%
+    d=    2: accuracy=100.0%
+    d=    4: accuracy=100.0%
+    d=    8: accuracy=90.0%
+    d=   16: accuracy=100.0%
+    d=   32: accuracy=100.0%
+    d=   64: accuracy=90.0%
+    d=  128: accuracy=100.0%
+    d=  256: accuracy=90.0%
+    d=  512: accuracy=80.0%
+    d= 1024: accuracy=80.0%
+    d= 1536: accuracy=50.0%
+    mean_accuracy=89.2%  (3.9s)
+
+  Generation samples (greedy + T=0.7)...
+
+  [greedy]
+    'It was a dark and stormy'               → ' day. The sun was shining on the sky, and the sun was shining on the sky. The su'
+    'The length of the hypotenuse'           → ' is the length of the hypotenuse.\nThe hypotenuse is the length of the hypotenuse'
+    'The President of the United'            → ' States, the President of the United States, and the President of the United Sta'
+    'Once upon a time there was'             → ' a great deal of confusion about the meaning of the word. The word was used to d'
+    'The results indicate that'              → ' the most common cause of death in the United States is the death of a person wh'
+
+  [T=0.7]
+    'It was a dark and stormy'               → ' place to start.\nThe soldiers were accustomed to the dangers of the enemy’s camp'
+    'The length of the hypotenuse'           → ' is very low, but is generally considered to be more than 4 to 8%.\nThe main reas'
+    'The President of the United'            → ' States, William H. Woolley, Jr., was the first president of the United States S'
+    'Once upon a time there was'             → ' a struggle between the local government and the “official” government.\nBut this'
+    'The results indicate that'              → ' the rate of dehydration and an increase in temperature in the form of low water'
+
+  Results saved to /home/dlewis3/Desktop/AI/DWARF/evals/logs/eval_suite_j20d_v10_L12_20260317_004101.json
+============================================================
+

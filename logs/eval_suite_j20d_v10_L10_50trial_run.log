@@ -1,0 +1,64 @@
+
+============================================================
+  eval_suite.py — j20d_v10_L10
+  Device: cuda
+============================================================
+
+  Model: J20D V10 L=10 Depth (54.8M, J=20, V10, IF=2, FA=L9)
+
+  Loading tokenizer...
+  Loading model...
+  Loaded J20D V10 L=10 Depth (54.8M, J=20, V10, IF=2, FA=L9): 54,754,028 params from bf948d1_j20d_v10_L10_best.pt
+
+  [1/4] Calibration...
+    entropy=7.121 bits  top1=0.220  eff_vocab=23.6  (0.3s)
+
+  [2/4] Distance-conditioned loss (wikitext-103)...
+    Loading wikitext-103 test split...
+    Using 17 full 2048-token chunks
+    Buckets:
+    0-16          PPL= 229.08  n=  289
+    17-64         PPL= 149.09  n=  816
+    65-256        PPL=  76.71  n= 3264
+    257-512       PPL=  69.52  n= 4352
+    513-1024      PPL=  56.54  n= 8704
+    1025-2047     PPL=  54.86  n=17374
+    (3.4s)
+
+  [3/4] Few-shot string copy...
+    exact=5/15  (33.3%)  mean_lev=7.00  (1.3s)
+
+  [4/4] Passkey retrieval...
+    d=    1: accuracy=70.0%
+    d=    2: accuracy=100.0%
+    d=    4: accuracy=100.0%
+    d=    8: accuracy=80.0%
+    d=   16: accuracy=100.0%
+    d=   32: accuracy=100.0%
+    d=   64: accuracy=100.0%
+    d=  128: accuracy=100.0%
+    d=  256: accuracy=90.0%
+    d=  512: accuracy=100.0%
+    d= 1024: accuracy=60.0%
+    d= 1536: accuracy=60.0%
+    mean_accuracy=88.3%  (3.4s)
+
+  Generation samples (greedy + T=0.7)...
+
+  [greedy]
+    'It was a dark and stormy'               → ' day, and the people were not afraid of the sun.\nThe people were not afraid of t'
+    'The length of the hypotenuse'           → ' is approximately 1.5 mm. The length of the hypotenuse is approximately 1.5 mm. '
+    'The President of the United'            → ' States, the President of the United States, and the President of the United Sta'
+    'Once upon a time there was'             → ' a great deal of confusion between the two groups. The first was the fact that t'
+    'The results indicate that'              → ' the average annual temperature of the United States is about 1.5 degrees Fahren'
+
+  [T=0.7]
+    'It was a dark and stormy'               → ' place and a bit of gloomy time, a great and enduring moment. The people of the '
+    'The length of the hypotenuse'           → ' is the same as the radius of the right-hand side. The distance between the righ'
+    'The President of the United'            → ' States, which made the United States a strong and powerful nation, was the firs'
+    'Once upon a time there was'             → ' no way for them to see a picture of the world. But there was no way to know wha'
+    'The results indicate that'              → ' the FAM-induced increase in PMI and PMI is associated with increased risk of ca'
+
+  Results saved to /home/dlewis3/Desktop/AI/DWARF/evals/logs/eval_suite_j20d_v10_L10_20260316_193643.json
+============================================================
+
