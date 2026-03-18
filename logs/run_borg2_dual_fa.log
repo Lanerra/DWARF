@@ -1,0 +1,95 @@
+======================================================================
+  🔬 DWARF Autoresearch — BORG-2 DUAL-FA RUN
+  Frozen borg_midattn FA at L2 + Unfrozen J26D FA at L5
+  DSQG blocks 0,1,3,4 train from scratch
+======================================================================
+  GPU: NVIDIA GeForce RTX 4090
+  D=512, H=8, L=6, FFN=2048
+  IF interval=2, Full attn layers=[2, 5]
+  Frozen FA layers=[2]
+  scale_embed init=0.1, LR mult=15.0
+  EMA α₀=0.00035 (window≈2857t), floor=1e-05
+  MAX_TRAIN_SEQS=121232, LR=0.0003, Epochs=2
+  git=c2688a0
+Loading FineWeb-Edu from cache: benchmarks/logs/condm_fineweb_edu_doc_cache.json
+  Loaded 100,000 docs from cache
+Loaded tokenizer from results/2048_condI_tokenizer.json
+Loading pre-encoded dataset from logs/fineweb_encoded_2048.pt
+  train: 121,232  val: 5,582 seqs
+
+  Loading dual FA warm-start weights...
+  Loading L2 FA from autoresearch/checkpoints/borg_midattn_ep2_full_attn.pt...
+  L2 FA: loaded 14 weights, missing 131
+  Loading L5 FA from autoresearch/checkpoints/j26d_full_attn_extracted.pt...
+  L5 FA: loaded 14 weights, missing 131
+  L2 FA frozen. L5 FA unfrozen (will refine).
+  compiled FullAttnBlock at layer 2
+  compiled FullAttnBlock at layer 5
+  torch.compile applied to FullAttnBlock(s)
+Parameters: 39,512,164 (39.5M)
+Trainable:  36,097,124 (36.1M)
+  Step 200/3789 | Loss 6.3760
+  Step 400/3789 | Loss 5.8598
+  Step 600/3789 | Loss 5.3480
+  Step 800/3789 | Loss 5.0665
+  Step 1000/3789 | Loss 4.8099
+  Step 1200/3789 | Loss 4.6020
+  Step 1400/3789 | Loss 4.6194
+  Step 1600/3789 | Loss 4.2051
+  Step 1800/3789 | Loss 4.5250
+  Step 2000/3789 | Loss 4.2073
+  Step 2200/3789 | Loss 4.2607
+  Step 2400/3789 | Loss 4.2372
+  Step 2600/3789 | Loss 4.3994
+  Step 2800/3789 | Loss 4.3271
+  Step 3000/3789 | Loss 4.1160
+  Step 3200/3789 | Loss 4.0812
+  Step 3400/3789 | Loss 3.9686
+  Step 3600/3789 | Loss 4.0911
+Ep 1/2 | Val PPL 54.86 *
+  scale_embed |mean|=0.3985 |max|=1.9922
+  Physics: b1: α=0.0395(w≈25t) kdv=0.0619  b3: α=-0.0019(w≈100000t) kdv=-0.0000
+  Saved FullAttn L2 checkpoint: autoresearch/checkpoints/borg2_dual_fa_L2_ep1_full_attn.pt
+  Saved FullAttn L5 checkpoint: autoresearch/checkpoints/borg2_dual_fa_L5_ep1_full_attn.pt
+  Passkey mean=51.7%
+  d=1:30%  d=2:40%  d=4:40%  d=8:60%  d=16:50%  d=32:50%  d=64:90%  d=128:50%  d=256:70%  d=512:50%  d=1024:50%  d=1536:40%
+  Step 200/3789 | Loss 4.0261
+  Step 400/3789 | Loss 4.0629
+  Step 600/3789 | Loss 3.8627
+  Step 800/3789 | Loss 4.1797
+  Step 1000/3789 | Loss 4.1468
+  Step 1200/3789 | Loss 3.9080
+  Step 1400/3789 | Loss 3.8975
+  Step 1600/3789 | Loss 3.9203
+  Step 1800/3789 | Loss 4.0902
+  Step 2000/3789 | Loss 4.0722
+  Step 2200/3789 | Loss 3.8012
+  Step 2400/3789 | Loss 3.9111
+  Step 2600/3789 | Loss 4.1079
+  Step 2800/3789 | Loss 4.0280
+  Step 3000/3789 | Loss 4.1777
+  Step 3200/3789 | Loss 3.8857
+  Step 3400/3789 | Loss 3.9935
+  Step 3600/3789 | Loss 4.0160
+Ep 2/2 | Val PPL 48.40 *
+  scale_embed |mean|=0.3791 |max|=2.0834
+  Physics: b1: α=0.0387(w≈26t) kdv=0.0636  b3: α=-0.0019(w≈100000t) kdv=-0.0000
+  Saved FullAttn L2 checkpoint: autoresearch/checkpoints/borg2_dual_fa_L2_ep2_full_attn.pt
+  Saved FullAttn L5 checkpoint: autoresearch/checkpoints/borg2_dual_fa_L5_ep2_full_attn.pt
+  Passkey mean=69.2%
+  d=1:50%  d=2:50%  d=4:50%  d=8:70%  d=16:100%  d=32:70%  d=64:90%  d=128:80%  d=256:90%  d=512:60%  d=1024:60%  d=1536:60%
+
+---
+passkey_ep1:    51.7
+passkey_ep2:    69.2
+ppl_ep1:        54.86
+ppl_ep2:        48.40
+ar_score:       50.87
+memory_mb:      10662.9
+elapsed_s:      11438.3
+num_params_M:   39.5
+num_layers:     6
+num_offsets:    24
+scale_embed_lr_mult: 15.0
+ema_init:       0.00035
+description:    BORG-2 Dual-FA — 39.5M, L2 frozen midattn FA + L5 unfrozen J26D FA, D=512, L=6

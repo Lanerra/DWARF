@@ -1,0 +1,53 @@
+======================================================================
+  🔬 DWARF Autoresearch — BORG MID-ATTN RUN
+  FullAttn at L2 (middle), warm-started from J26D (2 DSQG blocks before FA)
+======================================================================
+  GPU: NVIDIA GeForce RTX 4090
+  D=512, H=8, L=11, FFN=2048
+  IF interval=2, Full attn layer=5 (MIDDLE, L5 of 11, Gen2 FA frozen)
+  scale_embed init=0.1, LR mult=15.0
+  EMA α₀=0.00035 (window≈2857t), floor=1e-05
+  MAX_TRAIN_SEQS=121232, LR=0.0003, Epochs=2
+  FREEZE_FULL_ATTN_AFTER_EPOCH=0
+  git=c2688a0
+Loading FineWeb-Edu from cache: benchmarks/logs/condm_fineweb_edu_doc_cache.json
+  Loaded 100,000 docs from cache
+Loaded tokenizer from results/2048_condI_tokenizer.json
+Loading pre-encoded dataset from logs/fineweb_encoded_2048.pt
+  train: 121,232  val: 5,582 seqs
+
+  Loading J26D FullAttn weights from autoresearch/checkpoints/borg_midattn_gen2_ep3_full_attn.pt...
+  Loaded 14 weights
+  Missing (expected — DSQG blocks random init): 275
+  compiled FullAttnBlock at layer 5
+  torch.compile applied to FullAttnBlock(s)
+Parameters: 58,179,320 (58.2M)
+
+  ── Freezing FullAttn block (epoch 1) ──
+  FullAttn frozen.
+  Step 200/3789 | Loss 6.2096
+  Step 400/3789 | Loss 5.6405
+  Step 600/3789 | Loss 5.0219
+  Step 800/3789 | Loss 5.0518
+  Step 1000/3789 | Loss 4.7903
+  Step 1200/3789 | Loss 4.8073
+  Step 1400/3789 | Loss 4.6169
+  Step 1600/3789 | Loss 4.2354
+  Step 1800/3789 | Loss 4.1714
+  Step 2000/3789 | Loss 4.3751
+  Step 2200/3789 | Loss 3.8974
+  Step 2400/3789 | Loss 4.0631
+  Step 2600/3789 | Loss 4.2490
+  Step 2800/3789 | Loss 4.0039
+  Step 3000/3789 | Loss 4.0961
+  Step 3200/3789 | Loss 4.0486
+  Step 3400/3789 | Loss 4.0600
+  Step 3600/3789 | Loss 3.7150
+Ep 1/2 | Val PPL 50.40 *
+  scale_embed |mean|=0.3680 |max|=1.8462
+  Physics: b1: α=-0.0013(w≈100000t) kdv=-0.0000  b3: α=-0.0012(w≈100000t) kdv=-0.0000  b7: α=0.0302(w≈33t) kdv=-0.0000  b9: α=-0.0008(w≈100000t) kdv=-0.0000
+  Saved FullAttn checkpoint: autoresearch/checkpoints/borg_L11_ep1_full_attn.pt
+  Passkey mean=63.3%
+  d=1:80%  d=2:90%  d=4:70%  d=8:70%  d=16:90%  d=32:80%  d=64:80%  d=128:50%  d=256:60%  d=512:40%  d=1024:30%  d=1536:20%
+  Step 200/3789 | Loss 3.8770
+  Step 400/3789 | Loss 4.1278

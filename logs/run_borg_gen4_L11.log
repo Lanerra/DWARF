@@ -1,0 +1,49 @@
+======================================================================
+  🔬 DWARF Autoresearch — BORG MID-ATTN GEN2 (FA unfrozen)
+  FullAttn at L5 of L=11, warm-started from borgL11 checkpoint, FA UNFROZEN for refinement
+======================================================================
+  GPU: NVIDIA GeForce RTX 4090
+  D=512, H=8, L=11, FFN=2048
+  IF interval=2, Full attn layer=2 (L5 of 11, Gen4 scaling test)
+  scale_embed init=0.1, LR mult=15.0
+  EMA α₀=0.00035 (window≈2857t), floor=1e-05
+  MAX_TRAIN_SEQS=121232, LR=0.0003, Epochs=3
+  FREEZE_FULL_ATTN_AFTER_EPOCH=None
+  git=c2688a0
+Loading FineWeb-Edu from cache: benchmarks/logs/condm_fineweb_edu_doc_cache.json
+  Loaded 100,000 docs from cache
+Loaded tokenizer from results/2048_condI_tokenizer.json
+Loading pre-encoded dataset from logs/fineweb_encoded_2048.pt
+  train: 121,232  val: 5,582 seqs
+  WARNING: autoresearch/checkpoints/borg_L11_best.pt not found — training from scratch
+  compiled FullAttnBlock at layer 2
+  torch.compile applied to FullAttnBlock(s)
+Parameters: 58,968,314 (59.0M)
+Traceback (most recent call last):
+  File "/home/dlewis3/Desktop/AI/DWARF/train/train_borg_gen4_L11_bf16.py", line 650, in <module>
+    train(no_warmstart=args.no_warmstart)
+  File "/home/dlewis3/Desktop/AI/DWARF/train/train_borg_gen4_L11_bf16.py", line 556, in train
+    logits = model(x)
+             ^^^^^^^^
+  File "/home/dlewis3/Desktop/AI/DWARF/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dlewis3/Desktop/AI/DWARF/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dlewis3/Desktop/AI/DWARF/train/train_borg_gen4_L11_bf16.py", line 263, in forward
+    x = block(x)
+        ^^^^^^^^
+  File "/home/dlewis3/Desktop/AI/DWARF/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dlewis3/Desktop/AI/DWARF/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dlewis3/Desktop/AI/DWARF/train/train_borg_gen4_L11_bf16.py", line 157, in forward
+    pool = _kdv_correction(pool, self.kdv_alpha)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dlewis3/Desktop/AI/DWARF/train/train_borg_gen4_L11_bf16.py", line 105, in _kdv_correction
+    return pool + alpha * pool * (pool - pool_prev)
+                  ~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 32.00 MiB. GPU 0 has a total capacity of 21.99 GiB of which 54.62 MiB is free. Process 1941199 has 15.78 GiB memory in use. Including non-PyTorch memory, this process has 5.09 GiB memory in use. Of the allocated memory 2.19 GiB is allocated by PyTorch, and 8.89 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)

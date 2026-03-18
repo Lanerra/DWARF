@@ -1,0 +1,87 @@
+======================================================================
+  🔬 DWARF Autoresearch — BORG ADAPTATION RUN
+  FullAttn at L0, warm-started from J26D, adapting to raw embeddings
+======================================================================
+  GPU: NVIDIA GeForce RTX 4090
+  D=512, H=8, L=3, FFN=2048
+  IF interval=2, Full attn layer=0 (FIRST)
+  scale_embed init=0.1, LR mult=15.0
+  EMA α₀=0.00035 (window≈2857t), floor=1e-05
+  MAX_TRAIN_SEQS=121232, LR=0.0003, Epochs=2
+  FREEZE_FULL_ATTN_AFTER_EPOCH=None
+  git=c2688a0
+Loading FineWeb-Edu from cache: benchmarks/logs/condm_fineweb_edu_doc_cache.json
+  Loaded 100,000 docs from cache
+Loaded tokenizer from results/2048_condI_tokenizer.json
+Loading pre-encoded dataset from logs/fineweb_encoded_2048.pt
+  train: 121,232  val: 5,582 seqs
+
+  Loading J26D FullAttn weights from autoresearch/checkpoints/j26d_full_attn_extracted.pt...
+  Loaded 14 weights
+  Missing (expected — DSQG blocks random init): 61
+  compiled FullAttnBlock at layer 0
+  torch.compile applied to FullAttnBlock(s)
+Parameters: 28,473,394 (28.5M)
+  Step 200/3789 | Loss 6.4831
+  Step 400/3789 | Loss 5.8664
+  Step 600/3789 | Loss 5.5323
+  Step 800/3789 | Loss 5.2895
+  Step 1000/3789 | Loss 5.1174
+  Step 1200/3789 | Loss 4.9167
+  Step 1400/3789 | Loss 4.9720
+  Step 1600/3789 | Loss 5.0140
+  Step 1800/3789 | Loss 4.9792
+  Step 2000/3789 | Loss 4.7098
+  Step 2200/3789 | Loss 4.7816
+  Step 2400/3789 | Loss 4.6882
+  Step 2600/3789 | Loss 4.5581
+  Step 2800/3789 | Loss 4.7234
+  Step 3000/3789 | Loss 4.6482
+  Step 3200/3789 | Loss 4.6873
+  Step 3400/3789 | Loss 4.6541
+  Step 3600/3789 | Loss 4.8569
+Ep 1/2 | Val PPL 86.79 *
+  scale_embed |mean|=0.3847 |max|=1.8757
+  Physics: b1: α=0.0332(w≈30t) kdv=-0.0000
+  Saved FullAttn checkpoint: autoresearch/checkpoints/borg_adapt_13m_ep1_full_attn.pt
+  Passkey mean=13.3%
+  d=1:20%  d=2:20%  d=4:20%  d=8:20%  d=16:10%  d=32:10%  d=64:10%  d=128:10%  d=256:10%  d=512:10%  d=1024:10%  d=1536:10%
+  Step 200/3789 | Loss 4.5429
+  Step 400/3789 | Loss 4.6054
+  Step 600/3789 | Loss 4.4293
+  Step 800/3789 | Loss 4.5926
+  Step 1000/3789 | Loss 4.4875
+  Step 1200/3789 | Loss 4.3618
+  Step 1400/3789 | Loss 4.6209
+  Step 1600/3789 | Loss 4.2852
+  Step 1800/3789 | Loss 4.6198
+  Step 2000/3789 | Loss 4.3154
+  Step 2200/3789 | Loss 4.4946
+  Step 2400/3789 | Loss 4.5401
+  Step 2600/3789 | Loss 4.3650
+  Step 2800/3789 | Loss 4.1915
+  Step 3000/3789 | Loss 4.3230
+  Step 3200/3789 | Loss 4.3437
+  Step 3400/3789 | Loss 4.3588
+  Step 3600/3789 | Loss 4.3325
+Ep 2/2 | Val PPL 76.26 *
+  scale_embed |mean|=0.3610 |max|=1.7663
+  Physics: b1: α=0.0352(w≈28t) kdv=-0.0000
+  Saved FullAttn checkpoint: autoresearch/checkpoints/borg_adapt_13m_ep2_full_attn.pt
+  Passkey mean=15.0%
+  d=1:30%  d=2:20%  d=4:30%  d=8:20%  d=16:10%  d=32:10%  d=64:10%  d=128:10%  d=256:10%  d=512:10%  d=1024:10%  d=1536:10%
+
+---
+passkey_ep1:    13.3
+passkey_ep2:    15.0
+ppl_ep1:        86.79
+ppl_ep2:        76.26
+ar_score:       -10.55
+memory_mb:      8750.7
+elapsed_s:      6327.5
+num_params_M:   28.5
+num_layers:     3
+num_offsets:    24
+scale_embed_lr_mult: 15.0
+ema_init:       0.00035
+description:    Borg Adaptation Run — 28.5M, FullAttn@L0 warm from J26D, D=512, L=3, adapting to raw embedding distribution

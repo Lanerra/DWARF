@@ -1,0 +1,113 @@
+======================================================================
+  🔬 DWARF Autoresearch — BORG MID-ATTN GEN2 (FA unfrozen)
+  FullAttn at L2 (middle), warm-started from borg_midattn ep2 checkpoint, FA UNFROZEN for refinement
+======================================================================
+  GPU: NVIDIA GeForce RTX 4090
+  D=512, H=8, L=5, FFN=2048
+  IF interval=2, Full attn layer=2 (MIDDLE, L2 of 5)
+  scale_embed init=0.1, LR mult=15.0
+  EMA α₀=0.00035 (window≈2857t), floor=1e-05
+  MAX_TRAIN_SEQS=121232, LR=0.0003, Epochs=3
+  FREEZE_FULL_ATTN_AFTER_EPOCH=None
+  git=c2688a0
+Loading FineWeb-Edu from cache: benchmarks/logs/condm_fineweb_edu_doc_cache.json
+  Loaded 100,000 docs from cache
+Loaded tokenizer from results/2048_condI_tokenizer.json
+Loading pre-encoded dataset from logs/fineweb_encoded_2048.pt
+  train: 121,232  val: 5,582 seqs
+
+  Resuming from full checkpoint: autoresearch/checkpoints/borg_midattn_best.pt
+  Loaded — missing: 0, unexpected: 0
+  FA at L2 is UNFROZEN — will refine against trained DSQG blocks
+  compiled FullAttnBlock at layer 2
+  torch.compile applied to FullAttnBlock(s)
+Parameters: 36,097,124 (36.1M)
+  Step 200/3789 | Loss 4.1415
+  Step 400/3789 | Loss 3.9696
+  Step 600/3789 | Loss 3.9837
+  Step 800/3789 | Loss 4.0816
+  Step 1000/3789 | Loss 3.7432
+  Step 1200/3789 | Loss 4.0813
+  Step 1400/3789 | Loss 3.7787
+  Step 1600/3789 | Loss 4.1129
+  Step 1800/3789 | Loss 4.0188
+  Step 2000/3789 | Loss 3.8732
+  Step 2200/3789 | Loss 3.8946
+  Step 2400/3789 | Loss 3.9725
+  Step 2600/3789 | Loss 3.9978
+  Step 2800/3789 | Loss 3.8195
+  Step 3000/3789 | Loss 4.0319
+  Step 3200/3789 | Loss 3.9016
+  Step 3400/3789 | Loss 3.8158
+  Step 3600/3789 | Loss 3.8049
+Ep 1/3 | Val PPL 43.79 *
+  scale_embed |mean|=0.3645 |max|=2.7541
+  Physics: b1: α=0.0196(w≈51t) kdv=-0.0000  b3: α=-0.0017(w≈100000t) kdv=-0.0000
+  Saved FullAttn checkpoint: autoresearch/checkpoints/borg_midattn_gen2_ep1_full_attn.pt
+  Passkey mean=80.0%
+  d=1:100%  d=2:100%  d=4:100%  d=8:60%  d=16:80%  d=32:90%  d=64:80%  d=128:80%  d=256:80%  d=512:60%  d=1024:70%  d=1536:60%
+  Step 200/3789 | Loss 3.6202
+  Step 400/3789 | Loss 3.6688
+  Step 600/3789 | Loss 4.0323
+  Step 800/3789 | Loss 3.6254
+  Step 1000/3789 | Loss 3.7814
+  Step 1200/3789 | Loss 3.7265
+  Step 1400/3789 | Loss 3.4999
+  Step 1600/3789 | Loss 3.8988
+  Step 1800/3789 | Loss 3.7299
+  Step 2000/3789 | Loss 3.7975
+  Step 2200/3789 | Loss 3.8154
+  Step 2400/3789 | Loss 3.8980
+  Step 2600/3789 | Loss 3.8625
+  Step 2800/3789 | Loss 3.8594
+  Step 3000/3789 | Loss 3.7961
+  Step 3200/3789 | Loss 3.8282
+  Step 3400/3789 | Loss 3.8452
+  Step 3600/3789 | Loss 3.7079
+Ep 2/3 | Val PPL 39.30 *
+  scale_embed |mean|=0.3452 |max|=2.5923
+  Physics: b1: α=0.0199(w≈50t) kdv=-0.0000  b3: α=-0.0016(w≈100000t) kdv=-0.0000
+  Saved FullAttn checkpoint: autoresearch/checkpoints/borg_midattn_gen2_ep2_full_attn.pt
+  Passkey mean=92.5%
+  d=1:100%  d=2:100%  d=4:100%  d=8:100%  d=16:100%  d=32:100%  d=64:100%  d=128:90%  d=256:90%  d=512:80%  d=1024:90%  d=1536:60%
+  Step 200/3789 | Loss 3.6978
+  Step 400/3789 | Loss 3.6917
+  Step 600/3789 | Loss 3.7843
+  Step 800/3789 | Loss 3.6735
+  Step 1000/3789 | Loss 3.6897
+  Step 1200/3789 | Loss 3.8356
+  Step 1400/3789 | Loss 3.6938
+  Step 1600/3789 | Loss 3.6942
+  Step 1800/3789 | Loss 3.6161
+  Step 2000/3789 | Loss 3.5503
+  Step 2200/3789 | Loss 3.6003
+  Step 2400/3789 | Loss 3.6944
+  Step 2600/3789 | Loss 3.7535
+  Step 2800/3789 | Loss 3.7244
+  Step 3000/3789 | Loss 3.4590
+  Step 3200/3789 | Loss 3.6975
+  Step 3400/3789 | Loss 3.7971
+  Step 3600/3789 | Loss 3.6796
+Ep 3/3 | Val PPL 38.12 *
+  scale_embed |mean|=0.3386 |max|=2.5359
+  Physics: b1: α=0.0197(w≈51t) kdv=-0.0000  b3: α=-0.0016(w≈100000t) kdv=-0.0000
+  Saved FullAttn checkpoint: autoresearch/checkpoints/borg_midattn_gen2_ep3_full_attn.pt
+  Passkey mean=94.2%
+  d=1:100%  d=2:100%  d=4:100%  d=8:100%  d=16:100%  d=32:100%  d=64:100%  d=128:100%  d=256:90%  d=512:80%  d=1024:90%  d=1536:70%
+
+---
+passkey_ep1:    80.0
+passkey_ep2:    92.5
+passkey_ep3:    94.2
+ppl_ep1:        43.79
+ppl_ep2:        39.30
+ppl_ep3:        38.12
+ar_score:       75.87
+memory_mb:      10561.4
+elapsed_s:      16821.2
+num_params_M:   36.1
+num_layers:     5
+num_offsets:    24
+scale_embed_lr_mult: 15.0
+ema_init:       0.00035
+description:    Borg Adaptation Run — 36.1M, FullAttn@L0 warm from J26D, D=512, L=5, adapting to raw embedding distribution

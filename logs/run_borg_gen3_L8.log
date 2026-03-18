@@ -1,0 +1,73 @@
+======================================================================
+  🔬 DWARF Autoresearch — BORG MID-ATTN GEN2 (FA unfrozen)
+  FullAttn at L2 of L=8, warm-started from Gen2 full checkpoint, FA UNFROZEN for refinement
+======================================================================
+  GPU: NVIDIA GeForce RTX 4090
+  D=512, H=8, L=8, FFN=2048
+  IF interval=2, Full attn layer=2 (L2 of 8, Gen3 scaling test)
+  scale_embed init=0.1, LR mult=15.0
+  EMA α₀=0.00035 (window≈2857t), floor=1e-05
+  MAX_TRAIN_SEQS=121232, LR=0.0003, Epochs=3
+  FREEZE_FULL_ATTN_AFTER_EPOCH=None
+  git=c2688a0
+Loading FineWeb-Edu from cache: benchmarks/logs/condm_fineweb_edu_doc_cache.json
+  Loaded 100,000 docs from cache
+Loaded tokenizer from results/2048_condI_tokenizer.json
+Loading pre-encoded dataset from logs/fineweb_encoded_2048.pt
+  train: 121,232  val: 5,582 seqs
+
+  Resuming from full checkpoint: autoresearch/checkpoints/borg_midattn_gen2_best.pt
+  Loaded — missing: 89, unexpected: 0
+  FA at L2 is UNFROZEN — will refine against trained DSQG blocks
+  compiled FullAttnBlock at layer 2
+  torch.compile applied to FullAttnBlock(s)
+Parameters: 47,927,216 (47.9M)
+Traceback (most recent call last):
+  File "/home/dlewis3/Desktop/AI/DWARF/train/train_borg_gen3_L8_bf16.py", line 650, in <module>
+    train(no_warmstart=args.no_warmstart)
+  File "/home/dlewis3/Desktop/AI/DWARF/train/train_borg_gen3_L8_bf16.py", line 556, in train
+    logits = model(x)
+             ^^^^^^^^
+  File "/home/dlewis3/Desktop/AI/DWARF/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dlewis3/Desktop/AI/DWARF/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dlewis3/Desktop/AI/DWARF/train/train_borg_gen3_L8_bf16.py", line 263, in forward
+    x = block(x)
+        ^^^^^^^^
+  File "/home/dlewis3/Desktop/AI/DWARF/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dlewis3/Desktop/AI/DWARF/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dlewis3/Desktop/AI/DWARF/train/train_borg_gen3_L8_bf16.py", line 167, in forward
+    x = x + self.attn(self.norm1(x), kv_inject=kv_inject)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dlewis3/Desktop/AI/DWARF/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dlewis3/Desktop/AI/DWARF/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dlewis3/Desktop/AI/DWARF/kernels/dsqg_attention_v8.py", line 769, in forward
+    out = dsqg_attention_v8(q, k, v,
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dlewis3/Desktop/AI/DWARF/kernels/dsqg_attention_v8.py", line 687, in dsqg_attention_v8
+    out = _DSQGFnV8.apply(
+          ^^^^^^^^^^^^^^^^
+  File "/home/dlewis3/Desktop/AI/DWARF/.venv/lib/python3.12/site-packages/torch/autograd/function.py", line 575, in apply
+    return super().apply(*args, **kwargs)  # type: ignore[misc]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dlewis3/Desktop/AI/DWARF/kernels/dsqg_attention_v8.py", line 546, in forward
+    _fwd_v8[g](
+  File "/home/dlewis3/Desktop/AI/DWARF/.venv/lib/python3.12/site-packages/triton/runtime/jit.py", line 330, in <lambda>
+    return lambda *args, **kwargs: self.run(grid=grid, warmup=False, *args, **kwargs)
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dlewis3/Desktop/AI/DWARF/.venv/lib/python3.12/site-packages/triton/runtime/jit.py", line 653, in run
+    kernel.run(grid_0, grid_1, grid_2, stream, kernel.function, kernel.packed_metadata, launch_metadata,
+  File "/home/dlewis3/Desktop/AI/DWARF/.venv/lib/python3.12/site-packages/triton/backends/nvidia/driver.py", line 444, in __call__
+    self.launch(*args, **kwargs)
+RuntimeError: Triton Error [CUDA]: out of memory

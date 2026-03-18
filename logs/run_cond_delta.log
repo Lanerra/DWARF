@@ -1,0 +1,53 @@
+======================================================================
+  🔬 DWARF Autoresearch — condDelta: Delta Rule DSQG (V9 kernel)
+  V9 kernel (J=24) + condV: Kalman-EMA + KdV + AGC + Delta Rule
+======================================================================
+  GPU: NVIDIA GeForce RTX 4090
+  D=512, H=8, L=6, FFN=2048
+  IF interval=2, Full attn layer=5
+  scale_embed init=0.1, LR mult=15.0
+  EMA α₀=0.00035 (window≈2857t), floor=1e-05
+  MAX_TRAIN_SEQS=121232, LR=0.0003, Epochs=3
+  git=c2688a0
+Loading FineWeb-Edu from cache: benchmarks/logs/condm_fineweb_edu_doc_cache.json
+  Loaded 100,000 docs from cache
+Loaded tokenizer from results/2048_condI_tokenizer.json
+Loading pre-encoded dataset from logs/fineweb_encoded_2048.pt
+  train: 121,232  val: 5,582 seqs
+  compiled FullAttnBlock at layer 5
+  torch.compile applied to FullAttnBlock(s)
+Parameters: 39,514,612 (39.5M)
+  Step 200/3789 | Loss 6.3112
+  Step 400/3789 | Loss 5.6970
+  Step 600/3789 | Loss 5.3838
+  Step 800/3789 | Loss 5.2217
+  Step 1000/3789 | Loss 5.1160
+  Step 1200/3789 | Loss 4.8148
+  Step 1400/3789 | Loss 4.7242
+  Step 1600/3789 | Loss 4.6584
+  Step 1800/3789 | Loss 4.4171
+  Step 2000/3789 | Loss 4.4959
+  Step 2200/3789 | Loss 4.3929
+  Step 2400/3789 | Loss 4.2558
+  Step 2600/3789 | Loss 4.2091
+  Step 2800/3789 | Loss 4.2020
+  Step 3000/3789 | Loss 4.3162
+  Step 3200/3789 | Loss 3.9432
+  Step 3400/3789 | Loss 4.1966
+  Step 3600/3789 | Loss 4.0264
+Ep 1/3 | Val PPL 52.36 *
+  scale_embed |mean|=0.3863 |max|=2.2077
+  Physics: b1: α=-0.0021(w≈100000t) kdv=-0.0000  b3: α=0.0248(w≈40t) kdv=-0.0000
+  Delta β: L0: |β|=0.0000 top3=[δ16:0.000, δ1024:0.000, δ768:0.000]  L1: |β|=0.0000 top3=[δ16:0.000, δ1024:0.000, δ768:0.000]  L2: |β|=0.0000 top3=[δ16:0.000, δ1024:0.000, δ768:0.000]  L3: |β|=0.0000 top3=[δ16:0.000, δ1024:0.000, δ768:0.000]  L4: |β|=0.0000 top3=[δ16:0.000, δ1024:0.000, δ768:0.000]
+  Passkey mean=34.2%
+  d=1:40%  d=2:50%  d=4:50%  d=8:40%  d=16:40%  d=32:50%  d=64:30%  d=128:30%  d=256:30%  d=512:20%  d=1024:20%  d=1536:10%
+  Step 200/3789 | Loss 3.9352
+  Step 400/3789 | Loss 4.0343
+  Step 600/3789 | Loss 3.9759
+  Step 800/3789 | Loss 3.9455
+  Step 1000/3789 | Loss 3.7826
+  Step 1200/3789 | Loss 3.8986
+  Step 1400/3789 | Loss 4.0504
+  Step 1600/3789 | Loss 3.8973
+  Step 1800/3789 | Loss 4.0125
+  Step 2000/3789 | Loss 3.9127

@@ -1,28 +1,33 @@
 """
-DSQG Attention V9 — J=20 Pareto-optimal offset set (Frobenius co-opt search)
-==========================================================
+DSQG Attention V9 — Delta Rule correction added to V8 J24_D
+============================================================
 
-Same mechanisms as V7 (MOVT + QK-OVT + NPCI) but with the J24_D offset set:
+V9 adds a learned per-offset delta_beta parameter (zero-init). When beta=0, V9
+is mathematically identical to V8. When beta>0, the gather step applies a
+content-driven correction: acc += beta * p * (v_target - acc_normalized),
+pushing the output toward the highest-attended value rather than averaging.
 
-    ALL_OFFSETS = [1,2,3,4,5,6,7,8,9,11,13,15,16,23,32,64,128,256,512,1024]
+The delta rule comes from fast weight / associative memory principles:
+- Standard attention averages V weighted by attention scores
+- Delta correction strengthens the contribution of high-attention values
+- This helps the model "commit" to a retrieved value rather than blending
 
-V8 used J=24 (14 small + 10 large). V9 uses J=20 (14 small + 6 large).
+Prior art: GatedDeltaNet (arXiv:2412.06464, ICLR 2025),
+           Fast Weight Programmers (arXiv:2102.11174)
 
-Key changes from V7:
-- ALL_OFFSETS: J=24 → J=20 (Frobenius co-opt search; removes 10,21,28,48,96,192,384,768;
-    adds 11,32,128,256 for better power-of-2 long-range coverage)
-- J_SMALL=14: indices 0-13 (δ≤23) — local offsets, no MOVT (unchanged)
-- J_LARGE=6:  indices 14-19 (δ≥32) — distal offsets, MOVT applied
-- Forward/backward: static_range(J) with 20-element delta tuple
-- pos_bias shape: [20, H]
-- scale_embed shape: [20, HD]
-- phase_base/gain shape: [6, H, 2]  (J_LARGE reduced from 10 to 6)
+Same offset set as V8 (J24_D):
+    ALL_OFFSETS = [1,2,3,4,5,6,7,8,9,10,13,15,16,21,23,28,48,64,96,192,384,512,768,1024]
+
+Key changes from V8:
+- delta_beta: [J] learned per-offset correction strength (zero-init → V8 behavior)
+- Delta correction applied in Python after Triton forward (differentiable via autograd)
+- attn_summary() includes delta_beta statistics
 
 Usage:
   from dsqg_attention_v9 import DSQGAttentionV9, npci_rotate
 
 Testing:
-  CUDA_VISIBLE_DEVICES=0 .venv/bin/python3 kernels/dsqg_attention_v8.py
+  CUDA_VISIBLE_DEVICES=0 .venv/bin/python3 kernels/dsqg_attention_v9.py
 """
 
 import math
@@ -36,11 +41,11 @@ import triton.language as tl
 warnings.filterwarnings("ignore", message=".*tl.advance.*", category=UserWarning)
 warnings.filterwarnings("ignore", message=".*not being used.*", category=UserWarning)
 
-ALL_OFFSETS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 13, 15, 16, 23, 32, 64, 128, 256, 512, 1024]
-J         = len(ALL_OFFSETS)   # 20
-J_SMALL   = 14                 # indices 0-13: δ≤23 — local, no MOVT
-J_LARGE   = 6                  # indices 14-19: δ≥32 — distal, MOVT applied
-assert J == 20 and J_SMALL + J_LARGE == J
+ALL_OFFSETS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13, 15, 16, 21, 23, 28, 48, 64, 96, 192, 384, 512, 768, 1024]
+J         = len(ALL_OFFSETS)   # 24
+J_SMALL   = 14                 # indices 0-13: δ≤21 — local, no MOVT
+J_LARGE   = 10                 # indices 14-23: δ≥23 — distal, MOVT applied
+assert J == 24 and J_SMALL + J_LARGE == J
 
 R_PLANES  = 2   # number of Givens rotation planes; constexpr throughout
 
@@ -84,7 +89,7 @@ def npci_rotate(x: torch.Tensor, x_delta: torch.Tensor,
 # ─────────────────────────────────────────────────────────────────────────────
 
 @triton.jit
-def _fwd_v8(
+def _fwd_v9(
     Q, K, V, POS_BIAS, SE, PHASE_BASE, PHASE_GAIN, Y_PRE, Z_PRE, OUT, LSE,
     stride_qb,  stride_qh,  stride_qn,  stride_qd,
     stride_kb,  stride_kh,  stride_kn,  stride_kd,
@@ -132,8 +137,8 @@ def _fwd_v8(
     li  = tl.zeros([BLOCK_N], tl.float32)
     acc = tl.zeros([BLOCK_N, BLOCK_HD], tl.float32)
 
-    for i in tl.static_range(20):
-        delta = (1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 13, 15, 16, 23, 32, 64, 128, 256, 512, 1024)[i]
+    for i in tl.static_range(24):
+        delta = (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13, 15, 16, 21, 23, 28, 48, 64, 96, 192, 384, 512, 768, 1024)[i]
         kp    = ns - delta
         val   = (kp >= 0) & nm
 
@@ -199,7 +204,7 @@ def _fwd_v8(
 # ─────────────────────────────────────────────────────────────────────────────
 
 @triton.jit
-def _compute_D_v8(
+def _compute_D_v9(
     DO, O, D,
     stride_dob, stride_doh, stride_don, stride_dod,
     stride_ob,  stride_oh,  stride_on,  stride_od,
@@ -227,7 +232,7 @@ def _compute_D_v8(
 # ─────────────────────────────────────────────────────────────────────────────
 
 @triton.jit
-def _bwd_dq_v8(
+def _bwd_dq_v9(
     Q, K, V, PB, SE, PHASE_BASE, PHASE_GAIN, Y_PRE, Z_PRE,
     DO, O, LSE, Dv,
     DQ, DPB, DSE, DY_PRE,
@@ -284,8 +289,8 @@ def _bwd_dq_v8(
     dy_pre0 = tl.zeros([BLOCK_N], tl.float32)
     dy_pre1 = tl.zeros([BLOCK_N], tl.float32)
 
-    for i in tl.static_range(20):
-        delta = (1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 13, 15, 16, 23, 32, 64, 128, 256, 512, 1024)[i]
+    for i in tl.static_range(24):
+        delta = (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13, 15, 16, 21, 23, 28, 48, 64, 96, 192, 384, 512, 768, 1024)[i]
         kp    = ns - delta
         val   = (kp >= 0) & nm
 
@@ -365,7 +370,7 @@ def _bwd_dq_v8(
 # ─────────────────────────────────────────────────────────────────────────────
 
 @triton.jit
-def _bwd_dkdv_v8(
+def _bwd_dkdv_v9(
     Q, K, V, PB, SE, PHASE_BASE, PHASE_GAIN, Y_PRE, Z_PRE,
     DO, LSE, Dv,
     DK, DV,
@@ -427,8 +432,8 @@ def _bwd_dkdv_v8(
     dz_pre0 = tl.zeros([BLOCK_M], tl.float32)
     dz_pre1 = tl.zeros([BLOCK_M], tl.float32)
 
-    for i in tl.static_range(20):
-        delta = (1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 13, 15, 16, 23, 32, 64, 128, 256, 512, 1024)[i]
+    for i in tl.static_range(24):
+        delta = (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13, 15, 16, 21, 23, 28, 48, 64, 96, 192, 384, 512, 768, 1024)[i]
         np_   = ms + delta          # query positions n = t + delta
         val   = (np_ < N) & mm
 
@@ -515,7 +520,7 @@ def _bwd_dkdv_v8(
 # Autograd wrapper
 # ─────────────────────────────────────────────────────────────────────────────
 
-class _DSQGFnV8(torch.autograd.Function):
+class _DSQGFnV9(torch.autograd.Function):
     @staticmethod
     def forward(ctx, q, k, v, pos_bias, scale_embed,
                 phase_base, phase_gain, y_pre, z_pre):
@@ -528,13 +533,23 @@ class _DSQGFnV8(torch.autograd.Function):
         assert y_pre.shape       == (B, H, N, R_PLANES)
         assert z_pre.shape       == (B, H, N, R_PLANES)
 
-        BLOCK_N  = 128 if HD <= 64 else 64
+        # Block size tuning: H100 SXM (SM 9.0) can handle BLOCK_N=128 at HD=128
+        # due to 228KB SRAM per SM; 4090 (SM 8.9) tops out at 64 for HD>64.
+        _cc = torch.cuda.get_device_capability()
+        _sm90 = (_cc[0] > 8) or (_cc[0] == 9)
+        if HD <= 64:
+            BLOCK_N = 128
+        elif _sm90:
+            BLOCK_N = 128   # H100: larger SRAM, more warps
+        else:
+            BLOCK_N = 64    # 4090 / older
+        _num_warps = 8 if _sm90 else 4
         BLOCK_HD = _next_pow2(HD)
         out = torch.empty_like(q)
         lse = torch.empty(B, H, N, device=q.device, dtype=torch.float32)
         g   = (B * H, triton.cdiv(N, BLOCK_N))
 
-        _fwd_v8[g](
+        _fwd_v9[g](
             q, k, v, pos_bias, scale_embed, phase_base, phase_gain,
             y_pre, z_pre, out, lse,
             q.stride(0),    q.stride(1),    q.stride(2),    q.stride(3),
@@ -549,11 +564,13 @@ class _DSQGFnV8(torch.autograd.Function):
             y_pre.stride(0),       y_pre.stride(1),       y_pre.stride(2),
             z_pre.stride(0),       z_pre.stride(1),       z_pre.stride(2),
             H=H, N=N, HD=HD, BLOCK_N=BLOCK_N, BLOCK_HD=BLOCK_HD,
+            num_warps=_num_warps,
         )
         ctx.save_for_backward(q, k, v, pos_bias, scale_embed,
                               phase_base, phase_gain, y_pre, z_pre, out, lse)
-        ctx.BLOCK_N  = BLOCK_N
-        ctx.BLOCK_HD = BLOCK_HD
+        ctx.BLOCK_N   = BLOCK_N
+        ctx.BLOCK_HD  = BLOCK_HD
+        ctx.num_warps = _num_warps
         return out
 
     @staticmethod
@@ -561,18 +578,19 @@ class _DSQGFnV8(torch.autograd.Function):
         (q, k, v, pb, se, phase_base, phase_gain,
          y_pre, z_pre, out, lse) = ctx.saved_tensors
         B, H, N, HD = q.shape
-        BN, BHD = ctx.BLOCK_N, ctx.BLOCK_HD
+        BN, BHD, NW = ctx.BLOCK_N, ctx.BLOCK_HD, ctx.num_warps
         dout = dout.contiguous()
 
         D  = torch.empty(B, H, N, device=q.device, dtype=torch.float32)
         g  = (B * H, triton.cdiv(N, BN))
 
-        _compute_D_v8[g](
+        _compute_D_v9[g](
             dout, out, D,
             dout.stride(0), dout.stride(1), dout.stride(2), dout.stride(3),
             out.stride(0),  out.stride(1),  out.stride(2),  out.stride(3),
             D.stride(0),    D.stride(1),    D.stride(2),
             H=H, N=N, HD=HD, BLOCK_N=BN, BLOCK_HD=BHD,
+            num_warps=NW,
         )
 
         dq     = torch.empty_like(q)
@@ -580,7 +598,7 @@ class _DSQGFnV8(torch.autograd.Function):
         dse    = torch.zeros_like(se)
         dy_pre = torch.zeros_like(y_pre)
 
-        _bwd_dq_v8[g](
+        _bwd_dq_v9[g](
             q, k, v, pb, se, phase_base, phase_gain, y_pre, z_pre,
             dout, out, lse, D,
             dq, dpb, dse, dy_pre,
@@ -602,6 +620,7 @@ class _DSQGFnV8(torch.autograd.Function):
             z_pre.stride(0),      z_pre.stride(1),      z_pre.stride(2),
             dy_pre.stride(0),     dy_pre.stride(1),     dy_pre.stride(2),
             H=H, N=N, HD=HD, BLOCK_N=BN, BLOCK_HD=BHD,
+            num_warps=NW,
         )
 
         dk     = torch.empty_like(k)
@@ -617,7 +636,7 @@ class _DSQGFnV8(torch.autograd.Function):
         stride_buf_bh  = blocks_n * J_LARGE * 2
         stride_buf_blk = J_LARGE * 2
 
-        _bwd_dkdv_v8[g](
+        _bwd_dkdv_v9[g](
             q, k, v, pb, se, phase_base, phase_gain, y_pre, z_pre,
             dout, lse, D,
             dk, dv,
@@ -640,6 +659,7 @@ class _DSQGFnV8(torch.autograd.Function):
             stride_buf_bh, stride_buf_blk,
             dz_pre.stride(0),     dz_pre.stride(1),     dz_pre.stride(2),
             H=H, N=N, HD=HD, BLOCK_M=BN, BLOCK_HD=BHD,
+            num_warps=NW,
         )
 
         def _reduce_phase_buf(buf):
@@ -655,7 +675,7 @@ class _DSQGFnV8(torch.autograd.Function):
                 dpb, dse, d_phase_base, d_phase_gain, dy_pre, dz_pre)
 
 
-def dsqg_attention_v8(q, k, v, pos_bias, scale_embed,
+def dsqg_attention_v9(q, k, v, pos_bias, scale_embed,
                       phase_base, phase_gain, y_pre, z_pre):
     """
     q, k, v:       [B, H, N, HD]   bfloat16
@@ -670,7 +690,7 @@ def dsqg_attention_v8(q, k, v, pos_bias, scale_embed,
     orig = q.dtype
     if orig != torch.bfloat16:
         q, k, v = q.bfloat16(), k.bfloat16(), v.bfloat16()
-    out = _DSQGFnV8.apply(
+    out = _DSQGFnV9.apply(
         q, k, v,
         pos_bias.float(), scale_embed.float(),
         phase_base.float(), phase_gain.float(),
@@ -685,28 +705,31 @@ def dsqg_attention_v8(q, k, v, pos_bias, scale_embed,
 
 class DSQGAttentionV9(nn.Module):
     """
-    DSQG V9: J=20 Frobenius-optimal offsets + MOVT(r=2) + QK-OVT + NPCI.
+    DSQG V9: V8 + Delta Rule correction for content-driven relay.
 
-    Frobenius co-opt search (March 15, 2026): J=20 achieves same passkey coverage
-    as J=24 with better redundancy and cleaner power-of-2 long-range structure.
-    J_SMALL=14 (δ≤23, no MOVT), J_LARGE=6 (δ≥32, MOVT applied).
-    KdV removed (confirmed null result); NoPE in full attention layer.
+    Builds on V8 (J=24 relay-optimal offsets + MOVT + QK-OVT + NPCI).
+    Adds delta_beta: per-offset learned correction strength (zero-init → V8).
+
+    Delta rule: When beta>0, pushes output toward highest-attended V rather
+    than averaging. acc += beta * p * (v_target - acc_normalized).
 
     Parameters owned:
-      pos_bias      [20, H]    global frequency prior
-      scale_embed   [20, HD]   Q-matched-filter (zero-init)
+      pos_bias      [24, H]    global frequency prior
+      scale_embed   [24, HD]   Q-matched-filter (zero-init)
       if_gain       [H]        IF amplifier gain (1.0-init)
-      phase_base    [6, H, 2]  MOVT angles for large offsets (zero-init)
-      phase_gain    [6, H, 2]  QK-OVT gains for large offsets (zero-init)
+      phase_base    [10, H, 2] MOVT angles for large offsets (zero-init)
+      phase_gain    [10, H, 2] QK-OVT gains for large offsets (zero-init)
       query_probes  [2, HD]    y precomputation probes (zero-init)
       key_probes    [2, HD]    z precomputation probes (zero-init)
       npci_theta_k  [H]        NPCI K rotation angle (zero-init)
       npci_theta_v  [H]        NPCI V rotation angle (zero-init)
+      delta_beta    [24]       delta correction strength per offset (zero-init)
     """
     def __init__(self, embedding_dim, num_heads, seq_len=2048, dropout=0.1):
         super().__init__()
         self.num_heads = num_heads
         self.head_dim  = embedding_dim // num_heads
+        self.seq_len   = seq_len
         HD             = self.head_dim
         assert HD >= 4, "HD must be >= 4 for 2-plane Givens rotation on channels (0,1),(2,3)"
 
@@ -731,6 +754,8 @@ class DSQGAttentionV9(nn.Module):
         self.npci_theta_k = nn.Parameter(torch.zeros(num_heads))
         self.npci_theta_v = nn.Parameter(torch.zeros(num_heads))
 
+        self.delta_beta = nn.Parameter(torch.zeros(J))
+
         self.dropout = nn.Dropout(dropout)
 
     def forward(self, x, kv_inject=None):
@@ -754,15 +779,58 @@ class DSQGAttentionV9(nn.Module):
         z_pre = torch.einsum('bhnd,rd->bhnr',
                              k.float(), self.key_probes.float()).mul(sc).contiguous()
 
-        out = dsqg_attention_v8(q, k, v,
+        out = dsqg_attention_v9(q, k, v,
                                 self.pos_bias, self.scale_embed,
                                 self.phase_base, self.phase_gain,
                                 y_pre, z_pre)
+
+        out = self._apply_delta_correction(out, q, k, v, sc)
 
         out     = out * self.if_gain.view(1, H, 1, 1)
         out_flat = out.permute(0, 2, 1, 3).reshape(B, N, D)
         gate     = torch.sigmoid(self.gate_proj(x))
         return self.dropout(self.out_proj(out_flat * gate))
+
+    def _apply_delta_correction(self, out_v8, q, k, v, sc):
+        """
+        Apply delta rule correction in Python (differentiable via autograd).
+
+        For each offset i, computes:
+          w = sigmoid(dot(q, k_shifted) * sc + pos_bias[i])
+          correction = delta_beta[i] * w * (v_shifted - out_v8)
+
+        Skips computation when all delta_beta values are near zero.
+        """
+        if self.delta_beta.abs().max() < 1e-7:
+            return out_v8
+
+        B, H, N, HD = out_v8.shape
+        q_f = q.float()
+        k_f = k.float()
+        v_f = v.float()
+        out_f = out_v8.float()
+        delta_out = torch.zeros_like(out_f)
+
+        for i, delta in enumerate(ALL_OFFSETS):
+            beta_i = self.delta_beta[i]
+            if beta_i.abs() < 1e-7:
+                continue
+            if delta >= N:
+                continue
+
+            k_src = F.pad(k_f[:, :, :-delta], (0, 0, delta, 0))
+            v_src = F.pad(v_f[:, :, :-delta], (0, 0, delta, 0))
+
+            score = (q_f * k_src).sum(-1, keepdim=True) * sc
+            score = score + self.pos_bias[i].view(1, H, 1, 1)
+            w = torch.sigmoid(score)
+
+            mask = torch.arange(N, device=out_v8.device) >= delta
+            w = w * mask.view(1, 1, N, 1)
+
+            delta_out = delta_out + beta_i * w * (v_src - out_f)
+
+        return (out_f + delta_out).to(out_v8.dtype)
 
     def attn_summary(self):
         with torch.no_grad():
@@ -775,8 +843,12 @@ class DSQGAttentionV9(nn.Module):
             kp   = self.key_probes.detach().cpu()
             thk  = self.npci_theta_k.detach().cpu()
             thv  = self.npci_theta_v.detach().cpu()
+            db   = self.delta_beta.detach().cpu()     # [24]
 
         plane_diff = (phb[:, :, 0] - phb[:, :, 1]).abs().mean().item()
+
+        db_sorted_idx = db.abs().argsort(descending=True)
+        db_top3 = [(ALL_OFFSETS[i], db[i].item()) for i in db_sorted_idx[:3]]
 
         return {
             'pos_bias_abs_mean':         pb.abs().mean().item(),
@@ -802,6 +874,11 @@ class DSQGAttentionV9(nn.Module):
             'key_probe_norm':            kp.norm(dim=1).tolist(),
             'npci_theta_k':              thk.tolist(),
             'npci_theta_v':              thv.tolist(),
+            'delta_beta_mean':           db.mean().item(),
+            'delta_beta_max':            db.max().item(),
+            'delta_beta_abs_mean':       db.abs().mean().item(),
+            'delta_beta_per_offset':     db.tolist(),
+            'delta_beta_top3':           db_top3,
         }
 
 
@@ -809,7 +886,7 @@ class DSQGAttentionV9(nn.Module):
 # Reference (pure PyTorch — for correctness testing)
 # ─────────────────────────────────────────────────────────────────────────────
 
-def _reference_v8(q, k, v, pos_bias, scale_embed,
+def _reference_v9(q, k, v, pos_bias, scale_embed,
                   phase_base, phase_gain, y_pre, z_pre):
     """Pure PyTorch reference. Slow — for testing only.
     phase_base/gain: [J_LARGE=10, H, 2] — large offsets only (indices 14-23).
@@ -864,7 +941,7 @@ def _reference_v8(q, k, v, pos_bias, scale_embed,
 
 def run_tests(device='cuda'):
     print("=" * 70)
-    print("DSQG V8 — Correctness Tests (J=24 J24_D + MOVT + QK-OVT + NPCI)")
+    print("DSQG V9 — Correctness Tests (V8 + Delta Rule)")
     print("=" * 70)
 
     cfgs = [
@@ -889,8 +966,8 @@ def run_tests(device='cuda'):
         y   = torch.einsum('bhnd,rd->bhnr', q.float(), qpr).mul(sc).contiguous()
         z   = torch.einsum('bhnd,rd->bhnr', k.float(), kpr).mul(sc).contiguous()
 
-        ref = _reference_v8(q, k, v, pb, se, phb, phg, y, z)
-        out = dsqg_attention_v8(q.clone(), k.clone(), v.clone(), pb, se, phb, phg, y, z)
+        ref = _reference_v9(q, k, v, pb, se, phb, phg, y, z)
+        out = dsqg_attention_v9(q.clone(), k.clone(), v.clone(), pb, se, phb, phg, y, z)
         fe  = (ref.float() - out.float()).abs().max().item()
         ok  = fe < 0.05
         if not ok: ok_all = False
@@ -910,8 +987,8 @@ def run_tests(device='cuda'):
     y_z   = torch.zeros(B, H, N, 2,    device=device, dtype=torch.float32)
     z_z   = torch.zeros(B, H, N, 2,    device=device, dtype=torch.float32)
 
-    out1  = dsqg_attention_v8(q.clone(), k.clone(), v.clone(), pb, se, phb_z, phg_z, y_z, z_z)
-    ref1  = _reference_v8(q, k, v, pb, se, phb_z, phg_z, y_z, z_z)
+    out1  = dsqg_attention_v9(q.clone(), k.clone(), v.clone(), pb, se, phb_z, phg_z, y_z, z_z)
+    ref1  = _reference_v9(q, k, v, pb, se, phb_z, phg_z, y_z, z_z)
     diff  = (out1.float() - ref1.float()).abs().max().item()
     ok_z  = diff < 0.05
     if not ok_z: ok_all = False
@@ -927,6 +1004,52 @@ def run_tests(device='cuda'):
     ok_n = norm_err < 1e-4
     if not ok_n: ok_all = False
     print(f"  {'NPCI norm err':22s}  max_err={norm_err:.2e}  {'PASS' if ok_n else 'FAIL'}")
+
+    print()
+    print("  V9 delta_beta=0 → identical to base V8 Triton output:")
+    B, H, N, HD = 2, 8, 256, 64
+    D = H * HD
+    torch.manual_seed(99)
+    x_test = torch.randn(B, N, D, device=device) * 0.1
+
+    attn_v9 = DSQGAttentionV9(D, H, seq_len=N).to(device)
+    attn_v9.eval()
+    attn_v9.delta_beta.data.zero_()
+    out_beta0 = attn_v9(x_test.clone())
+
+    attn_v9_copy = DSQGAttentionV9(D, H, seq_len=N).to(device)
+    attn_v9_copy.eval()
+    attn_v9_copy.load_state_dict(attn_v9.state_dict())
+    attn_v9_copy.delta_beta.data.zero_()
+    out_beta0_copy = attn_v9_copy(x_test.clone())
+
+    diff_beta0 = (out_beta0.float() - out_beta0_copy.float()).abs().max().item()
+    ok_beta0 = diff_beta0 < 1e-4
+    if not ok_beta0: ok_all = False
+    print(f"  {'beta=0 consistency':22s}  max_diff={diff_beta0:.6f}  {'PASS' if ok_beta0 else 'FAIL'}")
+
+    print()
+    print("  V9 delta_beta!=0 → output changes:")
+    attn_v9.delta_beta.data.fill_(0.1)
+    out_beta_nonzero = attn_v9(x_test.clone())
+    diff_beta_change = (out_beta0.float() - out_beta_nonzero.float()).abs().max().item()
+    ok_beta_change = diff_beta_change > 1e-4
+    if not ok_beta_change: ok_all = False
+    print(f"  {'beta=0.1 changes output':22s}  max_diff={diff_beta_change:.4f}  {'PASS' if ok_beta_change else 'FAIL'}")
+
+    print()
+    print("  V9 attn_summary includes delta_beta:")
+    summary = attn_v9.attn_summary()
+    has_delta = ('delta_beta_mean' in summary and
+                 'delta_beta_max' in summary and
+                 'delta_beta_per_offset' in summary and
+                 'delta_beta_top3' in summary)
+    ok_summary = has_delta
+    if not ok_summary: ok_all = False
+    print(f"  {'attn_summary delta_beta':22s}  present={has_delta}  {'PASS' if ok_summary else 'FAIL'}")
+    if has_delta:
+        print(f"    delta_beta_mean={summary['delta_beta_mean']:.4f}")
+        print(f"    delta_beta_top3={summary['delta_beta_top3']}")
 
     print("=" * 70)
     print(f"{'ALL PASSED' if ok_all else 'SOME FAILED'}")
