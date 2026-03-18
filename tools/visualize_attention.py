@@ -56,6 +56,21 @@ _OFFSET_SETS = {
     'j20d_v10_L12': [1,2,3,4,5,6,7,8,9,11,13,15,16,23,32,64,128,256,512,1024],
     'j20d_v10_L32': [1,2,3,4,5,6,7,8,9,11,13,15,16,23,32,64,128,256,512,1024],
     'curve_27m':         [1,2,3,4,5,6,7,8,9,10,13,15,16,21,23,28,48,64,96,192,384,512,768,1024],
+    # Borg architecture variants (J=26 offsets, V8 kernel)
+    # Borg models use V8 kernel — pos_bias covers J=24 offsets only
+    # δ=11 and δ=32 are kernel-internal, no learned pos_bias entry
+    'borg_adapt_warmstart': [1,2,3,4,5,6,7,8,9,10,13,15,16,21,23,28,48,64,96,192,384,512,768,1024],
+    'borg_midattn':         [1,2,3,4,5,6,7,8,9,10,13,15,16,21,23,28,48,64,96,192,384,512,768,1024],
+    'borg_lastattn':        [1,2,3,4,5,6,7,8,9,10,13,15,16,21,23,28,48,64,96,192,384,512,768,1024],
+    'borg_midattn_gen2':    [1,2,3,4,5,6,7,8,9,10,13,15,16,21,23,28,48,64,96,192,384,512,768,1024],
+    'borg_midfa_L0':        [1,2,3,4,5,6,7,8,9,10,13,15,16,21,23,28,48,64,96,192,384,512,768,1024],
+    'borg2_dual_fa':        [1,2,3,4,5,6,7,8,9,10,13,15,16,21,23,28,48,64,96,192,384,512,768,1024],
+    'borg_L11':             [1,2,3,4,5,6,7,8,9,10,13,15,16,21,23,28,48,64,96,192,384,512,768,1024],
+    'borg_gen3_L8':         [1,2,3,4,5,6,7,8,9,10,13,15,16,21,23,28,48,64,96,192,384,512,768,1024],
+    'borg_gen5_L11_preIF':  [1,2,3,4,5,6,7,8,9,10,13,15,16,21,23,28,48,64,96,192,384,512,768,1024],
+    'borg_gen5_L8_preIF':   [1,2,3,4,5,6,7,8,9,10,13,15,16,21,23,28,48,64,96,192,384,512,768,1024],
+    'borg_gen4_L11':        [1,2,3,4,5,6,7,8,9,10,13,15,16,21,23,28,48,64,96,192,384,512,768,1024],
+    'cond_delta':           [1,2,3,4,5,6,7,8,9,10,13,15,16,21,23,28,48,64,96,192,384,512,768,1024],
 }
 
 _TRAIN_SCRIPTS = {
@@ -79,6 +94,19 @@ _TRAIN_SCRIPTS = {
     'j20d_v10_L12': 'train/train_j20d_v10_L12_bf16.py',
     'j20d_v10_L32': 'train/train_j20d_v10_L32_bf16.py',
     'curve_27m':         'train/train_curve_27m_bf16.py',
+    # Borg architecture variants
+    'borg_adapt_warmstart': 'train/train_borg_adapt_13m_bf16.py',
+    'borg_midattn':         'train/train_borg_midattn_bf16.py',
+    'borg_lastattn':        'train/train_borg_lastattn_bf16.py',
+    'borg_midattn_gen2':    'train/train_borg_midattn_unfreeze_bf16.py',
+    'borg_midfa_L0':        'train/train_borg_midfa_L0_bf16.py',
+    'borg2_dual_fa':        'train/train_borg2_dual_fa_bf16.py',
+    'borg_L11':             'train/train_borg_L11_bf16.py',
+    'borg_gen3_L8':         'train/train_borg_gen3_L8_bf16.py',
+    'borg_gen5_L11_preIF':  'train/train_borg_gen5_L11_preIF_bf16.py',
+    'borg_gen5_L8_preIF':   'train/train_borg_gen5_L8_preIF_bf16.py',
+    'borg_gen4_L11':        'train/train_borg_gen4_L11_bf16.py',
+    'cond_delta':           'train/train_cond_delta_bf16.py',
 }
 
 # Model class name to instantiate from the train script
@@ -102,6 +130,19 @@ _MODEL_CLASSES = {
     'j20d_v10_L12': 'AutoresearchTransformerPhysics',
     'j20d_v10_L32': 'AutoresearchTransformerPhysics',
     'curve_27m':         'CurveTransformer',
+    # Borg architecture variants
+    'borg_adapt_warmstart': 'AutoresearchTransformerPhysics',
+    'borg_midattn':         'AutoresearchTransformerPhysics',
+    'borg_lastattn':        'AutoresearchTransformerPhysics',
+    'borg_midattn_gen2':    'AutoresearchTransformerPhysics',
+    'borg_midfa_L0':        'AutoresearchTransformerPhysics',
+    'borg2_dual_fa':        'AutoresearchTransformerPhysics',
+    'borg_L11':             'AutoresearchTransformerPhysics',
+    'borg_gen3_L8':         'AutoresearchTransformerPhysics',
+    'borg_gen5_L11_preIF':  'AutoresearchTransformerPhysics',
+    'borg_gen5_L8_preIF':   'AutoresearchTransformerPhysics',
+    'borg_gen4_L11':        'AutoresearchTransformerPhysics',
+    'cond_delta':           'AutoresearchTransformerCondDelta',
 }
 
 # Archs without DSQG layers (standard transformers only)
@@ -568,7 +609,11 @@ def load_and_extract(checkpoint_path, arch, ids_tensor, device, root):
         full_weights_store = {}
         hook_handle = None
         if arch not in _NO_FULL_ATTN:
-            full_layer_idx = model.full_attn_layer
+            # Handle dual-FA models (full_attn_layers list) and single-FA (full_attn_layer int)
+            if hasattr(model, 'full_attn_layers'):
+                full_layer_idx = model.full_attn_layers[-1]
+            else:
+                full_layer_idx = model.full_attn_layer
             full_weights_store, hook_handle = capture_full_attention(model, None, full_layer_idx)
         _ = model(ids_tensor)
         if hook_handle is not None:
