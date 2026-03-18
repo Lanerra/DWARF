@@ -71,6 +71,14 @@ MODELS = [
         'checkpoint': '/tmp/dwarf-j17d/autoresearch/checkpoints/df0d435_j24d_int2_physics_best.pt',
         'D': 512, 'H': 8, 'L': 6, 'FFN': 2048, 'full_layer': 5, 'interference': 2,
     },
+    {
+        'name':       'Gen5-L8-preIF (45.6M) — CHAMPION',
+        'arch':       'borg_gen5_L8_preIF',
+        'script':     'train/train_borg_gen5_L8_preIF_bf16.py',
+        'model_cls':  'AutoresearchTransformerPhysics',
+        'checkpoint': 'autoresearch/checkpoints/borg_gen5_L8_preIF_best.pt',
+        'D': 512, 'H': 8, 'L': 8, 'FFN': 2048, 'full_layer': 2, 'interference': 2,
+    },
 ]
 
 def load_model(cfg, device):

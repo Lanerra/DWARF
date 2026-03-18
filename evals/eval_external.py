@@ -116,6 +116,24 @@ ARCH_CONFIGS = {
     # j24d_int2_physics: J24D relay-optimal offsets, V8 kernel, J=24, IF=2, condV physics, 39.5M
     'j24d_int2_physics': {'arch': 'j24d_int2_physics', 'D': 512, 'H': 8, 'FFN': 2048, 'L': 6, 'full_layer': 5, 'interference': 2,
                           'checkpoint': '/tmp/dwarf-j17d/autoresearch/checkpoints/df0d435_j24d_int2_physics_best.pt'},
+    # borg_midattn_gen2: L=5, unfrozen J26D FA at L2, full retrain
+    'borg_midattn_gen2': {'arch': 'borg_midattn_gen2', 'D': 512, 'H': 8, 'FFN': 2048, 'L': 5, 'full_layer': 2, 'interference': 2},
+    # borg_midfa_L0: L=6, unfrozen midattn ep2 FA at L0
+    'borg_midfa_L0': {'arch': 'borg_midfa_L0', 'D': 512, 'H': 8, 'FFN': 2048, 'L': 6, 'full_layer': 0, 'interference': 2},
+    # borg2_dual_fa: L=6, dual FA at L2+L5
+    'borg2_dual_fa': {'arch': 'borg2_dual_fa', 'D': 512, 'H': 8, 'FFN': 2048, 'L': 6, 'full_layers': [2, 5], 'interference': 2},
+    # borg_gen4_L11: L=11, borgL11 warm-start, FA@L5 unfrozen
+    'borg_gen4_L11': {'arch': 'borg_gen4_L11', 'D': 512, 'H': 8, 'FFN': 2048, 'L': 11, 'full_layer': 5, 'interference': 2},
+    # borg_gen5_L11_preIF: L=11, Gen5-L8 warm-start, FA@L2
+    'borg_gen5_L11_preIF': {'arch': 'borg_gen5_L11_preIF', 'D': 512, 'H': 8, 'FFN': 2048, 'L': 11, 'full_layer': 2, 'interference': 2},
+    # borg_gen5_L8_preIF: L=8, Gen3 warm-start, pre-FA IF only
+    'borg_gen5_L8_preIF': {'arch': 'borg_gen5_L8_preIF', 'D': 512, 'H': 8, 'FFN': 2048, 'L': 8, 'full_layer': 2, 'interference': 2},
+    # borg_gen3_L8: L=8, Gen2 warm-start, FA@L2 unfrozen
+    'borg_gen3_L8': {'arch': 'borg_gen3_L8', 'D': 512, 'H': 8, 'FFN': 2048, 'L': 8, 'full_layer': 2, 'interference': 2},
+    # borg_L11: L=11, frozen J26D FA at L10
+    'borg_L11': {'arch': 'borg_L11', 'D': 512, 'H': 8, 'FFN': 2048, 'L': 11, 'full_layer': 10, 'interference': 2},
+    # cond_delta: L=6, V9 delta rule kernel, J26D topology
+    'cond_delta': {'arch': 'cond_delta', 'D': 512, 'H': 8, 'FFN': 2048, 'L': 6, 'full_layer': 5, 'interference': 2},
 }
 
 TASKS = ['hellaswag', 'piqa', 'arc_easy', 'arc_challenge', 'winogrande', 'lambada']
@@ -340,6 +358,96 @@ def load_model_from_arch(arch_name, checkpoint_path, device):
         mod  = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(mod)
         model = mod.AutoresearchTransformerPhysics(
+            vocab_size=VOCAB_SIZE, embedding_dim=D, num_layers=L,
+            num_heads=H, ffn_dim=FFN, seq_len=MAX_SEQ_LEN,
+            full_attn_layer=cfg.get('full_layer', 5),
+            interference_interval=cfg.get('interference', 2),
+            scale_embed_init_val=0.1,
+        ).to(device)
+
+    elif arch in ('borg_midattn_gen2', 'borg_midfa_L0'):
+        import importlib.util
+        repo_root = os.path.normpath(os.path.join(SCRIPT_DIR, '..'))
+        for _d in [os.path.join(repo_root, 'kernels'), repo_root]:
+            if _d not in sys.path:
+                sys.path.insert(0, _d)
+        train_script = os.path.join(repo_root, 'train', 'train_j26d_int2_physics_bf16.py')
+        spec = importlib.util.spec_from_file_location('j26d_int2_physics_train', train_script)
+        mod  = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        model = mod.AutoresearchTransformerPhysics(
+            vocab_size=VOCAB_SIZE, embedding_dim=D, num_layers=L,
+            num_heads=H, ffn_dim=FFN, seq_len=MAX_SEQ_LEN,
+            full_attn_layer=cfg.get('full_layer', L - 1),
+            interference_interval=cfg.get('interference', 2),
+            scale_embed_init_val=0.1,
+        ).to(device)
+
+    elif arch == 'borg2_dual_fa':
+        import importlib.util
+        repo_root = os.path.normpath(os.path.join(SCRIPT_DIR, '..'))
+        for _d in [os.path.join(repo_root, 'kernels'), repo_root]:
+            if _d not in sys.path:
+                sys.path.insert(0, _d)
+        train_script = os.path.join(repo_root, 'train', 'train_borg2_dual_fa_bf16.py')
+        spec = importlib.util.spec_from_file_location('borg2_dual_fa_train', train_script)
+        mod  = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        model = mod.AutoresearchTransformerPhysics(
+            vocab_size=VOCAB_SIZE, embedding_dim=D, num_layers=L,
+            num_heads=H, ffn_dim=FFN, seq_len=MAX_SEQ_LEN,
+            full_attn_layers=cfg.get('full_layers', [2, 5]),
+            interference_interval=cfg.get('interference', 2),
+            scale_embed_init_val=0.1,
+        ).to(device)
+
+    elif arch == 'borg_gen3_L8':
+        import importlib.util
+        repo_root = os.path.normpath(os.path.join(SCRIPT_DIR, '..'))
+        for _d in [os.path.join(repo_root, 'kernels'), repo_root]:
+            if _d not in sys.path:
+                sys.path.insert(0, _d)
+        train_script = os.path.join(repo_root, 'train', 'train_borg_gen3_L8_bf16.py')
+        spec = importlib.util.spec_from_file_location('borg_gen3_L8_train', train_script)
+        mod  = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        model = mod.AutoresearchTransformerPhysics(
+            vocab_size=VOCAB_SIZE, embedding_dim=D, num_layers=L,
+            num_heads=H, ffn_dim=FFN, seq_len=MAX_SEQ_LEN,
+            full_attn_layer=cfg.get('full_layer', 2),
+            interference_interval=cfg.get('interference', 2),
+            scale_embed_init_val=0.1,
+        ).to(device)
+
+    elif arch == 'borg_L11':
+        import importlib.util
+        repo_root = os.path.normpath(os.path.join(SCRIPT_DIR, '..'))
+        for _d in [os.path.join(repo_root, 'kernels'), repo_root]:
+            if _d not in sys.path:
+                sys.path.insert(0, _d)
+        train_script = os.path.join(repo_root, 'train', 'train_borg_L11_bf16.py')
+        spec = importlib.util.spec_from_file_location('borg_L11_train', train_script)
+        mod  = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        model = mod.AutoresearchTransformerPhysics(
+            vocab_size=VOCAB_SIZE, embedding_dim=D, num_layers=L,
+            num_heads=H, ffn_dim=FFN, seq_len=MAX_SEQ_LEN,
+            full_attn_layer=cfg.get('full_layer', L - 1),
+            interference_interval=cfg.get('interference', 2),
+            scale_embed_init_val=0.1,
+        ).to(device)
+
+    elif arch == 'cond_delta':
+        import importlib.util
+        repo_root = os.path.normpath(os.path.join(SCRIPT_DIR, '..'))
+        for _d in [os.path.join(repo_root, 'kernels'), repo_root]:
+            if _d not in sys.path:
+                sys.path.insert(0, _d)
+        train_script = os.path.join(repo_root, 'train', 'train_cond_delta_bf16.py')
+        spec = importlib.util.spec_from_file_location('cond_delta_train', train_script)
+        mod  = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        model = mod.AutoresearchTransformerCondDelta(
             vocab_size=VOCAB_SIZE, embedding_dim=D, num_layers=L,
             num_heads=H, ffn_dim=FFN, seq_len=MAX_SEQ_LEN,
             full_attn_layer=cfg.get('full_layer', 5),

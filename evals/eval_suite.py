@@ -180,6 +180,72 @@ def _import_curve_27m():
     spec.loader.exec_module(mod)
     return mod.CurveTransformer
 
+def _import_borg2_dual_fa():
+    """Import AutoresearchTransformerPhysics from train_borg2_dual_fa_bf16.py (dual FA at L2+L5)."""
+    import importlib.util
+    repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    for _d in [os.path.join(repo_root, 'kernels'), repo_root]:
+        if _d not in sys.path:
+            sys.path.insert(0, _d)
+    script = os.path.join(repo_root, 'train', 'train_borg2_dual_fa_bf16.py')
+    spec = importlib.util.spec_from_file_location('borg2_dual_fa_train', script)
+    mod  = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod.AutoresearchTransformerPhysics
+
+def _import_borg_gen3_L8():
+    """Import AutoresearchTransformerPhysics from train_borg_gen3_L8_bf16.py (L=8, FA at L2, Gen2 warm-start)."""
+    import importlib.util
+    repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    script = os.path.join(repo_root, 'train', 'train_borg_gen3_L8_bf16.py')
+    spec = importlib.util.spec_from_file_location('borg_gen3_L8_train', script)
+    mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
+    return mod.AutoresearchTransformerPhysics
+
+def _import_borg_gen5_L8_preIF():
+    """Import AutoresearchTransformerPhysics from train_borg_gen5_L8_preIF_bf16.py (L=8, pre-FA IF only)."""
+    import importlib.util
+    repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    script = os.path.join(repo_root, 'train', 'train_borg_gen5_L8_preIF_bf16.py')
+    spec = importlib.util.spec_from_file_location('borg_gen5_preIF_train', script)
+    mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
+    return mod.AutoresearchTransformerPhysics
+
+
+def _import_borg_gen5_L11_preIF():
+    """Import AutoresearchTransformerPhysics from train_borg_gen5_L11_preIF_bf16.py (L=11, pre-FA IF only)."""
+    import importlib.util
+    repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    script = os.path.join(repo_root, 'train', 'train_borg_gen5_L11_preIF_bf16.py')
+    spec = importlib.util.spec_from_file_location('borg_gen5_L11_preIF_train', script)
+    mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
+    return mod.AutoresearchTransformerPhysics
+def _import_borg_L11():
+    """Import AutoresearchTransformerPhysics from train_borg_L11_bf16.py (L=11, FA at L10)."""
+    import importlib.util
+    repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    for _d in [os.path.join(repo_root, 'kernels'), repo_root]:
+        if _d not in sys.path:
+            sys.path.insert(0, _d)
+    script = os.path.join(repo_root, 'train', 'train_borg_L11_bf16.py')
+    spec = importlib.util.spec_from_file_location('borg_L11_train', script)
+    mod  = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod.AutoresearchTransformerPhysics
+
+def _import_cond_delta():
+    """Import AutoresearchTransformerCondDelta from train_cond_delta_bf16.py (V9 delta rule kernel)."""
+    import importlib.util
+    repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    for _d in [os.path.join(repo_root, 'kernels'), repo_root]:
+        if _d not in sys.path:
+            sys.path.insert(0, _d)
+    script = os.path.join(repo_root, 'train', 'train_cond_delta_bf16.py')
+    spec = importlib.util.spec_from_file_location('cond_delta_train', script)
+    mod  = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod.AutoresearchTransformerCondDelta
+
 # ─── Paths ────────────────────────────────────────────────────────────────────
 
 SCRIPT_DIR  = os.path.dirname(os.path.abspath(__file__))
@@ -443,6 +509,104 @@ MODEL_REGISTRY = {
         'checkpoint': os.path.join(CKPT_ROOT, '..', 'autoresearch', 'checkpoints', '99437df_j26d_int2_physics_best.pt'),
         'label':      'J26D-int2 Physics 39.5M (J=26, V6, IF=2, condV physics, EMA dead-zone fix)',
         'params_ref': None,
+    },
+    # borg_adapt_warmstart: J26D topology L=3, FA at L0, warmstarted from J26D, unfrozen
+    'borg_adapt_warmstart': {
+        'arch':       'borg_adapt_warmstart',
+        'D':          512, 'H': 8, 'FFN': 2048, 'L': 3, 'full_layer': 0,
+        'interference': 2,
+        'checkpoint': os.path.join(CKPT_ROOT, '..', 'autoresearch', 'checkpoints', 'borg_adapt_13m_warmstart_best.pt'),
+        'label':      'Borg Adapt Warmstart 28.5M (FA@L0 unfrozen, J26D warmstart, negative result)',
+    },
+    # borg_midattn: L=5, frozen J26D FA at L2, 4 DSQG blocks train
+    'borg_midattn': {
+        'arch':       'borg_midattn',
+        'D':          512, 'H': 8, 'FFN': 2048, 'L': 5, 'full_layer': 2,
+        'interference': 2,
+        'checkpoint': os.path.join(CKPT_ROOT, '..', 'autoresearch', 'checkpoints', 'borg_midattn_best.pt'),
+        'label':      'Borg MidAttn 36.1M (frozen J26D FA@L2, 4 DSQG blocks trained)',
+    },
+    # borg_lastattn: L=6, frozen J26D FA at L5 (last), 5 DSQG blocks train
+    'borg_lastattn': {
+        'arch':       'borg_lastattn',
+        'D':          512, 'H': 8, 'FFN': 2048, 'L': 6, 'full_layer': 5,
+        'interference': 2,
+        'checkpoint': os.path.join(CKPT_ROOT, '..', 'autoresearch', 'checkpoints', 'borg_lastattn_best.pt'),
+        'label':      'Borg LastAttn 39.5M (frozen J26D FA@L5, 5 DSQG blocks trained)',
+    },
+    # borg_midattn_gen2: L=5, unfrozen J26D FA at L2, full retrain (3 epochs)
+    'borg_midattn_gen2': {
+        'arch':       'borg_midattn_gen2',
+        'D':          512, 'H': 8, 'FFN': 2048, 'L': 5, 'full_layer': 2,
+        'interference': 2,
+        'checkpoint': os.path.join(CKPT_ROOT, '..', 'autoresearch', 'checkpoints', 'borg_midattn_gen2_best.pt'),
+        'label':      'Borg MidAttn Gen2 36.1M (unfrozen J26D FA@L2, full retrain)',
+    },
+    # borg_midfa_L0: L=6, unfrozen midattn ep2 FA at L0 — negative result
+    'borg_midfa_L0': {
+        'arch':       'borg_midfa_L0',
+        'D':          512, 'H': 8, 'FFN': 2048, 'L': 6, 'full_layer': 0,
+        'interference': 2,
+        'checkpoint': os.path.join(CKPT_ROOT, '..', 'autoresearch', 'checkpoints', 'borg_midfa_L0_best.pt'),
+        'label':      'Borg MidFA@L0 40.3M (midattn ep2 FA transplanted to L0, unfrozen)',
+    },
+    # borg2_dual_fa: L=6, frozen FA@L2 + unfrozen J26D FA@L5
+    'borg2_dual_fa': {
+        'arch':       'borg2_dual_fa',
+        'D':          512, 'H': 8, 'FFN': 2048, 'L': 6,
+        'full_layers': [2, 5],
+        'interference': 2,
+        'checkpoint': os.path.join(CKPT_ROOT, '..', 'autoresearch', 'checkpoints', 'borg2_dual_fa_best.pt'),
+        'label':      'Borg2 Dual-FA 39.5M (frozen FA@L2 + unfrozen J26D FA@L5)',
+    },
+    # borg_gen4_L11: L=11, borgL11 full warm-start, FA@L5 unfrozen — scaling test
+    'borg_gen4_L11': {
+        'arch':       'borg_gen4_L11',
+        'D':          512, 'H': 8, 'FFN': 2048, 'L': 11, 'full_layer': 5,
+        'interference': 2,
+        'checkpoint': os.path.join(CKPT_ROOT, '..', 'autoresearch', 'checkpoints', 'borg_gen4_L11_best.pt'),
+        'label':      'Borg Gen4 L=11 (borgL11 warm-start, FA@L5 unfrozen, scaling test)',
+    },
+    # borg_gen5_L11_preIF: L=11, Gen5-L8 warm-start, FA@L2 unfrozen, IF@L1 only
+    'borg_gen5_L11_preIF': {
+        'arch':       'borg_gen5_L11_preIF',
+        'D':          512, 'H': 8, 'FFN': 2048, 'L': 11, 'full_layer': 2,
+        'interference': 2,
+        'checkpoint': os.path.join(CKPT_ROOT, '..', 'autoresearch', 'checkpoints', 'borg_gen5_L11_preIF_best.pt'),
+        'label':      'Borg Gen5 L=11 preIF (Gen5-L8 warm-start, FA@L2 unfrozen, IF@L1 only)',
+    },
+    # borg_gen5_L8_preIF: L=8, Gen3 warm-start, pre-FA IF only
+    'borg_gen5_L8_preIF': {
+        'arch':       'borg_gen5_L8_preIF',
+        'D':          512, 'H': 8, 'FFN': 2048, 'L': 8, 'full_layer': 2,
+        'interference': 2,
+        'checkpoint': os.path.join(CKPT_ROOT, '..', 'autoresearch', 'checkpoints', 'borg_gen5_L8_preIF_best.pt'),
+        'label':      'Borg Gen5 L=8 preIF (Gen3 warm-start, IF only pre-FA)',
+    },
+    # borg_gen3_L8: L=8, Gen2 full warm-start, FA@L2 unfrozen — scaling test
+    'borg_gen3_L8': {
+        'arch':       'borg_gen3_L8',
+        'D':          512, 'H': 8, 'FFN': 2048, 'L': 8, 'full_layer': 2,
+        'interference': 2,
+        'checkpoint': os.path.join(CKPT_ROOT, '..', 'autoresearch', 'checkpoints', 'borg_gen3_L8_best.pt'),
+        'label':      'Borg Gen3 L=8 (Gen2 warm-start, FA@L2 unfrozen, scaling test)',
+    },
+    # borg_L11: L=11, frozen J26D FA at L10
+    'borg_L11': {
+        'arch':       'borg_L11',
+        'D':          512, 'H': 8, 'FFN': 2048, 'L': 11, 'full_layer': 10,
+        'interference': 2,
+        'checkpoint': os.path.join(CKPT_ROOT, '..', 'autoresearch', 'checkpoints', 'borg_L11_best.pt'),
+        'label':      'Borg L=11 54M (frozen J26D FA@L10, phase coherence test)',
+    },
+    # cond_delta: L=6, V9 kernel (delta rule), J26D topology
+    'cond_delta': {
+        'arch':       'cond_delta',
+        'D':          512, 'H': 8, 'FFN': 2048, 'L': 6, 'full_layer': 5,
+        'interference': 2,
+        'checkpoint': None,
+        'checkpoint_glob': os.path.join(CKPT_ROOT, '..', 'autoresearch', 'checkpoints', '*_cond_delta_best.pt'),
+        'label':      'condDelta 39.5M (V9 delta rule kernel, J26D topology)',
     },
     # curve_27m: J24D offsets, V8 kernel, J=24, D=512, FFN=768 (27M), IF=2, condV physics
     'curve_27m': {
@@ -907,6 +1071,79 @@ def build_model(cfg):
             full_attn_layer=cfg.get('full_layer', -1),
             interference_interval=cfg.get('interference', 3),
         )
+    elif arch in ('borg_adapt_warmstart', 'borg_midattn', 'borg_lastattn',
+                   'borg_midattn_gen2', 'borg_midfa_L0'):
+        AutoresearchTransformerPhysics = _import_j26d_int2_physics()
+        return AutoresearchTransformerPhysics(
+            vocab_size=VOCAB_SIZE, embedding_dim=D, num_layers=L, num_heads=H,
+            ffn_dim=FFN, seq_len=MAX_SEQ_LEN,
+            full_attn_layer=cfg.get('full_layer', L - 1),
+            interference_interval=cfg.get('interference', 2),
+            scale_embed_init_val=0.1,
+        )
+    elif arch == 'borg2_dual_fa':
+        ATP = _import_borg2_dual_fa()
+        return ATP(
+            vocab_size=VOCAB_SIZE, embedding_dim=D, num_layers=L, num_heads=H,
+            ffn_dim=FFN, seq_len=MAX_SEQ_LEN,
+            full_attn_layers=cfg.get('full_layers', [2, 5]),
+            interference_interval=cfg.get('interference', 2),
+            scale_embed_init_val=0.1,
+        )
+    elif arch == 'borg_gen4_L11':
+        ATP = _import_borg_gen3_L8()  # same model class, different L/FA position
+        return ATP(
+            vocab_size=VOCAB_SIZE, embedding_dim=D, num_layers=L, num_heads=H,
+            ffn_dim=FFN, seq_len=MAX_SEQ_LEN,
+            full_attn_layer=cfg.get('full_layer', 5),
+            interference_interval=cfg.get('interference', 2),
+            scale_embed_init_val=0.1,
+        )
+    elif arch == 'borg_gen5_L11_preIF':
+        ATP = _import_borg_gen5_L11_preIF()
+        return ATP(
+            vocab_size=VOCAB_SIZE, embedding_dim=D, num_layers=L, num_heads=H,
+            ffn_dim=FFN, seq_len=MAX_SEQ_LEN,
+            full_attn_layer=cfg.get('full_layer', 2),
+            interference_interval=2,
+            scale_embed_init_val=0.1,
+        )
+    elif arch == 'borg_gen5_L8_preIF':
+        ATP = _import_borg_gen5_L8_preIF()
+        return ATP(
+            vocab_size=VOCAB_SIZE, embedding_dim=D, num_layers=L, num_heads=H,
+            ffn_dim=FFN, seq_len=MAX_SEQ_LEN,
+            full_attn_layer=cfg.get('full_layer', 2),
+            interference_interval=2,  # passed but overridden by pre-FA IF logic in script
+            scale_embed_init_val=0.1,
+        )
+    elif arch == 'borg_gen3_L8':
+        ATP = _import_borg_gen3_L8()
+        return ATP(
+            vocab_size=VOCAB_SIZE, embedding_dim=D, num_layers=L, num_heads=H,
+            ffn_dim=FFN, seq_len=MAX_SEQ_LEN,
+            full_attn_layer=cfg.get('full_layer', 2),
+            interference_interval=cfg.get('interference', 2),
+            scale_embed_init_val=0.1,
+        )
+    elif arch == 'borg_L11':
+        ATP = _import_borg_L11()
+        return ATP(
+            vocab_size=VOCAB_SIZE, embedding_dim=D, num_layers=L, num_heads=H,
+            ffn_dim=FFN, seq_len=MAX_SEQ_LEN,
+            full_attn_layer=cfg.get('full_layer', L - 1),
+            interference_interval=cfg.get('interference', 2),
+            scale_embed_init_val=0.1,
+        )
+    elif arch == 'cond_delta':
+        CondDelta = _import_cond_delta()
+        return CondDelta(
+            vocab_size=VOCAB_SIZE, embedding_dim=D, num_layers=L, num_heads=H,
+            ffn_dim=FFN, seq_len=MAX_SEQ_LEN,
+            full_attn_layer=cfg.get('full_layer', 5),
+            interference_interval=cfg.get('interference', 2),
+            scale_embed_init_val=0.1,
+        )
     elif arch in ('j20d_v10_L8', 'j20d_v10_L10', 'j20d_v10_L12', 'j20d_v10_L32'):
         num_layers = int(arch.split('_L')[1])
         ATP = _import_j20d_v10_L(num_layers)
@@ -940,7 +1177,14 @@ def build_model(cfg):
 
 
 def load_model(cfg, device):
+    import glob
     ckpt_path = cfg['checkpoint']
+    if ckpt_path is None and cfg.get('checkpoint_glob'):
+        matches = sorted(glob.glob(cfg['checkpoint_glob']), key=os.path.getmtime, reverse=True)
+        if not matches:
+            raise FileNotFoundError(f"No checkpoint found matching glob: {cfg['checkpoint_glob']}")
+        ckpt_path = matches[0]
+        print(f"  Resolved checkpoint via glob: {os.path.basename(ckpt_path)}")
     if not os.path.exists(ckpt_path):
         raise FileNotFoundError(f"Checkpoint not found: {ckpt_path}")
     model = build_model(cfg)
