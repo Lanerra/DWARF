@@ -2,14 +2,14 @@
   🔬 DWARF Autoresearch — BORG MID-ATTN GEN2 (FA unfrozen)
   FullAttn at L2 of L=8, warm-started from Gen2 full checkpoint, FA UNFROZEN for refinement
 ======================================================================
-  GPU: NVIDIA GeForce RTX 4090
+  GPU: NVIDIA H100 NVL
   D=512, H=8, L=8, FFN=2048
   IF interval=2, Full attn layer=2 (L2 of 8, Gen3 scaling test)
   scale_embed init=0.1, LR mult=15.0
   EMA α₀=0.00035 (window≈2857t), floor=1e-05
   MAX_TRAIN_SEQS=121232, LR=0.0003, Epochs=3
   FREEZE_FULL_ATTN_AFTER_EPOCH=None
-  git=c2688a0
+  git=99437df
 Loading FineWeb-Edu from cache: benchmarks/logs/condm_fineweb_edu_doc_cache.json
   Loaded 100,000 docs from cache
 Loaded tokenizer from results/2048_condI_tokenizer.json
@@ -22,52 +22,94 @@ Loading pre-encoded dataset from logs/fineweb_encoded_2048.pt
   compiled FullAttnBlock at layer 2
   torch.compile applied to FullAttnBlock(s)
 Parameters: 47,927,216 (47.9M)
-Traceback (most recent call last):
-  File "/home/dlewis3/Desktop/AI/DWARF/train/train_borg_gen3_L8_bf16.py", line 650, in <module>
-    train(no_warmstart=args.no_warmstart)
-  File "/home/dlewis3/Desktop/AI/DWARF/train/train_borg_gen3_L8_bf16.py", line 556, in train
-    logits = model(x)
-             ^^^^^^^^
-  File "/home/dlewis3/Desktop/AI/DWARF/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
-    return self._call_impl(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/dlewis3/Desktop/AI/DWARF/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
-    return forward_call(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/dlewis3/Desktop/AI/DWARF/train/train_borg_gen3_L8_bf16.py", line 263, in forward
-    x = block(x)
-        ^^^^^^^^
-  File "/home/dlewis3/Desktop/AI/DWARF/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
-    return self._call_impl(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/dlewis3/Desktop/AI/DWARF/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
-    return forward_call(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/dlewis3/Desktop/AI/DWARF/train/train_borg_gen3_L8_bf16.py", line 167, in forward
-    x = x + self.attn(self.norm1(x), kv_inject=kv_inject)
-            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/dlewis3/Desktop/AI/DWARF/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
-    return self._call_impl(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/dlewis3/Desktop/AI/DWARF/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
-    return forward_call(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/dlewis3/Desktop/AI/DWARF/kernels/dsqg_attention_v8.py", line 769, in forward
-    out = dsqg_attention_v8(q, k, v,
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/dlewis3/Desktop/AI/DWARF/kernels/dsqg_attention_v8.py", line 687, in dsqg_attention_v8
-    out = _DSQGFnV8.apply(
-          ^^^^^^^^^^^^^^^^
-  File "/home/dlewis3/Desktop/AI/DWARF/.venv/lib/python3.12/site-packages/torch/autograd/function.py", line 575, in apply
-    return super().apply(*args, **kwargs)  # type: ignore[misc]
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/dlewis3/Desktop/AI/DWARF/kernels/dsqg_attention_v8.py", line 546, in forward
-    _fwd_v8[g](
-  File "/home/dlewis3/Desktop/AI/DWARF/.venv/lib/python3.12/site-packages/triton/runtime/jit.py", line 330, in <lambda>
-    return lambda *args, **kwargs: self.run(grid=grid, warmup=False, *args, **kwargs)
-                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/dlewis3/Desktop/AI/DWARF/.venv/lib/python3.12/site-packages/triton/runtime/jit.py", line 653, in run
-    kernel.run(grid_0, grid_1, grid_2, stream, kernel.function, kernel.packed_metadata, launch_metadata,
-  File "/home/dlewis3/Desktop/AI/DWARF/.venv/lib/python3.12/site-packages/triton/backends/nvidia/driver.py", line 444, in __call__
-    self.launch(*args, **kwargs)
-RuntimeError: Triton Error [CUDA]: out of memory
+  Step 200/3789 | Loss 3.7070
+  Step 400/3789 | Loss 3.7740
+  Step 600/3789 | Loss 3.7039
+  Step 800/3789 | Loss 3.8514
+  Step 1000/3789 | Loss 3.7541
+  Step 1200/3789 | Loss 3.7817
+  Step 1400/3789 | Loss 3.9705
+  Step 1600/3789 | Loss 3.8204
+  Step 1800/3789 | Loss 3.8401
+  Step 2000/3789 | Loss 3.8399
+  Step 2200/3789 | Loss 3.8515
+  Step 2400/3789 | Loss 3.7578
+  Step 2600/3789 | Loss 3.8399
+  Step 2800/3789 | Loss 3.7172
+  Step 3000/3789 | Loss 3.7292
+  Step 3200/3789 | Loss 3.7810
+  Step 3400/3789 | Loss 3.6130
+  Step 3600/3789 | Loss 3.7421
+/usr/local/lib/python3.11/dist-packages/torch/_inductor/compile_fx.py:194: UserWarning: TensorFloat32 tensor cores for float32 matrix multiplication available but not enabled. Consider setting `torch.set_float32_matmul_precision('high')` for better performance.
+  warnings.warn(
+Ep 1/3 | Val PPL 37.92 *
+  scale_embed |mean|=0.3029 |max|=2.6496
+  Physics: b1: α=0.0228(w≈44t) kdv=-0.0000  b3: α=-0.0015(w≈100000t) kdv=-0.0000  b5: α=-0.0013(w≈100000t) kdv=-0.0000  b7: α=-0.0020(w≈100000t) kdv=-0.0000
+  Saved FullAttn checkpoint: autoresearch/checkpoints/borg_gen3_L8_ep1_full_attn.pt
+  Passkey mean=98.3%
+  d=1:100%  d=2:100%  d=4:100%  d=8:100%  d=16:100%  d=32:100%  d=64:100%  d=128:100%  d=256:100%  d=512:90%  d=1024:100%  d=1536:90%
+  Step 200/3789 | Loss 3.6614
+  Step 400/3789 | Loss 3.6894
+  Step 600/3789 | Loss 3.7337
+  Step 800/3789 | Loss 3.7631
+  Step 1000/3789 | Loss 3.5449
+  Step 1200/3789 | Loss 3.7305
+  Step 1400/3789 | Loss 3.7742
+  Step 1600/3789 | Loss 3.7147
+  Step 1800/3789 | Loss 3.4986
+  Step 2000/3789 | Loss 3.6814
+  Step 2200/3789 | Loss 3.6239
+  Step 2400/3789 | Loss 3.5747
+  Step 2600/3789 | Loss 3.5211
+  Step 2800/3789 | Loss 3.6559
+  Step 3000/3789 | Loss 3.6304
+  Step 3200/3789 | Loss 3.6007
+  Step 3400/3789 | Loss 3.7147
+  Step 3600/3789 | Loss 3.6409
+Ep 2/3 | Val PPL 34.58 *
+  scale_embed |mean|=0.2921 |max|=2.5950
+  Physics: b1: α=0.0215(w≈46t) kdv=-0.0000  b3: α=-0.0014(w≈100000t) kdv=-0.0000  b5: α=-0.0013(w≈100000t) kdv=-0.0000  b7: α=-0.0018(w≈100000t) kdv=-0.0000
+  Saved FullAttn checkpoint: autoresearch/checkpoints/borg_gen3_L8_ep2_full_attn.pt
+  Passkey mean=98.3%
+  d=1:100%  d=2:100%  d=4:100%  d=8:100%  d=16:100%  d=32:100%  d=64:100%  d=128:100%  d=256:100%  d=512:100%  d=1024:100%  d=1536:80%
+  Step 200/3789 | Loss 3.4758
+  Step 400/3789 | Loss 3.6821
+  Step 600/3789 | Loss 3.7238
+  Step 800/3789 | Loss 3.5679
+  Step 1000/3789 | Loss 3.5280
+  Step 1200/3789 | Loss 3.6352
+  Step 1400/3789 | Loss 3.6334
+  Step 1600/3789 | Loss 3.5218
+  Step 1800/3789 | Loss 3.6055
+  Step 2000/3789 | Loss 3.5151
+  Step 2200/3789 | Loss 3.5869
+  Step 2400/3789 | Loss 3.6742
+  Step 2600/3789 | Loss 3.4661
+  Step 2800/3789 | Loss 3.5711
+  Step 3000/3789 | Loss 3.5688
+  Step 3200/3789 | Loss 3.5130
+  Step 3400/3789 | Loss 3.5312
+  Step 3600/3789 | Loss 3.6198
+Ep 3/3 | Val PPL 33.63 *
+  scale_embed |mean|=0.2883 |max|=2.5602
+  Physics: b1: α=0.0213(w≈47t) kdv=-0.0000  b3: α=-0.0014(w≈100000t) kdv=-0.0000  b5: α=-0.0013(w≈100000t) kdv=-0.0000  b7: α=-0.0018(w≈100000t) kdv=-0.0000
+  Saved FullAttn checkpoint: autoresearch/checkpoints/borg_gen3_L8_ep3_full_attn.pt
+  Passkey mean=98.3%
+  d=1:100%  d=2:100%  d=4:100%  d=8:100%  d=16:100%  d=32:100%  d=64:100%  d=128:100%  d=256:100%  d=512:100%  d=1024:100%  d=1536:80%
+
+---
+passkey_ep1:    98.3
+passkey_ep2:    98.3
+passkey_ep3:    98.3
+ppl_ep1:        37.92
+ppl_ep2:        34.58
+ppl_ep3:        33.63
+ar_score:       80.03
+memory_mb:      49974.6
+elapsed_s:      10005.5
+num_params_M:   47.9
+num_layers:     8
+num_offsets:    24
+scale_embed_lr_mult: 15.0
+ema_init:       0.00035
+description:    Borg Gen3 L=8 — 47.9M, Gen2 full warm-start, FA@L2 unfrozen, D=512, L=8, FA@L2 unfrozen, scaling test

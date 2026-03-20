@@ -28,28 +28,30 @@ OFFSETS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13, 15, 16, 21, 23, 28, 48, 64, 96, 19
 EMBEDDING_DIM    = 512
 NUM_HEADS        = 8
 FFN_DIM          = 2048
-NUM_LAYERS       = 5
+NUM_LAYERS       = 8
+INTERFERENCE     = 2
 FULL_ATTN_LAYER  = 2
 
 MAX_TRAIN_SEQS      = 121_232
-SCALE_EMBED_INIT_VAL = 0.1
+SCALE_EMBED_INIT_VAL = 0.15  # confirmed faster relay acquisition
 SCALE_EMBED_LR_MULT  = 15.0
 
 EMA_INIT  = 0.00035
 EMA_FLOOR = 0.00001
 
 LR            = 3e-4
-SCREEN_EPOCHS = 2
+SCREEN_EPOCHS = 3
 
-FREEZE_FULL_ATTN_AFTER_EPOCH = 0
+FREEZE_FULL_ATTN_AFTER_EPOCH = None
 
-EXTRACTED_CKPT = "autoresearch/checkpoints/borg_midattn_gen2_best.pt"
+EXTRACTED_CKPT = ""   # Gen6: no warm-start — training FA@L2 natively from scratch
 
 # =============================================================================
 
 import json, math, os, subprocess, sys, time
 import torch
 import torch.nn as nn
+from torch.utils.checkpoint import checkpoint as grad_ckpt
 import torch.nn.functional as F
 
 # H100: enable TF32 tensor cores for free speedup on FP32 ops (optimizer states, reductions)
@@ -58,8 +60,8 @@ torch.set_float32_matmul_precision('high')
 os.environ.setdefault('PYTORCH_CUDA_ALLOC_CONF', 'expandable_segments:True')
 
 VOCAB_SIZE     = 32000
-BATCH_SIZE     = 8
-GRAD_ACCUM     = 4
+BATCH_SIZE     = 16   # safe on 4090 with grad_ckpt FA recompute at N=2048
+GRAD_ACCUM     = 2    # effective batch=32 (same as 8×4), 2× more updates
 MAX_SEQ_LEN    = 2048
 NUM_DOCS       = 100_000
 MAX_VAL_SEQS   = 5_582
@@ -157,7 +159,7 @@ class DSQGBlockV6Physics(nn.Module):
             B, N, D = xi.shape
             H, HD   = self.num_heads, self.head_dim
 
-            pool = _causal_ema(xi, self.ema_factor, floor=EMA_FLOOR)
+            pool = _causal_ema(xi, self.ema_factor.abs() + EMA_FLOOR, floor=EMA_FLOOR)  # abs() prevents dead zone
             pool = _kdv_correction(pool, self.kdv_alpha)
             pool = _agc_normalize(pool)
 
@@ -214,7 +216,7 @@ class FullAttentionBlock(nn.Module):
 
 class AutoresearchTransformerPhysics(nn.Module):
     def __init__(self, vocab_size, embedding_dim, num_layers, num_heads,
-                 ffn_dim, seq_len, full_attn_layer,
+                 ffn_dim, seq_len, full_attn_layer, interference_interval,
                  scale_embed_init_val=0.0, dropout=0.1):
         super().__init__()
         self.embedding       = nn.Embedding(vocab_size, embedding_dim)
@@ -228,7 +230,8 @@ class AutoresearchTransformerPhysics(nn.Module):
                 blocks.append(FullAttentionBlock(
                     embedding_dim, num_heads, ffn_dim, dropout))
             else:
-                has_if = (i == full_attn_layer - 1)  # preIF only: single IF block immediately before FA
+                # Pre-FA IF only: IF on the single layer immediately before FA, pure DSQG everywhere else
+                has_if = (i == full_attn_layer - 1)
                 blocks.append(DSQGBlockV6Physics(
                     embedding_dim, num_heads, ffn_dim, seq_len,
                     dropout=dropout, interference=has_if))
@@ -263,7 +266,10 @@ class AutoresearchTransformerPhysics(nn.Module):
         pos  = torch.arange(N, device=idx.device).unsqueeze(0)
         x    = self.drop(self.embedding(idx) + self.pos_embed(pos))
         for block in self.blocks:
-            x = block(x)
+            if self.training:
+                x = grad_ckpt(block, x, use_reentrant=False)
+            else:
+                x = block(x)
         return self.out(self.norm(x))
 
     def param_count(self):
@@ -297,7 +303,7 @@ class AutoresearchTransformerPhysics(nn.Module):
         entries = []
         for i, block in enumerate(self.blocks):
             if isinstance(block, DSQGBlockV6Physics) and block.interference:
-                alpha = block.ema_factor.item()
+                alpha = abs(block.ema_factor.item()) + EMA_FLOOR  # matches abs() parameterization
                 kdv   = block.kdv_alpha.item()
                 win   = round(1.0 / max(alpha, EMA_FLOOR))
                 entries.append(f'b{i}: α={alpha:.4f}(w≈{win}t) kdv={kdv:.4f}')
@@ -400,6 +406,19 @@ def passkey_accuracy(model, tokenizer, device):
     return results
 
 
+def save_resume_checkpoint(model, optimizer, scheduler, epoch, git_hash, checkpoint_dir):
+    """Save full resume checkpoint (model + optimizer + scheduler) after each epoch."""
+    out_path = os.path.join(checkpoint_dir, f"borg_gen6_L8_coldstart_ep{epoch}_resume.pt")
+    torch.save({
+        "epoch":                epoch,
+        "model_state_dict":     model.state_dict(),
+        "optimizer_state_dict": optimizer.state_dict(),
+        "scheduler_state_dict": scheduler.state_dict(),
+        "git_hash":             git_hash,
+    }, out_path)
+    print(f"  Saved resume checkpoint: {out_path}")
+
+
 def save_full_attn_checkpoint(model, epoch, git_hash, checkpoint_dir):
     """Save just the FullAttn block weights after an epoch (for precompute experiment)."""
     full_attn_block = model.blocks[model.full_attn_layer]
@@ -425,7 +444,7 @@ def save_full_attn_checkpoint(model, epoch, git_hash, checkpoint_dir):
         },
     }
 
-    out_path = os.path.join(checkpoint_dir, f"borg_gen3_ep{epoch}_full_attn.pt")
+    out_path = os.path.join(checkpoint_dir, f"borg_gen6_L8_coldstart_ep{epoch}_full_attn.pt")
     torch.save(payload, out_path)
     print(f"  Saved FullAttn checkpoint: {out_path}")
 
@@ -440,13 +459,13 @@ def train(no_warmstart: bool = False):
         ['git', 'rev-parse', '--short', 'HEAD']).decode().strip()
 
     print('=' * 70)
-    print('  🔬 DWARF Autoresearch — BORG GEN3 RUN')
-    print('  FullAttn at L2 (middle), warm-started from Gen2 FA — testing curriculum improvement')
+    print('  🔬 DWARF Autoresearch — BORG MID-ATTN GEN2 (FA unfrozen)')
+    print('  FullAttn at L2 of L=8, Gen3 warm-start, pre-FA IF only (IF iff layer < FA), FA UNFROZEN')
     print('=' * 70)
     if torch.cuda.is_available():
         print(f'  GPU: {torch.cuda.get_device_name(0)}')
     print(f'  D={EMBEDDING_DIM}, H={NUM_HEADS}, L={NUM_LAYERS}, FFN={FFN_DIM}')
-    print(f'  IF@L{FULL_ATTN_LAYER - 1} (preIF only), FA@L{FULL_ATTN_LAYER} (MIDDLE, L2 of 5)')
+    print(f'  Pre-FA IF only: IF on layers < {FULL_ATTN_LAYER}, pure DSQG on layers >= {FULL_ATTN_LAYER}')
     print(f'  scale_embed init={SCALE_EMBED_INIT_VAL}, LR mult={SCALE_EMBED_LR_MULT}')
     print(f'  EMA α₀={EMA_INIT} (window≈{round(1/EMA_INIT)}t), floor={EMA_FLOOR}')
     print(f'  MAX_TRAIN_SEQS={MAX_TRAIN_SEQS}, LR={LR}, Epochs={SCREEN_EPOCHS}')
@@ -481,31 +500,25 @@ def train(no_warmstart: bool = False):
         vocab_size=tokenizer.vocab_size(), embedding_dim=EMBEDDING_DIM,
         num_layers=NUM_LAYERS, num_heads=NUM_HEADS, ffn_dim=FFN_DIM,
         seq_len=MAX_SEQ_LEN, full_attn_layer=FULL_ATTN_LAYER,
+        interference_interval=INTERFERENCE,
         scale_embed_init_val=SCALE_EMBED_INIT_VAL,
     ).to(device)
 
     # ── Warm-start FullAttn from J26D extracted weights ──────────────────────
     ckpt_suffix = 'control' if no_warmstart else 'warmstart'
-    best_ckpt_name = f'borg_gen3_best.pt'
+    best_ckpt_name = f'borg_gen6_L8_coldstart_best.pt'
     if no_warmstart:
         print(f'\n  [control] Random-init FullAttn — skipping J26D warm-start')
         print(f'  Checkpoint: {best_ckpt_name}\n')
     if not no_warmstart and os.path.exists(EXTRACTED_CKPT):
-        print(f'\n  Loading J26D FullAttn weights from {EXTRACTED_CKPT}...')
-        extracted = torch.load(EXTRACTED_CKPT, map_location="cpu")
-        full_attn_weights = extracted["full_attn_block"]
-
-        remapped = {}
-        for k, v in full_attn_weights.items():
-            new_key = k.replace(f"blocks.2._orig_mod.", f"blocks.{FULL_ATTN_LAYER}.")
-            new_key = new_key.replace(f"blocks.2.", f"blocks.{FULL_ATTN_LAYER}.") 
-            remapped[new_key] = v
-
-        missing, unexpected = model.load_state_dict(remapped, strict=False)
-        print(f'  Loaded {len(remapped)} weights')
-        print(f'  Missing (expected — DSQG blocks random init): {len(missing)}')
-        if unexpected:
-            print(f'  WARNING unexpected keys: {unexpected}')
+        print(f'\n  Resuming from full checkpoint: {EXTRACTED_CKPT}')
+        ckpt = torch.load(EXTRACTED_CKPT, map_location=device)
+        sd = ckpt.get("model_state_dict", ckpt)
+        # Strip _orig_mod prefix if present
+        sd = {k.replace("_orig_mod.", ""): v for k, v in sd.items()}
+        missing, unexpected = model.load_state_dict(sd, strict=False)
+        print(f'  Loaded — missing: {len(missing)}, unexpected: {len(unexpected)}')
+        print(f'  FA at L{FULL_ATTN_LAYER} is UNFROZEN — will refine against trained DSQG blocks')
     elif not no_warmstart:
         print(f'  WARNING: {EXTRACTED_CKPT} not found — training from scratch')
 
@@ -536,11 +549,31 @@ def train(no_warmstart: bool = False):
     best_val_loss   = float('inf')
     passkey_results = {}
     ppl_results     = {}
+    start_epoch     = 1
     os.makedirs(CHECKPOINT_DIR, exist_ok=True)
+
+    # ── Resume from per-epoch checkpoint if available ────────────────────────
+    resume_ckpt = None
+    for ep in range(SCREEN_EPOCHS, 0, -1):
+        candidate = os.path.join(CHECKPOINT_DIR, f"borg_gen6_L8_coldstart_ep{ep}_resume.pt")
+        if os.path.exists(candidate):
+            resume_ckpt = candidate
+            break
+    if resume_ckpt:
+        print(f"\n  Resuming from: {resume_ckpt}")
+        ckpt = torch.load(resume_ckpt, map_location=device)
+        sd = {k.replace("_orig_mod.", ""): v for k, v in ckpt["model_state_dict"].items()}
+        model.load_state_dict(sd)
+        optimizer.load_state_dict(ckpt["optimizer_state_dict"])
+        scheduler.load_state_dict(ckpt["scheduler_state_dict"])
+        start_epoch = ckpt["epoch"] + 1
+        print(f"  Loaded ep{ckpt['epoch']} state — resuming from epoch {start_epoch}\n")
+    else:
+        print("  No resume checkpoint found — starting from scratch\n")
 
     full_attn_frozen = False
 
-    for epoch in range(1, SCREEN_EPOCHS + 1):
+    for epoch in range(start_epoch, SCREEN_EPOCHS + 1):
         if FREEZE_FULL_ATTN_AFTER_EPOCH is not None and epoch > FREEZE_FULL_ATTN_AFTER_EPOCH and not full_attn_frozen:
             print(f'\n  ── Freezing FullAttn block (epoch {epoch}) ──')
             for p in model.full_attn_parameters():
@@ -602,6 +635,7 @@ def train(no_warmstart: bool = False):
         print(f'  Physics: {model.physics_summary()}')
 
         save_full_attn_checkpoint(model, epoch, git_hash, CHECKPOINT_DIR)
+        save_resume_checkpoint(model, optimizer, scheduler, epoch, git_hash, CHECKPOINT_DIR)
 
         pk      = passkey_accuracy(model, tokenizer, device)
         pk_mean = sum(pk.values()) / len(pk)
@@ -632,8 +666,8 @@ def train(no_warmstart: bool = False):
     print(f'num_offsets:    24')
     print(f'scale_embed_lr_mult: {SCALE_EMBED_LR_MULT}')
     print(f'ema_init:       {EMA_INIT}')
-    print(f'description:    Borg Adaptation Run — {n_params/1e6:.1f}M, FullAttn@L0 warm from J26D, '
-          f'D={EMBEDDING_DIM}, L={NUM_LAYERS}, adapting to raw embedding distribution')
+    print(f'description:    Borg Gen5 L=8 preIF — {n_params/1e6:.1f}M, Gen2 full warm-start, FA@L2 unfrozen, '
+          f'D={EMBEDDING_DIM}, L={NUM_LAYERS}, pre-FA IF only, Gen3 warm-start')
 
 
 if __name__ == '__main__':
@@ -652,7 +686,7 @@ if __name__ == '__main__':
         # Monkey-patch checkpoint name by modifying the save path at runtime
         # — handled by checking sys.argv in train() is cleaner; just note in log
         print("\n  [--no-warmstart] Random-init control — skipping J26D weight load")
-        print("  Checkpoint: borg_gen3_best.pt\n")
+        print("  Checkpoint: borg_gen6_L8_coldstart_best.pt\n")
         # Patch the checkpoint name global
         import sys as _sys
         # We'll use a simple flag read inside train()

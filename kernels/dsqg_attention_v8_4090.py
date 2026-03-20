@@ -1,5 +1,5 @@
 """
-DSQG Attention V8 — J=24 relay-optimal offset set (J24_D)
+DSQG Attention V8 4090 — J=24 relay-optimal offset set (J24_D), 4090/sm_89 tuned
 ==========================================================
 
 Same mechanisms as V7 (MOVT + QK-OVT + NPCI) but with the J24_D offset set:
@@ -530,19 +530,33 @@ class _DSQGFnV8(torch.autograd.Function):
         # Block size tuning for SRAM budget: acc = [BLOCK_N, BLOCK_HD] floats
         # At HD=64, BLOCK_N=128: 128×64 = 8K floats = 32KB (fine)
         # At HD=128, BLOCK_N=128: 128×128 = 16K floats = 64KB (exceeds SM SRAM)
-        # H100 NVL has 228KB SRAM/SM but multiple warps share it. Safe budget: ~48KB.
+        # Block size tuning per GPU architecture:
+        #   sm_90 (H100 NVL):      228KB SRAM/SM, 128 warps — aggressive
+        #   sm_89 (RTX 4090 Ada):  128KB SRAM/SM, higher bandwidth — mid-tier
+        #   else (3090/Ampere):    128KB SRAM/SM, conservative
         _cc = torch.cuda.get_device_capability()
-        _sm90 = (_cc[0] > 8) or (_cc[0] == 9)
+        _sm90 = (_cc[0] == 9 and _cc[1] == 0) or _cc[0] > 9   # H100 NVL
+        _sm89 = (_cc[0] == 8 and _cc[1] == 9)                   # RTX 4090 Ada Lovelace
         if HD <= 32:
-            BLOCK_N, _num_warps = (128, 8) if _sm90 else (64, 4)
+            if _sm90:   BLOCK_N, _num_warps = 128, 8
+            elif _sm89: BLOCK_N, _num_warps = 64, 8
+            else:       BLOCK_N, _num_warps = 64, 4
         elif HD <= 64:
-            BLOCK_N, _num_warps = (128, 8) if _sm90 else (64, 4)
+            if _sm90:   BLOCK_N, _num_warps = 128, 8
+            elif _sm89: BLOCK_N, _num_warps = 64, 8
+            else:       BLOCK_N, _num_warps = 64, 4
         elif HD <= 128:
-            BLOCK_N, _num_warps = (64, 4) if _sm90 else (32, 4)
+            if _sm90:   BLOCK_N, _num_warps = 64, 4
+            elif _sm89: BLOCK_N, _num_warps = 64, 4
+            else:       BLOCK_N, _num_warps = 32, 4
         elif HD <= 256:
-            BLOCK_N, _num_warps = (32, 4) if _sm90 else (16, 4)
+            if _sm90:   BLOCK_N, _num_warps = 32, 4
+            elif _sm89: BLOCK_N, _num_warps = 32, 4
+            else:       BLOCK_N, _num_warps = 16, 4
         else:
-            BLOCK_N, _num_warps = (16, 4) if _sm90 else (8, 4)
+            if _sm90:   BLOCK_N, _num_warps = 16, 4
+            elif _sm89: BLOCK_N, _num_warps = 16, 4
+            else:       BLOCK_N, _num_warps = 8, 4
         BLOCK_HD = _next_pow2(HD)
         out = torch.empty_like(q)
         lse = torch.empty(B, H, N, device=q.device, dtype=torch.float32)
@@ -702,7 +716,7 @@ def dsqg_attention_v8(q, k, v, pos_bias, scale_embed,
 # Module
 # ─────────────────────────────────────────────────────────────────────────────
 
-class DSQGAttentionV8(nn.Module):
+class DSQGAttentionV8_4090(nn.Module):
     """
     DSQG V8: J=24 relay-optimal offsets + MOVT(r=2) + QK-OVT + NPCI.
 

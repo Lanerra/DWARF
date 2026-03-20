@@ -29,7 +29,6 @@ EMBEDDING_DIM    = 512
 NUM_HEADS        = 8
 FFN_DIM          = 2048
 NUM_LAYERS       = 8
-INTERFERENCE     = 2
 FULL_ATTN_LAYER  = 2
 
 MAX_TRAIN_SEQS      = 121_232
@@ -53,6 +52,11 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+# H100: enable TF32 tensor cores for free speedup on FP32 ops (optimizer states, reductions)
+torch.set_float32_matmul_precision('high')
+# Reduce VRAM fragmentation — critical on large models
+os.environ.setdefault('PYTORCH_CUDA_ALLOC_CONF', 'expandable_segments:True')
+
 VOCAB_SIZE     = 32000
 BATCH_SIZE     = 8
 GRAD_ACCUM     = 4
@@ -66,7 +70,7 @@ TOKENIZER_CANDIDATES = [
     'results/2048_condI_tokenizer.json',
 ]
 PASSKEY_DISTANCES = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 1536]
-PASSKEY_TRIALS    = 20
+PASSKEY_TRIALS    = 50
 _PASSKEY_WORDS    = ['apple', 'banana', 'orange', 'cherry', 'grape',
                      'lemon', 'mango', 'peach', 'plum', 'berry']
 _FILLER_SENTENCE  = 'the weather was mild and the air was still . '
@@ -83,7 +87,7 @@ for _d in [_kernel_dir, _project_root]:
     if _d not in sys.path:
         sys.path.insert(0, _d)
 
-from dsqg_attention_v8 import DSQGAttentionV8 as DSQGAttentionV6, npci_rotate
+from dsqg_attention_v8_4090 import DSQGAttentionV8_4090 as DSQGAttentionV6, npci_rotate
 
 assert len(OFFSETS) == 24
 
@@ -210,7 +214,7 @@ class FullAttentionBlock(nn.Module):
 
 class AutoresearchTransformerPhysics(nn.Module):
     def __init__(self, vocab_size, embedding_dim, num_layers, num_heads,
-                 ffn_dim, seq_len, full_attn_layer, interference_interval,
+                 ffn_dim, seq_len, full_attn_layer,
                  scale_embed_init_val=0.0, dropout=0.1):
         super().__init__()
         self.embedding       = nn.Embedding(vocab_size, embedding_dim)
@@ -224,8 +228,7 @@ class AutoresearchTransformerPhysics(nn.Module):
                 blocks.append(FullAttentionBlock(
                     embedding_dim, num_heads, ffn_dim, dropout))
             else:
-                has_if = (interference_interval is not None and
-                          i % interference_interval == interference_interval - 1)
+                has_if = (i == full_attn_layer - 1)  # preIF only: single IF block immediately before FA
                 blocks.append(DSQGBlockV6Physics(
                     embedding_dim, num_heads, ffn_dim, seq_len,
                     dropout=dropout, interference=has_if))
@@ -443,7 +446,7 @@ def train(no_warmstart: bool = False):
     if torch.cuda.is_available():
         print(f'  GPU: {torch.cuda.get_device_name(0)}')
     print(f'  D={EMBEDDING_DIM}, H={NUM_HEADS}, L={NUM_LAYERS}, FFN={FFN_DIM}')
-    print(f'  IF interval={INTERFERENCE}, Full attn layer={FULL_ATTN_LAYER} (L2 of 8, Gen3 scaling test)')
+    print(f'  IF@L{FULL_ATTN_LAYER - 1} (preIF only), FA@L{FULL_ATTN_LAYER} (L2 of 8, Gen3 scaling test)')
     print(f'  scale_embed init={SCALE_EMBED_INIT_VAL}, LR mult={SCALE_EMBED_LR_MULT}')
     print(f'  EMA α₀={EMA_INIT} (window≈{round(1/EMA_INIT)}t), floor={EMA_FLOOR}')
     print(f'  MAX_TRAIN_SEQS={MAX_TRAIN_SEQS}, LR={LR}, Epochs={SCREEN_EPOCHS}')
@@ -478,7 +481,6 @@ def train(no_warmstart: bool = False):
         vocab_size=tokenizer.vocab_size(), embedding_dim=EMBEDDING_DIM,
         num_layers=NUM_LAYERS, num_heads=NUM_HEADS, ffn_dim=FFN_DIM,
         seq_len=MAX_SEQ_LEN, full_attn_layer=FULL_ATTN_LAYER,
-        interference_interval=INTERFERENCE,
         scale_embed_init_val=SCALE_EMBED_INIT_VAL,
     ).to(device)
 

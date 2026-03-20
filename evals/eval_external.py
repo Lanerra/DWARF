@@ -131,7 +131,7 @@ ARCH_CONFIGS = {
     # borg_gen3_L8: L=8, Gen2 warm-start, FA@L2 unfrozen
     'borg_gen3_L8': {'arch': 'borg_gen3_L8', 'D': 512, 'H': 8, 'FFN': 2048, 'L': 8, 'full_layer': 2, 'interference': 2},
     # borg_L11: L=11, frozen J26D FA at L10
-    'borg_L11': {'arch': 'borg_L11', 'D': 512, 'H': 8, 'FFN': 2048, 'L': 11, 'full_layer': 10, 'interference': 2},
+    'borg_L11': {'arch': 'borg_L11', 'D': 512, 'H': 8, 'FFN': 2048, 'L': 11, 'full_layer': 5, 'interference': 2},
     # cond_delta: L=6, V9 delta rule kernel, J26D topology
     'cond_delta': {'arch': 'cond_delta', 'D': 512, 'H': 8, 'FFN': 2048, 'L': 6, 'full_layer': 5, 'interference': 2},
 }

@@ -9,41 +9,79 @@
   EMA α₀=0.00035 (window≈2857t), floor=1e-05
   MAX_TRAIN_SEQS=121232, LR=0.0003, Epochs=3
   FREEZE_FULL_ATTN_AFTER_EPOCH=None
-  git=c2688a0
+  git=6a61588
 Loading FineWeb-Edu from cache: benchmarks/logs/condm_fineweb_edu_doc_cache.json
   Loaded 100,000 docs from cache
 Loaded tokenizer from results/2048_condI_tokenizer.json
 Loading pre-encoded dataset from logs/fineweb_encoded_2048.pt
   train: 121,232  val: 5,582 seqs
-  WARNING: autoresearch/checkpoints/borg_L11_best.pt not found — training from scratch
+
+  Loading borgL11 FA weights from autoresearch/checkpoints/borg_L11_ep2_full_attn.pt
+  Loaded 14 FA weights → blocks.2
+  Missing (DSQG random init): 285, Unexpected: 0
+  FA at L2 is UNFROZEN — will co-train with fresh DSQG blocks
   compiled FullAttnBlock at layer 2
   torch.compile applied to FullAttnBlock(s)
 Parameters: 58,968,314 (59.0M)
-Traceback (most recent call last):
-  File "/home/dlewis3/Desktop/AI/DWARF/train/train_borg_gen4_L11_bf16.py", line 650, in <module>
-    train(no_warmstart=args.no_warmstart)
-  File "/home/dlewis3/Desktop/AI/DWARF/train/train_borg_gen4_L11_bf16.py", line 556, in train
-    logits = model(x)
-             ^^^^^^^^
-  File "/home/dlewis3/Desktop/AI/DWARF/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
-    return self._call_impl(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/dlewis3/Desktop/AI/DWARF/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
-    return forward_call(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/dlewis3/Desktop/AI/DWARF/train/train_borg_gen4_L11_bf16.py", line 263, in forward
-    x = block(x)
-        ^^^^^^^^
-  File "/home/dlewis3/Desktop/AI/DWARF/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
-    return self._call_impl(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/dlewis3/Desktop/AI/DWARF/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
-    return forward_call(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/dlewis3/Desktop/AI/DWARF/train/train_borg_gen4_L11_bf16.py", line 157, in forward
-    pool = _kdv_correction(pool, self.kdv_alpha)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/dlewis3/Desktop/AI/DWARF/train/train_borg_gen4_L11_bf16.py", line 105, in _kdv_correction
-    return pool + alpha * pool * (pool - pool_prev)
-                  ~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~
-torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 32.00 MiB. GPU 0 has a total capacity of 21.99 GiB of which 54.62 MiB is free. Process 1941199 has 15.78 GiB memory in use. Including non-PyTorch memory, this process has 5.09 GiB memory in use. Of the allocated memory 2.19 GiB is allocated by PyTorch, and 8.89 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+  Step 200/1895 | Loss 6.1890
+  Step 400/1895 | Loss 5.7124
+  Step 600/1895 | Loss 5.1947
+  Step 800/1895 | Loss 4.6107
+  Step 1000/1895 | Loss 4.6162
+  Step 1200/1895 | Loss 4.5518
+  Step 1400/1895 | Loss 4.2148
+  Step 1600/1895 | Loss 4.3345
+  Step 1800/1895 | Loss 4.0861
+Ep 1/3 | Val PPL 57.38 *
+  scale_embed |mean|=0.4123 |max|=2.0328
+  Physics: b1: α=0.0034(w≈298t) kdv=-0.0000  b3: α=-0.0017(w≈100000t) kdv=-0.0000  b5: α=0.0325(w≈31t) kdv=-0.0000  b7: α=0.0362(w≈28t) kdv=-0.0000  b9: α=0.0045(w≈223t) kdv=-0.0000
+  Saved FullAttn checkpoint: autoresearch/checkpoints/borg_gen4_L11_ep1_full_attn.pt
+  Passkey mean=40.8%
+  d=1:20%  d=2:20%  d=4:20%  d=8:20%  d=16:30%  d=32:60%  d=64:70%  d=128:70%  d=256:60%  d=512:50%  d=1024:50%  d=1536:20%
+  Step 200/1895 | Loss 3.8481
+  Step 400/1895 | Loss 4.1283
+  Step 600/1895 | Loss 4.2748
+  Step 800/1895 | Loss 3.7608
+  Step 1000/1895 | Loss 4.1043
+  Step 1200/1895 | Loss 3.7324
+  Step 1400/1895 | Loss 3.9792
+  Step 1600/1895 | Loss 3.8814
+  Step 1800/1895 | Loss 3.8791
+Ep 2/3 | Val PPL 44.44 *
+  scale_embed |mean|=0.3921 |max|=1.8946
+  Physics: b1: α=0.0035(w≈286t) kdv=-0.0000  b3: α=-0.0017(w≈100000t) kdv=-0.0000  b5: α=0.0408(w≈25t) kdv=-0.0000  b7: α=0.0475(w≈21t) kdv=-0.0000  b9: α=0.0050(w≈201t) kdv=-0.0000
+  Saved FullAttn checkpoint: autoresearch/checkpoints/borg_gen4_L11_ep2_full_attn.pt
+  Passkey mean=77.5%
+  d=1:60%  d=2:50%  d=4:40%  d=8:40%  d=16:90%  d=32:100%  d=64:100%  d=128:100%  d=256:100%  d=512:90%  d=1024:90%  d=1536:70%
+  Step 200/1895 | Loss 3.8524
+  Step 400/1895 | Loss 3.9938
+  Step 600/1895 | Loss 3.5841
+  Step 800/1895 | Loss 3.7253
+  Step 1000/1895 | Loss 3.8842
+  Step 1200/1895 | Loss 3.7167
+  Step 1400/1895 | Loss 3.9090
+  Step 1600/1895 | Loss 3.8411
+  Step 1800/1895 | Loss 3.9361
+Ep 3/3 | Val PPL 42.41 *
+  scale_embed |mean|=0.3852 |max|=1.8699
+  Physics: b1: α=0.0034(w≈295t) kdv=-0.0000  b3: α=-0.0016(w≈100000t) kdv=-0.0000  b5: α=0.0403(w≈25t) kdv=-0.0000  b7: α=0.0465(w≈21t) kdv=-0.0000  b9: α=0.0047(w≈213t) kdv=-0.0000
+  Saved FullAttn checkpoint: autoresearch/checkpoints/borg_gen4_L11_ep3_full_attn.pt
+  Passkey mean=87.5%
+  d=1:60%  d=2:60%  d=4:70%  d=8:70%  d=16:100%  d=32:100%  d=64:100%  d=128:100%  d=256:100%  d=512:100%  d=1024:100%  d=1536:90%
+
+---
+passkey_ep1:    40.8
+passkey_ep2:    77.5
+passkey_ep3:    87.5
+ppl_ep1:        57.38
+ppl_ep2:        44.44
+ppl_ep3:        42.41
+ar_score:       69.20
+memory_mb:      15370.6
+elapsed_s:      36554.6
+num_params_M:   59.0
+num_layers:     11
+num_offsets:    24
+scale_embed_lr_mult: 15.0
+ema_init:       0.00035
+description:    Borg Gen4 L=11 — 59.0M, Gen2 full warm-start, FA@L2 unfrozen, D=512, L=11, FA@L5 unfrozen, scaling test

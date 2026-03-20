@@ -33,7 +33,7 @@ INTERFERENCE     = 2
 FULL_ATTN_LAYER  = 2
 
 MAX_TRAIN_SEQS      = 121_232
-SCALE_EMBED_INIT_VAL = 0.1
+SCALE_EMBED_INIT_VAL = 0.15  # confirmed faster relay acquisition
 SCALE_EMBED_LR_MULT  = 15.0
 
 EMA_INIT  = 0.00035
@@ -51,11 +51,17 @@ EXTRACTED_CKPT = "autoresearch/checkpoints/borg_gen3_L8_best.pt"
 import json, math, os, subprocess, sys, time
 import torch
 import torch.nn as nn
+from torch.utils.checkpoint import checkpoint as grad_ckpt
 import torch.nn.functional as F
 
+# H100: enable TF32 tensor cores for free speedup on FP32 ops (optimizer states, reductions)
+torch.set_float32_matmul_precision('high')
+# Reduce VRAM fragmentation — critical on large models
+os.environ.setdefault('PYTORCH_CUDA_ALLOC_CONF', 'expandable_segments:True')
+
 VOCAB_SIZE     = 32000
-BATCH_SIZE     = 8
-GRAD_ACCUM     = 4
+BATCH_SIZE     = 16   # safe on 4090 with grad_ckpt FA recompute at N=2048
+GRAD_ACCUM     = 2    # effective batch=32 (same as 8×4), 2× more updates
 MAX_SEQ_LEN    = 2048
 NUM_DOCS       = 100_000
 MAX_VAL_SEQS   = 5_582
@@ -66,7 +72,7 @@ TOKENIZER_CANDIDATES = [
     'results/2048_condI_tokenizer.json',
 ]
 PASSKEY_DISTANCES = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 1536]
-PASSKEY_TRIALS    = 20
+PASSKEY_TRIALS    = 50
 _PASSKEY_WORDS    = ['apple', 'banana', 'orange', 'cherry', 'grape',
                      'lemon', 'mango', 'peach', 'plum', 'berry']
 _FILLER_SENTENCE  = 'the weather was mild and the air was still . '
@@ -83,7 +89,7 @@ for _d in [_kernel_dir, _project_root]:
     if _d not in sys.path:
         sys.path.insert(0, _d)
 
-from dsqg_attention_v8 import DSQGAttentionV8 as DSQGAttentionV6, npci_rotate
+from dsqg_attention_v8_4090 import DSQGAttentionV8_4090 as DSQGAttentionV6, npci_rotate
 
 assert len(OFFSETS) == 24
 
@@ -153,7 +159,7 @@ class DSQGBlockV6Physics(nn.Module):
             B, N, D = xi.shape
             H, HD   = self.num_heads, self.head_dim
 
-            pool = _causal_ema(xi, self.ema_factor, floor=EMA_FLOOR)
+            pool = _causal_ema(xi, self.ema_factor.abs() + EMA_FLOOR, floor=EMA_FLOOR)  # abs() prevents dead zone
             pool = _kdv_correction(pool, self.kdv_alpha)
             pool = _agc_normalize(pool)
 
@@ -260,7 +266,10 @@ class AutoresearchTransformerPhysics(nn.Module):
         pos  = torch.arange(N, device=idx.device).unsqueeze(0)
         x    = self.drop(self.embedding(idx) + self.pos_embed(pos))
         for block in self.blocks:
-            x = block(x)
+            if self.training:
+                x = grad_ckpt(block, x, use_reentrant=False)
+            else:
+                x = block(x)
         return self.out(self.norm(x))
 
     def param_count(self):
@@ -294,7 +303,7 @@ class AutoresearchTransformerPhysics(nn.Module):
         entries = []
         for i, block in enumerate(self.blocks):
             if isinstance(block, DSQGBlockV6Physics) and block.interference:
-                alpha = block.ema_factor.item()
+                alpha = abs(block.ema_factor.item()) + EMA_FLOOR  # matches abs() parameterization
                 kdv   = block.kdv_alpha.item()
                 win   = round(1.0 / max(alpha, EMA_FLOOR))
                 entries.append(f'b{i}: α={alpha:.4f}(w≈{win}t) kdv={kdv:.4f}')

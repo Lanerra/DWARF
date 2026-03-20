@@ -70,6 +70,8 @@ _OFFSET_SETS = {
     'borg_gen5_L11_preIF':  [1,2,3,4,5,6,7,8,9,10,13,15,16,21,23,28,48,64,96,192,384,512,768,1024],
     'borg_gen5_L8_preIF':   [1,2,3,4,5,6,7,8,9,10,13,15,16,21,23,28,48,64,96,192,384,512,768,1024],
     'borg_gen4_L11':        [1,2,3,4,5,6,7,8,9,10,13,15,16,21,23,28,48,64,96,192,384,512,768,1024],
+    'borg_j12_30m':         [1, 2, 4, 8, 16, 64, 96, 192, 384, 512, 768, 1024],
+    'dwarf_1b_d4096':       [1,2,3,4,5,6,7,8,9,10,13,15,16,21,23,28,48,64,96,192,384,512,768,1024],
     'cond_delta':           [1,2,3,4,5,6,7,8,9,10,13,15,16,21,23,28,48,64,96,192,384,512,768,1024],
 }
 
@@ -106,6 +108,8 @@ _TRAIN_SCRIPTS = {
     'borg_gen5_L11_preIF':  'train/train_borg_gen5_L11_preIF_bf16.py',
     'borg_gen5_L8_preIF':   'train/train_borg_gen5_L8_preIF_bf16.py',
     'borg_gen4_L11':        'train/train_borg_gen4_L11_bf16.py',
+    'borg_j12_30m':         'train/train_borg_j12_30m_4090_bf16.py',
+    'dwarf_1b_d4096':       'train/train_dwarf_1b_d4096_bf16.py',
     'cond_delta':           'train/train_cond_delta_bf16.py',
 }
 
@@ -142,11 +146,20 @@ _MODEL_CLASSES = {
     'borg_gen5_L11_preIF':  'AutoresearchTransformerPhysics',
     'borg_gen5_L8_preIF':   'AutoresearchTransformerPhysics',
     'borg_gen4_L11':        'AutoresearchTransformerPhysics',
+    'borg_j12_30m':         'AutoresearchTransformerPhysics',
+    'dwarf_1b_d4096':       'AutoresearchTransformerPhysics',
     'cond_delta':           'AutoresearchTransformerCondDelta',
 }
 
 # Archs without DSQG layers (standard transformers only)
 _IS_STANDARD = {'std_85m', 'std_13m'}
+
+# Archs where interference_interval was removed from __init__ (gen3/gen4 cleanup Mar 19)
+# Note: gen5 scripts still accept interference_interval — only gen3/gen4 had it removed
+# borg_j12_30m also has no interference_interval (preIF-only from the start)
+_PREIF_ARCHS = {
+    'borg_gen4_L11', 'borg_gen3_L8', 'borg_j12_30m',
+}
 
 # Archs without a full attention layer (pure DSQG)
 _NO_FULL_ATTN = {'condw'}
@@ -524,6 +537,11 @@ def _instantiate_model(m, arch, vocab_size=None, ckpt_path=None):
         return cls(vocab_size=vs, embedding_dim=D, num_layers=L,
                    num_heads=H, ffn_dim=F, seq_len=2048,
                    interference_interval=iv)
+    elif arch in _PREIF_ARCHS:
+        # preIF-only archs: interference_interval removed from __init__
+        return cls(vocab_size=vs, embedding_dim=D, num_layers=L,
+                   num_heads=H, ffn_dim=F, seq_len=2048,
+                   full_attn_layer=fa)
     else:
         return cls(vocab_size=vs, embedding_dim=D, num_layers=L,
                    num_heads=H, ffn_dim=F, seq_len=2048,
@@ -619,7 +637,10 @@ def load_and_extract(checkpoint_path, arch, ids_tensor, device, root):
         if hook_handle is not None:
             hook_handle.remove()
 
-        x_running = model.embedding(ids_tensor) + model.pos_embed(pos)
+        if hasattr(model, 'pos_embed'):
+            x_running = model.embedding(ids_tensor) + model.pos_embed(pos)
+        else:
+            x_running = model.embedding(ids_tensor)
         x_running = model.drop(x_running)
 
         dsqg_alphas = {}

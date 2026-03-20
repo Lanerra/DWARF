@@ -71,6 +71,17 @@ _ARCH_INFO = {
         'model_cls':  'AutoresearchTransformerPhysics',
         'has_physics': True,
     },
+    'borg_gen5_L8_preIF': {
+        'script':     'train/train_borg_gen5_L8_preIF_bf16.py',
+        'model_cls':  'AutoresearchTransformerPhysics',
+        'has_physics': True,
+    },
+    'j13d_v2_30m': {
+        'script':          'train/train_borg_j13d_v2_30m_4090_bf16.py',
+        'model_cls':       'AutoresearchTransformerPhysics',
+        'has_physics':     True,
+        'no_interference': True,   # preIF-only: __init__ has no interference_interval arg
+    },
     'curve_27m': {
         'script':     'train/train_curve_27m_bf16.py',
         'model_cls':  'CurveTransformer',
@@ -107,12 +118,20 @@ def load_model(arch, checkpoint_path, device):
     iv = getattr(m, 'INTERFERENCE', 3)
     vs = getattr(m, 'VOCAB_SIZE', 32000)
 
-    model = cls(
-        vocab_size=vs, embedding_dim=D, num_layers=L,
-        num_heads=H, ffn_dim=F_, seq_len=MAX_SEQ_LEN,
-        full_attn_layer=fa, interference_interval=iv,
-        scale_embed_init_val=0.1,
-    )
+    if info.get('no_interference', False):
+        model = cls(
+            vocab_size=vs, embedding_dim=D, num_layers=L,
+            num_heads=H, ffn_dim=F_, seq_len=MAX_SEQ_LEN,
+            full_attn_layer=fa,
+            scale_embed_init_val=0.1,
+        )
+    else:
+        model = cls(
+            vocab_size=vs, embedding_dim=D, num_layers=L,
+            num_heads=H, ffn_dim=F_, seq_len=MAX_SEQ_LEN,
+            full_attn_layer=fa, interference_interval=iv,
+            scale_embed_init_val=0.1,
+        )
 
     ckpt_path = os.path.join(ROOT, checkpoint_path)
     sd = torch.load(ckpt_path, map_location='cpu', weights_only=False)

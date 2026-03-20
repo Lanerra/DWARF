@@ -1,27 +1,36 @@
 """
-DSQG Attention V8 — J=24 relay-optimal offset set (J24_D)
-==========================================================
+DSQG Attention V8 J13D — Relay-optimal minimal offset set with 4090-specific tuning
+===================================================================================
 
-Same mechanisms as V7 (MOVT + QK-OVT + NPCI) but with the J24_D offset set:
+J=12 subset of V8 (J=24), keeping only the confirmed-necessary offsets for relay:
 
-    ALL_OFFSETS = [1,2,3,4,5,6,7,8,9,10,13,15,16,21,23,28,48,64,96,192,384,512,768,1024]
+    ALL_OFFSETS = [1, 2, 4, 5, 8, 16, 32, 64, 128, 256, 512, 768, 1024]
 
-V7 used J=20 (10 small + 10 large). V8 uses J=24 (14 small + 10 large).
+Local coverage (J_SMALL=4): δ=1,2,4,8 — immediate neighbors, no MOVT
+Distal coverage (J_LARGE=8): δ=16+ — relay hops, MOVT applied
 
-Key changes from V7:
-- ALL_OFFSETS: J=20 → J=24 (J24_D set with finer local coverage: 5,7,9,10 added)
-- J_SMALL=14: indices 0-13 (δ≤21) — local offsets, no MOVT
-- J_LARGE=10: indices 14-23 (δ≥23) — distal offsets, MOVT applied (unchanged)
-- Forward/backward: static_range(J) with 24-element delta tuple
-- pos_bias shape: [24, H]  (was [20, H])
-- scale_embed shape: [24, HD]  (was [20, HD])
-- phase_base/gain shape: [10, H, 2]  (unchanged — J_LARGE=10)
+This is a science experiment to test whether the relay mechanism works with
+a sparser offset set (12 vs 24). If successful, this reduces compute cost
+significantly while maintaining relay effectiveness.
+
+Key differences from V8:
+- ALL_OFFSETS: J=24 → J=12 (drops δ=3,5,6,7,9,10,13,15,21,23,28,48)
+- J_SMALL=4 (was 14): only δ≤8 are local
+- J_LARGE=8 (was 10): δ≥16 are distal with MOVT
+- Forward/backward: static_range(12) with 12-element delta tuple
+- pos_bias shape: [12, H]  (was [24, H])
+- scale_embed shape: [12, HD]  (was [24, HD])
+- phase_base/gain shape: [8, H, 2]  (was [10, H, 2])
+
+4090-specific tuning (sm_89 = Ada Lovelace):
+- Optimized block sizes for 4090's L2 cache and SM architecture
+- Falls between H100 (sm90) and 3090 (sm86) performance profiles
 
 Usage:
-  from dsqg_attention_v8 import DSQGAttentionV8, npci_rotate
+  from dsqg_attention_v8_j12 import DSQGAttentionV8J12, npci_rotate
 
 Testing:
-  CUDA_VISIBLE_DEVICES=0 .venv/bin/python3 kernels/dsqg_attention_v8.py
+  CUDA_VISIBLE_DEVICES=0 .venv/bin/python3 kernels/dsqg_attention_v8_j12.py
 """
 
 import math
@@ -35,11 +44,11 @@ import triton.language as tl
 warnings.filterwarnings("ignore", message=".*tl.advance.*", category=UserWarning)
 warnings.filterwarnings("ignore", message=".*not being used.*", category=UserWarning)
 
-ALL_OFFSETS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13, 15, 16, 21, 23, 28, 48, 64, 96, 192, 384, 512, 768, 1024]
-J         = len(ALL_OFFSETS)   # 24
-J_SMALL   = 14                 # indices 0-13: δ≤21 — local, no MOVT
-J_LARGE   = 10                 # indices 14-23: δ≥23 — distal, MOVT applied
-assert J == 24 and J_SMALL + J_LARGE == J
+ALL_OFFSETS = [1, 2, 4, 5, 8, 16, 32, 64, 128, 256, 512, 768, 1024]
+J         = len(ALL_OFFSETS)   # 13
+J_SMALL   = 5                  # indices 0-4: δ≤8 (1,2,4,5,8) — local, no MOVT
+J_LARGE   = 8                  # indices 5-12: δ≥16 (16,32,64,128,256,512,768,1024) — distal, MOVT
+assert J == 13 and J_SMALL + J_LARGE == J
 
 R_PLANES  = 2   # number of Givens rotation planes; constexpr throughout
 
@@ -48,6 +57,12 @@ MAX_DELTA = max(ALL_OFFSETS)   # 1024
 def _next_pow2(n):
     if n <= 0: return 1
     n -= 1; n |= n>>1; n |= n>>2; n |= n>>4; n |= n>>8; n |= n>>16; return n+1
+
+
+# GPU capability detection
+_cc = torch.cuda.get_device_capability() if torch.cuda.is_available() else (0, 0)
+_sm90 = (_cc[0] == 9 and _cc[1] == 0) or _cc[0] > 9   # H100 NVL
+_sm89 = (_cc[0] == 8 and _cc[1] == 9)                  # RTX 4090 Ada
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -79,7 +94,7 @@ def npci_rotate(x: torch.Tensor, x_delta: torch.Tensor,
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Forward Kernel V8 — single static_range(J) loop, direct loads for all offsets
+# Forward Kernel V8 J=12 — single static_range(J) loop, direct loads for all offsets
 # ─────────────────────────────────────────────────────────────────────────────
 
 @triton.jit
@@ -131,8 +146,8 @@ def _fwd_v8(
     li  = tl.zeros([BLOCK_N], tl.float32)
     acc = tl.zeros([BLOCK_N, BLOCK_HD], tl.float32)
 
-    for i in tl.static_range(24):
-        delta = (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13, 15, 16, 21, 23, 28, 48, 64, 96, 192, 384, 512, 768, 1024)[i]
+    for i in tl.static_range(13):
+        delta = (1, 2, 4, 5, 8, 16, 32, 64, 128, 256, 512, 768, 1024)[i]
         kp    = ns - delta
         val   = (kp >= 0) & nm
 
@@ -153,10 +168,10 @@ def _fwd_v8(
         vt    = tl.load(vb + kp[:,None]*stride_vn + ds[None,:]*stride_vd,
                         mask=val[:,None] & dm[None,:], other=0.0).to(tl.float32)
 
-        if i < 14:
+        if i < 5:
             acc = acc * cor[:,None] + p[:,None] * vt
         else:
-            pi  = i - 14
+            pi  = i - 5
             z0  = tl.load(zb + kp*stride_zn + 0, mask=val, other=0.0)
             z1  = tl.load(zb + kp*stride_zn + 1, mask=val, other=0.0)
 
@@ -283,8 +298,8 @@ def _bwd_dq_v8(
     dy_pre0 = tl.zeros([BLOCK_N], tl.float32)
     dy_pre1 = tl.zeros([BLOCK_N], tl.float32)
 
-    for i in tl.static_range(24):
-        delta = (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13, 15, 16, 21, 23, 28, 48, 64, 96, 192, 384, 512, 768, 1024)[i]
+    for i in tl.static_range(13):
+        delta = (1, 2, 4, 5, 8, 16, 32, 64, 128, 256, 512, 768, 1024)[i]
         kp    = ns - delta
         val   = (kp >= 0) & nm
 
@@ -300,7 +315,7 @@ def _bwd_dq_v8(
         s     = tl.where(val, s, float('-inf'))
         alpha = tl.where(val, tl.exp(s - lse), 0.0)
 
-        if i < 14:
+        if i < 5:
             dot_rv = tl.sum(do * vt, axis=1)
             ds_v   = alpha * (dot_rv - Dval)
             dq    += ds_v[:,None] * kt * sc
@@ -310,7 +325,7 @@ def _bwd_dq_v8(
             dse_i = tl.sum(ds_v[:,None] * q, axis=0) * sc
             tl.atomic_add(DSE + i*stride_dsei + ds*stride_dsed, tl.where(dm, dse_i, 0.0))
         else:
-            pi  = i - 14
+            pi  = i - 5
             z0  = tl.load(zb + kp*stride_zn + 0, mask=val, other=0.0)
             z1  = tl.load(zb + kp*stride_zn + 1, mask=val, other=0.0)
 
@@ -426,8 +441,8 @@ def _bwd_dkdv_v8(
     dz_pre0 = tl.zeros([BLOCK_M], tl.float32)
     dz_pre1 = tl.zeros([BLOCK_M], tl.float32)
 
-    for i in tl.static_range(24):
-        delta = (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13, 15, 16, 21, 23, 28, 48, 64, 96, 192, 384, 512, 768, 1024)[i]
+    for i in tl.static_range(13):
+        delta = (1, 2, 4, 5, 8, 16, 32, 64, 128, 256, 512, 768, 1024)[i]
         np_   = ms + delta          # query positions n = t + delta
         val   = (np_ < N) & mm
 
@@ -448,13 +463,13 @@ def _bwd_dkdv_v8(
         s     = tl.where(val, s, float('-inf'))
         alpha = tl.where(val, tl.exp(s - lsen), 0.0)
 
-        if i < 14:
+        if i < 5:
             dot_rv = tl.sum(don * vt, axis=1)
             ds_v   = alpha * (dot_rv - Dn)
             dk    += ds_v[:,None] * qn * sc
             dv    += alpha[:,None] * don
         else:
-            pi  = i - 14
+            pi  = i - 5
             pb0 = tl.load(PHASE_BASE + pi * stride_phi + h * stride_phh + 0)
             pb1 = tl.load(PHASE_BASE + pi * stride_phi + h * stride_phh + 1)
             pg0 = tl.load(PHASE_GAIN + pi * stride_pgi + h * stride_pgh + 0)
@@ -527,22 +542,37 @@ class _DSQGFnV8(torch.autograd.Function):
         assert y_pre.shape       == (B, H, N, R_PLANES)
         assert z_pre.shape       == (B, H, N, R_PLANES)
 
-        # Block size tuning for SRAM budget: acc = [BLOCK_N, BLOCK_HD] floats
-        # At HD=64, BLOCK_N=128: 128×64 = 8K floats = 32KB (fine)
-        # At HD=128, BLOCK_N=128: 128×128 = 16K floats = 64KB (exceeds SM SRAM)
-        # H100 NVL has 228KB SRAM/SM but multiple warps share it. Safe budget: ~48KB.
+        # Block size tuning for SRAM budget
+        # Three-way selection: H100 (sm90) / 4090 (sm89) / generic
         _cc = torch.cuda.get_device_capability()
-        _sm90 = (_cc[0] > 8) or (_cc[0] == 9)
+        _is_sm90 = (_cc[0] == 9 and _cc[1] == 0) or _cc[0] > 9
+        _is_sm89 = (_cc[0] == 8 and _cc[1] == 9)
+
         if HD <= 32:
-            BLOCK_N, _num_warps = (128, 8) if _sm90 else (64, 4)
+            if _is_sm90:
+                BLOCK_N, _num_warps = (128, 8)
+            elif _is_sm89:
+                BLOCK_N, _num_warps = (64, 4)
+            else:
+                BLOCK_N, _num_warps = (64, 4)
         elif HD <= 64:
-            BLOCK_N, _num_warps = (128, 8) if _sm90 else (64, 4)
+            if _is_sm90:
+                BLOCK_N, _num_warps = (128, 8)
+            elif _is_sm89:
+                BLOCK_N, _num_warps = (64, 4)
+            else:
+                BLOCK_N, _num_warps = (64, 4)
         elif HD <= 128:
-            BLOCK_N, _num_warps = (64, 4) if _sm90 else (32, 4)
+            if _is_sm90:
+                BLOCK_N, _num_warps = (64, 4)
+            elif _is_sm89:
+                BLOCK_N, _num_warps = (64, 4)
+            else:
+                BLOCK_N, _num_warps = (32, 4)
         elif HD <= 256:
-            BLOCK_N, _num_warps = (32, 4) if _sm90 else (16, 4)
+            BLOCK_N, _num_warps = (32, 4) if _is_sm90 else (16, 4)
         else:
-            BLOCK_N, _num_warps = (16, 4) if _sm90 else (8, 4)
+            BLOCK_N, _num_warps = (16, 4) if _is_sm90 else (8, 4)
         BLOCK_HD = _next_pow2(HD)
         out = torch.empty_like(q)
         lse = torch.empty(B, H, N, device=q.device, dtype=torch.float32)
@@ -678,10 +708,10 @@ def dsqg_attention_v8(q, k, v, pos_bias, scale_embed,
                       phase_base, phase_gain, y_pre, z_pre):
     """
     q, k, v:       [B, H, N, HD]   bfloat16
-    pos_bias:      [24, H]          float32
-    scale_embed:   [24, HD]         float32
-    phase_base:    [10, H, 2]       float32  MOVT angles (large offsets only, zero=identity)
-    phase_gain:    [10, H, 2]       float32  QK-OVT gains (zero=pure MOVT)
+    pos_bias:      [12, H]          float32
+    scale_embed:   [12, HD]         float32
+    phase_base:    [8, H, 2]        float32  MOVT angles (large offsets only, zero=identity)
+    phase_gain:    [8, H, 2]        float32  QK-OVT gains (zero=pure MOVT)
     y_pre:         [B, H, N, 2]    float32  Q @ query_probes.T / sqrt(HD)
     z_pre:         [B, H, N, 2]    float32  K @ key_probes.T / sqrt(HD)
     Returns:       [B, H, N, HD]   bfloat16
@@ -702,19 +732,19 @@ def dsqg_attention_v8(q, k, v, pos_bias, scale_embed,
 # Module
 # ─────────────────────────────────────────────────────────────────────────────
 
-class DSQGAttentionV8(nn.Module):
+class DSQGAttentionV8J13D(nn.Module):
     """
-    DSQG V8: J=24 relay-optimal offsets + MOVT(r=2) + QK-OVT + NPCI.
+    DSQG V8 J=12: Minimal relay-optimal offsets + MOVT(r=2) + QK-OVT + NPCI.
 
-    Extends V7 (J=20) to J=24 with finer local coverage (δ=5,7,9,10 added).
-    J_SMALL=14 (δ≤21, no MOVT), J_LARGE=10 (δ≥23, MOVT applied, unchanged).
+    J=12 subset: [1,2,4,8,16,64,96,192,384,512,768,1024]
+    J_SMALL=4 (δ≤8, no MOVT), J_LARGE=8 (δ≥16, MOVT applied).
 
     Parameters owned:
-      pos_bias      [24, H]    global frequency prior
-      scale_embed   [24, HD]   Q-matched-filter (zero-init)
+      pos_bias      [12, H]    global frequency prior
+      scale_embed   [12, HD]   Q-matched-filter (zero-init)
       if_gain       [H]        IF amplifier gain (1.0-init)
-      phase_base    [10, H, 2] MOVT angles for large offsets (zero-init)
-      phase_gain    [10, H, 2] QK-OVT gains for large offsets (zero-init)
+      phase_base    [8, H, 2]  MOVT angles for large offsets (zero-init)
+      phase_gain    [8, H, 2]  QK-OVT gains for large offsets (zero-init)
       query_probes  [2, HD]    y precomputation probes (zero-init)
       key_probes    [2, HD]    z precomputation probes (zero-init)
       npci_theta_k  [H]        NPCI K rotation angle (zero-init)
@@ -783,11 +813,11 @@ class DSQGAttentionV8(nn.Module):
 
     def attn_summary(self):
         with torch.no_grad():
-            pb   = self.pos_bias.detach().cpu()       # [24, H]
-            se   = self.scale_embed.detach().cpu()    # [24, HD]
+            pb   = self.pos_bias.detach().cpu()       # [12, H]
+            se   = self.scale_embed.detach().cpu()    # [12, HD]
             gain = self.if_gain.detach().cpu()        # [H]
-            phb  = self.phase_base.detach().cpu()     # [10, H, 2]
-            phg  = self.phase_gain.detach().cpu()     # [10, H, 2]
+            phb  = self.phase_base.detach().cpu()     # [8, H, 2]
+            phg  = self.phase_gain.detach().cpu()     # [8, H, 2]
             qp   = self.query_probes.detach().cpu()
             kp   = self.key_probes.detach().cpu()
             thk  = self.npci_theta_k.detach().cpu()
@@ -822,6 +852,9 @@ class DSQGAttentionV8(nn.Module):
         }
 
 
+DSQGAttentionV8 = DSQGAttentionV8J13D
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 # Reference (pure PyTorch — for correctness testing)
 # ─────────────────────────────────────────────────────────────────────────────
@@ -829,7 +862,7 @@ class DSQGAttentionV8(nn.Module):
 def _reference_v8(q, k, v, pos_bias, scale_embed,
                   phase_base, phase_gain, y_pre, z_pre):
     """Pure PyTorch reference. Slow — for testing only.
-    phase_base/gain: [J_LARGE=10, H, 2] — large offsets only (indices 14-23).
+    phase_base/gain: [J_LARGE=8, H, 2] — large offsets only (indices 4-11).
     """
     B, H, N, HD = q.shape
     sc   = HD ** -0.5
@@ -837,27 +870,27 @@ def _reference_v8(q, k, v, pos_bias, scale_embed,
     kp   = F.pad(k.float(), (0, 0, MAX_DELTA, 0))
     vp   = F.pad(v.float(), (0, 0, MAX_DELTA, 0))
     ni   = torch.arange(N, device=q.device)
-    gi   = MAX_DELTA - off[None, :] + ni[:, None]   # [N, 24]
-    Ka   = kp[:, :, gi, :]                           # [B, H, N, 24, HD]
-    Va   = vp[:, :, gi, :]                           # [B, H, N, 24, HD]
+    gi   = MAX_DELTA - off[None, :] + ni[:, None]   # [N, 12]
+    Ka   = kp[:, :, gi, :]                           # [B, H, N, 12, HD]
+    Va   = vp[:, :, gi, :]                           # [B, H, N, 12, HD]
 
-    s = (q.float().unsqueeze(3) * Ka).sum(-1) * sc   # [B, H, N, 24]
+    s = (q.float().unsqueeze(3) * Ka).sum(-1) * sc   # [B, H, N, 12]
     s += pos_bias.T[None, :, None, :]
     s += (q.float().unsqueeze(3) * scale_embed[None, None, :, :]).sum(-1) * sc
     s  = s.masked_fill(
         (ni[:, None] < off[None, :]).unsqueeze(0).unsqueeze(0), float('-inf'))
-    a  = F.softmax(s, dim=-1)                        # [B, H, N, 24]
+    a  = F.softmax(s, dim=-1)                        # [B, H, N, 12]
     a  = torch.nan_to_num(a, nan=0.0)
 
     z_pad  = F.pad(z_pre, (0, 0, MAX_DELTA, 0))
-    gi_lg  = gi[:, J_SMALL:]                         # [N, 10]
-    za_lg  = z_pad[:, :, gi_lg, :]                  # [B, H, N, 10, 2]
-    ya_lg  = y_pre.unsqueeze(3).expand(-1, -1, -1, J_LARGE, -1)  # [B, H, N, 10, 2]
+    gi_lg  = gi[:, J_SMALL:]                         # [N, 8]
+    za_lg  = z_pad[:, :, gi_lg, :]                  # [B, H, N, 8, 2]
+    ya_lg  = y_pre.unsqueeze(3).expand(-1, -1, -1, J_LARGE, -1)  # [B, H, N, 8, 2]
 
-    pb_exp = phase_base.permute(1, 0, 2)[None, :, None, :, :]    # [1, H, 1, 10, 2]
-    pg_exp = phase_gain.permute(1, 0, 2)[None, :, None, :, :]    # [1, H, 1, 10, 2]
+    pb_exp = phase_base.permute(1, 0, 2)[None, :, None, :, :]    # [1, H, 1, 8, 2]
+    pg_exp = phase_gain.permute(1, 0, 2)[None, :, None, :, :]    # [1, H, 1, 8, 2]
 
-    theta  = pb_exp + pg_exp * ya_lg * za_lg         # [B, H, N, 10, 2]
+    theta  = pb_exp + pg_exp * ya_lg * za_lg         # [B, H, N, 8, 2]
     theta0 = theta[..., 0];  theta1 = theta[..., 1]
 
     cos0 = torch.cos(theta0); sin0 = torch.sin(theta0)
@@ -881,8 +914,17 @@ def _reference_v8(q, k, v, pos_bias, scale_embed,
 
 def run_tests(device='cuda'):
     print("=" * 70)
-    print("DSQG V8 — Correctness Tests (J=24 J24_D + MOVT + QK-OVT + NPCI)")
+    print("DSQG V8 J=12 — Correctness Tests (J=12 minimal + MOVT + QK-OVT + NPCI)")
     print("=" * 70)
+
+    _cc = torch.cuda.get_device_capability() if device == 'cuda' else (0, 0)
+    _is_sm90 = (_cc[0] == 9 and _cc[1] == 0) or _cc[0] > 9
+    _is_sm89 = (_cc[0] == 8 and _cc[1] == 9)
+    gpu_name = torch.cuda.get_device_name(0) if device == 'cuda' else 'CPU'
+    kernel_path = "H100 (sm90)" if _is_sm90 else ("4090 (sm89)" if _is_sm89 else "generic")
+    print(f"  GPU: {gpu_name}")
+    print(f"  Kernel path: {kernel_path}")
+    print()
 
     cfgs = [
         (1, 8,   64, 32, "tiny"),
@@ -944,6 +986,34 @@ def run_tests(device='cuda'):
     ok_n = norm_err < 1e-4
     if not ok_n: ok_all = False
     print(f"  {'NPCI norm err':22s}  max_err={norm_err:.2e}  {'PASS' if ok_n else 'FAIL'}")
+
+    print()
+    print("  J=12 vs J=24 timing comparison:")
+    B, H, N, HD = 2, 8, 2048, 64
+    q   = torch.randn(B, H, N, HD, device=device, dtype=torch.bfloat16) * 0.1
+    k   = torch.randn(B, H, N, HD, device=device, dtype=torch.bfloat16) * 0.1
+    v   = torch.randn(B, H, N, HD, device=device, dtype=torch.bfloat16) * 0.1
+    pb  = torch.randn(J, H, device=device, dtype=torch.float32) * 0.5
+    se  = torch.randn(J, HD, device=device, dtype=torch.float32) * 0.05
+    phb = torch.randn(J_LARGE, H, 2, device=device, dtype=torch.float32) * 0.3
+    phg = torch.randn(J_LARGE, H, 2, device=device, dtype=torch.float32) * 0.1
+    sc  = HD ** -0.5
+    qpr = torch.randn(2, HD, device=device, dtype=torch.float32) * 0.1
+    kpr = torch.randn(2, HD, device=device, dtype=torch.float32) * 0.1
+    y   = torch.einsum('bhnd,rd->bhnr', q.float(), qpr).mul(sc).contiguous()
+    z   = torch.einsum('bhnd,rd->bhnr', k.float(), kpr).mul(sc).contiguous()
+
+    import time
+    torch.cuda.synchronize()
+    for _ in range(3):
+        dsqg_attention_v8(q, k, v, pb, se, phb, phg, y, z)
+    torch.cuda.synchronize()
+    t0 = time.perf_counter()
+    for _ in range(20):
+        dsqg_attention_v8(q, k, v, pb, se, phb, phg, y, z)
+    torch.cuda.synchronize()
+    t_j12 = (time.perf_counter() - t0) / 20 * 1000
+    print(f"  J=12 kernel: {t_j12:.2f} ms/fwd (B={B}, N={N}, HD={HD})")
 
     print("=" * 70)
     print(f"{'ALL PASSED' if ok_all else 'SOME FAILED'}")

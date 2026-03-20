@@ -212,6 +212,46 @@ def _import_borg_gen5_L8_preIF():
     return mod.AutoresearchTransformerPhysics
 
 
+def _import_borg_j12_30m():
+    """Import AutoresearchTransformerPhysics from train_borg_j12_30m_4090_bf16.py (J=12 minimal offset science run)."""
+    import importlib.util
+    repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    script = os.path.join(repo_root, 'train', 'train_borg_j12_30m_4090_bf16.py')
+    spec = importlib.util.spec_from_file_location('borg_j12_30m_train', script)
+    mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
+    return mod.AutoresearchTransformerPhysics
+
+
+def _import_j13d_v1_30m():
+    """Import AutoresearchTransformerPhysics from train_borg_j13d_30m_4090_bf16.py (J13D v1, no EMA fix)."""
+    import importlib.util
+    repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    script = os.path.join(repo_root, 'train', 'train_borg_j13d_30m_4090_bf16.py')
+    spec = importlib.util.spec_from_file_location('j13d_v1_30m_train', script)
+    mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
+    return mod.AutoresearchTransformerPhysics
+
+
+def _import_j13d_v2_30m():
+    """Import AutoresearchTransformerPhysics from train_borg_j13d_v2_30m_4090_bf16.py (J13D v2, EMA dead-zone fix)."""
+    import importlib.util
+    repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    script = os.path.join(repo_root, 'train', 'train_borg_j13d_v2_30m_4090_bf16.py')
+    spec = importlib.util.spec_from_file_location('j13d_v2_30m_train', script)
+    mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
+    return mod.AutoresearchTransformerPhysics
+
+
+def _import_dwarf_1b_d4096():
+    """Import AutoresearchTransformerPhysics from train_dwarf_1b_d4096_bf16.py (1.927B, D=4096, FA@L2)."""
+    import importlib.util
+    repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    script = os.path.join(repo_root, 'train', 'train_dwarf_1b_d4096_bf16.py')
+    spec = importlib.util.spec_from_file_location('dwarf_1b_d4096_train', script)
+    mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
+    return mod.AutoresearchTransformerPhysics
+
+
 def _import_borg_gen5_L11_preIF():
     """Import AutoresearchTransformerPhysics from train_borg_gen5_L11_preIF_bf16.py (L=11, pre-FA IF only)."""
     import importlib.util
@@ -575,6 +615,34 @@ MODEL_REGISTRY = {
         'checkpoint': os.path.join(CKPT_ROOT, '..', 'autoresearch', 'checkpoints', 'borg_gen5_L11_preIF_best.pt'),
         'label':      'Borg Gen5 L=11 preIF (Gen5-L8 warm-start, FA@L2 unfrozen, IF@L1 only)',
     },
+    # dwarf_1b_d4096: 1.927B params, D=4096, H=32, L=8, FA@L2, preIF@L1, J=24, N=1024
+    'dwarf_1b_d4096': {
+        'arch':       'dwarf_1b_d4096',
+        'D':          4096, 'H': 32, 'FFN': 16384, 'L': 8, 'full_layer': 2,
+        'checkpoint': os.path.join(CKPT_ROOT, '..', 'autoresearch', 'checkpoints', 'dwarf_1b_d4096_best.pt'),
+        'label':      'DWARF 1.927B D=4096 (FA@L2 preIF, J=24, N=1024 training)',
+    },
+    # borg_j12_30m: L=6, J=12 minimal relay-optimal offsets, cold-start, FA@L2, preIF@L1
+    'borg_j12_30m': {
+        'arch':       'borg_j12_30m',
+        'D':          512, 'H': 8, 'FFN': 2048, 'L': 6, 'full_layer': 2,
+        'checkpoint': os.path.join(CKPT_ROOT, '..', 'autoresearch', 'checkpoints', 'j12_30m_best.pt'),
+        'label':      'J=12 30M Science Run (minimal relay-optimal offsets, cold-start, FA@L2, preIF only)',
+    },
+    # j13d_v1_30m: J=13D Frobenius-optimal offsets, cold-start, FA@L2, preIF@L1, NO EMA fix
+    'j13d_v1_30m': {
+        'arch':       'j13d_v1_30m',
+        'D':          512, 'H': 8, 'FFN': 2048, 'L': 6, 'full_layer': 2,
+        'checkpoint': os.path.join(CKPT_ROOT, '..', 'autoresearch', 'checkpoints', 'j13d_30m_ep3_resume.pt'),
+        'label':      'J13D v1 37.7M (J=13, FA@L2, preIF@L1, no EMA fix)',
+    },
+    # j13d_v2_30m: J=13D Frobenius-optimal offsets, cold-start, FA@L2, preIF@L1, EMA dead-zone fix
+    'j13d_v2_30m': {
+        'arch':       'j13d_v2_30m',
+        'D':          512, 'H': 8, 'FFN': 2048, 'L': 6, 'full_layer': 2,
+        'checkpoint': os.path.join(CKPT_ROOT, '..', 'autoresearch', 'checkpoints', 'j13d_v2_30m_ep3_resume.pt'),
+        'label':      'J13D v2 37.7M (J=13, FA@L2, preIF@L1, EMA dead-zone fix)',
+    },
     # borg_gen5_L8_preIF: L=8, Gen3 warm-start, pre-FA IF only
     'borg_gen5_L8_preIF': {
         'arch':       'borg_gen5_L8_preIF',
@@ -594,10 +662,10 @@ MODEL_REGISTRY = {
     # borg_L11: L=11, frozen J26D FA at L10
     'borg_L11': {
         'arch':       'borg_L11',
-        'D':          512, 'H': 8, 'FFN': 2048, 'L': 11, 'full_layer': 10,
+        'D':          512, 'H': 8, 'FFN': 2048, 'L': 11, 'full_layer': 5,
         'interference': 2,
         'checkpoint': os.path.join(CKPT_ROOT, '..', 'autoresearch', 'checkpoints', 'borg_L11_best.pt'),
-        'label':      'Borg L=11 54M (frozen J26D FA@L10, phase coherence test)',
+        'label':      'Borg L=11 58.2M (Gen2 FA frozen@L5, 5 DSQG each side)',
     },
     # cond_delta: L=6, V9 kernel (delta rule), J26D topology
     'cond_delta': {
@@ -1115,6 +1183,40 @@ def build_model(cfg):
             ffn_dim=FFN, seq_len=MAX_SEQ_LEN,
             full_attn_layer=cfg.get('full_layer', 2),
             interference_interval=2,  # passed but overridden by pre-FA IF logic in script
+            scale_embed_init_val=0.1,
+        )
+    elif arch == 'dwarf_1b_d4096':
+        ATP = _import_dwarf_1b_d4096()
+        return ATP(
+            vocab_size=VOCAB_SIZE, embedding_dim=cfg['D'], num_layers=cfg['L'],
+            num_heads=cfg['H'], ffn_dim=cfg['FFN'], seq_len=MAX_SEQ_LEN,
+            full_attn_layer=cfg.get('full_layer', 2),
+            interference_interval=2,
+            scale_embed_init_val=0.1,
+        )
+    elif arch == 'borg_j12_30m':
+        ATP = _import_borg_j12_30m()
+        return ATP(
+            vocab_size=VOCAB_SIZE, embedding_dim=D, num_layers=L, num_heads=H,
+            ffn_dim=FFN, seq_len=MAX_SEQ_LEN,
+            full_attn_layer=cfg.get('full_layer', 2),
+            scale_embed_init_val=0.1,
+            # no interference_interval — preIF-only arch, removed from __init__
+        )
+    elif arch == 'j13d_v1_30m':
+        ATP = _import_j13d_v1_30m()
+        return ATP(
+            vocab_size=VOCAB_SIZE, embedding_dim=D, num_layers=L, num_heads=H,
+            ffn_dim=FFN, seq_len=MAX_SEQ_LEN,
+            full_attn_layer=cfg.get('full_layer', 2),
+            scale_embed_init_val=0.1,
+        )
+    elif arch == 'j13d_v2_30m':
+        ATP = _import_j13d_v2_30m()
+        return ATP(
+            vocab_size=VOCAB_SIZE, embedding_dim=D, num_layers=L, num_heads=H,
+            ffn_dim=FFN, seq_len=MAX_SEQ_LEN,
+            full_attn_layer=cfg.get('full_layer', 2),
             scale_embed_init_val=0.1,
         )
     elif arch == 'borg_gen3_L8':

@@ -14,3 +14,11 @@ rayon       = "1"
 [[bin]]
 name = "depth_resonance"
 path = "src/depth_resonance.rs"
+
+[[bin]]
+name = "physics_domain_verification"
+path = "src/physics_domain_verification.rs"
+
+[[bin]]
+name = "j13d_offset_verification"
+path = "src/j13d_offset_verification.rs"

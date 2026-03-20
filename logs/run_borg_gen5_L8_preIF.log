@@ -1,0 +1,113 @@
+======================================================================
+  🔬 DWARF Autoresearch — BORG MID-ATTN GEN2 (FA unfrozen)
+  FullAttn at L2 of L=8, Gen3 warm-start, pre-FA IF only (IF iff layer < FA), FA UNFROZEN
+======================================================================
+  GPU: NVIDIA H100 NVL
+  D=512, H=8, L=8, FFN=2048
+  Pre-FA IF only: IF on layers < 2, pure DSQG on layers >= 2
+  scale_embed init=0.1, LR mult=15.0
+  EMA α₀=0.00035 (window≈2857t), floor=1e-05
+  MAX_TRAIN_SEQS=121232, LR=0.0003, Epochs=3
+  FREEZE_FULL_ATTN_AFTER_EPOCH=None
+  git=99437df
+Loading FineWeb-Edu from cache: benchmarks/logs/condm_fineweb_edu_doc_cache.json
+  Loaded 100,000 docs from cache
+Loaded tokenizer from results/2048_condI_tokenizer.json
+Loading pre-encoded dataset from logs/fineweb_encoded_2048.pt
+  train: 121,232  val: 5,582 seqs
+
+  Resuming from full checkpoint: autoresearch/checkpoints/borg_gen3_L8_best.pt
+  Loaded — missing: 0, unexpected: 30
+  FA at L2 is UNFROZEN — will refine against trained DSQG blocks
+  compiled FullAttnBlock at layer 2
+  torch.compile applied to FullAttnBlock(s)
+Parameters: 45,560,234 (45.6M)
+  Step 200/3789 | Loss 3.6469
+  Step 400/3789 | Loss 3.6852
+  Step 600/3789 | Loss 3.8278
+  Step 800/3789 | Loss 3.6010
+  Step 1000/3789 | Loss 3.5624
+  Step 1200/3789 | Loss 3.6076
+  Step 1400/3789 | Loss 3.5083
+  Step 1600/3789 | Loss 3.6483
+  Step 1800/3789 | Loss 3.5787
+  Step 2000/3789 | Loss 3.5521
+  Step 2200/3789 | Loss 3.6701
+  Step 2400/3789 | Loss 3.6366
+  Step 2600/3789 | Loss 3.6896
+  Step 2800/3789 | Loss 3.6514
+  Step 3000/3789 | Loss 3.4915
+  Step 3200/3789 | Loss 3.6790
+  Step 3400/3789 | Loss 3.6302
+  Step 3600/3789 | Loss 3.6302
+Ep 1/3 | Val PPL 34.82 *
+  scale_embed |mean|=0.3165 |max|=2.9823
+  Physics: b1: α=0.0220(w≈46t) kdv=-0.0000
+  Saved FullAttn checkpoint: autoresearch/checkpoints/borg_gen5_L8_preIF_ep1_full_attn.pt
+  Passkey mean=95.8%
+  d=1:100%  d=2:100%  d=4:100%  d=8:100%  d=16:100%  d=32:100%  d=64:100%  d=128:100%  d=256:100%  d=512:90%  d=1024:90%  d=1536:70%
+  Step 200/3789 | Loss 3.5431
+  Step 400/3789 | Loss 3.4535
+  Step 600/3789 | Loss 3.5077
+  Step 800/3789 | Loss 3.5684
+  Step 1000/3789 | Loss 3.6371
+  Step 1200/3789 | Loss 3.4504
+  Step 1400/3789 | Loss 3.6438
+  Step 1600/3789 | Loss 3.5759
+  Step 1800/3789 | Loss 3.6506
+  Step 2000/3789 | Loss 3.4650
+  Step 2200/3789 | Loss 3.6169
+  Step 2400/3789 | Loss 3.5497
+  Step 2600/3789 | Loss 3.4364
+  Step 2800/3789 | Loss 3.5070
+  Step 3000/3789 | Loss 3.5298
+  Step 3200/3789 | Loss 3.5900
+  Step 3400/3789 | Loss 3.4980
+  Step 3600/3789 | Loss 3.4951
+Ep 2/3 | Val PPL 32.36 *
+  scale_embed |mean|=0.3023 |max|=2.8666
+  Physics: b1: α=0.0208(w≈48t) kdv=-0.0000
+  Saved FullAttn checkpoint: autoresearch/checkpoints/borg_gen5_L8_preIF_ep2_full_attn.pt
+  Passkey mean=99.2%
+  d=1:100%  d=2:100%  d=4:100%  d=8:100%  d=16:100%  d=32:100%  d=64:100%  d=128:100%  d=256:100%  d=512:100%  d=1024:100%  d=1536:90%
+  Step 200/3789 | Loss 3.5266
+  Step 400/3789 | Loss 3.4621
+  Step 600/3789 | Loss 3.5677
+  Step 800/3789 | Loss 3.5196
+  Step 1000/3789 | Loss 3.4643
+  Step 1200/3789 | Loss 3.4338
+  Step 1400/3789 | Loss 3.4954
+  Step 1600/3789 | Loss 3.5008
+  Step 1800/3789 | Loss 3.5098
+  Step 2000/3789 | Loss 3.3524
+  Step 2200/3789 | Loss 3.4293
+  Step 2400/3789 | Loss 3.3620
+  Step 2600/3789 | Loss 3.4863
+  Step 2800/3789 | Loss 3.4162
+  Step 3000/3789 | Loss 3.4929
+  Step 3200/3789 | Loss 3.4383
+  Step 3400/3789 | Loss 3.5154
+  Step 3600/3789 | Loss 3.3700
+Ep 3/3 | Val PPL 31.58 *
+  scale_embed |mean|=0.2977 |max|=2.7974
+  Physics: b1: α=0.0203(w≈49t) kdv=-0.0000
+  Saved FullAttn checkpoint: autoresearch/checkpoints/borg_gen5_L8_preIF_ep3_full_attn.pt
+  Passkey mean=100.0%
+  d=1:100%  d=2:100%  d=4:100%  d=8:100%  d=16:100%  d=32:100%  d=64:100%  d=128:100%  d=256:100%  d=512:100%  d=1024:100%  d=1536:100%
+
+---
+passkey_ep1:    95.8
+passkey_ep2:    99.2
+passkey_ep3:    100.0
+ppl_ep1:        34.82
+ppl_ep2:        32.36
+ppl_ep3:        31.58
+ar_score:       81.70
+memory_mb:      43062.5
+elapsed_s:      6689.1
+num_params_M:   45.6
+num_layers:     8
+num_offsets:    24
+scale_embed_lr_mult: 15.0
+ema_init:       0.00035
+description:    Borg Gen5 L=8 preIF — 45.6M, Gen2 full warm-start, FA@L2 unfrozen, D=512, L=8, pre-FA IF only, Gen3 warm-start

@@ -1,65 +1,66 @@
 """
-🔬 DWARF Autoresearch — Borg Adaptation Run (FullAttn-first, 13M)
+🔬 DWARF J13D v2 — 30M Science Experiment (EMA dead-zone fix)
+J=13 H1+Frobenius-optimal: [1,2,4,5,8,16,32,64,128,256,512,768,1024]
+EMA fix: abs(ema_factor)+floor prevents Adam driving raw param negative.
+Designed via H1 repetition code + 2-hop Frobenius coverage analysis.
+δ=5 bridge enables 2-hop at 11/12 distances; 2×δ+5=gap H1 paths for all.
+FA@L2, preIF@L1 only, L=6, no pos_embed, 4090-tuned kernel, cold start.
 
-Step 2 of Borg Collective experiment: train a FullAttn-first model where the
-FullAttn block is warm-started from extracted J26D weights, adapted to receive
-raw embeddings at L0 instead of processed DSQG residuals.
+This experiment tests whether the relay mechanism works with a sparser
+offset set (J=12 vs J=24). If successful, this confirms that:
+1. Local coverage needs only δ=1,2,4,8 (powers of 2)
+2. Distal coverage needs only δ=16,64,96,192,384,512,768,1024
 
-Architecture (D=512, H=8, L=3, FFN=2048 → ~15M params):
-  Block 0:  FullAttentionBlock  ← warm-started from J26D extracted weights
-  Block 1:  DSQGBlockV6Physics  ← randomly initialized
-  Block 2:  DSQGBlockV6Physics  ← randomly initialized
+Architecture (D=512, H=8, L=6, FFN=2048 → ~30M params with tied embeddings):
+  L0:  DSQGBlockV6Physics  IF=False
+  L1:  DSQGBlockV6Physics  IF=True   ← single pre-FA IF block
+  L2:  FullAttentionBlock            ← FA@L2 (optimal placement confirmed)
+  L3-5: DSQGBlockV6Physics IF=False  ← 3 post-FA relay layers
 
-J26D's FullAttn was trained at L5 receiving residual stream activations after
-5 DSQG blocks. Placing it at L0 causes distribution mismatch (raw embeddings ≠
-processed residuals). This run adapts the block to the new input distribution.
-
-Run (from repo root):
-  CUDA_VISIBLE_DEVICES=0 .venv/bin/python3 -u train/train_borg_adapt_13m_bf16.py \
-    > logs/run_borg_adapt_13m.log 2>&1 &
+Run (from repo root, on 4090):
+  CUDA_VISIBLE_DEVICES=0 .venv/bin/python3 -u train/train_borg_j13d_v2_30m_4090_bf16.py > logs/run_j12_30m.log 2>&1 &
 """
 
 # =============================================================================
 # EXPERIMENT KNOBS
 # =============================================================================
 
-OFFSETS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13, 15, 16, 21, 23, 28, 48, 64, 96, 192, 384, 512, 768, 1024]
+OFFSETS = [1, 2, 4, 5, 8, 16, 32, 64, 128, 256, 512, 768, 1024]  # J=13D
 
 EMBEDDING_DIM    = 512
 NUM_HEADS        = 8
 FFN_DIM          = 2048
-NUM_LAYERS       = 5
+NUM_LAYERS       = 6
 FULL_ATTN_LAYER  = 2
 
 MAX_TRAIN_SEQS      = 121_232
-SCALE_EMBED_INIT_VAL = 0.1
+SCALE_EMBED_INIT_VAL = 0.15  # confirmed faster relay acquisition
 SCALE_EMBED_LR_MULT  = 15.0
 
-EMA_INIT  = 0.00035
+EMA_INIT  = 0.003   # v2: higher init to prevent Adam dead-zone (raw_param going negative)
 EMA_FLOOR = 0.00001
 
 LR            = 3e-4
-SCREEN_EPOCHS = 2
+SCREEN_EPOCHS = 3
 
-FREEZE_FULL_ATTN_AFTER_EPOCH = 0
+FREEZE_FULL_ATTN_AFTER_EPOCH = None
 
-EXTRACTED_CKPT = "autoresearch/checkpoints/borg_midattn_gen2_best.pt"
+EXTRACTED_CKPT = ""   # No warm-start — J=12 has different param shapes from J=24
 
 # =============================================================================
 
 import json, math, os, subprocess, sys, time
 import torch
 import torch.nn as nn
+from torch.utils.checkpoint import checkpoint as grad_ckpt
 import torch.nn.functional as F
 
-# H100: enable TF32 tensor cores for free speedup on FP32 ops (optimizer states, reductions)
 torch.set_float32_matmul_precision('high')
-# Reduce VRAM fragmentation — critical on large models
 os.environ.setdefault('PYTORCH_CUDA_ALLOC_CONF', 'expandable_segments:True')
 
 VOCAB_SIZE     = 32000
-BATCH_SIZE     = 8
-GRAD_ACCUM     = 4
+BATCH_SIZE     = 16   # 4090: D=512 but FA recompute during backward is large at N=2048
+GRAD_ACCUM     = 2    # effective batch = 32 (same as original 8×4), 2× more updates
 MAX_SEQ_LEN    = 2048
 NUM_DOCS       = 100_000
 MAX_VAL_SEQS   = 5_582
@@ -87,9 +88,9 @@ for _d in [_kernel_dir, _project_root]:
     if _d not in sys.path:
         sys.path.insert(0, _d)
 
-from dsqg_attention_v8_4090 import DSQGAttentionV8_4090 as DSQGAttentionV6, npci_rotate
+from dsqg_attention_v8_j13d import DSQGAttentionV8J13D as DSQGAttentionV6, npci_rotate
 
-assert len(OFFSETS) == 24
+assert len(OFFSETS) == 13
 
 # ── condV physics helpers ─────────────────────────────────────────────────────
 
@@ -129,7 +130,7 @@ class FFN(nn.Module):
 
 
 class DSQGBlockV6Physics(nn.Module):
-    """V8 DSQG attention + condV interference (EMA + KdV + AGC)."""
+    """V8 J=12 DSQG attention + condV interference (EMA + KdV + AGC)."""
     def __init__(self, embedding_dim, num_heads, ffn_dim, seq_len,
                  dropout=0.1, interference=False):
         super().__init__()
@@ -157,7 +158,7 @@ class DSQGBlockV6Physics(nn.Module):
             B, N, D = xi.shape
             H, HD   = self.num_heads, self.head_dim
 
-            pool = _causal_ema(xi, self.ema_factor, floor=EMA_FLOOR)
+            pool = _causal_ema(xi, self.ema_factor.abs() + EMA_FLOOR, floor=EMA_FLOOR)  # v2: abs() prevents dead zone
             pool = _kdv_correction(pool, self.kdv_alpha)
             pool = _agc_normalize(pool)
 
@@ -218,7 +219,6 @@ class AutoresearchTransformerPhysics(nn.Module):
                  scale_embed_init_val=0.0, dropout=0.1):
         super().__init__()
         self.embedding       = nn.Embedding(vocab_size, embedding_dim)
-        self.pos_embed       = nn.Embedding(seq_len + 2, embedding_dim)
         self.drop            = nn.Dropout(dropout)
         self.full_attn_layer = full_attn_layer
 
@@ -228,7 +228,7 @@ class AutoresearchTransformerPhysics(nn.Module):
                 blocks.append(FullAttentionBlock(
                     embedding_dim, num_heads, ffn_dim, dropout))
             else:
-                has_if = (i == full_attn_layer - 1)  # preIF only: single IF block immediately before FA
+                has_if = (i == full_attn_layer - 1)
                 blocks.append(DSQGBlockV6Physics(
                     embedding_dim, num_heads, ffn_dim, seq_len,
                     dropout=dropout, interference=has_if))
@@ -260,10 +260,12 @@ class AutoresearchTransformerPhysics(nn.Module):
 
     def forward(self, idx):
         B, N = idx.shape
-        pos  = torch.arange(N, device=idx.device).unsqueeze(0)
-        x    = self.drop(self.embedding(idx) + self.pos_embed(pos))
+        x    = self.drop(self.embedding(idx))
         for block in self.blocks:
-            x = block(x)
+            if self.training:
+                x = grad_ckpt(block, x, use_reentrant=False)
+            else:
+                x = block(x)
         return self.out(self.norm(x))
 
     def param_count(self):
@@ -281,7 +283,7 @@ class AutoresearchTransformerPhysics(nn.Module):
                 yield p
 
     def full_attn_parameters(self):
-        """Yield all parameters from the FullAttentionBlock at layer 0."""
+        """Yield all parameters from the FullAttentionBlock."""
         for p in self.blocks[self.full_attn_layer].parameters():
             yield p
 
@@ -297,7 +299,7 @@ class AutoresearchTransformerPhysics(nn.Module):
         entries = []
         for i, block in enumerate(self.blocks):
             if isinstance(block, DSQGBlockV6Physics) and block.interference:
-                alpha = block.ema_factor.item()
+                alpha = abs(block.ema_factor.item()) + EMA_FLOOR  # v2: matches abs() parameterization
                 kdv   = block.kdv_alpha.item()
                 win   = round(1.0 / max(alpha, EMA_FLOOR))
                 entries.append(f'b{i}: α={alpha:.4f}(w≈{win}t) kdv={kdv:.4f}')
@@ -400,8 +402,21 @@ def passkey_accuracy(model, tokenizer, device):
     return results
 
 
+def save_resume_checkpoint(model, optimizer, scheduler, epoch, git_hash, checkpoint_dir):
+    """Save full resume checkpoint (model + optimizer + scheduler) after each epoch."""
+    out_path = os.path.join(checkpoint_dir, f"j13d_v2_30m_ep{epoch}_resume.pt")
+    torch.save({
+        "epoch":                epoch,
+        "model_state_dict":     model.state_dict(),
+        "optimizer_state_dict": optimizer.state_dict(),
+        "scheduler_state_dict": scheduler.state_dict(),
+        "git_hash":             git_hash,
+    }, out_path)
+    print(f"  Saved resume checkpoint: {out_path}")
+
+
 def save_full_attn_checkpoint(model, epoch, git_hash, checkpoint_dir):
-    """Save just the FullAttn block weights after an epoch (for precompute experiment)."""
+    """Save just the FullAttn block weights after an epoch."""
     full_attn_block = model.blocks[model.full_attn_layer]
     state_dict = {}
     for name, param in full_attn_block.named_parameters():
@@ -414,25 +429,26 @@ def save_full_attn_checkpoint(model, epoch, git_hash, checkpoint_dir):
             "num_heads":         NUM_HEADS,
             "ffn_dim":           FFN_DIM,
             "seq_len":           MAX_SEQ_LEN,
-            "source_script":     "train/train_borg_adapt_13m_bf16.py",
+            "source_script":     "train/train_borg_j13d_v2_30m_4090_bf16.py",
             "source_layer":      FULL_ATTN_LAYER,
             "num_layers":        NUM_LAYERS,
+            "num_offsets":       12,
             "epoch":             epoch,
             "note": (
-                "FullAttn adapted to L0 input distribution (raw embeddings). "
-                f"Epoch {epoch} of Borg adaptation run."
+                "J=12 minimal relay-optimal experiment. "
+                f"Epoch {epoch}, FA@L{FULL_ATTN_LAYER}, preIF@L{FULL_ATTN_LAYER-1}."
             ),
         },
     }
 
-    out_path = os.path.join(checkpoint_dir, f"borg_gen3_ep{epoch}_full_attn.pt")
+    out_path = os.path.join(checkpoint_dir, f"j13d_v2_30m_ep{epoch}_full_attn.pt")
     torch.save(payload, out_path)
     print(f"  Saved FullAttn checkpoint: {out_path}")
 
 
 # ── Training ──────────────────────────────────────────────────────────────────
 
-def train(no_warmstart: bool = False):
+def train():
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     torch.cuda.reset_peak_memory_stats()
     t_start = time.time()
@@ -440,17 +456,24 @@ def train(no_warmstart: bool = False):
         ['git', 'rev-parse', '--short', 'HEAD']).decode().strip()
 
     print('=' * 70)
-    print('  🔬 DWARF Autoresearch — BORG GEN3 RUN')
-    print('  FullAttn at L2 (middle), warm-started from Gen2 FA — testing curriculum improvement')
+    print('  🔬 DWARF J=12 — 30M Science Experiment')
+    print('  J=12 relay-optimal: [1,2,4,8,16,64,96,192,384,512,768,1024]')
+    print('  Confirms relay mechanism with minimal confirmed-necessary offsets.')
     print('=' * 70)
     if torch.cuda.is_available():
-        print(f'  GPU: {torch.cuda.get_device_name(0)}')
+        gpu_name = torch.cuda.get_device_name(0)
+        _cc = torch.cuda.get_device_capability()
+        _is_sm90 = (_cc[0] == 9 and _cc[1] == 0) or _cc[0] > 9
+        _is_sm89 = (_cc[0] == 8 and _cc[1] == 9)
+        kernel_path = "H100 (sm90)" if _is_sm90 else ("4090 (sm89)" if _is_sm89 else "generic")
+        print(f'  GPU: {gpu_name}')
+        print(f'  Kernel path: {kernel_path} (sm_{_cc[0]}{_cc[1]})')
     print(f'  D={EMBEDDING_DIM}, H={NUM_HEADS}, L={NUM_LAYERS}, FFN={FFN_DIM}')
-    print(f'  IF@L{FULL_ATTN_LAYER - 1} (preIF only), FA@L{FULL_ATTN_LAYER} (MIDDLE, L2 of 5)')
+    print(f'  J=12 offsets: {OFFSETS}')
+    print(f'  FA@L{FULL_ATTN_LAYER}, preIF@L{FULL_ATTN_LAYER-1} only, no pos_embed')
     print(f'  scale_embed init={SCALE_EMBED_INIT_VAL}, LR mult={SCALE_EMBED_LR_MULT}')
     print(f'  EMA α₀={EMA_INIT} (window≈{round(1/EMA_INIT)}t), floor={EMA_FLOOR}')
     print(f'  MAX_TRAIN_SEQS={MAX_TRAIN_SEQS}, LR={LR}, Epochs={SCREEN_EPOCHS}')
-    print(f'  FREEZE_FULL_ATTN_AFTER_EPOCH={FREEZE_FULL_ATTN_AFTER_EPOCH}')
     print(f'  git={git_hash}')
 
     splits = load_data()
@@ -484,30 +507,9 @@ def train(no_warmstart: bool = False):
         scale_embed_init_val=SCALE_EMBED_INIT_VAL,
     ).to(device)
 
-    # ── Warm-start FullAttn from J26D extracted weights ──────────────────────
-    ckpt_suffix = 'control' if no_warmstart else 'warmstart'
-    best_ckpt_name = f'borg_gen3_best.pt'
-    if no_warmstart:
-        print(f'\n  [control] Random-init FullAttn — skipping J26D warm-start')
-        print(f'  Checkpoint: {best_ckpt_name}\n')
-    if not no_warmstart and os.path.exists(EXTRACTED_CKPT):
-        print(f'\n  Loading J26D FullAttn weights from {EXTRACTED_CKPT}...')
-        extracted = torch.load(EXTRACTED_CKPT, map_location="cpu")
-        full_attn_weights = extracted["full_attn_block"]
-
-        remapped = {}
-        for k, v in full_attn_weights.items():
-            new_key = k.replace(f"blocks.2._orig_mod.", f"blocks.{FULL_ATTN_LAYER}.")
-            new_key = new_key.replace(f"blocks.2.", f"blocks.{FULL_ATTN_LAYER}.") 
-            remapped[new_key] = v
-
-        missing, unexpected = model.load_state_dict(remapped, strict=False)
-        print(f'  Loaded {len(remapped)} weights')
-        print(f'  Missing (expected — DSQG blocks random init): {len(missing)}')
-        if unexpected:
-            print(f'  WARNING unexpected keys: {unexpected}')
-    elif not no_warmstart:
-        print(f'  WARNING: {EXTRACTED_CKPT} not found — training from scratch')
+    best_ckpt_name = 'j13d_v2_30m_best.pt'
+    print(f'\n  No warm-start — J=12 trains from scratch')
+    print(f'  Checkpoint: {best_ckpt_name}\n')
 
     try:
         for i, block in enumerate(model.blocks):
@@ -536,11 +538,30 @@ def train(no_warmstart: bool = False):
     best_val_loss   = float('inf')
     passkey_results = {}
     ppl_results     = {}
+    start_epoch     = 1
     os.makedirs(CHECKPOINT_DIR, exist_ok=True)
+
+    resume_ckpt = None
+    for ep in range(SCREEN_EPOCHS, 0, -1):
+        candidate = os.path.join(CHECKPOINT_DIR, f"j13d_v2_30m_ep{ep}_resume.pt")
+        if os.path.exists(candidate):
+            resume_ckpt = candidate
+            break
+    if resume_ckpt:
+        print(f"\n  Resuming from: {resume_ckpt}")
+        ckpt = torch.load(resume_ckpt, map_location=device)
+        sd = {k.replace("_orig_mod.", ""): v for k, v in ckpt["model_state_dict"].items()}
+        model.load_state_dict(sd)
+        optimizer.load_state_dict(ckpt["optimizer_state_dict"])
+        scheduler.load_state_dict(ckpt["scheduler_state_dict"])
+        start_epoch = ckpt["epoch"] + 1
+        print(f"  Loaded ep{ckpt['epoch']} state — resuming from epoch {start_epoch}\n")
+    else:
+        print("  No resume checkpoint found — starting from scratch\n")
 
     full_attn_frozen = False
 
-    for epoch in range(1, SCREEN_EPOCHS + 1):
+    for epoch in range(start_epoch, SCREEN_EPOCHS + 1):
         if FREEZE_FULL_ATTN_AFTER_EPOCH is not None and epoch > FREEZE_FULL_ATTN_AFTER_EPOCH and not full_attn_frozen:
             print(f'\n  ── Freezing FullAttn block (epoch {epoch}) ──')
             for p in model.full_attn_parameters():
@@ -602,6 +623,7 @@ def train(no_warmstart: bool = False):
         print(f'  Physics: {model.physics_summary()}')
 
         save_full_attn_checkpoint(model, epoch, git_hash, CHECKPOINT_DIR)
+        save_resume_checkpoint(model, optimizer, scheduler, epoch, git_hash, CHECKPOINT_DIR)
 
         pk      = passkey_accuracy(model, tokenizer, device)
         pk_mean = sum(pk.values()) / len(pk)
@@ -629,31 +651,13 @@ def train(no_warmstart: bool = False):
     print(f'elapsed_s:      {elapsed_s:.1f}')
     print(f'num_params_M:   {n_params / 1e6:.1f}')
     print(f'num_layers:     {NUM_LAYERS}')
-    print(f'num_offsets:    24')
+    print(f'num_offsets:    12')
     print(f'scale_embed_lr_mult: {SCALE_EMBED_LR_MULT}')
     print(f'ema_init:       {EMA_INIT}')
-    print(f'description:    Borg Adaptation Run — {n_params/1e6:.1f}M, FullAttn@L0 warm from J26D, '
-          f'D={EMBEDDING_DIM}, L={NUM_LAYERS}, adapting to raw embedding distribution')
+    print(f'description:    J=12 30M Science Experiment — {n_params/1e6:.1f}M, '
+          f'D={EMBEDDING_DIM}, L={NUM_LAYERS}, FA@L{FULL_ATTN_LAYER}, preIF@L{FULL_ATTN_LAYER-1}, '
+          f'J=13D H1+Frobenius-optimal offsets, no pos_embed, 4090-tuned kernel')
 
 
 if __name__ == '__main__':
-    import argparse
-    parser = argparse.ArgumentParser(description='Borg adaptation run')
-    parser.add_argument('--no-warmstart', action='store_true',
-                        help='Skip J26D weight loading (random-init control)')
-    args = parser.parse_args()
-    if args.no_warmstart:
-        # Patch the global so the warm-start block is skipped
-        _real_exists = os.path.exists
-        os.path.exists = lambda p: False if p == EXTRACTED_CKPT else _real_exists(p)
-        # Use distinct checkpoint names so control and warm-start don't collide
-        import train_borg_adapt_13m_bf16 as _self
-        _self.CHECKPOINT_DIR  # ensure module loaded
-        # Monkey-patch checkpoint name by modifying the save path at runtime
-        # — handled by checking sys.argv in train() is cleaner; just note in log
-        print("\n  [--no-warmstart] Random-init control — skipping J26D weight load")
-        print("  Checkpoint: borg_gen3_best.pt\n")
-        # Patch the checkpoint name global
-        import sys as _sys
-        # We'll use a simple flag read inside train()
-    train(no_warmstart=args.no_warmstart)
+    train()

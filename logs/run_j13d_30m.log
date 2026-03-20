@@ -1,0 +1,120 @@
+======================================================================
+  🔬 DWARF J=12 — 30M Science Experiment
+  J=12 relay-optimal: [1,2,4,8,16,64,96,192,384,512,768,1024]
+  Confirms relay mechanism with minimal confirmed-necessary offsets.
+======================================================================
+  GPU: NVIDIA GeForce RTX 4090
+  Kernel path: 4090 (sm89) (sm_89)
+  D=512, H=8, L=6, FFN=2048
+  J=12 offsets: [1, 2, 4, 5, 8, 16, 32, 64, 128, 256, 512, 768, 1024]
+  FA@L2, preIF@L1 only, no pos_embed
+  scale_embed init=0.1, LR mult=15.0
+  EMA α₀=0.00035 (window≈2857t), floor=1e-05
+  MAX_TRAIN_SEQS=121232, LR=0.0003, Epochs=3
+  git=6a61588
+Loading FineWeb-Edu from cache: benchmarks/logs/condm_fineweb_edu_doc_cache.json
+  Loaded 100,000 docs from cache
+Loaded tokenizer from results/2048_condI_tokenizer.json
+Loading pre-encoded dataset from logs/fineweb_encoded_2048.pt
+  train: 121,232  val: 5,582 seqs
+
+  No warm-start — J=12 trains from scratch
+  Checkpoint: j13d_30m_best.pt
+
+  compiled FullAttnBlock at layer 2
+  torch.compile applied to FullAttnBlock(s)
+Parameters: 37,671,618 (37.7M)
+  No resume checkpoint found — starting from scratch
+
+  Step 200/3789 | Loss 6.0406
+  Step 400/3789 | Loss 5.6497
+  Step 600/3789 | Loss 5.4056
+  Step 800/3789 | Loss 5.2111
+  Step 1000/3789 | Loss 4.9233
+  Step 1200/3789 | Loss 4.7108
+  Step 1400/3789 | Loss 4.6012
+  Step 1600/3789 | Loss 4.5625
+  Step 1800/3789 | Loss 4.3536
+  Step 2000/3789 | Loss 4.4054
+  Step 2200/3789 | Loss 4.2842
+  Step 2400/3789 | Loss 4.1602
+  Step 2600/3789 | Loss 4.2579
+  Step 2800/3789 | Loss 4.1299
+  Step 3000/3789 | Loss 4.1774
+  Step 3200/3789 | Loss 4.1152
+  Step 3400/3789 | Loss 4.1145
+  Step 3600/3789 | Loss 4.1204
+Ep 1/3 | Val PPL 56.14 *
+  scale_embed |mean|=0.4040 |max|=2.0693
+  Physics: b1: α=-0.0015(w≈100000t) kdv=-0.0000
+  Saved FullAttn checkpoint: autoresearch/checkpoints/j13d_30m_ep1_full_attn.pt
+  Saved resume checkpoint: autoresearch/checkpoints/j13d_30m_ep1_resume.pt
+  Passkey mean=32.5%
+  d=1:40%  d=2:40%  d=4:20%  d=8:40%  d=16:50%  d=32:50%  d=64:40%  d=128:50%  d=256:20%  d=512:10%  d=1024:20%  d=1536:10%
+  Step 200/3789 | Loss 4.1942
+  Step 400/3789 | Loss 3.9473
+  Step 600/3789 | Loss 4.0543
+  Step 800/3789 | Loss 4.1609
+  Step 1000/3789 | Loss 3.9505
+  Step 1200/3789 | Loss 4.0042
+  Step 1400/3789 | Loss 3.9213
+  Step 1600/3789 | Loss 4.2054
+  Step 1800/3789 | Loss 4.0337
+  Step 2000/3789 | Loss 4.0193
+  Step 2200/3789 | Loss 3.8582
+  Step 2400/3789 | Loss 4.0410
+  Step 2600/3789 | Loss 4.0262
+  Step 2800/3789 | Loss 3.8318
+  Step 3000/3789 | Loss 4.1509
+  Step 3200/3789 | Loss 3.8665
+  Step 3400/3789 | Loss 3.9970
+  Step 3600/3789 | Loss 3.9034
+Ep 2/3 | Val PPL 45.64 *
+  scale_embed |mean|=0.3666 |max|=1.9804
+  Physics: b1: α=-0.0014(w≈100000t) kdv=-0.0000
+  Saved FullAttn checkpoint: autoresearch/checkpoints/j13d_30m_ep2_full_attn.pt
+  Saved resume checkpoint: autoresearch/checkpoints/j13d_30m_ep2_resume.pt
+  Passkey mean=39.2%
+  d=1:20%  d=2:20%  d=4:10%  d=8:20%  d=16:50%  d=32:50%  d=64:50%  d=128:60%  d=256:60%  d=512:50%  d=1024:50%  d=1536:30%
+  Step 200/3789 | Loss 3.8810
+  Step 400/3789 | Loss 3.7954
+  Step 600/3789 | Loss 3.8405
+  Step 800/3789 | Loss 3.9519
+  Step 1000/3789 | Loss 3.8948
+  Step 1200/3789 | Loss 3.7312
+  Step 1400/3789 | Loss 3.9468
+  Step 1600/3789 | Loss 3.7392
+  Step 1800/3789 | Loss 3.5979
+  Step 2000/3789 | Loss 3.8919
+  Step 2200/3789 | Loss 3.9108
+  Step 2400/3789 | Loss 3.9114
+  Step 2600/3789 | Loss 3.8697
+  Step 2800/3789 | Loss 3.9609
+  Step 3000/3789 | Loss 3.7131
+  Step 3200/3789 | Loss 3.7170
+  Step 3400/3789 | Loss 3.9167
+  Step 3600/3789 | Loss 3.9536
+Ep 3/3 | Val PPL 43.64 *
+  scale_embed |mean|=0.3568 |max|=1.9095
+  Physics: b1: α=-0.0014(w≈100000t) kdv=-0.0000
+  Saved FullAttn checkpoint: autoresearch/checkpoints/j13d_30m_ep3_full_attn.pt
+  Saved resume checkpoint: autoresearch/checkpoints/j13d_30m_ep3_resume.pt
+  Passkey mean=47.5%
+  d=1:20%  d=2:30%  d=4:20%  d=8:30%  d=16:40%  d=32:60%  d=64:50%  d=128:70%  d=256:70%  d=512:60%  d=1024:70%  d=1536:50%
+
+---
+passkey_ep1:    32.5
+passkey_ep2:    39.2
+passkey_ep3:    47.5
+ppl_ep1:        56.14
+ppl_ep2:        45.64
+ppl_ep3:        43.64
+ar_score:       29.20
+memory_mb:      13750.0
+elapsed_s:      10730.4
+num_params_M:   37.7
+num_layers:     6
+num_offsets:    12
+scale_embed_lr_mult: 15.0
+ema_init:       0.00035
+description:    J=12 30M Science Experiment — 37.7M, D=512, L=6, FA@L2, preIF@L1, J=13D H1+Frobenius-optimal offsets, no pos_embed, 4090-tuned kernel

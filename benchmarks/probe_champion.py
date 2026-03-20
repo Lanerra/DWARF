@@ -12,6 +12,7 @@ Runs on any supported champion checkpoint and generates a full ablation report:
   Section 8 — pos_bias asymmetry (offset specialization analysis)
   Section 9 — Scale_embed per-offset contribution (learned scale analysis)
   Section 10 — IF block inference removability (self-erasing scaffold test)
+  Section 11 — Carrier-amplifier role decomposition (dense offsets: local retrieval vs relay clarifier)
 
 Usage:
   CUDA_VISIBLE_DEVICES=1 .venv/bin/python3 -u benchmarks/probe_champion.py \\
@@ -146,6 +147,18 @@ _ARCH_INFO = {
         'is_bypass':  False,
         'has_physics': True,
     },
+    'borg_j12_30m': {
+        'script':     'train/train_borg_j12_30m_4090_bf16.py',
+        'model_cls':  'AutoresearchTransformerPhysics',
+        'is_bypass':  False,
+        'has_physics': True,
+    },
+    'dwarf_1b_d4096': {
+        'script':     'train/train_dwarf_1b_d4096_bf16.py',
+        'model_cls':  'AutoresearchTransformerPhysics',
+        'is_bypass':  False,
+        'has_physics': True,
+    },
     'borg_gen3_L8': {
         'script':     'train/train_borg_gen3_L8_bf16.py',
         'model_cls':  'AutoresearchTransformerPhysics',
@@ -177,7 +190,7 @@ MAX_SEQ_LEN    = 2048
 # match exactly what each model was trained with.  These are fallback defaults.
 
 PASSKEY_DISTANCES = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 1536]
-PASSKEY_TRIALS    = 10   # 10 trials → 10% granularity; fast but readable
+PASSKEY_TRIALS    = 20   # 20 trials → 5% granularity; balanced speed/accuracy
 _PASSKEY_WORDS    = ['apple', 'banana', 'orange', 'cherry', 'grape',
                      'lemon', 'mango', 'melon', 'peach', 'plum']
 _INTRO_TEMPLATE  = 'the secret word is {word} .'
@@ -257,7 +270,7 @@ def load_model(arch, checkpoint_path, device):
     H  = getattr(m, 'NUM_HEADS', 8)
     F_ = getattr(m, 'FFN_DIM', 2048)
     fa = getattr(m, 'FULL_ATTN_LAYER', 5)
-    iv = getattr(m, 'INTERFERENCE', 3)
+    iv = getattr(m, 'INTERFERENCE', None)   # None for preIF scripts (param removed)
     vs = getattr(m, 'VOCAB_SIZE', 32000)
 
     # Physics models (AutoresearchTransformerPhysics, CurveTransformer) require
@@ -268,13 +281,18 @@ def load_model(arch, checkpoint_path, device):
             'AutoresearchTransformerCondDelta'):
         extra_kwargs['scale_embed_init_val'] = 0.1
 
+    # Only pass interference_interval if the training script still has the param
+    # (gen3/gen4/gen5 preIF scripts removed it; older scripts still use it)
+    if iv is not None:
+        extra_kwargs['interference_interval'] = iv
+
     # Multi-FA models (borg2_dual_fa) use full_attn_layers (list) instead of full_attn_layer
     if info.get('multi_fa'):
         fa_layers = getattr(m, 'FULL_ATTN_LAYERS', [2, 5])
         model = cls(
             vocab_size=vs, embedding_dim=D, num_layers=L,
             num_heads=H, ffn_dim=F_, seq_len=MAX_SEQ_LEN,
-            full_attn_layers=fa_layers, interference_interval=iv,
+            full_attn_layers=fa_layers,
             **extra_kwargs,
         )
         model.full_attn_layer = fa_layers[-1]
@@ -282,7 +300,7 @@ def load_model(arch, checkpoint_path, device):
         model = cls(
             vocab_size=vs, embedding_dim=D, num_layers=L,
             num_heads=H, ffn_dim=F_, seq_len=MAX_SEQ_LEN,
-            full_attn_layer=fa, interference_interval=iv,
+            full_attn_layer=fa,
             **extra_kwargs,
         )
 
@@ -1104,6 +1122,99 @@ def run_probe(args):
     else:
         print('\n─── Section 10: IF Block Removability (skipped: no physics/IF blocks) ──')
     results['if_removability'] = if_removability_results
+
+    # ── Section 11: Carrier-Amplifier Role Decomposition ───────────────────────
+    # For each dense offset (δ ≤ 50), zero it and measure impact on:
+    #   (a) short-range passkey (d ≤ 16)  — local direct retrieval
+    #   (b) long-range passkey (d ≥ 256)  — relay clarifier contribution
+    # An offset critical for long-range but not short-range is functioning
+    # primarily as a relay amplifier/clarifier, not as a direct retrieval hop.
+    # An offset critical for both is doing dual duty.
+    # An offset critical only for short-range is purely a local retrieval offset.
+    carrier_amplifier_results = {}
+    dense_offsets = [o for o in offsets if o <= 50]
+    if dense_offsets and 'offset_importance' in results:
+        print('\n─── Section 11: Carrier-Amplifier Role Decomposition ────────────────────')
+        print(f'  Dense offsets to test (δ≤50): {dense_offsets}')
+        print(f'  Short-range = d≤16, Long-range = d≥256')
+
+        # Precompute short/long distance index sets
+        short_ds = [d for d in PASSKEY_DISTANCES if d <= 16]
+        long_ds  = [d for d in PASSKEY_DISTANCES if d >= 256]
+
+        # Baseline short/long means
+        base_short = (sum(pk_by_d.get(d, 0.0) for d in short_ds) / len(short_ds)
+                      if short_ds else 0.0)
+        base_long  = (sum(pk_by_d.get(d, 0.0) for d in long_ds) / len(long_ds)
+                      if long_ds else 0.0)
+        print(f'  Baseline: short={base_short:.1%}  long={base_long:.1%}')
+
+        for delta in dense_offsets:
+            j_idx = offsets.index(delta)
+            j_tensor = torch.tensor([j_idx])
+            t0 = time.time()
+            with zero_offset_rows(model, j_tensor):
+                pk_d_abl, pk_abl = passkey_eval(model, tokenizer, device)
+
+            short_abl = (sum(pk_d_abl.get(d, 0.0) for d in short_ds) / len(short_ds)
+                         if short_ds else 0.0)
+            long_abl  = (sum(pk_d_abl.get(d, 0.0) for d in long_ds) / len(long_ds)
+                         if long_ds else 0.0)
+            short_delta = round(short_abl - base_short, 3)
+            long_delta  = round(long_abl  - base_long,  3)
+            mean_delta  = round(pk_abl - mean_pk, 3)
+
+            # Classify role
+            short_critical = short_delta < -0.10
+            long_critical  = long_delta  < -0.10
+            if short_critical and long_critical:
+                role = 'dual'          # both local retrieval AND relay clarifier
+            elif long_critical:
+                role = 'clarifier'     # primarily relay amplifier
+            elif short_critical:
+                role = 'local'         # purely local retrieval
+            else:
+                role = 'minor'         # not load-bearing in either regime
+
+            print(f'  δ={delta:3d}: short={short_delta:+.1%}  long={long_delta:+.1%}  '
+                  f'mean={mean_delta:+.1%}  role={role}  [{time.time()-t0:.0f}s]')
+
+            carrier_amplifier_results[str(delta)] = {
+                'j_idx':       j_idx,
+                'short_delta': short_delta,
+                'long_delta':  long_delta,
+                'mean_delta':  mean_delta,
+                'short_abl':   round(short_abl, 3),
+                'long_abl':    round(long_abl, 3),
+                'role':        role,
+                'passkey_by_d': {str(d): v for d, v in pk_d_abl.items()},
+            }
+
+        # Summary by role
+        by_role = {}
+        for delta_str, r in carrier_amplifier_results.items():
+            by_role.setdefault(r['role'], []).append(int(delta_str))
+        print(f'\n  Role summary:')
+        for role, deltas in sorted(by_role.items()):
+            print(f'    {role:10s}: δ={deltas}')
+
+        # Clarifiers are the key finding — long-range load-bearing dense offsets
+        clarifiers = by_role.get('clarifier', []) + by_role.get('dual', [])
+        if clarifiers:
+            print(f'\n  ⚑ Relay clarifiers (critical for long-range): δ={sorted(clarifiers)}')
+            print(f'    These dense offsets amplify long-range carrier hops.')
+        else:
+            print(f'\n  No dense offsets identified as relay clarifiers at threshold 10%.')
+
+        carrier_amplifier_results['_summary'] = {
+            'by_role': by_role,
+            'relay_clarifiers': sorted(clarifiers) if clarifiers else [],
+            'base_short': round(base_short, 3),
+            'base_long': round(base_long, 3),
+        }
+    else:
+        print('\n─── Section 11: Carrier-Amplifier Role Decomposition (skipped: no dense offsets) ──')
+    results['carrier_amplifier'] = carrier_amplifier_results
 
     # ── Summary ──────────────────────────────────────────────────────────────────
     print('\n─── Summary ────────────────────────────────────────────────────────────')
