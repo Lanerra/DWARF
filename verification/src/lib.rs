@@ -63,6 +63,7 @@ pub mod agc_dynamic_gain;          // Automatic Gain Control: dynamic IF amplifi
 pub mod kalman_interference;       // Kalman filter: optimal estimator for interference block (vs running mean)
 pub mod beamforming_coherent;      // Beamforming: Q-steered head combination, array gain
 pub mod soliton_dsqg_retrieval;    // Soliton DSQG: KdV stabilisation improves long-range retrieval SNR
+pub mod sampling_theory;          // DWARF sampling theory: Nyquist-Shannon application to offset design
 pub mod receiver_chain_interaction; // Combined chain: PLL+AGC+Kalman+beamforming interaction verification
 pub mod kalman_predict_step;        // Kalman predict step: dynamic gain preserves passkey signal vs plain EMA (condX hypothesis)
 pub mod h0_saturation;              // h0 entropy saturation + energy conservation: why h1 > h0 in pure DSQG

@@ -1,0 +1,40 @@
+name = "verification"
+version = "0.1.0"
+edition = "2021"
+
+[[require]]
+name = "mathlib"
+git = "https://github.com/leanprover-community/mathlib4.git"
+
+[dependencies]
+mathlib = { git = "https://github.com/leanprover-community/mathlib4.git" }
+
+[[lean_lib]]
+name = "j13d_theorems"
+
+[[lean_lib]]
+name = "minimal_j13d"
+
+[[lean_lib]]
+name = "j13d_explorations"
+
+[[lean_lib]]
+name = "condn_condp_theorems"
+
+[[lean_lib]]
+name = "twod_routing"
+
+[[lean_lib]]
+name = "j12_j13d_comparison"
+
+[[lean_lib]]
+name = "relay_cayley_graph"
+
+[[lean_lib]]
+name = "iir_filter_theory"
+
+[[lean_lib]]
+name = "additive_combinatorics"
+
+[[lean_lib]]
+name = "sampling_theory"
