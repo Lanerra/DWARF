@@ -66,7 +66,7 @@ EXTRACTED_CKPT = None  # cold start — no warm-start checkpoint
 
 # =============================================================================
 
-import json, math, os, subprocess, sys, time
+import contextlib, json, math, os, subprocess, sys, time
 import torch
 import torch.nn as nn
 from torch.utils.checkpoint import checkpoint as grad_ckpt
@@ -89,12 +89,17 @@ TOKENIZER_CANDIDATES = [
 ]
 PASSKEY_DISTANCES = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 1536]
 PASSKEY_TRIALS    = 50
+PASSKEY_BATCH_SIZE = 64
 _PASSKEY_WORDS    = ['apple', 'banana', 'orange', 'cherry', 'grape',
                      'lemon', 'mango', 'peach', 'plum', 'berry']
 _FILLER_SENTENCE  = 'the weather was mild and the air was still . '
 _INTRO_TEMPLATE   = 'the secret word is {word} .'
 _RETRIEVAL_CUE    = 'the secret word is'
 CHECKPOINT_DIR    = 'autoresearch/checkpoints'
+
+ENABLE_TORCH_COMPILE = os.getenv('DWARF_ENABLE_COMPILE', '0') == '1'
+COMPILE_MODE         = os.getenv('DWARF_COMPILE_MODE', 'reduce-overhead')
+CHECKPOINT_STRATEGY  = os.getenv('DWARF_CKPT', 'none').lower()  # none | full_attn | all
 
 # ── Kernel import ─────────────────────────────────────────────────────────────
 
@@ -108,6 +113,17 @@ for _d in [_kernel_dir, _project_root]:
 from dsqg_attention_v8_4090 import DSQGAttentionV8_4090 as DSQGAttentionV6, npci_rotate
 
 assert len(OFFSETS) == 24
+
+
+
+def _amp_context(device: str):
+    if device == 'cuda':
+        return torch.amp.autocast('cuda', dtype=torch.bfloat16)
+    return contextlib.nullcontext()
+
+
+def _unwrap_compiled_module(module: nn.Module) -> nn.Module:
+    return getattr(module, '_orig_mod', module)
 
 # ── condV physics helpers ─────────────────────────────────────────────────────
 
@@ -277,12 +293,19 @@ class AutoresearchTransformerPhysics(nn.Module):
                 if scale_embed_init_val != 0.0:
                     nn.init.constant_(m.scale_embed, scale_embed_init_val)
 
+    def _should_checkpoint_block(self, block_idx: int) -> bool:
+        if CHECKPOINT_STRATEGY == 'all':
+            return True
+        if CHECKPOINT_STRATEGY == 'full_attn':
+            return block_idx == self.full_attn_layer
+        return False
+
     def forward(self, idx):
         B, N = idx.shape
         pos  = torch.arange(N, device=idx.device).unsqueeze(0)
         x    = self.drop(self.embedding(idx) + self.pos_embed(pos))
-        for block in self.blocks:
-            if self.training:
+        for i, block in enumerate(self.blocks):
+            if self.training and self._should_checkpoint_block(i):
                 x = grad_ckpt(block, x, use_reentrant=False)
             else:
                 x = block(x)
@@ -380,55 +403,85 @@ def encode_split(split_texts, tokenizer, split_name):
     return seqs
 
 
-@torch.no_grad()
+@torch.inference_mode()
 def evaluate(model, data, device):
     model.eval()
     total_loss, total_tokens = 0.0, 0
     for i in range(0, len(data) - BATCH_SIZE + 1, BATCH_SIZE):
-        x = data[i:i+BATCH_SIZE, :-1].to(device)
-        y = data[i:i+BATCH_SIZE,  1:].to(device)
-        logits = model(x)
-        loss   = F.cross_entropy(logits.reshape(-1, logits.size(-1)), y.reshape(-1))
+        x = data[i:i+BATCH_SIZE, :-1].to(device, non_blocking=True)
+        y = data[i:i+BATCH_SIZE,  1:].to(device, non_blocking=True)
+        with _amp_context(device):
+            logits = model(x)
+            loss   = F.cross_entropy(logits.reshape(-1, logits.size(-1)), y.reshape(-1))
         total_loss   += loss.item() * y.numel()
         total_tokens += y.numel()
     return total_loss / max(total_tokens, 1)
 
 
-@torch.no_grad()
+@torch.inference_mode()
 def passkey_accuracy(model, tokenizer, device):
     model.eval()
     filler_ids = tokenizer.encode(_FILLER_SENTENCE)
     cue_ids    = tokenizer.encode(_RETRIEVAL_CUE)
-    results    = {}
+    pad_id     = 0
+    word_token_ids = {}
+    for word in _PASSKEY_WORDS:
+        encoded = tokenizer.encode(' ' + word) or tokenizer.encode(word)
+        if not encoded:
+            raise ValueError(f'Could not encode passkey word: {word}')
+        word_token_ids[word] = encoded[0]
+
+    results = {}
     for d in PASSKEY_DISTANCES:
-        correct, n_valid = 0, 0
+        seqs, last_pos, cand_rows = [], [], []
         for i in range(PASSKEY_TRIALS):
-            target    = _PASSKEY_WORDS[i % len(_PASSKEY_WORDS)]
-            others    = [w for w in _PASSKEY_WORDS if w != target]
+            target = _PASSKEY_WORDS[i % len(_PASSKEY_WORDS)]
+            others = [w for w in _PASSKEY_WORDS if w != target]
             intro_ids = tokenizer.encode(_INTRO_TEMPLATE.format(word=target))
             available = MAX_SEQ_LEN - 1 - len(intro_ids) - len(cue_ids) - 1
             if d > available:
                 continue
-            filler   = []
+
+            filler = []
             while len(filler) < d:
                 filler.extend(filler_ids)
             full_seq = intro_ids + filler[:d] + cue_ids
             if len(full_seq) >= MAX_SEQ_LEN:
                 continue
-            ids    = torch.tensor([full_seq], dtype=torch.long, device=device)
-            logits = model(ids)[:, -1, :]
-            cand_ids = [(tokenizer.encode(' ' + w) or tokenizer.encode(w))[0]
-                        for w in [target] + others[:9]]
-            correct  += int(([target] + others[:9])[
-                            logits[0][cand_ids].argmax().item()] == target)
-            n_valid  += 1
-        results[d] = correct / n_valid if n_valid else 0.0
+
+            seqs.append(full_seq + [pad_id] * (MAX_SEQ_LEN - len(full_seq)))
+            last_pos.append(len(full_seq) - 1)
+            cand_words = [target] + others[:9]
+            cand_rows.append([word_token_ids[w] for w in cand_words])
+
+        if not seqs:
+            results[d] = 0.0
+            continue
+
+        ids = torch.tensor(seqs, dtype=torch.long, device=device)
+        pos = torch.tensor(last_pos, dtype=torch.long, device=device)
+        cand = torch.tensor(cand_rows, dtype=torch.long, device=device)
+
+        correct = 0
+        total = ids.size(0)
+        for start in range(0, total, PASSKEY_BATCH_SIZE):
+            ids_b = ids[start:start + PASSKEY_BATCH_SIZE]
+            pos_b = pos[start:start + PASSKEY_BATCH_SIZE]
+            cand_b = cand[start:start + PASSKEY_BATCH_SIZE]
+            with _amp_context(device):
+                logits = model(ids_b)
+            row = torch.arange(ids_b.size(0), device=device)
+            next_logits = logits[row, pos_b, :]
+            cand_logits = torch.gather(next_logits, 1, cand_b)
+            correct += (cand_logits.argmax(dim=1) == 0).sum().item()
+
+        results[d] = correct / total
     return results
 
 
 def save_full_attn_checkpoint(model, epoch, git_hash, checkpoint_dir):
     """Save just the FullAttn block weights after each epoch."""
-    full_attn_block = model.blocks[model.full_attn_layer]
+    full_attn_block = _unwrap_compiled_module(model.blocks[model.full_attn_layer])
     state_dict = {}
     for name, param in full_attn_block.named_parameters():
         state_dict[f"blocks.{model.full_attn_layer}.{name}"] = param.data.clone()
@@ -485,6 +538,7 @@ def train():
     print(f'  EMA α₀={EMA_INIT} (window≈{round(1/EMA_INIT)}t), floor={EMA_FLOOR}')
     print(f'  MAX_TRAIN_SEQS={MAX_TRAIN_SEQS}, LR={LR}, Epochs={SCREEN_EPOCHS}')
     print(f'  Batch: BS={BATCH_SIZE} × GRAD_ACCUM={GRAD_ACCUM} = eff_batch={BATCH_SIZE*GRAD_ACCUM}')
+    print(f'  checkpoint_strategy={CHECKPOINT_STRATEGY}  passkey_batch_size={PASSKEY_BATCH_SIZE}')
     print(f'  git={git_hash}')
 
     splits = load_data()
@@ -523,14 +577,19 @@ def train():
     best_ckpt_name = 'moonshot_58m_best.pt'
     print(f'\n  Cold start — random init, no warm-start checkpoint')
 
-    # torch.compile on FullAttentionBlock only — safe; DSQG Triton kernels excluded
-    try:
-        for i, block in enumerate(model.blocks):
-            if type(block).__name__ == "FullAttentionBlock":
-                model.blocks[i] = torch.compile(block, fullgraph=False)
-                print(f"  torch.compile applied to FullAttentionBlock at layer {i}")
-    except Exception as e:
-        print(f"  torch.compile skipped: {e}")
+    if ENABLE_TORCH_COMPILE:
+        try:
+            for i, block in enumerate(model.blocks):
+                if type(block).__name__ == "FullAttentionBlock":
+                    try:
+                        model.blocks[i] = torch.compile(block, fullgraph=False, dynamic=False, mode=COMPILE_MODE)
+                    except TypeError:
+                        model.blocks[i] = torch.compile(block, fullgraph=False)
+                    print(f"  torch.compile applied to FullAttentionBlock at layer {i} (mode={COMPILE_MODE})")
+        except Exception as e:
+            print(f"  torch.compile skipped: {e}")
+    else:
+        print('  torch.compile disabled by default (set DWARF_ENABLE_COMPILE=1 to opt in)')
 
     n_params = model.param_count()
     print(f'Parameters: {n_params:,} ({n_params / 1e6:.1f}M)')
@@ -556,7 +615,7 @@ def train():
         model.train()
         indices         = torch.randperm(len(train_data))
         step            = 0
-        optimizer.zero_grad()
+        optimizer.zero_grad(set_to_none=True)
         steps_per_epoch = math.ceil(len(train_data) / BATCH_SIZE / GRAD_ACCUM)
 
         for acc_step in range(steps_per_epoch):
@@ -565,8 +624,9 @@ def train():
                 if idx_start >= len(train_data):
                     continue
                 batch = train_data[indices[idx_start:idx_start + BATCH_SIZE]]
-                x, y  = batch[:, :-1].to(device), batch[:, 1:].to(device)
-                with torch.amp.autocast('cuda', dtype=torch.bfloat16):
+                x = batch[:, :-1].to(device, non_blocking=True)
+                y = batch[:, 1:].to(device, non_blocking=True)
+                with _amp_context(device):
                     logits = model(x)
                     loss   = F.cross_entropy(
                         logits.reshape(-1, logits.size(-1)),
@@ -574,7 +634,7 @@ def train():
                 loss.backward()
             torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
             optimizer.step()
-            optimizer.zero_grad()
+            optimizer.zero_grad(set_to_none=True)
             scheduler.step()
             step += 1
 
@@ -589,8 +649,8 @@ def train():
         marker = ''
         if val_loss < best_val_loss:
             best_val_loss = val_loss
-            torch.save(model.state_dict(),
-                       os.path.join(CHECKPOINT_DIR, best_ckpt_name))
+            clean_state = {k.replace('._orig_mod', ''): v for k, v in model.state_dict().items()}
+            torch.save(clean_state, os.path.join(CHECKPOINT_DIR, best_ckpt_name))
             marker = ' *'
 
         print(f'Ep {epoch}/{SCREEN_EPOCHS} | Val PPL {val_ppl:.2f}{marker}')
