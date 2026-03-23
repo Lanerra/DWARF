@@ -234,7 +234,7 @@ def _compute_D_v8(
 def _bwd_dq_v8(
     Q, K, V, PB, SE, PHASE_BASE, PHASE_GAIN, Y_PRE, Z_PRE,
     DO, O, LSE, Dv,
-    DQ, DPB, DSE, DY_PRE,
+    DQ, DPB_BUF, DSE_BUF, DY_PRE,   # private per-program buffers (no atomics)
     stride_qb,   stride_qh,   stride_qn,   stride_qd,
     stride_kb,   stride_kh,   stride_kn,   stride_kd,
     stride_vb,   stride_vh,   stride_vn,   stride_vd,
@@ -243,10 +243,10 @@ def _bwd_dq_v8(
     stride_lb,   stride_lh,   stride_ln,
     stride_Db,   stride_Dh,   stride_Dn,
     stride_dqb,  stride_dqh,  stride_dqn,  stride_dqd,
-    stride_dpbi, stride_dpbh,
+    stride_dpb_bh, stride_dpb_blk,   # DPB_BUF[bh, blk, i]
     stride_pbi,  stride_pbh,
     stride_sei,  stride_sed,
-    stride_dsei, stride_dsed,
+    stride_dse_bh, stride_dse_blk,   # DSE_BUF[bh, blk, i*HD + d]
     stride_phi,  stride_phh,
     stride_pgi,  stride_pgh,
     stride_yb,   stride_yh,   stride_yn,
@@ -310,10 +310,11 @@ def _bwd_dq_v8(
             ds_v   = alpha * (dot_rv - Dval)
             dq    += ds_v[:,None] * kt * sc
             dq    += ds_v[:,None] * se_i[None,:] * sc
-            tl.atomic_add(DPB + i*stride_dpbi + h*stride_dpbh,
-                          tl.sum(tl.where(val, ds_v, 0.0)))
+            tl.store(DPB_BUF + bh*stride_dpb_bh + blk*stride_dpb_blk + i,
+                     tl.sum(tl.where(val, ds_v, 0.0)))
             dse_i = tl.sum(ds_v[:,None] * q, axis=0) * sc
-            tl.atomic_add(DSE + i*stride_dsei + ds*stride_dsed, tl.where(dm, dse_i, 0.0))
+            tl.store(DSE_BUF + bh*stride_dse_bh + blk*stride_dse_blk + i*HD + ds,
+                     tl.where(dm, dse_i, 0.0), mask=dm)
         else:
             pi  = i - 14
             z0  = tl.load(zb + kp*stride_zn + 0, mask=val, other=0.0)
@@ -341,10 +342,11 @@ def _bwd_dq_v8(
             ds_v   = alpha * (dot_rv - Dval)
             dq    += ds_v[:,None] * kt * sc
             dq    += ds_v[:,None] * se_i[None,:] * sc
-            tl.atomic_add(DPB + i*stride_dpbi + h*stride_dpbh,
-                          tl.sum(tl.where(val, ds_v, 0.0)))
+            tl.store(DPB_BUF + bh*stride_dpb_bh + blk*stride_dpb_blk + i,
+                     tl.sum(tl.where(val, ds_v, 0.0)))
             dse_i = tl.sum(ds_v[:,None] * q, axis=0) * sc
-            tl.atomic_add(DSE + i*stride_dsei + ds*stride_dsed, tl.where(dm, dse_i, 0.0))
+            tl.store(DSE_BUF + bh*stride_dse_bh + blk*stride_dse_blk + i*HD + ds,
+                     tl.where(dm, dse_i, 0.0), mask=dm)
 
             do0 = tl.sum(do * f0[None,:], axis=1); do1 = tl.sum(do * f1[None,:], axis=1)
             do2 = tl.sum(do * f2[None,:], axis=1); do3 = tl.sum(do * f3[None,:], axis=1)
@@ -614,15 +616,19 @@ class _DSQGFnV8(torch.autograd.Function):
             num_warps=NW, num_stages=NS,
         )
 
-        dq     = torch.empty_like(q)
-        dpb    = torch.zeros_like(pb)
-        dse    = torch.zeros_like(se)
-        dy_pre = torch.zeros_like(y_pre)
+        blocks_n = (N + BN - 1) // BN
+        _dev     = q.device
+
+        dq      = torch.empty_like(q)
+        dy_pre  = torch.zeros_like(y_pre)
+        # Private per-program buffers for dpb/dse — no atomics, reduce after kernel
+        dpb_buf = torch.empty(B * H, blocks_n, J,       device=_dev, dtype=torch.float32)
+        dse_buf = torch.empty(B * H, blocks_n, J * HD,  device=_dev, dtype=torch.float32)
 
         _bwd_dq_v8[g](
             q, k, v, pb, se, phase_base, phase_gain, y_pre, z_pre,
             dout, out, lse, D,
-            dq, dpb, dse, dy_pre,
+            dq, dpb_buf, dse_buf, dy_pre,
             q.stride(0),    q.stride(1),    q.stride(2),    q.stride(3),
             k.stride(0),    k.stride(1),    k.stride(2),    k.stride(3),
             v.stride(0),    v.stride(1),    v.stride(2),    v.stride(3),
@@ -631,10 +637,10 @@ class _DSQGFnV8(torch.autograd.Function):
             lse.stride(0),  lse.stride(1),  lse.stride(2),
             D.stride(0),    D.stride(1),    D.stride(2),
             dq.stride(0),   dq.stride(1),   dq.stride(2),   dq.stride(3),
-            dpb.stride(0),  dpb.stride(1),
+            blocks_n * J,   J,              # stride_dpb_bh, stride_dpb_blk
             pb.stride(0),   pb.stride(1),
             se.stride(0),   se.stride(1),
-            dse.stride(0),  dse.stride(1),
+            blocks_n*J*HD,  J*HD,           # stride_dse_bh, stride_dse_blk
             phase_base.stride(0), phase_base.stride(1),
             phase_gain.stride(0), phase_gain.stride(1),
             y_pre.stride(0),      y_pre.stride(1),      y_pre.stride(2),
@@ -643,13 +649,13 @@ class _DSQGFnV8(torch.autograd.Function):
             H=H, N=N, HD=HD, BLOCK_N=BN, BLOCK_HD=BHD,
             num_warps=NW, num_stages=NS,
         )
+        # Reduce per-program partials → [J, H] and [J, HD]
+        dpb = dpb_buf.view(B, H, blocks_n, J).sum(dim=(0, 2)).permute(1, 0).contiguous()
+        dse = dse_buf.view(B, H, blocks_n, J, HD).sum(dim=(0, 1, 2)).contiguous()
 
         dk     = torch.empty_like(k)
         dv     = torch.empty_like(v)
         dz_pre = torch.zeros_like(z_pre)
-
-        blocks_n = (N + BN - 1) // BN
-        _dev     = q.device
         phase_base_buf = torch.empty(B * H, blocks_n, J_LARGE * 2,
                                      device=_dev, dtype=torch.float32)
         phase_gain_buf = torch.empty(B * H, blocks_n, J_LARGE * 2,
