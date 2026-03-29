@@ -362,8 +362,8 @@ def _bwd_dq_v8(
              dq.to(tl.bfloat16), mask=nm[:,None] & dm[None,:])
 
     dyb = DY_PRE + b*stride_dyb + h*stride_dyh
-    tl.atomic_add(dyb + ns*stride_dyn + 0, tl.where(nm, dy_pre0, 0.0))
-    tl.atomic_add(dyb + ns*stride_dyn + 1, tl.where(nm, dy_pre1, 0.0))
+    tl.store(dyb + ns*stride_dyn + 0, tl.where(nm, dy_pre0, 0.0), mask=nm)
+    tl.store(dyb + ns*stride_dyn + 1, tl.where(nm, dy_pre1, 0.0), mask=nm)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -619,7 +619,7 @@ class _DSQGFnV8(torch.autograd.Function):
         blocks_n = (N + BN - 1) // BN
         _dev     = q.device
 
-        dq      = torch.empty_like(q)
+        dq      = torch.zeros_like(q)
         dy_pre  = torch.zeros_like(y_pre)
         # Private per-program buffers for dpb/dse — no atomics, reduce after kernel
         dpb_buf = torch.empty(B * H, blocks_n, J,       device=_dev, dtype=torch.float32)
@@ -653,8 +653,8 @@ class _DSQGFnV8(torch.autograd.Function):
         dpb = dpb_buf.view(B, H, blocks_n, J).sum(dim=(0, 2)).permute(1, 0).contiguous()
         dse = dse_buf.view(B, H, blocks_n, J, HD).sum(dim=(0, 1, 2)).contiguous()
 
-        dk     = torch.empty_like(k)
-        dv     = torch.empty_like(v)
+        dk     = torch.zeros_like(k)
+        dv     = torch.zeros_like(v)
         dz_pre = torch.zeros_like(z_pre)
         phase_base_buf = torch.empty(B * H, blocks_n, J_LARGE * 2,
                                      device=_dev, dtype=torch.float32)
@@ -695,10 +695,7 @@ class _DSQGFnV8(torch.autograd.Function):
         d_phase_base = _reduce_phase_buf(phase_base_buf)
         d_phase_gain = _reduce_phase_buf(phase_gain_buf)
 
-        dq_total = dq.float()
-        dk_total = dk.float()
-
-        return (dq_total.bfloat16(), dk_total.bfloat16(), dv,
+        return (dq, dk, dv,
                 dpb, dse, d_phase_base, d_phase_gain, dy_pre, dz_pre)
 
 
@@ -795,9 +792,9 @@ class DSQGAttentionV8_H100(nn.Module):
 
         sc    = HD ** -0.5
         y_pre = torch.einsum('bhnd,rd->bhnr',
-                             q.float(), self.query_probes.float()).mul(sc).contiguous()
+                             q, self.query_probes.to(q.dtype)).mul(sc).float().contiguous()
         z_pre = torch.einsum('bhnd,rd->bhnr',
-                             k.float(), self.key_probes.float()).mul(sc).contiguous()
+                             k, self.key_probes.to(k.dtype)).mul(sc).float().contiguous()
 
         out = dsqg_attention_v8(q, k, v,
                                 self.pos_bias, self.scale_embed,
