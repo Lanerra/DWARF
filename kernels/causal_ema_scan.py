@@ -26,6 +26,13 @@ import triton.language as tl
 
 BLOCK_D = 64   # D-dims per program; tuned for HD/D multiples common in DWARF
 
+def _ema_num_stages():
+    if not torch.cuda.is_available():
+        return 2
+    _cc = torch.cuda.get_device_capability()
+    _sm90 = (_cc[0] == 9 and _cc[1] == 0) or _cc[0] > 9
+    return 4 if _sm90 else 2
+
 
 # ── forward kernel ────────────────────────────────────────────────────────────
 @triton.jit
@@ -139,11 +146,12 @@ class _Fn(torch.autograd.Function):
 
         y = torch.empty_like(x)
         grid = (B * triton.cdiv(D, BLOCK_D),)
+        _ns = _ema_num_stages()
         _fwd[grid](
             x, y, alpha, N, D,
             x.stride(0), x.stride(1), x.stride(2),
             y.stride(0), y.stride(1), y.stride(2),
-            BLOCK_D=BLOCK_D,
+            BLOCK_D=BLOCK_D, num_stages=_ns,
         )
         ctx.save_for_backward(x, y, ema_factor, alpha)
         ctx.floor = float(floor)
@@ -158,11 +166,12 @@ class _Fn(torch.autograd.Function):
 
         dx = torch.empty_like(dy)
         grid = (num_programs,)
+        _ns = _ema_num_stages()
         _bwd_dx[grid](
             dy, dx, alpha, N, D,
             dy.stride(0), dy.stride(1), dy.stride(2),
             dx.stride(0), dx.stride(1), dx.stride(2),
-            BLOCK_D=BLOCK_D,
+            BLOCK_D=BLOCK_D, num_stages=_ns,
         )
 
         da_partial = torch.empty(num_programs, device=x.device, dtype=torch.float32)
@@ -171,7 +180,7 @@ class _Fn(torch.autograd.Function):
             x.stride(0), x.stride(1), x.stride(2),
             y.stride(0), y.stride(1), y.stride(2),
             dy.stride(0), dy.stride(1), dy.stride(2),
-            BLOCK_D=BLOCK_D,
+            BLOCK_D=BLOCK_D, num_stages=_ns,
         )
         da = da_partial.sum().reshape_as(ema_factor).to(dtype=ema_factor.dtype)
 

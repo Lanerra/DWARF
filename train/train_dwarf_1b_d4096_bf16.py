@@ -1,13 +1,13 @@
 """
-🔬 DWARF 1.8B — D=4096 Gen1 FA Donor
+🔬 DWARF 1.8B — D=4096 Gen1 FA Donor  (updated 2026-03-22)
 
 First D=4096 DWARF model. Goal: train a high-quality FA block at D=4096 that can
 be extracted and transplanted into any future 1B-7B DWARF model.
 
-Architecture (D=4096, H=32, L=8, FFN=16384 → ~1.8B params):
+Architecture (D=4096, H=64, hd=64, L=8, FFN=16384 → ~1.927B params):
   L0:  DSQGBlockV6Physics  IF=False  ← pre-FA preprocessing
   L1:  DSQGBlockV6Physics  IF=True   ← single pre-FA IF block
-  L2:  FullAttentionBlock            ← THE FA DONOR (218M params, transplantable)
+  L2:  FullAttentionBlock            ← THE FA DONOR (transplantable)
   L3-7: DSQGBlockV6Physics IF=False  ← 5 post-FA relay layers
 
 Key architectural choices:
@@ -17,8 +17,16 @@ Key architectural choices:
   - IF@L1 only (one pre-FA IF block — confirmed optimal across all D=512 experiments)
   - Train FA from scratch at D=4096 — Gen1 of new dimension lineage
 
-Run (from repo root, on H100):
-  python3 -u train/train_dwarf_1b_d4096_bf16.py > logs/run_dwarf_1b_d4096.log 2>&1 &
+Tokenizer: fineweb_tokenizer_32k.json (32K BPE, FineWeb proper — permanent standard
+           as of 2026-03-20; NOT the old condI tokenizer)
+Dataset:   fineweb_edu_encoded_2048_v2.pt (~2.01M seqs, 4.13B tokens, pre-encoded
+           with fineweb_tokenizer_32k)
+Kernel:    dsqg_attention_v8_h100.py (num_stages=3 for H100/sm90)
+EMA_INIT:  0.0208 = 1/δ_relay_min = 1/48 (J24D empirically validated, 0.6% error)
+           Rule: always derive from 1/δ_relay_min before training.
+
+Run (from repo root, on H100/H200):
+  CUDA_VISIBLE_DEVICES=0 python3 -u train/train_dwarf_1b_d4096_bf16.py > logs/run_dwarf_1b_d4096.log 2>&1 &
 """
 
 
@@ -36,17 +44,21 @@ NUM_LAYERS       = 8
 INTERFERENCE     = 2
 FULL_ATTN_LAYER  = 2
 
-MAX_TRAIN_SEQS      = 121_232
+MAX_TRAIN_SEQS      = 121_232   # ~41% Chinchilla for 1.927B params; increase for final run
 SCALE_EMBED_INIT_VAL = 0.1
 SCALE_EMBED_LR_MULT  = 15.0
 
-EMA_INIT  = 0.00035
+# EMA_INIT = 1/δ_relay_min = 1/48 ≈ 0.0208 (J24D empirically validated to 0.6% error)
+# Formula: α_optimal = 1/δ_relay_min where δ_relay_min is the first distal/relay offset.
+# For J24D (se015): offsets = [1..28, 48, 64, ...] → δ_relay_min = 48 → α = 0.0208
+# Old value 0.00035 was incorrect; model will self-correct but init matters.
+EMA_INIT  = 0.0208
 EMA_FLOOR = 0.00001
 
 LR            = 3e-4
 SCREEN_EPOCHS = 3
 
-FREEZE_FULL_ATTN_AFTER_EPOCH = None
+FREEZE_FULL_ATTN_AFTER_EPOCH = None   # dead code path — leave None, never set
 
 EXTRACTED_CKPT = ""  # No warm-start — Gen1 of D=4096 lineage, train FA from scratch
 
@@ -64,19 +76,21 @@ torch.set_float32_matmul_precision('high')
 os.environ.setdefault('PYTORCH_CUDA_ALLOC_CONF', 'expandable_segments:True')
 
 VOCAB_SIZE     = 32000
-BATCH_SIZE     = 8
-GRAD_ACCUM     = 4
-MAX_SEQ_LEN    = 1024
+BATCH_SIZE     = 4     # H100 80GB: conservative start — tune upward with GRAD_ACCUM
+GRAD_ACCUM     = 8     # effective batch = 32; increase both once VRAM profile known
+MAX_SEQ_LEN    = 2048  # full context window (was 1024 — extend to match training data)
 NUM_DOCS       = 100_000
 MAX_VAL_SEQS   = 5_582
 
+# New standard tokenizer (2026-03-20): 32K BPE trained on FineWeb proper
+# DO NOT revert to condI tokenizer — old and new checkpoints are incompatible
 FW_CACHE_FILE = 'benchmarks/logs/condm_fineweb_edu_doc_cache.json'
 TOKENIZER_CANDIDATES = [
-    'benchmarks/logs/condm_tokenizer.json',
-    'results/2048_condI_tokenizer.json',
+    'results/fineweb_tokenizer_32k.json',         # new standard — use this
+    'results/fineweb_v32k_v2_tokenizer.json',     # RunPod copy (same tokenizer)
 ]
-PASSKEY_DISTANCES = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512]
-PASSKEY_TRIALS    = 50
+PASSKEY_DISTANCES = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 1536]
+PASSKEY_TRIALS    = 50   # n=50: ±7pp noise vs ±20pp at n=20 (inflation risk)
 _PASSKEY_WORDS    = ['apple', 'banana', 'orange', 'cherry', 'grape',
                      'lemon', 'mango', 'peach', 'plum', 'berry']
 _FILLER_SENTENCE  = 'the weather was mild and the air was still . '
@@ -93,7 +107,8 @@ for _d in [_kernel_dir, _project_root]:
     if _d not in sys.path:
         sys.path.insert(0, _d)
 
-from dsqg_attention_v8 import DSQGAttentionV8 as DSQGAttentionV6, npci_rotate
+# H100/H200 kernel: num_stages=3 for sm90 deep pipeline, BLOCK_N=128, num_warps=8
+from dsqg_attention_v8_h100 import DSQGAttentionV8_H100 as DSQGAttentionV6, npci_rotate
 
 assert len(OFFSETS) == 24
 
@@ -437,13 +452,13 @@ def save_full_attn_checkpoint(model, epoch, git_hash, checkpoint_dir):
             "num_heads":         NUM_HEADS,
             "ffn_dim":           FFN_DIM,
             "seq_len":           MAX_SEQ_LEN,
-            "source_script":     "train/train_borg_adapt_13m_bf16.py",
+            "source_script":     "train/train_dwarf_1b_d4096_bf16.py",
             "source_layer":      FULL_ATTN_LAYER,
             "num_layers":        NUM_LAYERS,
             "epoch":             epoch,
             "note": (
-                "FullAttn adapted to L0 input distribution (raw embeddings). "
-                f"Epoch {epoch} of Borg adaptation run."
+                f"DWARF 1B D=4096 FA donor block. "
+                f"Epoch {epoch}. fineweb_tokenizer_32k. Cold start."
             ),
         },
     }
@@ -479,18 +494,24 @@ def train(no_warmstart: bool = False):
     splits = load_data()
     tok_path = next((p for p in TOKENIZER_CANDIDATES if os.path.exists(p)), None)
     if tok_path is None:
-        raise FileNotFoundError(f'Tokenizer not found.')
-    from tokenizers import Tokenizer
-    tokenizer = BPETokenizerWrapper(Tokenizer.from_file(tok_path))
-    print(f'Loaded tokenizer from {tok_path}')
+        raise FileNotFoundError(f'Tokenizer not found in: {TOKENIZER_CANDIDATES}')
+    from tokenizers import Tokenizer as _HFTokenizer
+    _raw_tok  = _HFTokenizer.from_file(tok_path)
+    tokenizer = BPETokenizerWrapper(_raw_tok)
+    eos_id    = _raw_tok.token_to_id('<|endoftext|>')  # 0 for fineweb_tokenizer_32k
+    print(f'Loaded tokenizer from {tok_path} (vocab={tokenizer.vocab_size()}, eos={eos_id})')
 
-    _encoded_cache = 'logs/fineweb_encoded_2048.pt'
+    # New standard dataset: pre-encoded with fineweb_tokenizer_32k (2026-03-20)
+    # ~2.01M train seqs, 5582 val seqs, 4.13B tokens, seq_len=2048
+    _encoded_cache = 'logs/fineweb_edu_encoded_2048_v2.pt'
     if os.path.exists(_encoded_cache):
         print(f'Loading pre-encoded dataset from {_encoded_cache}')
         _cache     = torch.load(_encoded_cache, weights_only=True)
-        train_data = _cache['train']
-        val_data   = _cache['val']
+        train_data = _cache['train'].long()   # ensure int64 for cross_entropy
+        val_data   = _cache['val'].long()
     else:
+        print(f'  WARNING: {_encoded_cache} not found — encoding on the fly (slow)')
+        print(f'  Run scripts/build_dataset_fineweb.py first to build the cache.')
         train_data = encode_split(splits['train'], tokenizer, 'Train')
         val_data   = encode_split(splits['val'],   tokenizer, 'Val')
 
@@ -654,9 +675,9 @@ def train(no_warmstart: bool = False):
     memory_mb     = torch.cuda.max_memory_allocated() / 1e6
     passkey_final = passkey_results.get(SCREEN_EPOCHS, 0.0)
     ppl_final     = ppl_results.get(SCREEN_EPOCHS, 999.0)
-    PPL_BASELINE     = 61.75
-    PASSKEY_BASELINE = 18.3
-    ar_score = (passkey_final - PASSKEY_BASELINE) - max(0, ppl_final - PPL_BASELINE) * 0.5
+    PPL_BASELINE     = 35.04
+    PASSKEY_BASELINE = 99.2
+    ar_score = (passkey_final - PASSKEY_BASELINE) + (PPL_BASELINE - ppl_final) * 0.5
 
     print('\n---')
     for ep in range(1, SCREEN_EPOCHS + 1):

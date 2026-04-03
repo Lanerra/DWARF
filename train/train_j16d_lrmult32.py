@@ -15,7 +15,7 @@ Changes vs pure J16D (+14.96 ar_score champion):
   SCALE_EMBED_INIT_VAL: 0.0 → 0.1    (address pos_bias init advantage)
 
 Everything else identical: J16D offsets, V6 kernel, lr_mult=15.0, no EMA,
-BF16, no GradScaler, PASSKEY_TRIALS=20.
+BF16, no GradScaler, PASSKEY_TRIALS    = 50   # n=50: ±7pp noise vs ±20pp at n=20 (inflation risk)
 
 Run (from /tmp/dwarf-j17d):
   CUDA_VISIBLE_DEVICES=0 .venv/bin/python3 autoresearch/train_j16d_fulldata.py \
@@ -76,7 +76,7 @@ TOKENIZER_CANDIDATES = [
 ]
 
 PASSKEY_DISTANCES = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 1536]
-PASSKEY_TRIALS    = 20
+PASSKEY_TRIALS    = 50   # n=50: ±7pp noise vs ±20pp at n=20 (inflation risk)
 _PASSKEY_WORDS    = ['apple', 'banana', 'orange', 'cherry', 'grape',
                      'lemon', 'mango', 'peach', 'plum', 'berry']
 _FILLER_SENTENCE  = 'the weather was mild and the air was still . '

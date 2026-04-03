@@ -78,8 +78,9 @@ torch.set_float32_matmul_precision('high')
 os.environ.setdefault('PYTORCH_CUDA_ALLOC_CONF', 'expandable_segments:True')
 
 VOCAB_SIZE     = 32000
-BATCH_SIZE     = 16   # 4090 24GB: probed 13.5 GB at BS=16 with grad_ckpt — safe headroom
+BATCH_SIZE     = 16   # 4090 24GB safe with every_other grad_ckpt
 GRAD_ACCUM     = 8    # effective batch = 128
+CE_CHUNK       = 512  # chunked CE token stride — avoids ~2GB fp32 gradient at vocab=32K
 MAX_SEQ_LEN    = 2048
 MAX_VAL_SEQS   = 5_582
 
@@ -89,7 +90,7 @@ TOKENIZER_CANDIDATES = [
 ]
 PASSKEY_DISTANCES = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 1536]
 PASSKEY_TRIALS    = 50
-PASSKEY_BATCH_SIZE = 64
+PASSKEY_BATCH_SIZE = 16   # keep passkey eval memory low (was 64, OOM risk)
 _PASSKEY_WORDS    = ['apple', 'banana', 'orange', 'cherry', 'grape',
                      'lemon', 'mango', 'peach', 'plum', 'berry']
 _FILLER_SENTENCE  = 'the weather was mild and the air was still . '
@@ -97,9 +98,12 @@ _INTRO_TEMPLATE   = 'the secret word is {word} .'
 _RETRIEVAL_CUE    = 'the secret word is'
 CHECKPOINT_DIR    = 'autoresearch/checkpoints'
 
-ENABLE_TORCH_COMPILE = os.getenv('DWARF_ENABLE_COMPILE', '0') == '1'
-COMPILE_MODE         = os.getenv('DWARF_COMPILE_MODE', 'reduce-overhead')
-CHECKPOINT_STRATEGY  = os.getenv('DWARF_CKPT', 'none').lower()  # none | full_attn | all
+ENABLE_TORCH_COMPILE = os.getenv('DWARF_ENABLE_COMPILE', '1') == '1'  # on by default
+# reduce-overhead (CUDAGraphs) is incompatible with sub-module compilation when the compiled block's
+# outputs are held in the autograd graph of surrounding non-compiled (Triton) layers — the CUDAGraph
+# replays and overwrites buffers that the backward still needs.  Use default (Inductor, no CUDAGraphs).
+COMPILE_MODE         = os.getenv('DWARF_COMPILE_MODE', 'default')
+CHECKPOINT_STRATEGY  = os.getenv('DWARF_CKPT', 'every_other').lower()  # none | every_other | all
 
 # ── Kernel import ─────────────────────────────────────────────────────────────
 
@@ -134,13 +138,6 @@ def _causal_ema(xi: torch.Tensor, ema_factor: torch.Tensor,
     """Causal EMA — Triton scan (O(B·N·D) memory vs O(B·D·N·K) conv)."""
     return _causal_ema_scan(xi, ema_factor, floor=floor)
 
-
-def _kdv_correction(pool: torch.Tensor,
-                    kdv_alpha: torch.Tensor) -> torch.Tensor:
-    """KdV soliton: pool += α * pool * Δpool. Zero-init → identity at start."""
-    alpha     = kdv_alpha.clamp(0.0, 0.5)
-    pool_prev = F.pad(pool[:, :-1], (0, 0, 1, 0))
-    return pool + alpha * pool * (pool - pool_prev)
 
 
 def _agc_normalize(pool: torch.Tensor, eps: float = 1e-6) -> torch.Tensor:
@@ -182,7 +179,6 @@ class DSQGBlockV6Physics(nn.Module):
             self.inter_k_proj = nn.Linear(embedding_dim, embedding_dim)
             self.inter_v_proj = nn.Linear(embedding_dim, embedding_dim)
             self.ema_factor = nn.Parameter(torch.full((1,), EMA_INIT))
-            self.kdv_alpha  = nn.Parameter(torch.zeros(1))
 
     def forward(self, x):
         kv_inject = None
@@ -192,7 +188,6 @@ class DSQGBlockV6Physics(nn.Module):
             H, HD   = self.num_heads, self.head_dim
 
             pool = _causal_ema(xi, self.ema_factor.abs() + EMA_FLOOR, floor=EMA_FLOOR)  # abs() prevents dead zone
-            pool = _kdv_correction(pool, self.kdv_alpha)
             pool = _agc_normalize(pool)
 
             inter   = torch.sigmoid(self.inter_gate(xi)) * pool
@@ -343,9 +338,9 @@ class AutoresearchTransformerPhysics(nn.Module):
         for i, block in enumerate(self.blocks):
             if isinstance(block, DSQGBlockV6Physics) and block.interference:
                 alpha = abs(block.ema_factor.item()) + EMA_FLOOR  # matches abs() parameterization
-                kdv   = block.kdv_alpha.item()
+
                 win   = round(1.0 / max(alpha, EMA_FLOOR))
-                entries.append(f'b{i}: α={alpha:.4f}(w≈{win}t) kdv={kdv:.4f}')
+                entries.append(f'b{i}: α={alpha:.4f}(w≈{win}t)')
         return '  '.join(entries)
 
 
@@ -628,10 +623,22 @@ def train():
                 y = batch[:, 1:].to(device, non_blocking=True)
                 with _amp_context(device):
                     logits = model(x)
-                    loss   = F.cross_entropy(
-                        logits.reshape(-1, logits.size(-1)),
-                        y.reshape(-1)) / GRAD_ACCUM
-                loss.backward()
+                # Chunked CE — avoids ~4 GB fp32 gradient spike at vocab=32K
+                logits_flat = logits.reshape(-1, logits.size(-1))
+                y_flat      = y.reshape(-1)
+                T           = logits_flat.size(0)
+                grad_logits = torch.empty_like(logits_flat)
+                total_loss  = 0.0
+                for chunk_start in range(0, T, CE_CHUNK):
+                    chunk_end  = min(chunk_start + CE_CHUNK, T)
+                    chunk      = logits_flat[chunk_start:chunk_end].detach().requires_grad_(True)
+                    chunk_loss = F.cross_entropy(chunk, y_flat[chunk_start:chunk_end], reduction='sum')
+                    chunk_loss.backward()
+                    grad_logits[chunk_start:chunk_end] = chunk.grad
+                    total_loss += chunk_loss.item()
+                logits_flat.backward(grad_logits / (T * GRAD_ACCUM))
+                loss_val = total_loss / T
+                del logits, logits_flat, y_flat, grad_logits
             torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
             optimizer.step()
             optimizer.zero_grad(set_to_none=True)
@@ -640,7 +647,7 @@ def train():
 
             if step % 200 == 0:
                 print(f'  Step {step}/{steps_per_epoch} '
-                      f'| Loss {loss.item() * GRAD_ACCUM:.4f}')
+                      f'| Loss {loss_val:.4f}', flush=True)
 
         val_loss = evaluate(model, val_data, device)
         val_ppl  = math.exp(min(val_loss, 20))
@@ -668,6 +675,14 @@ def train():
 
         save_full_attn_checkpoint(model, epoch, git_hash, CHECKPOINT_DIR)
 
+        # Save full-model resume checkpoint (weights only, no optimizer — for
+        # per-epoch acquisition-order eval and future warm-starts).
+        resume_state = {k.replace('._orig_mod', ''): v
+                        for k, v in model.state_dict().items()}
+        resume_path  = os.path.join(CHECKPOINT_DIR, f'moonshot_58m_ep{epoch}_resume.pt')
+        torch.save(resume_state, resume_path)
+        print(f'  Saved resume checkpoint: {resume_path}')
+
         pk      = passkey_accuracy(model, tokenizer, device)
         pk_mean = sum(pk.values()) / len(pk)
         passkey_results[epoch] = pk_mean * 100
@@ -680,9 +695,9 @@ def train():
     memory_mb     = torch.cuda.max_memory_allocated() / 1e6
     passkey_final = passkey_results.get(SCREEN_EPOCHS, 0.0)
     ppl_final     = ppl_results.get(SCREEN_EPOCHS, 999.0)
-    PPL_BASELINE     = 61.75
-    PASSKEY_BASELINE = 18.3
-    ar_score = (passkey_final - PASSKEY_BASELINE) - max(0, ppl_final - PPL_BASELINE) * 0.5
+    PPL_BASELINE     = 35.04
+    PASSKEY_BASELINE = 99.2
+    ar_score = (passkey_final - PASSKEY_BASELINE) + (PPL_BASELINE - ppl_final) * 0.5
 
     print('\n---')
     for ep in range(1, SCREEN_EPOCHS + 1):
@@ -702,4 +717,10 @@ def train():
 
 
 if __name__ == '__main__':
-    train()
+    import traceback
+    try:
+        train()
+    except Exception as e:
+        print(f'\n[FATAL] {type(e).__name__}: {e}', flush=True)
+        traceback.print_exc()
+        sys.exit(1)

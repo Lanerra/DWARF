@@ -1,5 +1,12 @@
 """
-🚀 DWARF D=768 L=16 — ~94M params, coherence-length test, cold-start
+🧪 DWARF D=768 L=16 — Mixed-Data Continuation (ep2-3 on mixed corpus)
+
+Experiment: Does a relay formed on FineWeb-Edu survive distribution shift?
+  - Resume from: autoresearch/checkpoints/d768_l16_fa4_ep1_resume.pt
+    (ep1 FineWeb-Edu: PPL=46.40, passkey=100% all 12 distances)
+  - ep2-3 training on: logs/mixed_encoded_2048_fineweb_tok.pt
+    (60% FineWeb-Edu / 25% PG19 / 15% The Stack, 240K seqs, fineweb_tokenizer_32k)
+  - Same tokenizer throughout — only content distribution changes.
 
 Architecture: D=768, H=12 (hd=64), L=16, FFN=1536, J=24 (se015 offsets), TIED lm_head
   L0-L2:  DSQGBlockV6Physics  IF=False  ← 3 pre-FA warm-up relay layers
@@ -7,35 +14,13 @@ Architecture: D=768, H=12 (hd=64), L=16, FFN=1536, J=24 (se015 offsets), TIED lm
   L4:     FullAttentionBlock            ← FA@L4 (25% depth, 11 post-FA relay layers)
   L5-15:  DSQGBlockV6Physics  IF=False  ← 11 post-FA relay layers
 
-Hypothesis: relay coherence length scales with D (not L). D=512 coherence ≈ 12 layers,
-  insufficient for 11 post-FA at L=16. D=768 coherence ≈ 18 layers → should cover 11.
-  D=1024 coherence ≈ 30 layers → confirmed ✓ (267M).
-  This run tests whether D=768 sits above the coherence threshold for L=16.
+Success threshold: passkey ≥85% ep2, scale_embed |max| ≥2.0
 
-Derived quantities:
-  hd = 768/12 = 64 ✓ (validated head dimension)
-  Relay/residual ratio = (J=24 × hd=64) / D=768 = 2.0× (between D=512 3.0× and D=1024 1.5×)
-  LR_MULT = 15 × √(768/512) = 18.37
-  22% Chinchilla at 94M: ~202K sequences
-
-Baselines:
-  Moonshot-58M ep2   (PPL=35.04, passkey=99.2%, ar_score=80.90) — D=512 L=8
-  267M D=1024 ep1    (PPL=27.75, passkey=93.3%)                 — D=1024 L=24
-  d768_l16_fa4    (PPL=90.77, passkey=15.0%, stall@1.78)     — D=512 L=16 ✗
-
-Config:
-  - Tokenizer: fineweb_tokenizer_32k.json  (32K BPE, FineWeb proper)
-  - Dataset:   fineweb_edu_encoded_2048_v2.pt (~2.01M seqs, 4.13B tokens)
-  - EMA_INIT = 0.0208 (= 1/δ_relay_min for J24D se015)
-  - SCALE_EMBED_INIT = 0.15, LR_MULT = 18.37
-  - Batch: BS=64 × GRAD_ACCUM=2 = eff_batch=128
-  - Cold start, ~94M parameters (tied lm_head)
-
-Screen: 3 epochs × 202,000 seqs (22% Chinchilla for ~94M params)
+Checkpoints saved as d768_mixed_ep{N}_* (separate namespace from baseline d768_l16_fa4_ep*).
 
 Run (from repo root):
-  CUDA_VISIBLE_DEVICES=0 .venv/bin/python3 -u train/train_d768_l16_4090_bf16.py \\
-    2>&1 | tee logs/run_d768_l16.log
+  CUDA_VISIBLE_DEVICES=0 .venv/bin/python3 -u train/train_d768_mixed_continuation.py \\
+    2>&1 | tee logs/run_d768_mixed.log
 """
 
 # =============================================================================
@@ -50,7 +35,7 @@ FFN_DIM          = 1536       # 2×D
 NUM_LAYERS       = 16
 FULL_ATTN_LAYER  = 4          # 11 post-FA relay layers (L5-15); 3 pre-FA warm-up = 25% of depth
 
-MAX_TRAIN_SEQS       = 240_000   # 22% Chinchilla for 111.5M params (20 × 111.5M × 0.22 / 2048 ≈ 239K)
+MAX_TRAIN_SEQS       = 234_418   # train seqs in mixed_encoded_2048_fineweb_tok.pt (use all)
 SCALE_EMBED_INIT_VAL = 0.15
 SCALE_EMBED_LR_MULT  = 18.37    # μP: 15 × √(768/512)
 
@@ -61,7 +46,12 @@ EMA_INIT  = 0.0208
 EMA_FLOOR = 0.00001
 
 LR            = 3e-4
-SCREEN_EPOCHS = 3  # 3 × 202K seqs
+SCREEN_EPOCHS = 2   # ep2-3 of continuation (ep1 already done on FineWeb-Edu)
+
+# ── Continuation config ────────────────────────────────────────────────────────
+RESUME_CHECKPOINT = 'autoresearch/checkpoints/d768_l16_fa4_ep1_resume.pt'
+MIXED_DATASET     = 'logs/mixed_encoded_2048_fineweb_tok.pt'
+CKPT_PREFIX       = 'd768_mixed'   # saves as d768_mixed_ep{N}_* — no collision with baseline
 
 # =============================================================================
 
@@ -76,8 +66,8 @@ torch.set_float32_matmul_precision('high')
 os.environ.setdefault('PYTORCH_CUDA_ALLOC_CONF', 'expandable_segments:True')
 
 VOCAB_SIZE     = 32000
-BATCH_SIZE     = 64
-GRAD_ACCUM     = 2    # effective batch = 128
+BATCH_SIZE     = 128    # 4090 (22GB) — D=768 L=16 VRAM budget
+GRAD_ACCUM     = 1   # effective batch = 128
 CE_CHUNK       = 512  # chunked CE token stride — avoids materialising full (BS×2047×32K) fp32 grad tensor
 MAX_SEQ_LEN    = 2048
 MAX_VAL_SEQS   = 5_582
@@ -280,7 +270,9 @@ class AutoresearchTransformerPhysics(nn.Module):
             return block_idx == self.full_attn_layer
         return False
 
-    def forward(self, idx):
+    def forward_hidden(self, idx):
+        """Return pre-lm_head hidden states — use with chunked lm_head projection in CE loop
+        to avoid materialising full [B, N, V] logits tensor."""
         B, N = idx.shape
         x    = self.drop(self.embedding(idx))
         for i, block in enumerate(self.blocks):
@@ -288,7 +280,10 @@ class AutoresearchTransformerPhysics(nn.Module):
                 x = grad_ckpt(block, x, use_reentrant=False)
             else:
                 x = block(x)
-        return self.out(self.norm(x))
+        return self.norm(x)   # [B, N, D]
+
+    def forward(self, idx):
+        return self.out(self.forward_hidden(idx))
 
     def param_count(self):
         return sum(p.numel() for p in self.parameters())
@@ -414,7 +409,7 @@ def passkey_accuracy(model, tokenizer, device):
     return results
 
 
-def save_full_attn_checkpoint(model, epoch, git_hash, checkpoint_dir):
+def save_full_attn_checkpoint(model, epoch, git_hash, checkpoint_dir, prefix='d768_l16_fa4'):
     full_attn_block = _unwrap_compiled_module(model.blocks[model.full_attn_layer])
     state_dict = {}
     for name, param in full_attn_block.named_parameters():
@@ -426,20 +421,20 @@ def save_full_attn_checkpoint(model, epoch, git_hash, checkpoint_dir):
             "num_heads":     NUM_HEADS,
             "ffn_dim":       FFN_DIM,
             "seq_len":       MAX_SEQ_LEN,
-            "source_script": "train/train_d768_l16_fa4_4090_bf16.py",
+            "source_script": "train/train_d768_mixed_continuation.py",
             "source_layer":  FULL_ATTN_LAYER,
             "num_layers":    NUM_LAYERS,
             "num_offsets":   len(OFFSETS),
             "epoch":         epoch,
             "git_hash":      git_hash,
             "note": (
-                f"D768-L16-FA4: D={EMBEDDING_DIM} H={NUM_HEADS} L={NUM_LAYERS} "
+                f"D768-L16 mixed continuation: D={EMBEDDING_DIM} H={NUM_HEADS} L={NUM_LAYERS} "
                 f"FFN={FFN_DIM} J={len(OFFSETS)} FA@L{FULL_ATTN_LAYER} "
-                f"preIF@L{FULL_ATTN_LAYER-1}. Epoch {epoch}/3. Cold start."
+                f"preIF@L{FULL_ATTN_LAYER-1}. Epoch {epoch}/3. Resumed ep1 FineWeb → mixed ep2-3."
             ),
         },
     }
-    out_path = os.path.join(checkpoint_dir, f"d768_l16_fa4_ep{epoch}_full_attn.pt")
+    out_path = os.path.join(checkpoint_dir, f"{prefix}_ep{epoch}_full_attn.pt")
     torch.save(payload, out_path)
     print(f"  Saved FullAttn checkpoint: {out_path}")
 
@@ -481,16 +476,16 @@ def train():
     tokenizer = BPETokenizerWrapper(Tokenizer.from_file(tok_path))
     print(f'Loaded tokenizer from {tok_path}  (vocab={tokenizer.vocab_size():,})')
 
-    _encoded_cache = 'logs/fineweb_edu_encoded_2048_v2.pt'
-    if os.path.exists(_encoded_cache):
-        print(f'Loading pre-encoded dataset from {_encoded_cache}')
-        _cache     = torch.load(_encoded_cache, weights_only=True)
-        train_data = _cache['train'].long()
-        val_data   = _cache['val'].long()
-    else:
+    if not os.path.exists(MIXED_DATASET):
         raise FileNotFoundError(
-            f'Pre-encoded dataset not found: {_encoded_cache}\n'
-            f'Run scripts/build_dataset_fineweb.py first.')
+            f'Mixed dataset not found: {MIXED_DATASET}\n'
+            f'Run scripts/build_dataset_mixed_v5_fwtok.py first.')
+    print(f'Loading mixed dataset from {MIXED_DATASET}')
+    _cache     = torch.load(MIXED_DATASET, weights_only=True)
+    train_data = _cache['train'].long()
+    val_data   = _cache['val'].long()
+    print(f'  Mix: {_cache.get("source_mix", {})}')
+    print(f'  Tokenizer: {_cache.get("tokenizer_path", "unknown")}')
 
     if len(train_data) > MAX_TRAIN_SEQS:
         train_data = train_data[torch.randperm(len(train_data))[:MAX_TRAIN_SEQS]]
@@ -508,6 +503,12 @@ def train():
         full_attn_layer=FULL_ATTN_LAYER,
         scale_embed_init_val=SCALE_EMBED_INIT_VAL,
     ).to(device)
+
+    # ── Resume from ep1 checkpoint ────────────────────────────────────────────
+    print(f'Resuming from {RESUME_CHECKPOINT}')
+    _ckpt = torch.load(RESUME_CHECKPOINT, map_location=device, weights_only=True)
+    model.load_state_dict(_ckpt['model_state_dict'])
+    print(f'  Loaded ep{_ckpt["epoch"]} weights  (val_loss={_ckpt["val_loss"]:.4f})')
 
     if ENABLE_TORCH_COMPILE:
         try:
@@ -534,10 +535,17 @@ def train():
         {'params': scale_embed_params,     'lr': LR * SCALE_EMBED_LR_MULT},
     ], weight_decay=0.1, betas=(0.9, 0.95))
 
-    total_steps = SCREEN_EPOCHS * math.ceil(
-        len(train_data) / BATCH_SIZE / GRAD_ACCUM)
+    # Restore optimizer state from ep1 checkpoint
+    optimizer.load_state_dict(_ckpt['optimizer_state_dict'])
+    print('  Restored optimizer state from checkpoint.')
+
+    # Scheduler: treat total run as 3 epochs (ep1 already done), continue from
+    # the step count at end of ep1 so LR decays correctly across ep2-3.
+    steps_per_epoch = math.ceil(len(train_data) / BATCH_SIZE / GRAD_ACCUM)
+    total_steps     = 3 * steps_per_epoch   # full 3-epoch cosine window
+    ep1_steps       = steps_per_epoch       # already consumed
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
-        optimizer, T_max=total_steps)
+        optimizer, T_max=total_steps, last_epoch=ep1_steps - 1)
 
     best_val_loss   = float('inf')
     passkey_results = {}
@@ -557,20 +565,22 @@ def train():
     _wx          = train_data[:_wb, :-1].to(device)
     _wy          = train_data[:_wb, 1:].to(device)
     with torch.amp.autocast('cuda', dtype=torch.bfloat16):
-        _wout    = model(_wx)
-    _wlogits_flat = _wout.reshape(-1, _wout.size(-1))
+        _whidden = model.forward_hidden(_wx)   # [B, N, D]
+    _whidden_flat = _whidden.reshape(-1, _whidden.size(-1))
     _wy_flat      = _wy.reshape(-1)
-    _wT           = _wlogits_flat.size(0)
-    _wgrad        = torch.empty_like(_wlogits_flat)
+    _wT           = _whidden_flat.size(0)
+    _wgrad        = torch.zeros_like(_whidden_flat)
+    _wlm_w        = model.out.weight
     for _wcs in range(0, _wT, CE_CHUNK):
-        _wce    = min(_wcs + CE_CHUNK, _wT)
-        _wchunk = _wlogits_flat[_wcs:_wce].detach().requires_grad_(True)
-        _wloss  = F.cross_entropy(_wchunk, _wy_flat[_wcs:_wce], reduction='sum')
+        _wce      = min(_wcs + CE_CHUNK, _wT)
+        _wchunk   = _whidden_flat[_wcs:_wce].detach().requires_grad_(True)
+        _wlogits  = _wchunk @ _wlm_w.t()
+        _wloss    = F.cross_entropy(_wlogits.float(), _wy_flat[_wcs:_wce], reduction='sum')
         _wloss.backward()
         _wgrad[_wcs:_wce] = _wchunk.grad
-    _wlogits_flat.backward(_wgrad / _wT)
+    _whidden_flat.backward(_wgrad / _wT)
     optimizer.zero_grad(set_to_none=True)
-    del _wx, _wy, _wout, _wlogits_flat, _wy_flat, _wloss
+    del _wx, _wy, _whidden, _whidden_flat, _wy_flat, _wloss
     torch.cuda.synchronize()
     print('  kernel warmup complete.')
 
@@ -590,23 +600,26 @@ def train():
                 x = batch[:, :-1].to(device, non_blocking=True)
                 y = batch[:, 1:].to(device, non_blocking=True)
                 with _amp_context(device):
-                    logits = model(x)
-                logits_flat = logits.reshape(-1, logits.size(-1))
+                    hidden = model.forward_hidden(x)   # [B, N, D] — no lm_head yet
+                hidden_flat = hidden.reshape(-1, hidden.size(-1))  # [B*N, D]
                 y_flat      = y.reshape(-1)
-                T           = logits_flat.size(0)
-                grad_logits = torch.empty_like(logits_flat)
+                T           = hidden_flat.size(0)
+                grad_hidden = torch.zeros_like(hidden_flat)
                 total_loss  = 0.0
+                lm_head_w   = model.out.weight  # [V, D] — tied
                 for chunk_start in range(0, T, CE_CHUNK):
-                    chunk_end = min(chunk_start + CE_CHUNK, T)
-                    chunk     = logits_flat[chunk_start:chunk_end].detach().requires_grad_(True)
-                    chunk_loss = F.cross_entropy(
-                        chunk, y_flat[chunk_start:chunk_end], reduction='sum')
+                    chunk_end   = min(chunk_start + CE_CHUNK, T)
+                    h_chunk     = hidden_flat[chunk_start:chunk_end].detach().requires_grad_(True)
+                    # materialise only [chunk, V] — not [B*N, V]
+                    logit_chunk = h_chunk @ lm_head_w.t()
+                    chunk_loss  = F.cross_entropy(
+                        logit_chunk.float(), y_flat[chunk_start:chunk_end], reduction='sum')
                     chunk_loss.backward()
-                    grad_logits[chunk_start:chunk_end] = chunk.grad
+                    grad_hidden[chunk_start:chunk_end] = h_chunk.grad
                     total_loss += chunk_loss.item()
-                logits_flat.backward(grad_logits / (T * GRAD_ACCUM))
+                hidden_flat.backward(grad_hidden / (T * GRAD_ACCUM))
                 loss_val = total_loss / T
-                del logits, logits_flat, y_flat, grad_logits
+                del hidden, hidden_flat, y_flat, grad_hidden
             torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
             optimizer.step()
             optimizer.zero_grad(set_to_none=True)
@@ -626,17 +639,17 @@ def train():
             best_val_loss = val_loss
             clean_state = {k.replace('._orig_mod', ''): v for k, v in model.state_dict().items()}
             torch.save(clean_state,
-                       os.path.join(CHECKPOINT_DIR, 'd768_l16_fa4_best.pt'))
+                       os.path.join(CHECKPOINT_DIR, f'{CKPT_PREFIX}_best.pt'))
             marker = ' *'
 
         # Save resume checkpoint
         torch.save({
-            'epoch': epoch,
+            'epoch': epoch + 1,   # continuation epoch number (ep2 → label 2, ep3 → 3)
             'model_state_dict': {k.replace('._orig_mod', ''): v for k, v in model.state_dict().items()},
             'optimizer_state_dict': optimizer.state_dict(),
             'scheduler_state_dict': scheduler.state_dict(),
             'val_loss': val_loss,
-        }, os.path.join(CHECKPOINT_DIR, f'd768_l16_fa4_ep{epoch}_resume.pt'))
+        }, os.path.join(CHECKPOINT_DIR, f'{CKPT_PREFIX}_ep{epoch + 1}_resume.pt'))
 
         print(f'Ep {epoch}/{SCREEN_EPOCHS} | Val PPL {val_ppl:.2f}{marker}')
 
@@ -650,7 +663,8 @@ def train():
                   f'|max|={se_all.max():.4f}')
 
         print(f'  Physics: {model.physics_summary()}')
-        save_full_attn_checkpoint(model, epoch, git_hash, CHECKPOINT_DIR)
+        save_full_attn_checkpoint(model, epoch + 1, git_hash, CHECKPOINT_DIR,
+                                  prefix=CKPT_PREFIX)
 
         pk      = passkey_accuracy(model, tokenizer, device)
         pk_mean = sum(pk.values()) / len(pk)
@@ -669,10 +683,11 @@ def train():
     ar_score = (passkey_final - PASSKEY_BASELINE) + (PPL_BASELINE - ppl_final) * 0.5
 
     print('\n---')
-    for ep in range(1, SCREEN_EPOCHS + 1):
-        print(f'passkey_ep{ep}: {passkey_results.get(ep, 0.0):.1f}')
-    for ep in range(1, SCREEN_EPOCHS + 1):
-        print(f'ppl_ep{ep}: {ppl_results.get(ep, 999.0):.2f}')
+    # Continuation epochs are ep2-3 (loop runs epoch=1,2 → displayed as ep2,ep3)
+    for ep_loop, ep_label in enumerate(range(2, 2 + SCREEN_EPOCHS), start=1):
+        print(f'passkey_ep{ep_label}: {passkey_results.get(ep_loop, 0.0):.1f}')
+    for ep_loop, ep_label in enumerate(range(2, 2 + SCREEN_EPOCHS), start=1):
+        print(f'ppl_ep{ep_label}: {ppl_results.get(ep_loop, 999.0):.2f}')
     print(f'ar_score: {ar_score:.2f}')
     print(f'memory_mb: {memory_mb:.1f}')
     print(f'elapsed_s: {elapsed_s:.1f}')
@@ -681,10 +696,11 @@ def train():
     print(f'num_offsets: {len(OFFSETS)}')
     print(f'scale_embed_lr_mult: {SCALE_EMBED_LR_MULT}')
     print(f'ema_init: {EMA_INIT}')
-    print(f'description: D768-L16-FA4 D={EMBEDDING_DIM} H={NUM_HEADS} hd=64 L={NUM_LAYERS} '
-          f'FFN={FFN_DIM} J=24 se015, cold start, fineweb_tokenizer_32k, '
+    print(f'description: D768-L16 mixed continuation: D={EMBEDDING_DIM} H={NUM_HEADS} hd=64 '
+          f'L={NUM_LAYERS} FFN={FFN_DIM} J=24 se015, fineweb_tokenizer_32k, '
           f'FA@L{FULL_ATTN_LAYER} preIF@L{FULL_ATTN_LAYER-1} '
-          f'{NUM_LAYERS - FULL_ATTN_LAYER - 1} post-FA relay layers')
+          f'{NUM_LAYERS - FULL_ATTN_LAYER - 1} post-FA relay layers, '
+          f'resumed ep1 FineWeb → mixed ep2-3 (60%FW/25%PG19/15%Stack)')
 
 
 if __name__ == '__main__':

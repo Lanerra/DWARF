@@ -1,59 +1,50 @@
 """
-🔬 DWARF FFN Ablation — Moonshot-58M variant with FFN=1024 (FFN/2), 4090, cold-start
+🔬 DWARF condU-shape — D=512 L=6 FFN=2048 FA@L5 (last layer), 4090, cold-start
 
-Ablation: single-variable test of FFN width reduction.
-  Baseline: train_moonshot_58m_4090_bf16.py (FFN=2048, PPL=35.04 ep2, passkey=99.2%)
-  This run: FFN=2048 → FFN=1024. All other config identical.
+Architecture shape test: condU-v5 original shape vs modern canonical (FA@25% depth).
+  Canonical (Moonshot): L=8, FFN=1024 (2×D), FA@L2 (25% depth), 5 post-FA layers
+  This run:            L=6, FFN=2048 (4×D), FA@L5 (last layer), 0 post-FA layers
 
-Hypothesis: DSQG relay carries long-range "memory" load normally handled by wide FFN.
-  If true: FFN=1024 should show minimal PPL degradation vs baseline.
-  If false: PPL degrades noticeably, indicating FFN width is non-redundant with relay.
+Key question: does FA-at-last-layer (condU original shape) hold up against
+FA-at-25%-depth (canonical) when everything else is equal (J=24 se015, 32K vocab,
+v8 kernel with MOVT+QK-OVT+NPCI, same dataset)?
 
-Architecture: D=512, H=8 (hd=64), L=8, FFN=1024, J=24 (se015 offsets)
+Old condU-v5 38M (for comparison): J=44, condI 2K vocab, 34.5% external benchmarks.
+This run isolates architecture shape from tokenizer/offset confounds.
+
+Architecture: D=512, H=8 (hd=64), L=6, FFN=2048, J=24 (se015 offsets)
   L0:  DSQGBlockV6Physics  IF=False  ← pure DSQG relay
-  L1:  DSQGBlockV6Physics  IF=True   ← preIF (single layer before FA)
-  L2:  FullAttentionBlock            ← FA@L2 (empirically optimal placement)
-  L3-7: DSQGBlockV6Physics IF=False  ← post-FA relay layers
+  L1:  DSQGBlockV6Physics  IF=False  ← pure DSQG relay
+  L2:  DSQGBlockV6Physics  IF=False  ← pure DSQG relay
+  L3:  DSQGBlockV6Physics  IF=False  ← pure DSQG relay
+  L4:  DSQGBlockV6Physics  IF=True   ← preIF (single layer before FA)
+  L5:  FullAttentionBlock            ← FA@L5 (last layer, 100% depth)
+  0 post-FA relay layers (coherence ceiling: ~12 — well below; passkey by direct FA retrieval)
+
+Notes:
+  - FA at last layer means relay signal accumulates across ALL DSQG layers before retrieval
+  - No post-FA propagation — FA must retrieve directly, cannot rely on downstream relay
+  - FFN=4×D (2048): wider than canonical 2×D — matches original condU-v5 proportions
+  - Relay/residual ratio: 3.0× (J=24 × hd=64 / D=512), same as Moonshot
 
 Config:
   - Tokenizer: fineweb_tokenizer_32k.json  (32K BPE, FineWeb proper)
-                EOS id = 0  (<|endoftext|>)
-  - Dataset:   fineweb_edu_encoded_2048_v2.pt (~2.01M seqs, 4.13B tokens)
-               pre-encoded with fineweb_tokenizer_32k
-  - EMA_INIT = 0.0208 (= 1/48 = 1/δ_relay_min; empirically validated for J24D,
-               se015 trains to α≈0.0207, 0.6% error)
-  - SCALE_EMBED_INIT = 0.1, LR_MULT = 15.0
+  - Dataset:   fineweb_edu_encoded_2048_v2.pt  (pre-encoded, 2.01M seqs)
+  - EMA_INIT = 0.0208 (= 1/δ_relay_min = 1/48; validated for J24D se015)
+  - SCALE_EMBED_INIT = 0.15, LR_MULT = 15.0
   - Batch: BS=16 × GRAD_ACCUM=8 → eff_batch=128
-             (BS limited by 32K vocab logits VRAM; 32K×2048×BS×2B (bf16) OOMs at BS=32)
-             (chunked cross-entropy would unlock BS=32 — future optimization)
-  - Cold start (no warm-start checkpoint)
-  - ~49.5M parameters (vs moonshot baseline ~45.6M; embeddings dominate at 32K vocab)
+  - Cold start
+  - ~30.6M parameters (14.2M non-embedding; 16.4M embedding at 32K vocab)
+  - 22% Chinchilla: 65,700 seqs ≈ 134.5M tokens → 3 epochs
 
-Comparison target: moonshot-58M ep2 (PPL=35.04, passkey=99.2%, ar_score=80.90)
-
-EMA_INIT RULE: Always derive from offset set before training.
-  For J24D (se015): empirically validated 1/δ_relay_min = 1/48 = 0.0208
-  For J13D: 1/√(δ_local × δ_relay) = 1/√(5×8) = 0.0447 (0.4% error)
-  If unsure: use 0.003 (abs+floor parameterization self-corrects, but converges slower)
-
-TODO (inherited from moonshot audit Mar 20 2026):
-  - dropout=0.1 never ablated at this scale; modern LLMs use 0.0 — worth testing
-  - grad_clip=1.0 never varied — flag for future experiment
-  - No LR warmup — stable so far but untested at >100M scale
+Comparison targets:
+  - FFN-Ablation (D=512 L=8 FFN=1024 FA@L2): PPL=32.00, passkey=96.7%  ← canonical winner
+  - Moonshot-58M (D=512 L=8 FFN=2048 FA@L2): PPL=35.04, passkey=99.2%
+  - condU-v5 38M old (J=44, 2K vocab):        PPL=39.998, passkey=96.7%, benchmarks=34.5%
 
 Run (from repo root):
-  CUDA_VISIBLE_DEVICES=0 .venv/bin/python3 -u train/train_ffn_ablation_4090_bf16.py \\
-    > logs/run_ffn_ablation.log 2>&1 &
-
-Resume ep2+ep3 after ep1 checkpoint (ep1 result: PPL=38.18, passkey=93.3%):
-  # Set START_EPOCH=2 in EXPERIMENT KNOBS section, then:
-  CUDA_VISIBLE_DEVICES=0 .venv/bin/python3 -u train/train_ffn_ablation_4090_bf16.py \\
-    > logs/run_ffn_ablation_ep2.log 2>&1 &
-
-Status (Mar 25 2026):
-  Ep1 complete: PPL=38.18 passkey=93.3% (vs moonshot ep2: PPL=35.04 passkey=99.2%)
-  Ep2+ep3: pending — needs 4090 free, set START_EPOCH=2
-  Resume checkpoint: autoresearch/checkpoints/ffn_ablation_ep1_resume.pt (= ep1 best.pt)
+  CUDA_VISIBLE_DEVICES=0 .venv/bin/python3 -u train/train_condu_shape_4090_bf16.py \\
+    > logs/run_condu_shape.log 2>&1 &
 """
 
 # =============================================================================
@@ -64,15 +55,13 @@ OFFSETS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13, 15, 16, 21, 23, 28, 48, 64, 96, 19
 
 EMBEDDING_DIM    = 512
 NUM_HEADS        = 8          # hd = 512/8 = 64
-FFN_DIM          = 1024   # ABLATION: halved from moonshot baseline (2048)
-NUM_LAYERS       = 8
-FULL_ATTN_LAYER  = 2
+FFN_DIM          = 2048       # 4×D — condU-v5 original proportions
+NUM_LAYERS       = 6
+FULL_ATTN_LAYER  = 5          # FA at last layer (100% depth) — condU shape
 
-# Chinchilla-optimal for ~49.5M params: 20 × 49.5M / 2048 = 483,398 seqs (0.99B tokens)
-# Using moonshot baseline budget (445,312) for direct comparison — same training cost.
-# Slight under-Chinchilla (92%) acceptable; fair comparison is the priority.
-MAX_TRAIN_SEQS      = 445_312
-SCALE_EMBED_INIT_VAL = 0.1
+# 22% Chinchilla for ~30.6M params: 20 × 30.6M / 2048 = 298,828 seqs × 0.22 = 65,742 seqs
+MAX_TRAIN_SEQS      = 65_742
+SCALE_EMBED_INIT_VAL = 0.15
 SCALE_EMBED_LR_MULT  = 15.0
 
 # EMA_INIT = 1/δ_relay_min = 1/48 ≈ 0.0208
@@ -84,14 +73,11 @@ EMA_FLOOR = 0.00001
 LR            = 3e-4
 SCREEN_EPOCHS = 3
 
-EXTRACTED_CKPT = None  # cold start — no warm-start checkpoint
+EXTRACTED_CKPT = None  # cold start
 
 # Resume control: set START_EPOCH=2 to resume after ep1, etc.
-# RESUME_CKPT = checkpoint saved at end of (START_EPOCH - 1).
-#   START_EPOCH=2 → RESUME_CKPT = ffn_ablation_ep1_resume.pt  (ep1_resume.pt = best.pt from first run)
-#   START_EPOCH=3 → RESUME_CKPT = ffn_ablation_ep2_resume.pt  (saved automatically during ep2)
-START_EPOCH = 2      # ep1 done (PPL=38.18, passkey=93.3%) — resuming from ep1_resume.pt
-RESUME_CKPT = 'autoresearch/checkpoints/ffn_ablation_ep1_resume.pt'  # pre-ep2 checkpoint
+START_EPOCH = 1
+RESUME_CKPT = None  # cold start — no checkpoint yet
 
 # =============================================================================
 
@@ -107,8 +93,8 @@ torch.set_float32_matmul_precision('high')
 os.environ.setdefault('PYTORCH_CUDA_ALLOC_CONF', 'expandable_segments:True')
 
 VOCAB_SIZE     = 32000
-BATCH_SIZE     = 16   # VRAM ceiling: seq=2047 × BS=16 = 10.8 GB; BS=32+ OOM on backward
-GRAD_ACCUM     = 1    # no accumulation — 7.4h → ~54min/epoch; eff_batch=16 fine for 45M model
+BATCH_SIZE     = 16   # BS=16 × GRAD_ACCUM=8 → eff_batch=128
+GRAD_ACCUM     = 8    # matches requested config
 MAX_SEQ_LEN    = 2048
 MAX_VAL_SEQS   = 5_582
 
@@ -472,21 +458,21 @@ def save_full_attn_checkpoint(model, epoch, git_hash, checkpoint_dir):
             "num_heads":         NUM_HEADS,
             "ffn_dim":           FFN_DIM,
             "seq_len":           MAX_SEQ_LEN,
-            "source_script":     "train/train_ffn_ablation_4090_bf16.py",
+            "source_script":     "train/train_condu_shape_4090_bf16.py",
             "source_layer":      FULL_ATTN_LAYER,
             "num_layers":        NUM_LAYERS,
             "num_offsets":       len(OFFSETS),
             "epoch":             epoch,
             "git_hash":          git_hash,
             "note": (
-                f"FFN-Ablation: FFN=1024 D={EMBEDDING_DIM} H={NUM_HEADS} L={NUM_LAYERS} "
+                f"condU-shape: FFN=2048 FA@last D={EMBEDDING_DIM} H={NUM_HEADS} L={NUM_LAYERS} "
                 f"J={len(OFFSETS)} FA@L{FULL_ATTN_LAYER} preIF@L{FULL_ATTN_LAYER-1}. "
                 f"Epoch {epoch}/3. fineweb_tokenizer_32k. Cold start."
             ),
         },
     }
 
-    out_path = os.path.join(checkpoint_dir, f"ffn_ablation_ep{epoch}_full_attn.pt")
+    out_path = os.path.join(checkpoint_dir, f"condu_shape_ep{epoch}_full_attn.pt")
     torch.save(payload, out_path)
     print(f"  Saved FullAttn checkpoint: {out_path}")
 
@@ -501,7 +487,7 @@ def train():
         ['git', 'rev-parse', '--short', 'HEAD']).decode().strip()
 
     print('=' * 70)
-    print('  🔬 DWARF FFN Ablation — D=512 H=8 hd=64 L=8 FFN=1024 J=24, cold start')
+    print('  🔬 DWARF condU-shape — D=512 H=8 hd=64 L=6 FFN=2048 FA@L5 J=24, cold start')
     print('  Baseline: moonshot-58M FFN=2048 (PPL=35.04 ep2, passkey=99.2%)')
     print('  FA@L2, preIF@L1, fineweb_tokenizer_32k, EMA_INIT=1/δ_relay_min=0.0208')
     print('=' * 70)
@@ -555,7 +541,7 @@ def train():
     ).to(device)
 
     # ── Cold start or resume ──────────────────────────────────────────────────
-    best_ckpt_name = 'ffn_ablation_best.pt'
+    best_ckpt_name = 'condu_shape_best.pt'
     if START_EPOCH > 1:
         if not os.path.exists(RESUME_CKPT):
             raise FileNotFoundError(f'Resume checkpoint not found: {RESUME_CKPT}')
@@ -661,7 +647,7 @@ def train():
         save_full_attn_checkpoint(model, epoch, git_hash, CHECKPOINT_DIR)
 
         # Save resume checkpoint for this epoch (strip torch.compile's _orig_mod prefix)
-        resume_name = f'ffn_ablation_ep{epoch}_resume.pt'
+        resume_name = f'condu_shape_ep{epoch}_resume.pt'
         clean_state = {k.replace('._orig_mod', ''): v for k, v in model.state_dict().items()}
         torch.save(clean_state, os.path.join(CHECKPOINT_DIR, resume_name))
         print(f'  Saved resume checkpoint: {CHECKPOINT_DIR}/{resume_name}')
@@ -695,7 +681,7 @@ def train():
     print(f'num_offsets:    {len(OFFSETS)}')
     print(f'scale_embed_lr_mult: {SCALE_EMBED_LR_MULT}')
     print(f'ema_init:       {EMA_INIT}')
-    print(f'description:    FFN-Ablation FFN=1024 — D={EMBEDDING_DIM} H={NUM_HEADS} hd=64 L={NUM_LAYERS} '
+    print(f'description:    condU-shape FFN=2048 FA@last — D={EMBEDDING_DIM} H={NUM_HEADS} hd=64 L={NUM_LAYERS} '
           f'FFN={FFN_DIM} J=24 se015, cold start, fineweb_tokenizer_32k, EMA_INIT=1/δ_relay_min')
 
 

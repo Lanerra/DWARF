@@ -1,41 +1,66 @@
 """
-🚀 DWARF D=768 L=16 — ~94M params, coherence-length test, cold-start
+🧪 DWARF D=768 L=32 — FROM-SCRATCH MIXED-DOMAIN PRETRAINING
 
-Architecture: D=768, H=12 (hd=64), L=16, FFN=1536, J=24 (se015 offsets), TIED lm_head
-  L0-L2:  DSQGBlockV6Physics  IF=False  ← 3 pre-FA warm-up relay layers
-  L3:     DSQGBlockV6Physics  IF=True   ← preIF@L3
-  L4:     FullAttentionBlock            ← FA@L4 (25% depth, 11 post-FA relay layers)
-  L5-15:  DSQGBlockV6Physics  IF=False  ← 11 post-FA relay layers
+Architecture: D=768, H=12 (hd=64), L=32, FFN=1536, J=24 (se015 offsets), TIED lm_head
+  L0-L6:  DSQGBlockV6Physics  IF=False  ← 7 pre-FA warm-up relay layers
+  L7:     DSQGBlockV6Physics  IF=True   ← preIF@L7
+  L8:     FullAttentionBlock            ← FA@L8 (25% depth, 23 post-FA relay layers)
+  L9-31:  DSQGBlockV6Physics  IF=False  ← 23 post-FA relay layers
 
-Hypothesis: relay coherence length scales with D (not L). D=512 coherence ≈ 12 layers,
-  insufficient for 11 post-FA at L=16. D=768 coherence ≈ 18 layers → should cover 11.
-  D=1024 coherence ≈ 30 layers → confirmed ✓ (267M).
-  This run tests whether D=768 sits above the coherence threshold for L=16.
+EXPERIMENT: Does relay form natively in a from-scratch model trained entirely on
+  a mixed-domain corpus (60% FineWeb-Edu / 25% PG19 / 15% The Stack)?
 
-Derived quantities:
-  hd = 768/12 = 64 ✓ (validated head dimension)
-  Relay/residual ratio = (J=24 × hd=64) / D=768 = 2.0× (between D=512 3.0× and D=1024 1.5×)
-  LR_MULT = 15 × √(768/512) = 18.37
-  22% Chinchilla at 94M: ~202K sequences
+MOTIVATION: Mixed-domain *continuation* (frozen scale_embed) achieved 99.2% passkey
+  with PPL 18.75 after ep1, proving K/Q topology is robust to domain shift when
+  scale_embed amplitude is preserved. The original March-29 collapse was entirely
+  caused by unfrozen scale_embed (LR amplification destroyed amplitude).
+
+  QUESTION: Can relay crystallise FROM SCRATCH under mixed gradients? If yes, this
+  architecture is domain-agnostic at pretraining and FineWeb-Edu is NOT a hard
+  requirement for relay formation (only for amplitude preservation post-formation).
+
+HYPOTHESIS H3: scale_embed will climb through percolation threshold (~2.0) during
+  ep1 despite mixed gradients, because:
+  (1) relay formation is driven by DSQG attention dynamics (topology) — domain-agnostic
+  (2) mixed gradients may slow threshold crossing (ep2 vs ep1) but won't prevent it
+  (3) K/Q crystallisation follows the same physics as FineWeb-only training
+
+FAILURE MODE: If scale_embed stalls at ~1.77 (D=512/L=16 pattern), the mixed corpus
+  provides insufficient consistent relay signal for bootstrapping. Domain coherence IS
+  required for from-scratch formation (just not for continuation).
+
+Dataset: mixed_encoded_2048_fineweb_tok.pt
+  - 234,418 train / 5,582 val sequences
+  - 60% FineWeb-Edu / 25% PG19 / 15% The Stack
+  - Encoded with fineweb_tokenizer_32k.json (32K BPE)
+
+Chinchilla budget:
+  196.6M params × 20 = 3.932B Chinchilla-optimal tokens
+  22% Chinchilla: 0.22 × 3.932B / 2048 ≈ 422,526 seqs
+  Dataset cap: 234,418 seqs (all available) = 0.48B tokens = 12.2% Chinchilla
+  This is intentionally below 22% — we're testing relay formation, not PPL optimality.
+  Relay typically crystallises at ~1% Chinchilla; 12% is ample if formation is possible.
 
 Baselines:
-  Moonshot-58M ep2   (PPL=35.04, passkey=99.2%, ar_score=80.90) — D=512 L=8
-  267M D=1024 ep1    (PPL=27.75, passkey=93.3%)                 — D=1024 L=24
-  d768_l16_fa4    (PPL=90.77, passkey=15.0%, stall@1.78)     — D=512 L=16 ✗
+  d768_l32 pretrained ep3     (PPL=27.47, passkey=96.7%)   ← FineWeb-Edu only, 22% Chinchilla
+  d768_l32 cont_ep2 (best)    (PPL=25.85, passkey=98.3%)   ← FineWeb-Edu 80% + Wiki 20%
+  d768_l32 mixed_frozen ep1   (PPL=18.75, passkey=99.2%)   ← Mixed continuation, scale_embed frozen
+
+KEY DIAGNOSTIC (check at step 800–1000):
+  scale_embed |max| climbing toward 2.0 → relay formation underway ✓
+  scale_embed |max| stalling at ~1.77   → from-scratch mixed fails ✗
 
 Config:
-  - Tokenizer: fineweb_tokenizer_32k.json  (32K BPE, FineWeb proper)
-  - Dataset:   fineweb_edu_encoded_2048_v2.pt (~2.01M seqs, 4.13B tokens)
   - EMA_INIT = 0.0208 (= 1/δ_relay_min for J24D se015)
   - SCALE_EMBED_INIT = 0.15, LR_MULT = 18.37
-  - Batch: BS=64 × GRAD_ACCUM=2 = eff_batch=128
-  - Cold start, ~94M parameters (tied lm_head)
+  - Batch: BS=128 × GRAD_ACCUM=1 = eff_batch=128 (H100)
+  - Cold start, 196.6M parameters (tied lm_head)
+  - 3 epochs × 234,418 seqs = 702,254 total sequence presentations
 
-Screen: 3 epochs × 202,000 seqs (22% Chinchilla for ~94M params)
-
-Run (from repo root):
-  CUDA_VISIBLE_DEVICES=0 .venv/bin/python3 -u train/train_d768_l16_4090_bf16.py \\
-    2>&1 | tee logs/run_d768_l16.log
+Run (from repo root, on H100 pod):
+  tmux new-session -d -s mixed_scratch \\
+    ".venv/bin/python3 -u train/train_d768_l32_mixed_scratch_h100_bf16.py \\
+     2>&1 | tee logs/run_d768_l32_mixed_scratch.log"
 """
 
 # =============================================================================
@@ -46,27 +71,31 @@ OFFSETS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13, 15, 16, 21, 23, 28, 48, 64, 96, 19
 
 EMBEDDING_DIM    = 768
 NUM_HEADS        = 12         # hd = 768/12 = 64 ✓ (validated head dimension)
-FFN_DIM          = 1536       # 2×D
-NUM_LAYERS       = 16
-FULL_ATTN_LAYER  = 4          # 11 post-FA relay layers (L5-15); 3 pre-FA warm-up = 25% of depth
+FFN_DIM          = 1536       # 2×D — confirmed optimal by FFN ablation
+NUM_LAYERS       = 32
+FULL_ATTN_LAYER  = 8          # 25% of 32 = L8; 23 post-FA relay layers; preIF@L7
 
-MAX_TRAIN_SEQS       = 240_000   # 22% Chinchilla for 111.5M params (20 × 111.5M × 0.22 / 2048 ≈ 239K)
+# All available mixed sequences — 12.2% Chinchilla (sufficient for relay formation test)
+MAX_TRAIN_SEQS       = 234_418
 SCALE_EMBED_INIT_VAL = 0.15
 SCALE_EMBED_LR_MULT  = 18.37    # μP: 15 × √(768/512)
 
 # EMA_INIT = 1/δ_relay_min = 1/48 ≈ 0.0208
-# Empirically validated for J24D (se015): trains to α≈0.0207, 0.6% error
-# δ_relay_min = 48 (first offset after local cluster [1..28])
+# Validated for J24D (se015): trains to α≈0.0207, 0.6% error
 EMA_INIT  = 0.0208
 EMA_FLOOR = 0.00001
 
 LR            = 3e-4
-SCREEN_EPOCHS = 3  # 3 × 202K seqs
+SCREEN_EPOCHS = 3
+
+# Abort if passkey drops below this in ep2+ (relay formation failure indicator)
+PASSKEY_ABORT_THRESHOLD = 0.20   # 20% — strictly above random (10%) baseline
 
 # =============================================================================
 
 import contextlib, json, math, os, subprocess, sys, time
-MAX_TRAIN_SEQS = int(os.environ.get('MAX_TRAIN_SEQS_OVERRIDE', MAX_TRAIN_SEQS))  # pipeline override
+from collections import deque
+MAX_TRAIN_SEQS = int(os.environ.get('MAX_TRAIN_SEQS_OVERRIDE', MAX_TRAIN_SEQS))
 import torch
 import torch.nn as nn
 from torch.utils.checkpoint import checkpoint as grad_ckpt
@@ -75,20 +104,46 @@ import torch.nn.functional as F
 torch.set_float32_matmul_precision('high')
 os.environ.setdefault('PYTORCH_CUDA_ALLOC_CONF', 'expandable_segments:True')
 
+# ── Liger fused CE ─────────────────────────────────────────────────────────────
+try:
+    from liger_kernel.transformers.fused_linear_cross_entropy import LigerFusedLinearCrossEntropyLoss
+    _LIGER_AVAILABLE = True
+except ImportError:
+    _LIGER_AVAILABLE = False
+
+USE_LIGER_CE = _LIGER_AVAILABLE and os.getenv("DWARF_LIGER", "1") == "1"
+
+
+def get_gpu_peak_flops(device="cuda"):
+    """Return peak BF16 TFLOPs for the detected GPU."""
+    if not torch.cuda.is_available():
+        return None
+    name = torch.cuda.get_device_name(device)
+    if "H100" in name:
+        return 989e12
+    elif "H200" in name:
+        return 1979e12
+    elif "4090" in name:
+        return 330e12
+    elif "3090" in name:
+        return 142e12
+    elif "A100" in name:
+        return 312e12
+    return None
+
 VOCAB_SIZE     = 32000
-BATCH_SIZE     = 64
-GRAD_ACCUM     = 2    # effective batch = 128
-CE_CHUNK       = 512  # chunked CE token stride — avoids materialising full (BS×2047×32K) fp32 grad tensor
+BATCH_SIZE     = 32
+GRAD_ACCUM     = 4    # effective batch = 128
+CE_CHUNK       = 512  # chunked CE — avoids materialising full (BS×2047×32K) grad tensor
 MAX_SEQ_LEN    = 2048
 MAX_VAL_SEQS   = 5_582
 
-FW_CACHE_FILE = 'benchmarks/logs/condm_fineweb_edu_doc_cache.json'
 TOKENIZER_CANDIDATES = [
     'results/fineweb_tokenizer_32k.json',
     'results/fineweb_v32k_v2_tokenizer.json',
 ]
 PASSKEY_DISTANCES = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 1536]
-PASSKEY_TRIALS    = 50   # n=50: ±7pp noise vs ±20pp at n=20 (inflation risk)
+PASSKEY_TRIALS    = 50   # n=50: ±7pp noise floor
 _PASSKEY_WORDS    = ['apple', 'banana', 'orange', 'cherry', 'grape',
                      'lemon', 'mango', 'peach', 'plum', 'berry']
 _FILLER_SENTENCE  = 'the weather was mild and the air was still . '
@@ -98,7 +153,7 @@ CHECKPOINT_DIR    = 'autoresearch/checkpoints'
 
 ENABLE_TORCH_COMPILE = os.getenv('DWARF_ENABLE_COMPILE', '0') == '1'
 COMPILE_MODE         = os.getenv('DWARF_COMPILE_MODE', 'reduce-overhead')
-CHECKPOINT_STRATEGY  = os.getenv('DWARF_CKPT', 'every_other').lower()   # none | full_attn | every_other | all
+CHECKPOINT_STRATEGY  = os.getenv('DWARF_CKPT', 'every_other').lower()
 PASSKEY_BATCH_SIZE   = int(os.getenv('DWARF_PASSKEY_BATCH', '32'))
 
 # ── Kernel import ─────────────────────────────────────────────────────────────
@@ -166,6 +221,7 @@ class DSQGBlockV6Physics(nn.Module):
             self.inter_k_proj = nn.Linear(embedding_dim, embedding_dim)
             self.inter_v_proj = nn.Linear(embedding_dim, embedding_dim)
             self.ema_factor   = nn.Parameter(torch.full((1,), EMA_INIT))
+
     def forward(self, x):
         kv_inject = None
         if self.interference:
@@ -246,9 +302,9 @@ class AutoresearchTransformerPhysics(nn.Module):
                     dropout=dropout, interference=has_if))
         self.blocks = nn.ModuleList(blocks)
         self.norm   = nn.LayerNorm(embedding_dim)
-        # Tied lm_head — shares weights with embedding table (saves ~16.4M params at V=32K)
+        # Tied lm_head
         self.out    = nn.Linear(embedding_dim, vocab_size, bias=False)
-        self.out.weight = self.embedding.weight   # weight tying
+        self.out.weight = self.embedding.weight
         self._init_weights(scale_embed_init_val)
 
     def _init_weights(self, scale_embed_init_val):
@@ -289,6 +345,14 @@ class AutoresearchTransformerPhysics(nn.Module):
             else:
                 x = block(x)
         return self.out(self.norm(x))
+
+    def forward_hidden(self, idx):
+        """Return pre-lm_head hidden states [B, N, D] for chunked CE computation."""
+        B, N = idx.shape
+        x    = self.drop(self.embedding(idx))
+        for block in self.blocks:
+            x = block(x)
+        return self.norm(x)
 
     def param_count(self):
         return sum(p.numel() for p in self.parameters())
@@ -335,13 +399,12 @@ class BPETokenizerWrapper:
 def evaluate(model, data, device, CE_CHUNK=512):
     model.eval()
     total_loss, total_tokens = 0.0, 0
-    bs = 4  # keep logit memory low: 4×2047×32K×2 bytes ≈ 0.5 GB
+    bs = 4
     for i in range(0, len(data) - bs + 1, bs):
         x = data[i:i+bs, :-1].to(device, non_blocking=True)
         y = data[i:i+bs,  1:].to(device, non_blocking=True)
         with _amp_context(device):
-            logits = model(x)          # [bs, T, V]
-        # chunked CE to avoid materialising full fp32 gradient tensor
+            logits = model(x)
         T, V = logits.size(1), logits.size(2)
         batch_loss = 0.0
         for c in range(0, T, CE_CHUNK):
@@ -393,22 +456,22 @@ def passkey_accuracy(model, tokenizer, device):
             results[d] = 0.0
             continue
 
-        ids = torch.tensor(seqs, dtype=torch.long, device=device)
-        pos = torch.tensor(last_pos, dtype=torch.long, device=device)
+        ids  = torch.tensor(seqs,     dtype=torch.long, device=device)
+        pos  = torch.tensor(last_pos, dtype=torch.long, device=device)
         cand = torch.tensor(cand_rows, dtype=torch.long, device=device)
 
         correct = 0
-        total = ids.size(0)
+        total   = ids.size(0)
         for start in range(0, total, PASSKEY_BATCH_SIZE):
-            ids_b = ids[start:start + PASSKEY_BATCH_SIZE]
-            pos_b = pos[start:start + PASSKEY_BATCH_SIZE]
+            ids_b  = ids[start:start + PASSKEY_BATCH_SIZE]
+            pos_b  = pos[start:start + PASSKEY_BATCH_SIZE]
             cand_b = cand[start:start + PASSKEY_BATCH_SIZE]
             with _amp_context(device):
                 logits = model(ids_b)
-            row = torch.arange(ids_b.size(0), device=device)
+            row         = torch.arange(ids_b.size(0), device=device)
             next_logits = logits[row, pos_b, :]
             cand_logits = torch.gather(next_logits, 1, cand_b)
-            correct += (cand_logits.argmax(dim=1) == 0).sum().item()
+            correct    += (cand_logits.argmax(dim=1) == 0).sum().item()
 
         results[d] = correct / total
     return results
@@ -426,20 +489,21 @@ def save_full_attn_checkpoint(model, epoch, git_hash, checkpoint_dir):
             "num_heads":     NUM_HEADS,
             "ffn_dim":       FFN_DIM,
             "seq_len":       MAX_SEQ_LEN,
-            "source_script": "train/train_d768_l16_fa4_4090_bf16.py",
+            "source_script": "train/train_d768_l32_mixed_scratch_h100_bf16.py",
             "source_layer":  FULL_ATTN_LAYER,
             "num_layers":    NUM_LAYERS,
             "num_offsets":   len(OFFSETS),
             "epoch":         epoch,
             "git_hash":      git_hash,
             "note": (
-                f"D768-L16-FA4: D={EMBEDDING_DIM} H={NUM_HEADS} L={NUM_LAYERS} "
-                f"FFN={FFN_DIM} J={len(OFFSETS)} FA@L{FULL_ATTN_LAYER} "
-                f"preIF@L{FULL_ATTN_LAYER-1}. Epoch {epoch}/3. Cold start."
+                f"D768-L32-FA8 FROM-SCRATCH MIXED: D={EMBEDDING_DIM} H={NUM_HEADS} "
+                f"L={NUM_LAYERS} FFN={FFN_DIM} J={len(OFFSETS)} FA@L{FULL_ATTN_LAYER} "
+                f"preIF@L{FULL_ATTN_LAYER-1}. Epoch {epoch}/3. "
+                f"Mixed dataset: 60% FineWeb-Edu / 25% PG19 / 15% Stack."
             ),
         },
     }
-    out_path = os.path.join(checkpoint_dir, f"d768_l16_fa4_ep{epoch}_full_attn.pt")
+    out_path = os.path.join(checkpoint_dir, f"d768_l32_mixed_scratch_ep{epoch}_full_attn.pt")
     torch.save(payload, out_path)
     print(f"  Saved FullAttn checkpoint: {out_path}")
 
@@ -450,26 +514,29 @@ def train():
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     if torch.cuda.is_available():
         torch.cuda.reset_peak_memory_stats()
-    t_start = time.time()
+    t_start  = time.time()
     git_hash = subprocess.check_output(
         ['git', 'rev-parse', '--short', 'HEAD']).decode().strip()
 
     print('=' * 70)
-    print('  🚀 DWARF D768-L16 FA@L4 — D=768 H=12 hd=64 L=16 FFN=1536 J=24, cold start')
-    print(f'  FA@L{FULL_ATTN_LAYER}, preIF@L{FULL_ATTN_LAYER-1}, {NUM_LAYERS - FULL_ATTN_LAYER - 1} post-FA relay layers, fineweb_tokenizer_32k')
+    print('  🧪 DWARF D768-L32 FA@L8 — FROM-SCRATCH MIXED-DOMAIN PRETRAINING')
+    print('  Dataset: 60% FineWeb-Edu / 25% PG19 / 15% The Stack')
+    print('  Hypothesis H3: Relay crystallises natively under mixed gradients')
+    print('  Key diagnostic: scale_embed |max| trajectory at steps 800-1000')
     print('=' * 70)
     if torch.cuda.is_available():
         print(f'  GPU: {torch.cuda.get_device_name(0)}')
-        _cc = torch.cuda.get_device_capability()
-        _path = 'sm_89 (4090 Ada — tuned)' if (_cc[0]==8 and _cc[1]==9) else \
-                f'sm_{_cc[0]}{_cc[1]}'
-        print(f'  Kernel path: {_path}')
-    print(f'  D={EMBEDDING_DIM}, H={NUM_HEADS}, hd={EMBEDDING_DIM//NUM_HEADS}, L={NUM_LAYERS}, FFN={FFN_DIM}')
-    print(f'  FA@L{FULL_ATTN_LAYER}, preIF@L{FULL_ATTN_LAYER-1}')
-    print(f'  Post-FA relay layers: {NUM_LAYERS - FULL_ATTN_LAYER - 1}  (vs 5 in moonshot)')
+    if USE_LIGER_CE:
+        print('  Using Liger fused CE')
+    else:
+        print('  Liger not available, using chunked CE')
+    print(f'  D={EMBEDDING_DIM}, H={NUM_HEADS}, hd={EMBEDDING_DIM//NUM_HEADS}, '
+          f'L={NUM_LAYERS}, FFN={FFN_DIM}')
+    print(f'  FA@L{FULL_ATTN_LAYER}, preIF@L{FULL_ATTN_LAYER-1}, '
+          f'{NUM_LAYERS - FULL_ATTN_LAYER - 1} post-FA relay layers')
     print(f'  scale_embed init={SCALE_EMBED_INIT_VAL}, LR mult={SCALE_EMBED_LR_MULT}')
     print(f'  EMA α₀={EMA_INIT} (window≈{round(1/EMA_INIT)}t)')
-    print(f'  MAX_TRAIN_SEQS={MAX_TRAIN_SEQS:,}, Epochs={SCREEN_EPOCHS}')
+    print(f'  MAX_TRAIN_SEQS={MAX_TRAIN_SEQS:,} (~12.2% Chinchilla), Epochs={SCREEN_EPOCHS}')
     print(f'  Batch: BS={BATCH_SIZE} × GRAD_ACCUM={GRAD_ACCUM} = eff_batch={BATCH_SIZE*GRAD_ACCUM}')
     print(f'  checkpoint_strategy={CHECKPOINT_STRATEGY}  passkey_batch_size={PASSKEY_BATCH_SIZE}')
     print(f'  git={git_hash}')
@@ -479,18 +546,18 @@ def train():
         raise FileNotFoundError(f'Tokenizer not found in: {TOKENIZER_CANDIDATES}')
     from tokenizers import Tokenizer
     tokenizer = BPETokenizerWrapper(Tokenizer.from_file(tok_path))
-    print(f'Loaded tokenizer from {tok_path}  (vocab={tokenizer.vocab_size():,})')
+    print(f'Loaded tokenizer: {tok_path}  (vocab={tokenizer.vocab_size():,})')
 
-    _encoded_cache = 'logs/fineweb_edu_encoded_2048_v2.pt'
+    _encoded_cache = 'logs/mixed_encoded_2048_fineweb_tok.pt'
     if os.path.exists(_encoded_cache):
-        print(f'Loading pre-encoded dataset from {_encoded_cache}')
+        print(f'Loading mixed dataset from {_encoded_cache}')
         _cache     = torch.load(_encoded_cache, weights_only=True)
         train_data = _cache['train'].long()
         val_data   = _cache['val'].long()
     else:
         raise FileNotFoundError(
-            f'Pre-encoded dataset not found: {_encoded_cache}\n'
-            f'Run scripts/build_dataset_fineweb.py first.')
+            f'Mixed dataset not found: {_encoded_cache}\n'
+            f'Expected: mixed_encoded_2048_fineweb_tok.pt (60% FW-Edu / 25% PG19 / 15% Stack)')
 
     if len(train_data) > MAX_TRAIN_SEQS:
         train_data = train_data[torch.randperm(len(train_data))[:MAX_TRAIN_SEQS]]
@@ -517,12 +584,12 @@ def train():
                         model.blocks[i] = torch.compile(block, fullgraph=False, dynamic=False, mode=COMPILE_MODE)
                     except TypeError:
                         model.blocks[i] = torch.compile(block, fullgraph=False)
-                    print(f"  torch.compile applied to FullAttentionBlock at layer {i} (mode={COMPILE_MODE})")
+                    print(f"  torch.compile applied to FullAttentionBlock at layer {i}")
                     break
         except Exception as e:
             print(f"  torch.compile skipped: {e}")
     else:
-        print('  torch.compile disabled by default (set DWARF_ENABLE_COMPILE=1 to opt in)')
+        print('  torch.compile disabled (set DWARF_ENABLE_COMPILE=1 to opt in)')
 
     n_params = model.param_count()
     print(f'Parameters: {n_params:,} ({n_params / 1e6:.1f}M)')
@@ -544,35 +611,49 @@ def train():
     ppl_results     = {}
     os.makedirs(CHECKPOINT_DIR, exist_ok=True)
 
-    # ── Kernel warmup pass ────────────────────────────────────────────────────
-    # Run one dummy forward+backward at BS=1 to compile all Triton kernels
-    # (DSQG fwd/bwd, EMA fwd/bwd) before entering the training loop.
-    # Without this, the first real training step stalls for 5–15 min on a
-    # cold cache while silently compiling — printing nothing to the log.
-    # Warmup batch size MUST match BATCH_SIZE — Triton specialises kernels on
-    # (B, N) so a different-size warmup leaves the first real step stalling.
-    _WARMUP_BS   = BATCH_SIZE
-    print(f'Warming up Triton kernels (BS={_WARMUP_BS} dummy pass)...')
-    _wb          = min(_WARMUP_BS, len(train_data))
-    _wx          = train_data[:_wb, :-1].to(device)
-    _wy          = train_data[:_wb, 1:].to(device)
+    # ── Kernel warmup ─────────────────────────────────────────────────────────
+    _WARMUP_BS = 4   # small BS for warmup to avoid OOM; Triton caches kernel for reuse
+    print(f'Warming up Triton kernels (warmup BS={_WARMUP_BS}, train BS={BATCH_SIZE})...')
+    _wb       = min(_WARMUP_BS, len(train_data))
+    _wx       = train_data[:_wb, :-1].to(device)
+    _wy       = train_data[:_wb, 1:].to(device)
     with torch.amp.autocast('cuda', dtype=torch.bfloat16):
-        _wout    = model(_wx)
-    _wlogits_flat = _wout.reshape(-1, _wout.size(-1))
-    _wy_flat      = _wy.reshape(-1)
-    _wT           = _wlogits_flat.size(0)
-    _wgrad        = torch.empty_like(_wlogits_flat)
-    for _wcs in range(0, _wT, CE_CHUNK):
-        _wce    = min(_wcs + CE_CHUNK, _wT)
-        _wchunk = _wlogits_flat[_wcs:_wce].detach().requires_grad_(True)
-        _wloss  = F.cross_entropy(_wchunk, _wy_flat[_wcs:_wce], reduction='sum')
-        _wloss.backward()
-        _wgrad[_wcs:_wce] = _wchunk.grad
-    _wlogits_flat.backward(_wgrad / _wT)
+        if USE_LIGER_CE:
+            _whidden = model.forward_hidden(_wx)
+            _liger_ce_fn = LigerFusedLinearCrossEntropyLoss()
+            _wloss = _liger_ce_fn(
+                _whidden.view(-1, _whidden.size(-1)),
+                model.out.weight,
+                _wy.view(-1)
+            )
+            _wloss.backward()
+            del _whidden, _wloss
+        else:
+            _wout = model(_wx)
+            _wlogits_flat = _wout.reshape(-1, _wout.size(-1))
+            _wy_flat      = _wy.reshape(-1)
+            _wT           = _wlogits_flat.size(0)
+            _wgrad        = torch.empty_like(_wlogits_flat)
+            for _wcs in range(0, _wT, CE_CHUNK):
+                _wce    = min(_wcs + CE_CHUNK, _wT)
+                _wchunk = _wlogits_flat[_wcs:_wce].detach().requires_grad_(True)
+                _wloss  = F.cross_entropy(_wchunk, _wy_flat[_wcs:_wce], reduction='sum')
+                _wloss.backward()
+                _wgrad[_wcs:_wce] = _wchunk.grad
+            _wlogits_flat.backward(_wgrad / _wT)
+            del _wout, _wlogits_flat, _wy_flat, _wloss
     optimizer.zero_grad(set_to_none=True)
-    del _wx, _wy, _wout, _wlogits_flat, _wy_flat, _wloss
+    del _wx, _wy
     torch.cuda.synchronize()
-    print('  kernel warmup complete.')
+    print('  Kernel warmup complete.')
+
+    # ── MFU tracking setup ─────────────────────────────────────────────────────
+    gpu_peak_flops = get_gpu_peak_flops(device)
+    tokens_per_step = BATCH_SIZE * GRAD_ACCUM * (MAX_SEQ_LEN - 1)
+    flops_per_step = 6 * n_params * tokens_per_step
+    mfu_window = deque(maxlen=20)
+    if USE_LIGER_CE:
+        liger_ce_fn = LigerFusedLinearCrossEntropyLoss()
 
     for epoch in range(1, SCREEN_EPOCHS + 1):
         model.train()
@@ -582,6 +663,10 @@ def train():
         steps_per_epoch = math.ceil(len(train_data) / BATCH_SIZE / GRAD_ACCUM)
 
         for acc_step in range(steps_per_epoch):
+            t_start_event = torch.cuda.Event(enable_timing=True)
+            t_end_event   = torch.cuda.Event(enable_timing=True)
+            t_start_event.record()
+
             for ga in range(GRAD_ACCUM):
                 idx_start = (acc_step * GRAD_ACCUM + ga) * BATCH_SIZE
                 if idx_start >= len(train_data):
@@ -589,33 +674,67 @@ def train():
                 batch = train_data[indices[idx_start:idx_start + BATCH_SIZE]]
                 x = batch[:, :-1].to(device, non_blocking=True)
                 y = batch[:, 1:].to(device, non_blocking=True)
-                with _amp_context(device):
-                    logits = model(x)
-                logits_flat = logits.reshape(-1, logits.size(-1))
-                y_flat      = y.reshape(-1)
-                T           = logits_flat.size(0)
-                grad_logits = torch.empty_like(logits_flat)
-                total_loss  = 0.0
-                for chunk_start in range(0, T, CE_CHUNK):
-                    chunk_end = min(chunk_start + CE_CHUNK, T)
-                    chunk     = logits_flat[chunk_start:chunk_end].detach().requires_grad_(True)
-                    chunk_loss = F.cross_entropy(
-                        chunk, y_flat[chunk_start:chunk_end], reduction='sum')
-                    chunk_loss.backward()
-                    grad_logits[chunk_start:chunk_end] = chunk.grad
-                    total_loss += chunk_loss.item()
-                logits_flat.backward(grad_logits / (T * GRAD_ACCUM))
-                loss_val = total_loss / T
-                del logits, logits_flat, y_flat, grad_logits
+
+                if USE_LIGER_CE:
+                    with _amp_context(device):
+                        hidden = model.forward_hidden(x)
+                        loss = liger_ce_fn(
+                            hidden.view(-1, hidden.size(-1)),
+                            model.out.weight,
+                            y.view(-1)
+                        )
+                    (loss / GRAD_ACCUM).backward()
+                    loss_val = loss.item()
+                    del hidden, loss
+                else:
+                    with _amp_context(device):
+                        logits = model(x)
+                    logits_flat = logits.reshape(-1, logits.size(-1))
+                    y_flat      = y.reshape(-1)
+                    T           = logits_flat.size(0)
+                    grad_logits = torch.empty_like(logits_flat)
+                    total_loss  = 0.0
+                    for chunk_start in range(0, T, CE_CHUNK):
+                        chunk_end  = min(chunk_start + CE_CHUNK, T)
+                        chunk      = logits_flat[chunk_start:chunk_end].detach().requires_grad_(True)
+                        chunk_loss = F.cross_entropy(
+                            chunk, y_flat[chunk_start:chunk_end], reduction='sum')
+                        chunk_loss.backward()
+                        grad_logits[chunk_start:chunk_end] = chunk.grad
+                        total_loss += chunk_loss.item()
+                    logits_flat.backward(grad_logits / (T * GRAD_ACCUM))
+                    loss_val = total_loss / T
+                    del logits, logits_flat, y_flat, grad_logits
+
             torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
             optimizer.step()
             optimizer.zero_grad(set_to_none=True)
             scheduler.step()
+
+            t_end_event.record()
+            torch.cuda.synchronize()
+            step_ms = t_start_event.elapsed_time(t_end_event)
+            mfu_window.append(step_ms)
             step += 1
 
             if step % 200 == 0:
-                print(f'  Step {step}/{steps_per_epoch} '
-                      f'| Loss {loss_val:.4f}', flush=True)
+                se_vals = []
+                for m in model.modules():
+                    if isinstance(m, DSQGAttentionV6):
+                        se_vals.append(m.scale_embed.detach().abs())
+                se_max = torch.cat(se_vals).max().item() if se_vals else 0.0
+                threshold_marker = ' ← ABOVE THRESHOLD' if se_max >= 2.0 else (
+                    ' ← approaching' if se_max >= 1.6 else '')
+                avg_step_ms = sum(mfu_window) / len(mfu_window)
+                tok_per_sec = tokens_per_step / (avg_step_ms / 1000.0)
+                mfu_str = ''
+                if gpu_peak_flops is not None:
+                    mfu = (flops_per_step / (avg_step_ms / 1000.0)) / gpu_peak_flops * 100
+                    mfu_str = f' | MFU {mfu:.1f}%'
+                print(f'  Ep{epoch} Step {step}/{steps_per_epoch} '
+                      f'| Loss {loss_val:.4f} '
+                      f'| SE |max|={se_max:.4f}{threshold_marker}'
+                      f'{mfu_str} | {tok_per_sec:.0f} tok/s', flush=True)
 
         val_loss = evaluate(model, val_data, device)
         val_ppl  = math.exp(min(val_loss, 20))
@@ -624,21 +743,24 @@ def train():
         marker = ''
         if val_loss < best_val_loss:
             best_val_loss = val_loss
-            clean_state = {k.replace('._orig_mod', ''): v for k, v in model.state_dict().items()}
+            clean_state = {k.replace('._orig_mod', ''): v
+                           for k, v in model.state_dict().items()}
             torch.save(clean_state,
-                       os.path.join(CHECKPOINT_DIR, 'd768_l16_fa4_best.pt'))
+                       os.path.join(CHECKPOINT_DIR, 'd768_l32_mixed_scratch_best.pt'))
             marker = ' *'
 
-        # Save resume checkpoint
+        # Save full resume checkpoint (optimizer + scheduler for continuation)
         torch.save({
             'epoch': epoch,
-            'model_state_dict': {k.replace('._orig_mod', ''): v for k, v in model.state_dict().items()},
+            'model_state_dict': {k.replace('._orig_mod', ''): v
+                                 for k, v in model.state_dict().items()},
             'optimizer_state_dict': optimizer.state_dict(),
             'scheduler_state_dict': scheduler.state_dict(),
             'val_loss': val_loss,
-        }, os.path.join(CHECKPOINT_DIR, f'd768_l16_fa4_ep{epoch}_resume.pt'))
+            'val_ppl':  val_ppl,
+        }, os.path.join(CHECKPOINT_DIR, f'd768_l32_mixed_scratch_ep{epoch}.pt'))
 
-        print(f'Ep {epoch}/{SCREEN_EPOCHS} | Val PPL {val_ppl:.2f}{marker}')
+        print(f'\nEp {epoch}/{SCREEN_EPOCHS} | Val PPL {val_ppl:.2f}{marker}')
 
         se_vals = []
         for m in model.modules():
@@ -646,8 +768,13 @@ def train():
                 se_vals.append(m.scale_embed.detach().abs())
         if se_vals:
             se_all = torch.cat(se_vals)
+            se_max = se_all.max().item()
+            threshold_status = (
+                'ABOVE THRESHOLD ✓ — relay crystallising' if se_max >= 2.0 else
+                f'BELOW THRESHOLD ✗ — need {2.0 - se_max:.4f} more to cross 2.0'
+            )
             print(f'  scale_embed |mean|={se_all.mean():.4f} '
-                  f'|max|={se_all.max():.4f}')
+                  f'|max|={se_max:.4f} ({threshold_status})')
 
         print(f'  Physics: {model.physics_summary()}')
         save_full_attn_checkpoint(model, epoch, git_hash, CHECKPOINT_DIR)
@@ -655,34 +782,41 @@ def train():
         pk      = passkey_accuracy(model, tokenizer, device)
         pk_mean = sum(pk.values()) / len(pk)
         passkey_results[epoch] = pk_mean * 100
-        print(f'  Passkey mean={pk_mean * 100:.1f}%')
+        print(f'  Passkey mean={pk_mean * 100:.1f}%  '
+              f'({"relay active" if pk_mean > 0.5 else "random — relay not yet formed"})')
         parts = [f'd={d}:{int(pk[d] * 100)}%' for d in PASSKEY_DISTANCES]
         print('  ' + '  '.join(parts))
+
+        # Early abort on relay formation failure in ep2+
+        if epoch >= 2 and pk_mean < PASSKEY_ABORT_THRESHOLD:
+            print(f'\n  ⛔ ABORT: Passkey {pk_mean*100:.1f}% < {PASSKEY_ABORT_THRESHOLD*100:.0f}% '
+                  f'threshold at ep{epoch} — relay formation failed on mixed corpus.')
+            print(f'  H3 REJECTED: From-scratch mixed-domain training insufficient '
+                  f'for relay crystallisation at D=768/L=32.')
+            break
+
         sys.stdout.flush()
 
     elapsed_s     = time.time() - t_start
     memory_mb     = (torch.cuda.max_memory_allocated() / 1e6) if torch.cuda.is_available() else 0.0
-    passkey_final = passkey_results.get(SCREEN_EPOCHS, 0.0)
-    ppl_final     = ppl_results.get(SCREEN_EPOCHS, 999.0)
-    PPL_BASELINE     = 35.04
+    passkey_final = passkey_results.get(max(passkey_results.keys(), default=1), 0.0)
+    ppl_final     = ppl_results.get(max(ppl_results.keys(), default=1), 999.0)
+    PPL_BASELINE     = 35.04  # Moonshot-58M ep2
     PASSKEY_BASELINE = 99.2
     ar_score = (passkey_final - PASSKEY_BASELINE) + (PPL_BASELINE - ppl_final) * 0.5
 
-    print('\n---')
-    for ep in range(1, SCREEN_EPOCHS + 1):
-        print(f'passkey_ep{ep}: {passkey_results.get(ep, 0.0):.1f}')
-    for ep in range(1, SCREEN_EPOCHS + 1):
-        print(f'ppl_ep{ep}: {ppl_results.get(ep, 999.0):.2f}')
+    print('\n--- RESULTS ---')
+    for ep in sorted(passkey_results):
+        print(f'passkey_ep{ep}: {passkey_results[ep]:.1f}%')
+    for ep in sorted(ppl_results):
+        print(f'ppl_ep{ep}: {ppl_results[ep]:.2f}')
     print(f'ar_score: {ar_score:.2f}')
     print(f'memory_mb: {memory_mb:.1f}')
     print(f'elapsed_s: {elapsed_s:.1f}')
     print(f'num_params_M: {n_params / 1e6:.1f}')
-    print(f'num_layers: {NUM_LAYERS}')
-    print(f'num_offsets: {len(OFFSETS)}')
-    print(f'scale_embed_lr_mult: {SCALE_EMBED_LR_MULT}')
-    print(f'ema_init: {EMA_INIT}')
-    print(f'description: D768-L16-FA4 D={EMBEDDING_DIM} H={NUM_HEADS} hd=64 L={NUM_LAYERS} '
-          f'FFN={FFN_DIM} J=24 se015, cold start, fineweb_tokenizer_32k, '
+    print(f'description: D768-L32-FA8 FROM-SCRATCH MIXED '
+          f'D={EMBEDDING_DIM} H={NUM_HEADS} hd=64 L={NUM_LAYERS} '
+          f'FFN={FFN_DIM} J=24 se015, 60% FW-Edu/25% PG19/15% Stack, '
           f'FA@L{FULL_ATTN_LAYER} preIF@L{FULL_ATTN_LAYER-1} '
           f'{NUM_LAYERS - FULL_ATTN_LAYER - 1} post-FA relay layers')
 

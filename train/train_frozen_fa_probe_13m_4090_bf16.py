@@ -1,59 +1,38 @@
 """
-🔬 DWARF FFN Ablation — Moonshot-58M variant with FFN=1024 (FFN/2), 4090, cold-start
+🧪 DWARF Frozen-FA Probe — 13M/34M, 4090, frozen FA from Moonshot-58M ep2
 
-Ablation: single-variable test of FFN width reduction.
-  Baseline: train_moonshot_58m_4090_bf16.py (FFN=2048, PPL=35.04 ep2, passkey=99.2%)
-  This run: FFN=2048 → FFN=1024. All other config identical.
-
-Hypothesis: DSQG relay carries long-range "memory" load normally handled by wide FFN.
-  If true: FFN=1024 should show minimal PPL degradation vs baseline.
-  If false: PPL degrades noticeably, indicating FFN width is non-redundant with relay.
-
-Architecture: D=512, H=8 (hd=64), L=8, FFN=1024, J=24 (se015 offsets)
+Architecture: D=512, H=8 (hd=64), L=8, FFN=2048, J=24 (se015 offsets)
   L0:  DSQGBlockV6Physics  IF=False  ← pure DSQG relay
   L1:  DSQGBlockV6Physics  IF=True   ← preIF (single layer before FA)
-  L2:  FullAttentionBlock            ← FA@L2 (empirically optimal placement)
+  L2:  FullAttentionBlock            ← FA@L2 — FROZEN from moonshot_58m_ep2_full_attn.pt
   L3-7: DSQGBlockV6Physics IF=False  ← post-FA relay layers
 
+Key difference vs moonshot: FA is FROZEN from day 1. DSQG layers cold-start and
+learn to route into a fixed, already-trained retrieval block. Tests whether
+co-adaptive training is required or if a pre-trained FA is good enough.
+
 Config:
-  - Tokenizer: fineweb_tokenizer_32k.json  (32K BPE, FineWeb proper)
+  - Tokenizer: fineweb_tokenizer_8k.json  (8K BPE, trained on 100K FineWeb-Edu cache)
                 EOS id = 0  (<|endoftext|>)
-  - Dataset:   fineweb_edu_encoded_2048_v2.pt (~2.01M seqs, 4.13B tokens)
-               pre-encoded with fineweb_tokenizer_32k
-  - EMA_INIT = 0.0208 (= 1/48 = 1/δ_relay_min; empirically validated for J24D,
-               se015 trains to α≈0.0207, 0.6% error)
+  - Dataset:   fineweb_edu_encoded_2048_8k.pt  (~87K train seqs, 178M tokens)
+               pre-encoded with fineweb_tokenizer_8k
+  - Vocab:     8000  (reduces embedding/lm_head from 16.4M → 4.1M params each)
+  - FA Donor:  autoresearch/checkpoints/moonshot_58m_ep2_full_attn.pt
+  - EMA_INIT = 0.0208 (= 1/48 = 1/δ_relay_min; J24D validated 0.6% error)
   - SCALE_EMBED_INIT = 0.1, LR_MULT = 15.0
   - Batch: BS=16 × GRAD_ACCUM=8 → eff_batch=128
-             (BS limited by 32K vocab logits VRAM; 32K×2048×BS×2B (bf16) OOMs at BS=32)
-             (chunked cross-entropy would unlock BS=32 — future optimization)
-  - Cold start (no warm-start checkpoint)
-  - ~49.5M parameters (vs moonshot baseline ~45.6M; embeddings dominate at 32K vocab)
-
-Comparison target: moonshot-58M ep2 (PPL=35.04, passkey=99.2%, ar_score=80.90)
+  - ~87K train seqs (30% Chinchilla for 33.7M tied-weight params) — probe budget
 
 EMA_INIT RULE: Always derive from offset set before training.
   For J24D (se015): empirically validated 1/δ_relay_min = 1/48 = 0.0208
-  For J13D: 1/√(δ_local × δ_relay) = 1/√(5×8) = 0.0447 (0.4% error)
-  If unsure: use 0.003 (abs+floor parameterization self-corrects, but converges slower)
 
-TODO (inherited from moonshot audit Mar 20 2026):
-  - dropout=0.1 never ablated at this scale; modern LLMs use 0.0 — worth testing
-  - grad_clip=1.0 never varied — flag for future experiment
-  - No LR warmup — stable so far but untested at >100M scale
+Hypothesis: DSQG layers can learn to route into a frozen pre-trained FA,
+skipping the co-adaptive phase transition and potentially reaching good
+passkey performance faster than a cold-start run.
 
 Run (from repo root):
-  CUDA_VISIBLE_DEVICES=0 .venv/bin/python3 -u train/train_ffn_ablation_4090_bf16.py \\
-    > logs/run_ffn_ablation.log 2>&1 &
-
-Resume ep2+ep3 after ep1 checkpoint (ep1 result: PPL=38.18, passkey=93.3%):
-  # Set START_EPOCH=2 in EXPERIMENT KNOBS section, then:
-  CUDA_VISIBLE_DEVICES=0 .venv/bin/python3 -u train/train_ffn_ablation_4090_bf16.py \\
-    > logs/run_ffn_ablation_ep2.log 2>&1 &
-
-Status (Mar 25 2026):
-  Ep1 complete: PPL=38.18 passkey=93.3% (vs moonshot ep2: PPL=35.04 passkey=99.2%)
-  Ep2+ep3: pending — needs 4090 free, set START_EPOCH=2
-  Resume checkpoint: autoresearch/checkpoints/ffn_ablation_ep1_resume.pt (= ep1 best.pt)
+  CUDA_VISIBLE_DEVICES=0 .venv/bin/python3 -u train/train_frozen_fa_probe_13m_4090_bf16.py \\
+    > logs/run_frozen_fa_probe_13m.log 2>&1 &
 """
 
 # =============================================================================
@@ -64,34 +43,41 @@ OFFSETS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13, 15, 16, 21, 23, 28, 48, 64, 96, 19
 
 EMBEDDING_DIM    = 512
 NUM_HEADS        = 8          # hd = 512/8 = 64
-FFN_DIM          = 1024   # ABLATION: halved from moonshot baseline (2048)
+FFN_DIM          = 2048
 NUM_LAYERS       = 8
 FULL_ATTN_LAYER  = 2
 
-# Chinchilla-optimal for ~49.5M params: 20 × 49.5M / 2048 = 483,398 seqs (0.99B tokens)
-# Using moonshot baseline budget (445,312) for direct comparison — same training cost.
-# Slight under-Chinchilla (92%) acceptable; fair comparison is the priority.
-MAX_TRAIN_SEQS      = 445_312
+# Probe budget: use all available 87K seqs (30% Chinchilla for ~33.7M tied params)
+MAX_TRAIN_SEQS      = 87_484
 SCALE_EMBED_INIT_VAL = 0.1
 SCALE_EMBED_LR_MULT  = 15.0
 
 # EMA_INIT = 1/δ_relay_min = 1/48 ≈ 0.0208
 # Empirically validated for J24D: se015 trains to α≈0.0207, error 0.6%
-# δ_relay_min = 48 (first offset after local cluster [1..28])
 EMA_INIT  = 0.0208
 EMA_FLOOR = 0.00001
 
 LR            = 3e-4
 SCREEN_EPOCHS = 3
 
-EXTRACTED_CKPT = None  # cold start — no warm-start checkpoint
+VOCAB_SIZE  = 8000
+BATCH_SIZE  = 16
+GRAD_ACCUM  = 8    # effective batch = 128
+MAX_SEQ_LEN = 2048
+MAX_VAL_SEQS = 2048
 
-# Resume control: set START_EPOCH=2 to resume after ep1, etc.
-# RESUME_CKPT = checkpoint saved at end of (START_EPOCH - 1).
-#   START_EPOCH=2 → RESUME_CKPT = ffn_ablation_ep1_resume.pt  (ep1_resume.pt = best.pt from first run)
-#   START_EPOCH=3 → RESUME_CKPT = ffn_ablation_ep2_resume.pt  (saved automatically during ep2)
-START_EPOCH = 2      # ep1 done (PPL=38.18, passkey=93.3%) — resuming from ep1_resume.pt
-RESUME_CKPT = 'autoresearch/checkpoints/ffn_ablation_ep1_resume.pt'  # pre-ep2 checkpoint
+DATASET_PATH   = 'logs/fineweb_edu_encoded_2048_8k.pt'
+TOKENIZER_PATH = 'results/fineweb_tokenizer_8k.json'
+FA_DONOR_PATH  = 'autoresearch/checkpoints/moonshot_58m_ep2_full_attn.pt'
+CHECKPOINT_DIR = 'autoresearch/checkpoints'
+
+PASSKEY_DISTANCES = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 1536]
+PASSKEY_TRIALS    = 50
+_PASSKEY_WORDS    = ['apple', 'banana', 'orange', 'cherry', 'grape',
+                     'lemon', 'mango', 'peach', 'plum', 'berry']
+_FILLER_SENTENCE  = 'the weather was mild and the air was still . '
+_INTRO_TEMPLATE   = 'the secret word is {word} .'
+_RETRIEVAL_CUE    = 'the secret word is'
 
 # =============================================================================
 
@@ -101,34 +87,8 @@ import torch.nn as nn
 from torch.utils.checkpoint import checkpoint as grad_ckpt
 import torch.nn.functional as F
 
-# H100: enable TF32 tensor cores for free speedup on FP32 ops (optimizer states, reductions)
 torch.set_float32_matmul_precision('high')
-# Reduce VRAM fragmentation — critical on large models
 os.environ.setdefault('PYTORCH_CUDA_ALLOC_CONF', 'expandable_segments:True')
-
-VOCAB_SIZE     = 32000
-BATCH_SIZE     = 16   # VRAM ceiling: seq=2047 × BS=16 = 10.8 GB; BS=32+ OOM on backward
-GRAD_ACCUM     = 1    # no accumulation — 7.4h → ~54min/epoch; eff_batch=16 fine for 45M model
-MAX_SEQ_LEN    = 2048
-MAX_VAL_SEQS   = 5_582
-
-FW_CACHE_FILE = 'benchmarks/logs/condm_fineweb_edu_doc_cache.json'
-TOKENIZER_CANDIDATES = [
-    'results/fineweb_tokenizer_32k.json',   # new standard: 32K BPE, FineWeb proper
-]
-PASSKEY_DISTANCES = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 1536]
-PASSKEY_TRIALS    = 50   # n=50: ±7pp noise vs ±20pp at n=20 (inflation risk)
-_PASSKEY_WORDS    = ['apple', 'banana', 'orange', 'cherry', 'grape',
-                     'lemon', 'mango', 'peach', 'plum', 'pear']
-# NOTE: 'berry' → [' b', 'erry'] in fineweb_tokenizer_32k; first token ' b' (id=281)
-# is a very common subword that inflates passkey score via LM prior.
-# Replaced with 'pear' (id=14660, single-token). See: 2026-03-29-flan-noffn-vocab-artifact.
-_FILLER_SENTENCE  = 'the weather was mild and the air was still . '
-_INTRO_TEMPLATE   = 'the secret word is {word} .'
-_RETRIEVAL_CUE    = 'the secret word is'
-CHECKPOINT_DIR    = 'autoresearch/checkpoints'
-
-# ── Kernel import ─────────────────────────────────────────────────────────────
 
 import pathlib as _pl
 _project_root = str(_pl.Path(__file__).resolve().parent.parent)
@@ -138,29 +98,22 @@ for _d in [_kernel_dir, _project_root]:
         sys.path.insert(0, _d)
 
 from dsqg_attention_v8_4090 import DSQGAttentionV8_4090 as DSQGAttentionV6, npci_rotate
+from causal_ema_scan import causal_ema_scan as _causal_ema_scan
 
 assert len(OFFSETS) == 24
 
-# ── condV physics helpers ─────────────────────────────────────────────────────
 
-from causal_ema_scan import causal_ema_scan as _causal_ema_scan
+# ── Physics helpers ───────────────────────────────────────────────────────────
 
-def _causal_ema(xi: torch.Tensor, ema_factor: torch.Tensor,
-                floor: float = EMA_FLOOR) -> torch.Tensor:
-    """Causal EMA — Triton scan (O(B·N·D) memory vs O(B·D·N·K) conv)."""
+def _causal_ema(xi, ema_factor, floor=EMA_FLOOR):
     return _causal_ema_scan(xi, ema_factor, floor=floor)
 
-
-def _kdv_correction(pool: torch.Tensor,
-                    kdv_alpha: torch.Tensor) -> torch.Tensor:
-    """KdV soliton: pool += α * pool * Δpool. Zero-init → identity at start."""
+def _kdv_correction(pool, kdv_alpha):
     alpha     = kdv_alpha.clamp(0.0, 0.5)
     pool_prev = F.pad(pool[:, :-1], (0, 0, 1, 0))
     return pool + alpha * pool * (pool - pool_prev)
 
-
-def _agc_normalize(pool: torch.Tensor, eps: float = 1e-6) -> torch.Tensor:
-    """AGC: normalise to unit RMS per token. No learnable params."""
+def _agc_normalize(pool, eps=1e-6):
     D   = pool.shape[-1]
     rms = pool.norm(dim=-1, keepdim=True) / (D ** 0.5)
     return pool / (rms + eps)
@@ -179,7 +132,6 @@ class FFN(nn.Module):
 
 
 class DSQGBlockV6Physics(nn.Module):
-    """V8 DSQG attention + condV interference (EMA + KdV + AGC)."""
     def __init__(self, embedding_dim, num_heads, ffn_dim, seq_len,
                  dropout=0.1, interference=False):
         super().__init__()
@@ -206,11 +158,9 @@ class DSQGBlockV6Physics(nn.Module):
             xi = self.inter_norm(x)
             B, N, D = xi.shape
             H, HD   = self.num_heads, self.head_dim
-
-            pool = _causal_ema(xi, self.ema_factor.abs() + EMA_FLOOR, floor=EMA_FLOOR)  # abs() prevents dead zone
+            pool = _causal_ema(xi, self.ema_factor.abs() + EMA_FLOOR, floor=EMA_FLOOR)
             pool = _kdv_correction(pool, self.kdv_alpha)
             pool = _agc_normalize(pool)
-
             inter   = torch.sigmoid(self.inter_gate(xi)) * pool
             k_delta = (self.inter_k_proj(inter)
                        .view(B, N, H, HD).permute(0, 2, 1, 3).contiguous())
@@ -264,7 +214,8 @@ class FullAttentionBlock(nn.Module):
 
 class AutoresearchTransformerPhysics(nn.Module):
     def __init__(self, vocab_size, embedding_dim, num_layers, num_heads,
-                 ffn_dim, seq_len, full_attn_layer, interference_interval,
+                 ffn_dim, seq_len, full_attn_layer,
+                 interference_interval=None,   # unused; kept for compat
                  scale_embed_init_val=0.0, dropout=0.1):
         super().__init__()
         self.embedding       = nn.Embedding(vocab_size, embedding_dim)
@@ -278,7 +229,6 @@ class AutoresearchTransformerPhysics(nn.Module):
                 blocks.append(FullAttentionBlock(
                     embedding_dim, num_heads, ffn_dim, dropout))
             else:
-                # Pre-FA IF only: IF on the single layer immediately before FA, pure DSQG everywhere else
                 has_if = (i == full_attn_layer - 1)
                 blocks.append(DSQGBlockV6Physics(
                     embedding_dim, num_heads, ffn_dim, seq_len,
@@ -286,6 +236,7 @@ class AutoresearchTransformerPhysics(nn.Module):
         self.blocks = nn.ModuleList(blocks)
         self.norm   = nn.LayerNorm(embedding_dim)
         self.out    = nn.Linear(embedding_dim, vocab_size, bias=False)
+        # Weight tying: lm_head shares embedding weights
         self.out.weight = self.embedding.weight
         self._init_weights(scale_embed_init_val)
 
@@ -309,6 +260,55 @@ class AutoresearchTransformerPhysics(nn.Module):
                 if scale_embed_init_val != 0.0:
                     nn.init.constant_(m.scale_embed, scale_embed_init_val)
 
+    def load_frozen_fa(self, checkpoint_path):
+        """Load FA weights from donor checkpoint and freeze them.
+
+        Donor keys look like: blocks.2._orig_mod.<subkey>  (torch.compile artifact)
+        Target keys look like: blocks.2.<subkey>
+        Strips the _orig_mod prefix automatically.
+        """
+        ckpt = torch.load(checkpoint_path, map_location='cpu')
+        donor_sd = ckpt['full_attn_block']
+        donor_config = ckpt.get('config', {})
+        print(f'  FA donor: {checkpoint_path}')
+        print(f'  Donor config: D={donor_config.get("embedding_dim")}, '
+              f'H={donor_config.get("num_heads")}, epoch={donor_config.get("epoch")}')
+
+        # Strip _orig_mod prefix (torch.compile artifact) and blocks.N. prefix
+        target_layer = self.full_attn_layer
+        target_block = self.blocks[target_layer]
+        target_sd    = target_block.state_dict()
+
+        remapped = {}
+        for k, v in donor_sd.items():
+            # k = "blocks.2._orig_mod.norm1.weight" → strip "blocks.2._orig_mod."
+            prefix = f'blocks.{target_layer}._orig_mod.'
+            prefix_noc = f'blocks.{target_layer}.'
+            if k.startswith(prefix):
+                new_k = k[len(prefix):]
+            elif k.startswith(prefix_noc):
+                new_k = k[len(prefix_noc):]
+            else:
+                print(f'  WARNING: unexpected key {k}, skipping')
+                continue
+            remapped[new_k] = v
+
+        missing   = set(target_sd.keys()) - set(remapped.keys())
+        unexpected = set(remapped.keys()) - set(target_sd.keys())
+        if missing:
+            print(f'  WARNING: missing FA keys: {missing}')
+        if unexpected:
+            print(f'  WARNING: unexpected FA keys: {unexpected}')
+
+        target_block.load_state_dict(remapped, strict=True)
+        print(f'  Loaded {len(remapped)} FA weight tensors')
+
+        # Freeze all FA parameters
+        for p in target_block.parameters():
+            p.requires_grad_(False)
+        frozen_count = sum(p.numel() for p in target_block.parameters())
+        print(f'  Frozen {frozen_count:,} FA parameters ({frozen_count/1e6:.2f}M)')
+
     def forward(self, idx):
         B, N = idx.shape
         pos  = torch.arange(N, device=idx.device).unsqueeze(0)
@@ -323,35 +323,26 @@ class AutoresearchTransformerPhysics(nn.Module):
     def param_count(self):
         return sum(p.numel() for p in self.parameters())
 
+    def trainable_param_count(self):
+        return sum(p.numel() for p in self.parameters() if p.requires_grad)
+
     def scale_embed_parameters(self):
         for m in self.modules():
             if isinstance(m, DSQGAttentionV6):
-                yield m.scale_embed
+                if m.scale_embed.requires_grad:
+                    yield m.scale_embed
 
-    def non_scale_embed_parameters(self):
+    def non_scale_embed_trainable_parameters(self):
         se_ids = {id(p) for p in self.scale_embed_parameters()}
         for p in self.parameters():
-            if id(p) not in se_ids:
-                yield p
-
-    def full_attn_parameters(self):
-        """Yield all parameters from the FullAttentionBlock."""
-        for p in self.blocks[self.full_attn_layer].parameters():
-            yield p
-
-    def non_full_attn_parameters(self):
-        """Yield all parameters except those in the FullAttentionBlock."""
-        fa_ids = {id(p) for p in self.full_attn_parameters()}
-        for p in self.parameters():
-            if id(p) not in fa_ids:
+            if p.requires_grad and id(p) not in se_ids:
                 yield p
 
     def physics_summary(self):
-        """Log EMA and KdV state for all interference blocks."""
         entries = []
         for i, block in enumerate(self.blocks):
             if isinstance(block, DSQGBlockV6Physics) and block.interference:
-                alpha = abs(block.ema_factor.item()) + EMA_FLOOR  # matches abs() parameterization
+                alpha = abs(block.ema_factor.item()) + EMA_FLOOR
                 kdv   = block.kdv_alpha.item()
                 win   = round(1.0 / max(alpha, EMA_FLOOR))
                 entries.append(f'b{i}: α={alpha:.4f}(w≈{win}t) kdv={kdv:.4f}')
@@ -369,47 +360,8 @@ class BPETokenizerWrapper:
         return self.tokenizer.decode(ids)
     def vocab_size(self):
         return self.tokenizer.get_vocab_size()
-
-
-def load_data():
-    if os.path.exists(FW_CACHE_FILE):
-        print(f'Loading FineWeb-Edu from cache: {FW_CACHE_FILE}')
-        with open(FW_CACHE_FILE) as fp:
-            texts = json.load(fp)
-        print(f'  Loaded {len(texts):,} docs from cache')
-    else:
-        from datasets import load_dataset
-        ds = load_dataset('HuggingFaceFW/fineweb-edu', name='sample-10BT',
-                          split='train', streaming=True)
-        texts = []
-        for item in ds:
-            if len(item['text']) < 5_000:
-                continue
-            texts.append(item['text'])
-            if len(texts) >= 100_000:  # fallback streaming limit
-                break
-        os.makedirs(os.path.dirname(FW_CACHE_FILE), exist_ok=True)
-        with open(FW_CACHE_FILE, 'w') as fp:
-            json.dump(texts, fp)
-    n = len(texts)
-    return {'train': texts[:int(n * 0.95)],
-            'val':   texts[int(n * 0.95):int(n * 0.95) + 2500]}
-
-
-def encode_split(split_texts, tokenizer, split_name):
-    from tokenizers import Tokenizer as _Tokenizer
-    _tok_path = next((p for p in TOKENIZER_CANDIDATES if os.path.exists(p)), None)
-    _raw_tok = _Tokenizer.from_file(_tok_path)
-    eos_id = _raw_tok.token_to_id('<|endoftext|>')  # 0 for fineweb_tokenizer_32k
-    tokens = []
-    for text in split_texts:
-        tokens.extend(tokenizer.encode(text))
-        tokens.append(eos_id)
-    n    = (len(tokens) // MAX_SEQ_LEN) * MAX_SEQ_LEN
-    data = torch.tensor(tokens[:n], dtype=torch.long)
-    seqs = data.view(-1, MAX_SEQ_LEN)
-    print(f'  {split_name}: {len(seqs):,} sequences')
-    return seqs
+    def token_to_id(self, token):
+        return self.tokenizer.token_to_id(token)
 
 
 @torch.no_grad()
@@ -458,87 +410,34 @@ def passkey_accuracy(model, tokenizer, device):
     return results
 
 
-def save_full_attn_checkpoint(model, epoch, git_hash, checkpoint_dir):
-    """Save just the FullAttn block weights after each epoch."""
-    full_attn_block = model.blocks[model.full_attn_layer]
-    state_dict = {}
-    for name, param in full_attn_block.named_parameters():
-        state_dict[f"blocks.{model.full_attn_layer}.{name}"] = param.data.clone()
-
-    payload = {
-        "full_attn_block": state_dict,
-        "config": {
-            "embedding_dim":     EMBEDDING_DIM,
-            "num_heads":         NUM_HEADS,
-            "ffn_dim":           FFN_DIM,
-            "seq_len":           MAX_SEQ_LEN,
-            "source_script":     "train/train_ffn_ablation_4090_bf16.py",
-            "source_layer":      FULL_ATTN_LAYER,
-            "num_layers":        NUM_LAYERS,
-            "num_offsets":       len(OFFSETS),
-            "epoch":             epoch,
-            "git_hash":          git_hash,
-            "note": (
-                f"FFN-Ablation: FFN=1024 D={EMBEDDING_DIM} H={NUM_HEADS} L={NUM_LAYERS} "
-                f"J={len(OFFSETS)} FA@L{FULL_ATTN_LAYER} preIF@L{FULL_ATTN_LAYER-1}. "
-                f"Epoch {epoch}/3. fineweb_tokenizer_32k. Cold start."
-            ),
-        },
-    }
-
-    out_path = os.path.join(checkpoint_dir, f"ffn_ablation_ep{epoch}_full_attn.pt")
-    torch.save(payload, out_path)
-    print(f"  Saved FullAttn checkpoint: {out_path}")
-
-
 # ── Training ──────────────────────────────────────────────────────────────────
 
 def train():
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     torch.cuda.reset_peak_memory_stats()
-    t_start = time.time()
+    t_start  = time.time()
     git_hash = subprocess.check_output(
         ['git', 'rev-parse', '--short', 'HEAD']).decode().strip()
 
     print('=' * 70)
-    print('  🔬 DWARF FFN Ablation — D=512 H=8 hd=64 L=8 FFN=1024 J=24, cold start')
-    print('  Baseline: moonshot-58M FFN=2048 (PPL=35.04 ep2, passkey=99.2%)')
-    print('  FA@L2, preIF@L1, fineweb_tokenizer_32k, EMA_INIT=1/δ_relay_min=0.0208')
+    print('  🧪 DWARF Frozen-FA Probe — 13M/34M, D=512 H=8 L=8 J=24')
+    print('  FA@L2 FROZEN from moonshot_58m_ep2. DSQG cold-start.')
     print('=' * 70)
     if torch.cuda.is_available():
         print(f'  GPU: {torch.cuda.get_device_name(0)}')
-        _cc = torch.cuda.get_device_capability()
-        _path = 'sm_90 (H100)' if ((_cc[0]==9 and _cc[1]==0) or _cc[0]>9) else \
-                'sm_89 (4090 Ada — tuned)' if (_cc[0]==8 and _cc[1]==9) else \
-                f'sm_{_cc[0]}{_cc[1]} (generic)'
-        print(f'  Kernel path: {_path}')
-    print(f'  D={EMBEDDING_DIM}, H={NUM_HEADS}, L={NUM_LAYERS}, FFN={FFN_DIM}')
-    print(f'  Pre-FA IF only: IF on layers < {FULL_ATTN_LAYER}, pure DSQG on layers >= {FULL_ATTN_LAYER}')
-    print(f'  scale_embed init={SCALE_EMBED_INIT_VAL}, LR mult={SCALE_EMBED_LR_MULT}')
-    print(f'  EMA α₀={EMA_INIT} (window≈{round(1/EMA_INIT)}t), floor={EMA_FLOOR}')
-    print(f'  MAX_TRAIN_SEQS={MAX_TRAIN_SEQS}, LR={LR}, Epochs={SCREEN_EPOCHS}')
-    print(f'  Batch: BS={BATCH_SIZE} × GRAD_ACCUM={GRAD_ACCUM} = eff_batch={BATCH_SIZE*GRAD_ACCUM}')
-    print(f'  git={git_hash}')
 
-    tok_path = next((p for p in TOKENIZER_CANDIDATES if os.path.exists(p)), None)
-    if tok_path is None:
-        raise FileNotFoundError(f'Tokenizer not found.')
+    # Load tokenizer
     from tokenizers import Tokenizer
-    tokenizer = BPETokenizerWrapper(Tokenizer.from_file(tok_path))
-    print(f'Loaded tokenizer from {tok_path}')
+    tokenizer = BPETokenizerWrapper(Tokenizer.from_file(TOKENIZER_PATH))
+    print(f'  Tokenizer: {TOKENIZER_PATH} ({tokenizer.vocab_size()} vocab)')
+    eos_id = tokenizer.token_to_id('<|endoftext|>')
+    print(f'  EOS id: {eos_id}')
 
-    _encoded_cache = 'logs/fineweb_edu_encoded_2048_v2.pt'  # 1M docs, fineweb_tokenizer_32k
-    if os.path.exists(_encoded_cache):
-        # Fast path: pre-encoded tensor, skip JSON cache load entirely
-        print(f'Loading pre-encoded dataset from {_encoded_cache}')
-        _cache     = torch.load(_encoded_cache, weights_only=True)
-        train_data = _cache['train'].long()   # int32 on disk → int64 required by cross_entropy
-        val_data   = _cache['val'].long()
-    else:
-        # Fallback: load raw JSON cache and encode (slow — ~2 min for 1.2GB)
-        splits = load_data()
-        train_data = encode_split(splits['train'], tokenizer, 'Train')
-        val_data   = encode_split(splits['val'],   tokenizer, 'Val')
+    # Load dataset
+    print(f'Loading dataset from {DATASET_PATH}')
+    cache      = torch.load(DATASET_PATH, weights_only=True)
+    train_data = cache['train'].long()
+    val_data   = cache['val'].long()
 
     if len(train_data) > MAX_TRAIN_SEQS:
         train_data = train_data[torch.randperm(len(train_data))[:MAX_TRAIN_SEQS]]
@@ -546,41 +445,33 @@ def train():
         val_data = val_data[:MAX_VAL_SEQS]
     print(f'  train: {len(train_data):,}  val: {len(val_data):,} seqs')
 
+    # Build model
     model = AutoresearchTransformerPhysics(
-        vocab_size=tokenizer.vocab_size(), embedding_dim=EMBEDDING_DIM,
+        vocab_size=VOCAB_SIZE, embedding_dim=EMBEDDING_DIM,
         num_layers=NUM_LAYERS, num_heads=NUM_HEADS, ffn_dim=FFN_DIM,
         seq_len=MAX_SEQ_LEN, full_attn_layer=FULL_ATTN_LAYER,
-        interference_interval=None,  # unused; IF placement is hardcoded as preIF@(FA-1)
         scale_embed_init_val=SCALE_EMBED_INIT_VAL,
     ).to(device)
 
-    # ── Cold start or resume ──────────────────────────────────────────────────
-    best_ckpt_name = 'ffn_ablation_best.pt'
-    if START_EPOCH > 1:
-        if not os.path.exists(RESUME_CKPT):
-            raise FileNotFoundError(f'Resume checkpoint not found: {RESUME_CKPT}')
-        state = torch.load(RESUME_CKPT, map_location=device, weights_only=True)
-        # Strip torch.compile's _orig_mod prefix if present (compat with compiled checkpoints)
-        state = {k.replace('._orig_mod', ''): v for k, v in state.items()}
-        model.load_state_dict(state)
-        print(f'\n  Resumed from {RESUME_CKPT} (starting at epoch {START_EPOCH})')
-    else:
-        print(f'\n  Cold start — random init, no warm-start checkpoint')
+    # Load and freeze FA from donor checkpoint
+    model.load_frozen_fa(FA_DONOR_PATH)
 
-    # torch.compile on FullAttentionBlock only — safe; DSQG Triton kernels excluded
-    try:
-        for i, block in enumerate(model.blocks):
-            if type(block).__name__ == "FullAttentionBlock":
-                model.blocks[i] = torch.compile(block, fullgraph=False)
-                print(f"  torch.compile applied to FullAttentionBlock at layer {i}")
-    except Exception as e:
-        print(f"  torch.compile skipped: {e}")
+    n_total     = model.param_count()
+    n_trainable = model.trainable_param_count()
+    n_frozen    = n_total - n_trainable
+    print(f'Parameters: {n_total/1e6:.2f}M total | {n_trainable/1e6:.2f}M trainable | {n_frozen/1e6:.2f}M frozen FA')
+    print(f'  D={EMBEDDING_DIM}, H={NUM_HEADS}, L={NUM_LAYERS}, FFN={FFN_DIM}, V={VOCAB_SIZE}')
+    print(f'  scale_embed init={SCALE_EMBED_INIT_VAL}, LR_MULT={SCALE_EMBED_LR_MULT}')
+    print(f'  EMA α₀={EMA_INIT} (window≈{round(1/EMA_INIT)}t)')
+    print(f'  MAX_TRAIN_SEQS={MAX_TRAIN_SEQS} ({100*MAX_TRAIN_SEQS/(n_trainable*20/2048):.0f}% Chinchilla for trainable params)')
+    print(f'  Batch: BS={BATCH_SIZE} × GRAD_ACCUM={GRAD_ACCUM} = eff_batch={BATCH_SIZE*GRAD_ACCUM}')
+    print(f'  git={git_hash}')
 
-    n_params = model.param_count()
-    print(f'Parameters: {n_params:,} ({n_params / 1e6:.1f}M)')
-
+    # Optimizer — only trainable (non-FA) parameters
     scale_embed_params     = list(model.scale_embed_parameters())
-    non_scale_embed_params = list(model.non_scale_embed_parameters())
+    non_scale_embed_params = list(model.non_scale_embed_trainable_parameters())
+    print(f'  Optimizer groups: {len(non_scale_embed_params)} non-SE params, {len(scale_embed_params)} SE params')
+
     optimizer = torch.optim.AdamW([
         {'params': non_scale_embed_params, 'lr': LR},
         {'params': scale_embed_params,     'lr': LR * SCALE_EMBED_LR_MULT},
@@ -591,21 +482,17 @@ def train():
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
         optimizer, T_max=total_steps)
 
-    # Fast-forward scheduler to correct position when resuming
-    if START_EPOCH > 1:
-        steps_per_epoch_est = math.ceil(len(train_data) / BATCH_SIZE / GRAD_ACCUM)
-        completed_steps = (START_EPOCH - 1) * steps_per_epoch_est
-        print(f'  Fast-forwarding scheduler {completed_steps} steps (epochs 1–{START_EPOCH-1})')
-        for _ in range(completed_steps):
-            scheduler.step()
-
     best_val_loss   = float('inf')
     passkey_results = {}
     ppl_results     = {}
     os.makedirs(CHECKPOINT_DIR, exist_ok=True)
+    best_ckpt_name  = 'frozen_fa_probe_13m_best.pt'
 
-    for epoch in range(START_EPOCH, SCREEN_EPOCHS + 1):
+    for epoch in range(1, SCREEN_EPOCHS + 1):
         model.train()
+        # Keep FA in eval mode (frozen — no dropout, no grad)
+        model.blocks[FULL_ATTN_LAYER].eval()
+
         indices         = torch.randperm(len(train_data))
         step            = 0
         optimizer.zero_grad()
@@ -624,15 +511,17 @@ def train():
                         logits.reshape(-1, logits.size(-1)),
                         y.reshape(-1)) / GRAD_ACCUM
                 loss.backward()
-            torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+            torch.nn.utils.clip_grad_norm_(
+                [p for p in model.parameters() if p.requires_grad], 1.0)
             optimizer.step()
             optimizer.zero_grad()
             scheduler.step()
             step += 1
 
-            if step % 200 == 0:
+            if step % 50 == 0:
                 print(f'  Step {step}/{steps_per_epoch} '
                       f'| Loss {loss.item() * GRAD_ACCUM:.4f}')
+                sys.stdout.flush()
 
         val_loss = evaluate(model, val_data, device)
         val_ppl  = math.exp(min(val_loss, 20))
@@ -658,14 +547,6 @@ def train():
 
         print(f'  Physics: {model.physics_summary()}')
 
-        save_full_attn_checkpoint(model, epoch, git_hash, CHECKPOINT_DIR)
-
-        # Save resume checkpoint for this epoch (strip torch.compile's _orig_mod prefix)
-        resume_name = f'ffn_ablation_ep{epoch}_resume.pt'
-        clean_state = {k.replace('._orig_mod', ''): v for k, v in model.state_dict().items()}
-        torch.save(clean_state, os.path.join(CHECKPOINT_DIR, resume_name))
-        print(f'  Saved resume checkpoint: {CHECKPOINT_DIR}/{resume_name}')
-
         pk      = passkey_accuracy(model, tokenizer, device)
         pk_mean = sum(pk.values()) / len(pk)
         passkey_results[epoch] = pk_mean * 100
@@ -684,19 +565,21 @@ def train():
 
     print('\n---')
     for ep in range(1, SCREEN_EPOCHS + 1):
-        print(f'passkey_ep{ep}:    {passkey_results.get(ep, 0.0):.1f}')
+        print(f'passkey_ep{ep}: {passkey_results.get(ep, 0.0):.1f}')
     for ep in range(1, SCREEN_EPOCHS + 1):
-        print(f'ppl_ep{ep}:        {ppl_results.get(ep, 999.0):.2f}')
-    print(f'ar_score:       {ar_score:.2f}')
-    print(f'memory_mb:      {memory_mb:.1f}')
-    print(f'elapsed_s:      {elapsed_s:.1f}')
-    print(f'num_params_M:   {n_params / 1e6:.1f}')
-    print(f'num_layers:     {NUM_LAYERS}')
-    print(f'num_offsets:    {len(OFFSETS)}')
+        print(f'ppl_ep{ep}: {ppl_results.get(ep, 999.0):.2f}')
+    print(f'ar_score: {ar_score:.2f}')
+    print(f'memory_mb: {memory_mb:.1f}')
+    print(f'elapsed_s: {elapsed_s:.1f}')
+    print(f'num_params_M: {n_total / 1e6:.2f}')
+    print(f'num_trainable_M: {n_trainable / 1e6:.2f}')
+    print(f'num_frozen_M: {n_frozen / 1e6:.2f}')
+    print(f'num_layers: {NUM_LAYERS}')
+    print(f'num_offsets: {len(OFFSETS)}')
     print(f'scale_embed_lr_mult: {SCALE_EMBED_LR_MULT}')
-    print(f'ema_init:       {EMA_INIT}')
-    print(f'description:    FFN-Ablation FFN=1024 — D={EMBEDDING_DIM} H={NUM_HEADS} hd=64 L={NUM_LAYERS} '
-          f'FFN={FFN_DIM} J=24 se015, cold start, fineweb_tokenizer_32k, EMA_INIT=1/δ_relay_min')
+    print(f'ema_init: {EMA_INIT}')
+    print(f'description: Frozen-FA Probe 13M — D={EMBEDDING_DIM} H={NUM_HEADS} L={NUM_LAYERS} '
+          f'FFN={FFN_DIM} J=24 se015, FA frozen from moonshot_58m_ep2, V=8K, cold DSQG')
 
 
 if __name__ == '__main__':

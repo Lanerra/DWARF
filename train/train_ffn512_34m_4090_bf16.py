@@ -1,41 +1,38 @@
 """
-🚀 DWARF D=768 L=16 — ~94M params, coherence-length test, cold-start
+🚀 DWARF Depth-16 FA@L4 — 55M params, FA placement ablation, cold-start
 
-Architecture: D=768, H=12 (hd=64), L=16, FFN=1536, J=24 (se015 offsets), TIED lm_head
-  L0-L2:  DSQGBlockV6Physics  IF=False  ← 3 pre-FA warm-up relay layers
-  L3:     DSQGBlockV6Physics  IF=True   ← preIF@L3
-  L4:     FullAttentionBlock            ← FA@L4 (25% depth, 11 post-FA relay layers)
+Architecture: D=512, H=8 (hd=64), L=16, FFN=1024, J=24 (se015 offsets), TIED lm_head
+  L0-L2:  DSQGBlockV6Physics  IF=False  ← 3 pre-FA warm-up relay layers (~same as moonshot)
+  L3:     DSQGBlockV6Physics  IF=True   ← preIF@L3 (single layer before FA)
+  L4:     FullAttentionBlock            ← FA@L4 (11 post-FA relay layers)
   L5-15:  DSQGBlockV6Physics  IF=False  ← 11 post-FA relay layers
 
-Hypothesis: relay coherence length scales with D (not L). D=512 coherence ≈ 12 layers,
-  insufficient for 11 post-FA at L=16. D=768 coherence ≈ 18 layers → should cover 11.
-  D=1024 coherence ≈ 30 layers → confirmed ✓ (267M).
-  This run tests whether D=768 sits above the coherence threshold for L=16.
-
-Derived quantities:
-  hd = 768/12 = 64 ✓ (validated head dimension)
-  Relay/residual ratio = (J=24 × hd=64) / D=768 = 2.0× (between D=512 3.0× and D=1024 1.5×)
-  LR_MULT = 15 × √(768/512) = 18.37
-  22% Chinchilla at 94M: ~202K sequences
+Hypothesis: FA placement should scale with depth at ~25% of total layers.
+  Moonshot (L=8): FA@L2 = 25% pre-FA, 5 post-FA → 99.2% passkey ✓
+  Depth16 FA@L2:  FA@L2 = 12% pre-FA, 13 post-FA → 19.2% passkey ✗ (too many post-FA)
+  Depth16 FA@L10: FA@L10 = 62% pre-FA, 5 post-FA → 64.2% passkey ✗ (too many pre-FA)
+  Depth16 FA@L4:  FA@L4 = 25% pre-FA, 11 post-FA → ??? ← THIS RUN
 
 Baselines:
-  Moonshot-58M ep2   (PPL=35.04, passkey=99.2%, ar_score=80.90) — D=512 L=8
-  267M D=1024 ep1    (PPL=27.75, passkey=93.3%)                 — D=1024 L=24
-  d768_l16_fa4    (PPL=90.77, passkey=15.0%, stall@1.78)     — D=512 L=16 ✗
+  Moonshot-58M ep2     (PPL=35.04, passkey=99.2%, ar_score=80.90)
+  Depth-16 FA@L2 ep3   (PPL=56.22, passkey=19.2%, ar_score=0.87)
+  Depth-16 FA@L10 ep3  (PPL=44.27, passkey=64.2%, ar_score=45.87)
 
 Config:
   - Tokenizer: fineweb_tokenizer_32k.json  (32K BPE, FineWeb proper)
+               EOS id = 0  (<|endoftext|>)
   - Dataset:   fineweb_edu_encoded_2048_v2.pt (~2.01M seqs, 4.13B tokens)
   - EMA_INIT = 0.0208 (= 1/δ_relay_min for J24D se015)
-  - SCALE_EMBED_INIT = 0.15, LR_MULT = 18.37
-  - Batch: BS=64 × GRAD_ACCUM=2 = eff_batch=128
-  - Cold start, ~94M parameters (tied lm_head)
+  - SCALE_EMBED_INIT = 0.1, LR_MULT = 15.0
+  - Batch: BS=16 × GRAD_ACCUM=4 = eff_batch=64
+  - Cold start (no warm-start checkpoint)
+  - ~55M parameters (tied lm_head)
 
-Screen: 3 epochs × 202,000 seqs (22% Chinchilla for ~94M params)
+Screen: 3 epochs × 121,232 seqs (standard autoresearch budget)
 
 Run (from repo root):
-  CUDA_VISIBLE_DEVICES=0 .venv/bin/python3 -u train/train_d768_l16_4090_bf16.py \\
-    2>&1 | tee logs/run_d768_l16.log
+  CUDA_VISIBLE_DEVICES=0 .venv/bin/python3 -u train/train_ffn512_34m_4090_bf16.py \\
+    > logs/run_ffn512_34m.log 2>&1 &
 """
 
 # =============================================================================
@@ -44,15 +41,15 @@ Run (from repo root):
 
 OFFSETS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13, 15, 16, 21, 23, 28, 48, 64, 96, 192, 384, 512, 768, 1024]
 
-EMBEDDING_DIM    = 768
-NUM_HEADS        = 12         # hd = 768/12 = 64 ✓ (validated head dimension)
-FFN_DIM          = 1536       # 2×D
+EMBEDDING_DIM    = 512
+NUM_HEADS        = 8          # hd = 512/8 = 64
+FFN_DIM          = 512        # 1×D — testing minimum viable FFN width
 NUM_LAYERS       = 16
 FULL_ATTN_LAYER  = 4          # 11 post-FA relay layers (L5-15); 3 pre-FA warm-up = 25% of depth
 
-MAX_TRAIN_SEQS       = 240_000   # 22% Chinchilla for 111.5M params (20 × 111.5M × 0.22 / 2048 ≈ 239K)
-SCALE_EMBED_INIT_VAL = 0.15
-SCALE_EMBED_LR_MULT  = 18.37    # μP: 15 × √(768/512)
+MAX_TRAIN_SEQS       = 121_232   # overridden below after imports if MAX_TRAIN_SEQS_OVERRIDE env var is set
+SCALE_EMBED_INIT_VAL = 0.1
+SCALE_EMBED_LR_MULT  = 15.0
 
 # EMA_INIT = 1/δ_relay_min = 1/48 ≈ 0.0208
 # Empirically validated for J24D (se015): trains to α≈0.0207, 0.6% error
@@ -61,7 +58,7 @@ EMA_INIT  = 0.0208
 EMA_FLOOR = 0.00001
 
 LR            = 3e-4
-SCREEN_EPOCHS = 3  # 3 × 202K seqs
+SCREEN_EPOCHS = 3
 
 # =============================================================================
 
@@ -76,8 +73,8 @@ torch.set_float32_matmul_precision('high')
 os.environ.setdefault('PYTORCH_CUDA_ALLOC_CONF', 'expandable_segments:True')
 
 VOCAB_SIZE     = 32000
-BATCH_SIZE     = 64
-GRAD_ACCUM     = 2    # effective batch = 128
+BATCH_SIZE     = 16
+GRAD_ACCUM     = 4    # effective batch = 64
 CE_CHUNK       = 512  # chunked CE token stride — avoids materialising full (BS×2047×32K) fp32 grad tensor
 MAX_SEQ_LEN    = 2048
 MAX_VAL_SEQS   = 5_582
@@ -426,20 +423,20 @@ def save_full_attn_checkpoint(model, epoch, git_hash, checkpoint_dir):
             "num_heads":     NUM_HEADS,
             "ffn_dim":       FFN_DIM,
             "seq_len":       MAX_SEQ_LEN,
-            "source_script": "train/train_d768_l16_fa4_4090_bf16.py",
+            "source_script": "train/train_ffn512_34m_4090_bf16.py",
             "source_layer":  FULL_ATTN_LAYER,
             "num_layers":    NUM_LAYERS,
             "num_offsets":   len(OFFSETS),
             "epoch":         epoch,
             "git_hash":      git_hash,
             "note": (
-                f"D768-L16-FA4: D={EMBEDDING_DIM} H={NUM_HEADS} L={NUM_LAYERS} "
+                f"Depth16-55M-FA4: D={EMBEDDING_DIM} H={NUM_HEADS} L={NUM_LAYERS} "
                 f"FFN={FFN_DIM} J={len(OFFSETS)} FA@L{FULL_ATTN_LAYER} "
                 f"preIF@L{FULL_ATTN_LAYER-1}. Epoch {epoch}/3. Cold start."
             ),
         },
     }
-    out_path = os.path.join(checkpoint_dir, f"d768_l16_fa4_ep{epoch}_full_attn.pt")
+    out_path = os.path.join(checkpoint_dir, f"ffn512_34m_ep{epoch}_full_attn.pt")
     torch.save(payload, out_path)
     print(f"  Saved FullAttn checkpoint: {out_path}")
 
@@ -455,7 +452,7 @@ def train():
         ['git', 'rev-parse', '--short', 'HEAD']).decode().strip()
 
     print('=' * 70)
-    print('  🚀 DWARF D768-L16 FA@L4 — D=768 H=12 hd=64 L=16 FFN=1536 J=24, cold start')
+    print('  🚀 DWARF Depth-16 FA@L4 — D=512 H=8 hd=64 L=16 FFN=1024 J=24, cold start')
     print(f'  FA@L{FULL_ATTN_LAYER}, preIF@L{FULL_ATTN_LAYER-1}, {NUM_LAYERS - FULL_ATTN_LAYER - 1} post-FA relay layers, fineweb_tokenizer_32k')
     print('=' * 70)
     if torch.cuda.is_available():
@@ -551,7 +548,7 @@ def train():
     # cold cache while silently compiling — printing nothing to the log.
     # Warmup batch size MUST match BATCH_SIZE — Triton specialises kernels on
     # (B, N) so a different-size warmup leaves the first real step stalling.
-    _WARMUP_BS   = BATCH_SIZE
+    _WARMUP_BS   = 4
     print(f'Warming up Triton kernels (BS={_WARMUP_BS} dummy pass)...')
     _wb          = min(_WARMUP_BS, len(train_data))
     _wx          = train_data[:_wb, :-1].to(device)
@@ -626,7 +623,7 @@ def train():
             best_val_loss = val_loss
             clean_state = {k.replace('._orig_mod', ''): v for k, v in model.state_dict().items()}
             torch.save(clean_state,
-                       os.path.join(CHECKPOINT_DIR, 'd768_l16_fa4_best.pt'))
+                       os.path.join(CHECKPOINT_DIR, 'ffn512_34m_best.pt'))
             marker = ' *'
 
         # Save resume checkpoint
@@ -636,7 +633,7 @@ def train():
             'optimizer_state_dict': optimizer.state_dict(),
             'scheduler_state_dict': scheduler.state_dict(),
             'val_loss': val_loss,
-        }, os.path.join(CHECKPOINT_DIR, f'd768_l16_fa4_ep{epoch}_resume.pt'))
+        }, os.path.join(CHECKPOINT_DIR, f'ffn512_34m_ep{epoch}_resume.pt'))
 
         print(f'Ep {epoch}/{SCREEN_EPOCHS} | Val PPL {val_ppl:.2f}{marker}')
 
@@ -681,7 +678,7 @@ def train():
     print(f'num_offsets: {len(OFFSETS)}')
     print(f'scale_embed_lr_mult: {SCALE_EMBED_LR_MULT}')
     print(f'ema_init: {EMA_INIT}')
-    print(f'description: D768-L16-FA4 D={EMBEDDING_DIM} H={NUM_HEADS} hd=64 L={NUM_LAYERS} '
+    print(f'description: Depth16-55M-FA4 D={EMBEDDING_DIM} H={NUM_HEADS} hd=64 L={NUM_LAYERS} '
           f'FFN={FFN_DIM} J=24 se015, cold start, fineweb_tokenizer_32k, '
           f'FA@L{FULL_ATTN_LAYER} preIF@L{FULL_ATTN_LAYER-1} '
           f'{NUM_LAYERS - FULL_ATTN_LAYER - 1} post-FA relay layers')

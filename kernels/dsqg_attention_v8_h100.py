@@ -6,8 +6,9 @@ Same mechanisms as V8_4090 (MOVT + QK-OVT + NPCI), J24_D offset set.
 H100-specific tuning over V8_4090:
   - num_stages=3 on forward/backward launches (H100 deeper pipeline, larger SRAM)
   - BLOCK_N=128 at HD=64 (our primary case: D=1024, H=16 → HD=64)
-  - num_warps=8 at HD=64 for H100 (4 warp groups of 2 = full warp scheduler fill)
-  - Non-sm90 paths removed / simplified (this kernel is H100-only)
+  - BLOCK_N=128 at HD=128 (D=1024, H=8 → HD=128; 128×128×4B = 64KB < H100 228KB SRAM)
+  - num_warps=8 at HD=64 and HD=128 for H100 (4 warp groups of 2 = full warp scheduler fill)
+  - Non-sm90 paths retained for fallback (4090/Ampere use conservative tuning)
 
 Target: D=1024, H=16, HD=64 (DWARF 104M scaling run)
 
@@ -535,10 +536,10 @@ class _DSQGFnV8(torch.autograd.Function):
         assert z_pre.shape       == (B, H, N, R_PLANES)
 
         # Block size tuning for SRAM budget: acc = [BLOCK_N, BLOCK_HD] floats
-        # At HD=64, BLOCK_N=128: 128×64 = 8K floats = 32KB (fine)
-        # At HD=128, BLOCK_N=128: 128×128 = 16K floats = 64KB (exceeds SM SRAM)
+        # At HD=64, BLOCK_N=128: 128×64 = 8K floats = 32KB (fine for all GPUs)
+        # At HD=128, BLOCK_N=128: 128×128 = 16K floats = 64KB (fits H100 228KB, tight on 4090/Ampere 128KB)
         # Block size tuning per GPU architecture:
-        #   sm_90 (H100 NVL):      228KB SRAM/SM, 128 warps — aggressive
+        #   sm_90 (H100 NVL):      228KB SRAM/SM, 128 warps — aggressive (HD=128: BLOCK_N=128)
         #   sm_89 (RTX 4090 Ada):  128KB SRAM/SM, higher bandwidth — mid-tier
         #   else (3090/Ampere):    128KB SRAM/SM, conservative
         _cc = torch.cuda.get_device_capability()
@@ -554,7 +555,9 @@ class _DSQGFnV8(torch.autograd.Function):
             elif _sm89: BLOCK_N, _num_warps, _num_stages = 64,  8, 2
             else:       BLOCK_N, _num_warps, _num_stages = 64,  4, 2
         elif HD <= 128:
-            if _sm90:   BLOCK_N, _num_warps, _num_stages = 64,  4, 3
+            # HD=128 tuning: BLOCK_N=128, num_warps=8 on H100 (sm90)
+            # SRAM: 128×128×4B = 64KB < H100 228KB max shared mem
+            if _sm90:   BLOCK_N, _num_warps, _num_stages = 128, 8, 3
             elif _sm89: BLOCK_N, _num_warps, _num_stages = 64,  4, 2
             else:       BLOCK_N, _num_warps, _num_stages = 32,  4, 2
         elif HD <= 256:
@@ -695,6 +698,7 @@ class _DSQGFnV8(torch.autograd.Function):
         d_phase_base = _reduce_phase_buf(phase_base_buf)
         d_phase_gain = _reduce_phase_buf(phase_gain_buf)
 
+        # Removed .float().bfloat16() double-cast
         return (dq, dk, dv,
                 dpb, dse, d_phase_base, d_phase_gain, dy_pre, dz_pre)
 
@@ -791,6 +795,7 @@ class DSQGAttentionV8_H100(nn.Module):
             v = npci_rotate(v, v_delta, self.npci_theta_v)
 
         sc    = HD ** -0.5
+        # Fixed: Project in native precision to avoid autograd saving FP32 copies of q and k
         y_pre = torch.einsum('bhnd,rd->bhnr',
                              q, self.query_probes.to(q.dtype)).mul(sc).float().contiguous()
         z_pre = torch.einsum('bhnd,rd->bhnr',

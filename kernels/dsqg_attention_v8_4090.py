@@ -82,6 +82,16 @@ def npci_rotate(x: torch.Tensor, x_delta: torch.Tensor,
 # Forward Kernel V8 — single static_range(J) loop, direct loads for all offsets
 # ─────────────────────────────────────────────────────────────────────────────
 
+@triton.autotune(
+    configs=[
+        triton.Config({"BLOCK_N": 128, "BLOCK_HD": 64}, num_warps=8, num_stages=4),
+        triton.Config({"BLOCK_N": 128, "BLOCK_HD": 64}, num_warps=8, num_stages=2),
+        triton.Config({"BLOCK_N": 64,  "BLOCK_HD": 64}, num_warps=8, num_stages=2),
+        triton.Config({"BLOCK_N": 64,  "BLOCK_HD": 64}, num_warps=4, num_stages=2),
+        triton.Config({"BLOCK_N": 32,  "BLOCK_HD": 64}, num_warps=4, num_stages=2),
+    ],
+    key=["HD", "H", "N"],
+)
 @triton.jit
 def _fwd_v8(
     Q, K, V, POS_BIAS, SE, PHASE_BASE, PHASE_GAIN, Y_PRE, Z_PRE, OUT, LSE,
@@ -197,6 +207,16 @@ def _fwd_v8(
 # D computation — unchanged from V7
 # ─────────────────────────────────────────────────────────────────────────────
 
+@triton.autotune(
+    configs=[
+        triton.Config({"BLOCK_N": 128, "BLOCK_HD": 64}, num_warps=8, num_stages=4),
+        triton.Config({"BLOCK_N": 128, "BLOCK_HD": 64}, num_warps=8, num_stages=2),
+        triton.Config({"BLOCK_N": 64,  "BLOCK_HD": 64}, num_warps=8, num_stages=2),
+        triton.Config({"BLOCK_N": 64,  "BLOCK_HD": 64}, num_warps=4, num_stages=2),
+        triton.Config({"BLOCK_N": 32,  "BLOCK_HD": 64}, num_warps=4, num_stages=2),
+    ],
+    key=["HD", "H", "N"],
+)
 @triton.jit
 def _compute_D_v8(
     DO, O, D,
@@ -225,11 +245,21 @@ def _compute_D_v8(
 # Backward: dQ + dPOS_BIAS + dSCALE_EMBED + dY_PRE
 # ─────────────────────────────────────────────────────────────────────────────
 
+@triton.autotune(
+    configs=[
+        triton.Config({"BLOCK_N": 128, "BLOCK_HD": 64}, num_warps=8, num_stages=4),
+        triton.Config({"BLOCK_N": 128, "BLOCK_HD": 64}, num_warps=8, num_stages=2),
+        triton.Config({"BLOCK_N": 64,  "BLOCK_HD": 64}, num_warps=8, num_stages=2),
+        triton.Config({"BLOCK_N": 64,  "BLOCK_HD": 64}, num_warps=4, num_stages=2),
+        triton.Config({"BLOCK_N": 32,  "BLOCK_HD": 64}, num_warps=4, num_stages=2),
+    ],
+    key=["HD", "H", "N"],
+)
 @triton.jit
 def _bwd_dq_v8(
     Q, K, V, PB, SE, PHASE_BASE, PHASE_GAIN, Y_PRE, Z_PRE,
     DO, O, LSE, Dv,
-    DQ, DPB_BUF, DSE_BUF, DY_PRE,   # private per-program buffers (no atomics)
+    DQ, DPB, DSE, DY_PRE,
     stride_qb,   stride_qh,   stride_qn,   stride_qd,
     stride_kb,   stride_kh,   stride_kn,   stride_kd,
     stride_vb,   stride_vh,   stride_vn,   stride_vd,
@@ -238,10 +268,8 @@ def _bwd_dq_v8(
     stride_lb,   stride_lh,   stride_ln,
     stride_Db,   stride_Dh,   stride_Dn,
     stride_dqb,  stride_dqh,  stride_dqn,  stride_dqd,
-    stride_dpb_bh, stride_dpb_blk,   # DPB_BUF[bh, blk, i]
     stride_pbi,  stride_pbh,
     stride_sei,  stride_sed,
-    stride_dse_bh, stride_dse_blk,   # DSE_BUF[bh, blk, i*HD + d]
     stride_phi,  stride_phh,
     stride_pgi,  stride_pgh,
     stride_yb,   stride_yh,   stride_yn,
@@ -305,11 +333,11 @@ def _bwd_dq_v8(
             ds_v   = alpha * (dot_rv - Dval)
             dq    += ds_v[:,None] * kt * sc
             dq    += ds_v[:,None] * se_i[None,:] * sc
-            tl.store(DPB_BUF + bh*stride_dpb_bh + blk*stride_dpb_blk + i,
-                     tl.sum(tl.where(val, ds_v, 0.0)))
+            tl.atomic_add(DPB + i*stride_pbi + h*stride_pbh,
+                          tl.sum(tl.where(val, ds_v, 0.0)))
             dse_i = tl.sum(ds_v[:,None] * q, axis=0) * sc
-            tl.store(DSE_BUF + bh*stride_dse_bh + blk*stride_dse_blk + i*HD + ds,
-                     tl.where(dm, dse_i, 0.0), mask=dm)
+            tl.atomic_add(DSE + i*stride_sei + ds*stride_sed,
+                          tl.where(dm, dse_i, 0.0), mask=dm)
         else:
             pi  = i - 14
             z0  = tl.load(zb + kp*stride_zn + 0, mask=val, other=0.0)
@@ -337,11 +365,11 @@ def _bwd_dq_v8(
             ds_v   = alpha * (dot_rv - Dval)
             dq    += ds_v[:,None] * kt * sc
             dq    += ds_v[:,None] * se_i[None,:] * sc
-            tl.store(DPB_BUF + bh*stride_dpb_bh + blk*stride_dpb_blk + i,
-                     tl.sum(tl.where(val, ds_v, 0.0)))
+            tl.atomic_add(DPB + i*stride_pbi + h*stride_pbh,
+                          tl.sum(tl.where(val, ds_v, 0.0)))
             dse_i = tl.sum(ds_v[:,None] * q, axis=0) * sc
-            tl.store(DSE_BUF + bh*stride_dse_bh + blk*stride_dse_blk + i*HD + ds,
-                     tl.where(dm, dse_i, 0.0), mask=dm)
+            tl.atomic_add(DSE + i*stride_sei + ds*stride_sed,
+                          tl.where(dm, dse_i, 0.0), mask=dm)
 
             do0 = tl.sum(do * f0[None,:], axis=1); do1 = tl.sum(do * f1[None,:], axis=1)
             do2 = tl.sum(do * f2[None,:], axis=1); do3 = tl.sum(do * f3[None,:], axis=1)
@@ -357,14 +385,24 @@ def _bwd_dq_v8(
              dq.to(tl.bfloat16), mask=nm[:,None] & dm[None,:])
 
     dyb = DY_PRE + b*stride_dyb + h*stride_dyh
-    tl.atomic_add(dyb + ns*stride_dyn + 0, tl.where(nm, dy_pre0, 0.0))
-    tl.atomic_add(dyb + ns*stride_dyn + 1, tl.where(nm, dy_pre1, 0.0))
+    tl.store(dyb + ns*stride_dyn + 0, tl.where(nm, dy_pre0, 0.0), mask=nm)
+    tl.store(dyb + ns*stride_dyn + 1, tl.where(nm, dy_pre1, 0.0), mask=nm)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Backward: dK + dV + d_phase_base + d_phase_gain + dZ_PRE
 # ─────────────────────────────────────────────────────────────────────────────
 
+@triton.autotune(
+    configs=[
+        triton.Config({"BLOCK_M": 128, "BLOCK_HD": 64}, num_warps=8, num_stages=4),
+        triton.Config({"BLOCK_M": 128, "BLOCK_HD": 64}, num_warps=8, num_stages=2),
+        triton.Config({"BLOCK_M": 64,  "BLOCK_HD": 64}, num_warps=8, num_stages=2),
+        triton.Config({"BLOCK_M": 64,  "BLOCK_HD": 64}, num_warps=4, num_stages=2),
+        triton.Config({"BLOCK_M": 32,  "BLOCK_HD": 64}, num_warps=4, num_stages=2),
+    ],
+    key=["HD", "H", "N"],
+)
 @triton.jit
 def _bwd_dkdv_v8(
     Q, K, V, PB, SE, PHASE_BASE, PHASE_GAIN, Y_PRE, Z_PRE,
@@ -529,42 +567,14 @@ class _DSQGFnV8(torch.autograd.Function):
         assert y_pre.shape       == (B, H, N, R_PLANES)
         assert z_pre.shape       == (B, H, N, R_PLANES)
 
-        # Block size tuning for SRAM budget: acc = [BLOCK_N, BLOCK_HD] floats
-        # At HD=64, BLOCK_N=128: 128×64 = 8K floats = 32KB (fine)
-        # At HD=128, BLOCK_N=128: 128×128 = 16K floats = 64KB (exceeds SM SRAM)
-        # Block size tuning per GPU architecture:
-        #   sm_90 (H100 NVL):      228KB SRAM/SM, 128 warps — aggressive
-        #   sm_89 (RTX 4090 Ada):  128KB SRAM/SM, higher bandwidth — mid-tier
-        #   else (3090/Ampere):    128KB SRAM/SM, conservative
-        _cc = torch.cuda.get_device_capability()
-        _sm90 = (_cc[0] == 9 and _cc[1] == 0) or _cc[0] > 9   # H100 NVL
-        _sm89 = (_cc[0] == 8 and _cc[1] == 9)                   # RTX 4090 Ada Lovelace
-        if HD <= 32:
-            if _sm90:   BLOCK_N, _num_warps = 128, 8
-            elif _sm89: BLOCK_N, _num_warps = 64, 8
-            else:       BLOCK_N, _num_warps = 64, 4
-        elif HD <= 64:
-            if _sm90:   BLOCK_N, _num_warps = 128, 8
-            elif _sm89: BLOCK_N, _num_warps = 64, 8
-            else:       BLOCK_N, _num_warps = 64, 4
-        elif HD <= 128:
-            if _sm90:   BLOCK_N, _num_warps = 64, 4
-            elif _sm89: BLOCK_N, _num_warps = 64, 4
-            else:       BLOCK_N, _num_warps = 32, 4
-        elif HD <= 256:
-            if _sm90:   BLOCK_N, _num_warps = 32, 4
-            elif _sm89: BLOCK_N, _num_warps = 32, 4
-            else:       BLOCK_N, _num_warps = 16, 4
-        else:
-            if _sm90:   BLOCK_N, _num_warps = 16, 4
-            elif _sm89: BLOCK_N, _num_warps = 16, 4
-            else:       BLOCK_N, _num_warps = 8, 4
         BLOCK_HD = _next_pow2(HD)
         out = torch.empty_like(q)
         lse = torch.empty(B, H, N, device=q.device, dtype=torch.float32)
-        g   = (B * H, triton.cdiv(N, BLOCK_N))
 
-        _fwd_v8[g](
+        def grid(meta):
+            return (B * H, triton.cdiv(N, meta['BLOCK_N']))
+
+        _fwd_v8[grid](
             q, k, v, pos_bias, scale_embed, phase_base, phase_gain,
             y_pre, z_pre, out, lse,
             q.stride(0),    q.stride(1),    q.stride(2),    q.stride(3),
@@ -578,14 +588,16 @@ class _DSQGFnV8(torch.autograd.Function):
             phase_gain.stride(0),  phase_gain.stride(1),
             y_pre.stride(0),       y_pre.stride(1),       y_pre.stride(2),
             z_pre.stride(0),       z_pre.stride(1),       z_pre.stride(2),
-            H=H, N=N, HD=HD, BLOCK_N=BLOCK_N, BLOCK_HD=BLOCK_HD,
-            num_warps=_num_warps,
+            H=H, N=N, HD=HD,
         )
+        # Save autotuned block config for backward — best_config is set after first call
+        _cfg = _fwd_v8.best_config
         ctx.save_for_backward(q, k, v, pos_bias, scale_embed,
                               phase_base, phase_gain, y_pre, z_pre, out, lse)
-        ctx.BLOCK_N   = BLOCK_N
-        ctx.BLOCK_HD  = BLOCK_HD
-        ctx.num_warps = _num_warps
+        ctx.BLOCK_N   = _cfg.kwargs['BLOCK_N']
+        ctx.BLOCK_HD  = _cfg.kwargs.get('BLOCK_HD', BLOCK_HD)
+        ctx.num_warps = _cfg.num_warps
+        ctx.num_stages = _cfg.num_stages
         return out
 
     @staticmethod
@@ -593,34 +605,35 @@ class _DSQGFnV8(torch.autograd.Function):
         (q, k, v, pb, se, phase_base, phase_gain,
          y_pre, z_pre, out, lse) = ctx.saved_tensors
         B, H, N, HD = q.shape
-        BN, BHD, NW = ctx.BLOCK_N, ctx.BLOCK_HD, ctx.num_warps
+        BN, BHD, NW, NS = ctx.BLOCK_N, ctx.BLOCK_HD, ctx.num_warps, ctx.num_stages
         dout = dout.contiguous()
 
         D  = torch.empty(B, H, N, device=q.device, dtype=torch.float32)
-        g  = (B * H, triton.cdiv(N, BN))
 
-        _compute_D_v8[g](
+        def grid_n(meta):
+            return (B * H, triton.cdiv(N, meta['BLOCK_N']))
+
+        _compute_D_v8[grid_n](
             dout, out, D,
             dout.stride(0), dout.stride(1), dout.stride(2), dout.stride(3),
             out.stride(0),  out.stride(1),  out.stride(2),  out.stride(3),
             D.stride(0),    D.stride(1),    D.stride(2),
-            H=H, N=N, HD=HD, BLOCK_N=BN, BLOCK_HD=BHD,
-            num_warps=NW,
+            H=H, N=N, HD=HD,
         )
 
         blocks_n = (N + BN - 1) // BN
         _dev     = q.device
 
-        dq      = torch.empty_like(q)
-        dy_pre  = torch.zeros_like(y_pre)
-        # Private per-program buffers for dpb/dse — no atomics, reduce after kernel
-        dpb_buf = torch.empty(B * H, blocks_n, J,       device=_dev, dtype=torch.float32)
-        dse_buf = torch.empty(B * H, blocks_n, J * HD,  device=_dev, dtype=torch.float32)
+        dq     = torch.zeros_like(q)
+        dy_pre = torch.zeros_like(y_pre)
+        # dpb/dse accumulated via atomic_add in _bwd_dq_v8
+        dpb    = torch.zeros_like(pb)
+        dse    = torch.zeros_like(se)
 
-        _bwd_dq_v8[g](
+        _bwd_dq_v8[grid_n](
             q, k, v, pb, se, phase_base, phase_gain, y_pre, z_pre,
             dout, out, lse, D,
-            dq, dpb_buf, dse_buf, dy_pre,
+            dq, dpb, dse, dy_pre,
             q.stride(0),    q.stride(1),    q.stride(2),    q.stride(3),
             k.stride(0),    k.stride(1),    k.stride(2),    k.stride(3),
             v.stride(0),    v.stride(1),    v.stride(2),    v.stride(3),
@@ -629,33 +642,30 @@ class _DSQGFnV8(torch.autograd.Function):
             lse.stride(0),  lse.stride(1),  lse.stride(2),
             D.stride(0),    D.stride(1),    D.stride(2),
             dq.stride(0),   dq.stride(1),   dq.stride(2),   dq.stride(3),
-            blocks_n * J,   J,              # stride_dpb_bh, stride_dpb_blk
             pb.stride(0),   pb.stride(1),
             se.stride(0),   se.stride(1),
-            blocks_n*J*HD,  J*HD,           # stride_dse_bh, stride_dse_blk
             phase_base.stride(0), phase_base.stride(1),
             phase_gain.stride(0), phase_gain.stride(1),
             y_pre.stride(0),      y_pre.stride(1),      y_pre.stride(2),
             z_pre.stride(0),      z_pre.stride(1),      z_pre.stride(2),
             dy_pre.stride(0),     dy_pre.stride(1),     dy_pre.stride(2),
-            H=H, N=N, HD=HD, BLOCK_N=BN, BLOCK_HD=BHD,
-            num_warps=NW,
+            H=H, N=N, HD=HD,
         )
-        # Reduce per-program partials → [J, H] and [J, HD]
-        dpb = dpb_buf.view(B, H, blocks_n, J).sum(dim=(0, 2)).permute(1, 0).contiguous()
-        dse = dse_buf.view(B, H, blocks_n, J, HD).sum(dim=(0, 1, 2)).contiguous()
 
-        dk     = torch.empty_like(k)
-        dv     = torch.empty_like(v)
+        dk     = torch.zeros_like(k)
+        dv     = torch.zeros_like(v)
         dz_pre = torch.zeros_like(z_pre)
-        phase_base_buf = torch.empty(B * H, blocks_n, J_LARGE * 2,
+        phase_base_buf = torch.zeros(B * H, blocks_n, J_LARGE * 2,
                                      device=_dev, dtype=torch.float32)
-        phase_gain_buf = torch.empty(B * H, blocks_n, J_LARGE * 2,
+        phase_gain_buf = torch.zeros(B * H, blocks_n, J_LARGE * 2,
                                      device=_dev, dtype=torch.float32)
         stride_buf_bh  = blocks_n * J_LARGE * 2
         stride_buf_blk = J_LARGE * 2
 
-        _bwd_dkdv_v8[g](
+        def grid_m(meta):
+            return (B * H, triton.cdiv(N, meta['BLOCK_M']))
+
+        _bwd_dkdv_v8[grid_m](
             q, k, v, pb, se, phase_base, phase_gain, y_pre, z_pre,
             dout, lse, D,
             dk, dv,
@@ -677,8 +687,7 @@ class _DSQGFnV8(torch.autograd.Function):
             z_pre.stride(0),      z_pre.stride(1),      z_pre.stride(2),
             stride_buf_bh, stride_buf_blk,
             dz_pre.stride(0),     dz_pre.stride(1),     dz_pre.stride(2),
-            H=H, N=N, HD=HD, BLOCK_M=BN, BLOCK_HD=BHD,
-            num_warps=NW,
+            H=H, N=N, HD=HD,
         )
 
         def _reduce_phase_buf(buf):
@@ -687,10 +696,7 @@ class _DSQGFnV8(torch.autograd.Function):
         d_phase_base = _reduce_phase_buf(phase_base_buf)
         d_phase_gain = _reduce_phase_buf(phase_gain_buf)
 
-        dq_total = dq.float()
-        dk_total = dk.float()
-
-        return (dq_total.bfloat16(), dk_total.bfloat16(), dv,
+        return (dq, dk, dv,
                 dpb, dse, d_phase_base, d_phase_gain, dy_pre, dz_pre)
 
 
