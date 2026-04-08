@@ -48,6 +48,13 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+try:
+    import bitsandbytes as bnb
+    _BNB_AVAILABLE = True
+except ImportError:
+    _BNB_AVAILABLE = False
+    print("WARNING: bitsandbytes not available, using standard AdamW")
+
 OFFSETS = [1, 3, 4, 13, 15, 21, 23, 28, 48, 64, 96, 192, 384, 512, 768, 1024]
 VOCAB_SIZE     = 32000
 BATCH_SIZE     = 8

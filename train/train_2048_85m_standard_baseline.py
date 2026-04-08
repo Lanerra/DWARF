@@ -51,7 +51,14 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-torch.set_float32_matmul_precision('high')   # TF32 on Hopper
+try:
+    import bitsandbytes as bnb
+    _BNB_AVAILABLE = True
+except ImportError:
+    _BNB_AVAILABLE = False
+    print("WARNING: bitsandbytes not available, using standard AdamW")
+
+torch.set_float32_matmul_precision('medium')   # TF32 on Hopper
 
 # ── Hyperparameters ───────────────────────────────────────────────────────────
 
@@ -268,7 +275,7 @@ def train(model, train_data, val_data, test_data, tokenizer,
 
     decay     = [p for n, p in model.named_parameters() if p.requires_grad and p.dim() >= 2]
     no_decay  = [p for n, p in model.named_parameters() if p.requires_grad and p.dim() < 2]
-    optimizer = torch.optim.AdamW(
+    optimizer = (bnb.optim.AdamW8bit if _BNB_AVAILABLE else torch.optim.AdamW)(
         [{'params': decay, 'weight_decay': 0.1},
          {'params': no_decay, 'weight_decay': 0.0}],
         lr=LR, betas=(0.9, 0.95))

@@ -62,6 +62,13 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+try:
+    import bitsandbytes as bnb
+    _BNB_AVAILABLE = True
+except ImportError:
+    _BNB_AVAILABLE = False
+    print("WARNING: bitsandbytes not available, using standard AdamW")
+
 # ─── Hyperparameters ─────────────────────────────────────────────────────────
 
 VOCAB_SIZE      = 32000
@@ -434,7 +441,7 @@ def generate(model, tokenizer, prompts, device, max_new=150):
 def train_condition_g(model, train_data, val_data, test_data, tokenizer,
                       save_dir='2048_condG_checkpoints', device='cuda'):
     os.makedirs(save_dir, exist_ok=True)
-    optimizer = torch.optim.AdamW(
+    optimizer = (bnb.optim.AdamW8bit if _BNB_AVAILABLE else torch.optim.AdamW)(
         model.parameters(), lr=LR, weight_decay=0.1, betas=(0.9, 0.95))
     total_steps = NUM_EPOCHS * math.ceil(
         len(train_data) / BATCH_SIZE / GRAD_ACCUM)

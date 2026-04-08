@@ -46,6 +46,13 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+try:
+    import bitsandbytes as bnb
+    _BNB_AVAILABLE = True
+except ImportError:
+    _BNB_AVAILABLE = False
+    print("WARNING: bitsandbytes not available, using standard AdamW")
+
 # ── Hyperparameters (identical to condV — fair comparison) ────────────────────
 
 VOCAB_SIZE      = 32000
@@ -646,7 +653,7 @@ def passkey_accuracy(model, tokenizer, device):
 
 def train(model, train_data, val_data, test_data, tokenizer, device='cuda'):
     os.makedirs(SAVE_DIR, exist_ok=True)
-    optimizer = torch.optim.AdamW(
+    optimizer = (bnb.optim.AdamW8bit if _BNB_AVAILABLE else torch.optim.AdamW)(
         model.parameters(), lr=LR, weight_decay=0.1, betas=(0.9, 0.95))
     total_steps = NUM_EPOCHS * math.ceil(
         len(train_data) / BATCH_SIZE / GRAD_ACCUM)

@@ -49,6 +49,13 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+try:
+    import bitsandbytes as bnb
+    _BNB_AVAILABLE = True
+except ImportError:
+    _BNB_AVAILABLE = False
+    print("WARNING: bitsandbytes not available, using standard AdamW")
+
 # -- Hyperparameters -----------------------------------------------------------
 
 VOCAB_SIZE      = 32000

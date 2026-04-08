@@ -41,6 +41,13 @@ import json, math, os, sys, time, argparse
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+
+try:
+    import bitsandbytes as bnb
+    _BNB_AVAILABLE = True
+except ImportError:
+    _BNB_AVAILABLE = False
+    print("WARNING: bitsandbytes not available, using standard AdamW")
 import torch.utils.checkpoint
 
 # cuDNN auto-profiles kernel selection for fixed input sizes — free, do at import time
@@ -554,7 +561,7 @@ def build_optimizer(model, total_steps):
         else:
             decay_params.append(param)
 
-    optimizer = torch.optim.AdamW(
+    optimizer = (bnb.optim.AdamW8bit if _BNB_AVAILABLE else torch.optim.AdamW)(
         [{'params': decay_params,    'weight_decay': 0.1},
          {'params': no_decay_params, 'weight_decay': 0.0}],
         lr=LR, betas=(0.9, 0.95))

@@ -83,7 +83,14 @@ import torch.nn as nn
 from torch.utils.checkpoint import checkpoint as grad_ckpt
 import torch.nn.functional as F
 
-torch.set_float32_matmul_precision('high')
+try:
+    import bitsandbytes as bnb
+    _BNB_AVAILABLE = True
+except ImportError:
+    _BNB_AVAILABLE = False
+    print("WARNING: bitsandbytes not available, using standard AdamW")
+
+torch.set_float32_matmul_precision('medium')
 os.environ.setdefault('PYTORCH_CUDA_ALLOC_CONF', 'expandable_segments:True')
 
 # ── Liger fused CE ─────────────────────────────────────────────────────────────
@@ -93,7 +100,7 @@ try:
 except ImportError:
     _LIGER_AVAILABLE = False
 
-USE_LIGER_CE = _LIGER_AVAILABLE and os.getenv("DWARF_LIGER", "1") == "1"
+USE_LIGER_CE = _LIGER_AVAILABLE and os.getenv("DWARF_LIGER", "1") != "0"
 
 
 def get_gpu_peak_flops(device="cuda"):
@@ -311,6 +318,10 @@ class AutoresearchTransformerPhysics(nn.Module):
                     nn.init.constant_(m.scale_embed, scale_embed_init_val)
 
     def _should_checkpoint_block(self, block_idx: int) -> bool:
+        if block_idx == self.full_attn_layer:
+            return True
+        if block_idx == self.full_attn_layer - 1:
+            return True
         if CHECKPOINT_STRATEGY == 'all':
             return True
         if CHECKPOINT_STRATEGY == 'every_other':
@@ -592,7 +603,7 @@ def train():
 
     scale_embed_params     = list(model.scale_embed_parameters())
     non_scale_embed_params = list(model.non_scale_embed_parameters())
-    optimizer = torch.optim.AdamW([
+    optimizer = (bnb.optim.AdamW8bit if _BNB_AVAILABLE else torch.optim.AdamW)([
         {'params': non_scale_embed_params, 'lr': LR},
         {'params': scale_embed_params,     'lr': LR * SCALE_EMBED_LR_MULT},
     ], weight_decay=0.1, betas=(0.9, 0.95))
@@ -677,7 +688,7 @@ def train():
                     with _amp_context(device):
                         hidden = model.forward_hidden(x)
                         loss = liger_ce_fn(
-                            hidden.view(-1, hidden.size(-1)),
+                            hidden.contiguous().reshape(-1, hidden.size(-1)),
                             model.out.weight,
                             y.view(-1)
                         )

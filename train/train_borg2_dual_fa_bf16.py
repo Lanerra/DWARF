@@ -55,6 +55,13 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+try:
+    import bitsandbytes as bnb
+    _BNB_AVAILABLE = True
+except ImportError:
+    _BNB_AVAILABLE = False
+    print("WARNING: bitsandbytes not available, using standard AdamW")
+
 VOCAB_SIZE     = 32000
 BATCH_SIZE     = 8
 GRAD_ACCUM     = 4
@@ -546,7 +553,7 @@ def train():
     scale_embed_params     = list(model.scale_embed_parameters())
     non_scale_embed_params = [p for p in model.non_scale_embed_parameters() if p.requires_grad]
     scale_embed_params     = [p for p in scale_embed_params if p.requires_grad]
-    optimizer = torch.optim.AdamW([
+    optimizer = (bnb.optim.AdamW8bit if _BNB_AVAILABLE else torch.optim.AdamW)([
         {'params': non_scale_embed_params, 'lr': LR},
         {'params': scale_embed_params,     'lr': LR * SCALE_EMBED_LR_MULT},
     ], weight_decay=0.1, betas=(0.9, 0.95))

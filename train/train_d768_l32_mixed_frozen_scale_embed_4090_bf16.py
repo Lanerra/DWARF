@@ -85,7 +85,14 @@ import torch.nn as nn
 from torch.utils.checkpoint import checkpoint as grad_ckpt
 import torch.nn.functional as F
 
-torch.set_float32_matmul_precision('high')
+try:
+    import bitsandbytes as bnb
+    _BNB_AVAILABLE = True
+except ImportError:
+    _BNB_AVAILABLE = False
+    print("WARNING: bitsandbytes not available, using standard AdamW")
+
+torch.set_float32_matmul_precision('medium')
 os.environ.setdefault('PYTORCH_CUDA_ALLOC_CONF', 'expandable_segments:True')
 
 # ── Liger fused CE ─────────────────────────────────────────────────────────────
@@ -95,7 +102,7 @@ try:
 except ImportError:
     _LIGER_AVAILABLE = False
 
-USE_LIGER_CE = _LIGER_AVAILABLE and os.getenv("DWARF_LIGER", "1") == "1"
+USE_LIGER_CE = _LIGER_AVAILABLE and os.getenv("DWARF_LIGER", "1") != "0"
 
 
 def get_gpu_peak_flops(device="cuda"):
@@ -556,7 +563,7 @@ def train():
     print(f'  Trainable: {n_trainable:,} / {n_total:,} params '
           f'({100*n_trainable/n_total:.1f}% — scale_embed frozen)')
 
-    optimizer = torch.optim.AdamW(
+    optimizer = (bnb.optim.AdamW8bit if _BNB_AVAILABLE else torch.optim.AdamW)(
         trainable_params,
         lr=LR, weight_decay=0.1, betas=(0.9, 0.95))
 
@@ -651,7 +658,7 @@ def train():
                     with _amp_context(device):
                         hidden = model.forward_hidden(x)
                         loss = liger_ce_fn(
-                            hidden.view(-1, hidden.size(-1)),
+                            hidden.contiguous().reshape(-1, hidden.size(-1)),
                             model.out.weight,
                             y.view(-1)
                         )

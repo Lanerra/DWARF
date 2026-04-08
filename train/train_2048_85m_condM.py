@@ -22,7 +22,7 @@ Purpose
 H200 Optimisations
 ------------------
   - BATCH_SIZE=64 (2x the 27M H100 run; 141 GB HBM3e has headroom to spare)
-  - torch.set_float32_matmul_precision('high')  -> TF32 on Hopper for free
+  - torch.set_float32_matmul_precision('medium')  -> TF32 on Hopper for free
   - AMP bf16 (native Hopper dtype)
   - SDPA / FlashAttention in FullCausalAttention (unchanged from 27M)
   - Gradient checkpointing in DSQGBlock (use_checkpoint=True)
@@ -47,10 +47,17 @@ import json, math, os, sys, time
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+
+try:
+    import bitsandbytes as bnb
+    _BNB_AVAILABLE = True
+except ImportError:
+    _BNB_AVAILABLE = False
+    print("WARNING: bitsandbytes not available, using standard AdamW")
 import torch.utils.checkpoint
 
 # H200: TF32 matmuls on Hopper -- free ~10% throughput
-torch.set_float32_matmul_precision('high')
+torch.set_float32_matmul_precision('medium')
 
 # ---- Hyperparameters ---------------------------------------------------------
 
@@ -455,7 +462,7 @@ def train(model, train_data, val_data, test_data, tokenizer,
           save_dir=CHECKPOINT_DIR, device='cuda'):
     os.makedirs(save_dir, exist_ok=True)
 
-    optimizer = torch.optim.AdamW(
+    optimizer = (bnb.optim.AdamW8bit if _BNB_AVAILABLE else torch.optim.AdamW)(
         model.parameters(), lr=LR, weight_decay=0.1, betas=(0.9, 0.95))
 
     total_steps  = NUM_EPOCHS * math.ceil(

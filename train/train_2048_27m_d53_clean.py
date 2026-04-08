@@ -34,6 +34,13 @@ import json, math, os, sys, time
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+
+try:
+    import bitsandbytes as bnb
+    _BNB_AVAILABLE = True
+except ImportError:
+    _BNB_AVAILABLE = False
+    print("WARNING: bitsandbytes not available, using standard AdamW")
 import torch.utils.checkpoint
 
 # -- Hyperparameters -----------------------------------------------------------
@@ -463,7 +470,7 @@ def train():
     n_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
     print(f'Parameters: {n_params:,}')
 
-    optimizer = torch.optim.AdamW(model.parameters(), lr=LR, weight_decay=0.1)
+    optimizer = (bnb.optim.AdamW8bit if _BNB_AVAILABLE else torch.optim.AdamW)(model.parameters(), lr=LR, weight_decay=0.1)
     total_steps = (len(train_data) // (BATCH_SIZE * GRAD_ACCUM)) * NUM_EPOCHS
     scheduler   = torch.optim.lr_scheduler.CosineAnnealingLR(
         optimizer, T_max=total_steps, eta_min=LR * 0.1)

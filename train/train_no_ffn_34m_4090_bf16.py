@@ -91,7 +91,14 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-torch.set_float32_matmul_precision('high')
+try:
+    import bitsandbytes as bnb
+    _BNB_AVAILABLE = True
+except ImportError:
+    _BNB_AVAILABLE = False
+    print("WARNING: bitsandbytes not available, using standard AdamW")
+
+torch.set_float32_matmul_precision('medium')
 os.environ.setdefault('PYTORCH_CUDA_ALLOC_CONF', 'expandable_segments:True')
 
 import pathlib as _pl
@@ -447,7 +454,7 @@ def train(resume_from=None, start_epoch=1):
     # ── Optimizer + scheduler ─────────────────────────────────────────────────
     scale_embed_params     = list(model.scale_embed_parameters())
     non_scale_embed_params = list(model.non_scale_embed_parameters())
-    optimizer = torch.optim.AdamW([
+    optimizer = (bnb.optim.AdamW8bit if _BNB_AVAILABLE else torch.optim.AdamW)([
         {'params': non_scale_embed_params, 'lr': LR},
         {'params': scale_embed_params,     'lr': LR * SCALE_EMBED_LR_MULT},
     ], weight_decay=0.1, betas=(0.9, 0.95))

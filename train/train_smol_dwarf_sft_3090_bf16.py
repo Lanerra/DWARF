@@ -27,6 +27,13 @@ import os, sys, json, math, time, random
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+
+try:
+    import bitsandbytes as bnb
+    _BNB_AVAILABLE = True
+except ImportError:
+    _BNB_AVAILABLE = False
+    print("WARNING: bitsandbytes not available, using standard AdamW")
 from torch.utils.data import Dataset, DataLoader, Sampler
 
 # ── Paths ──────────────────────────────────────────────────────────────────────
@@ -394,7 +401,7 @@ def main():
     # Optimizer — scale_embed gets LR×15
     se_params    = [p for n, p in model.named_parameters() if 'scale_embed' in n]
     base_params  = [p for n, p in model.named_parameters() if 'scale_embed' not in n]
-    optimizer = torch.optim.AdamW([
+    optimizer = (bnb.optim.AdamW8bit if _BNB_AVAILABLE else torch.optim.AdamW)([
         {'params': base_params, 'lr': LR,                       'weight_decay': WEIGHT_DECAY},
         {'params': se_params,   'lr': LR * SCALE_EMBED_LR_MULT, 'weight_decay': 0.0},
     ], betas=(0.9, 0.95))
