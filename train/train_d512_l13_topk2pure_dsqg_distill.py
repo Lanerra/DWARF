@@ -198,14 +198,14 @@ def run_passkey(model, tokenizer, device, distances, trials, batch_size):
     Uses flat _PASSKEY_WORDS list + _INTRO_TEMPLATE['{word}'], _FILLER_SENTENCE, _RETRIEVAL_CUE.
     """
     model.eval()
-    filler_ids = tokenizer.encode(_FILLER_SENTENCE)
-    cue_ids = tokenizer.encode(_RETRIEVAL_CUE)
+    filler_ids = tokenizer.encode(_FILLER_SENTENCE).ids
+    cue_ids = tokenizer.encode(_RETRIEVAL_CUE).ids
     pad_id = 0
 
     # Pre-encode word -> token id
     word_token_ids = {}
     for word in _PASSKEY_WORDS:
-        encoded = tokenizer.encode(' ' + word) or tokenizer.encode(word)
+        encoded = tokenizer.encode(' ' + word).ids or tokenizer.encode(word).ids
         if not encoded:
             raise ValueError(f'Could not encode passkey word: {word}')
         word_token_ids[word] = encoded[0]
@@ -216,7 +216,7 @@ def run_passkey(model, tokenizer, device, distances, trials, batch_size):
     for dist in distances:
         for i in range(trials):
             target = _PASSKEY_WORDS[i % len(_PASSKEY_WORDS)]
-            intro_ids = tokenizer.encode(_INTRO_TEMPLATE.format(word=target))
+            intro_ids = tokenizer.encode(_INTRO_TEMPLATE.format(word=target)).ids
             available = MAX_SEQ_LEN - 1 - len(intro_ids) - len(cue_ids) - 1
             if dist > available:
                 continue
