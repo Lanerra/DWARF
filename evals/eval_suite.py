@@ -382,7 +382,7 @@ MODEL_REGISTRY = {
         'arch':       'condm',
         'D':          640, 'H': 8, 'FFN': 2560, 'L': 12, 'full_layer': 11,
         'interference': 3,
-        'checkpoint': os.path.join(CKPT_ROOT, '2048_condM_85m_checkpoints', 'best.ptrom'),
+        'checkpoint': os.path.join(CKPT_ROOT, '2048_condM_85m_checkpoints', 'best.pt'),
         'label':      'condM 85M (11 DSQG + 1 full attn, Layer 11)',
         'params_ref': 88_267_552,
     },
@@ -692,6 +692,262 @@ MODEL_REGISTRY = {
         'interference': 3,
         'checkpoint': os.path.join(CKPT_ROOT, 'd41_35m_pure', 'best.pt'),
         'label':      'd41_35m_pure 35M pure DSQG (FULL_ATTN_LAYER=-1, dense=41, sparse=[48,128,384])',
+        'params_ref': None,
+    },
+    # moonshot_58m: J24 se015 offsets, D=512, H=8, L=8, FFN=2048, FA@L2, preIF@L1
+    # ep2 checkpoint: PPL=35.04, passkey=99.2% (training-time eval, 20 trials)
+    'moonshot_58m': {
+        'arch':       'moonshot_58m',
+        'D':          512, 'H': 8, 'FFN': 2048, 'L': 8, 'full_layer': 2,
+        'interference': 1,
+        'checkpoint': os.path.join(os.path.dirname(CKPT_ROOT), 'autoresearch', 'checkpoints', 'moonshot_58m_best.pt'),
+        'tokenizer':  os.path.join(os.path.dirname(CKPT_ROOT), 'results', 'fineweb_tokenizer_32k.json'),
+        'label':      'Moonshot-58M ep2 (J24 se015, D=512, H=8, L=8, FA@L2, preIF@L1)',
+        'params_ref': None,
+    },
+    # d1024_267m: J24 se015 offsets, D=1024, H=16, L=24, FFN=2048, FA@L6, preIF@L5
+    # ep2 checkpoint: PPL=43.13, passkey=100% all 12 distances (121K seqs, 4.6% Chinchilla)
+    'd1024_267m': {
+        'arch':       'd1024_267m',
+        'D':          1024, 'H': 16, 'FFN': 2048, 'L': 24, 'full_layer': 6,
+        'interference': 5,
+        'checkpoint': os.path.join(os.path.dirname(CKPT_ROOT), 'autoresearch', 'checkpoints', 'd1024_267m_best.pt'),
+        'tokenizer':  os.path.join(os.path.dirname(CKPT_ROOT), 'results', 'fineweb_tokenizer_32k.json'),
+        'label':      'D1024-267M ep2 (J24 se015, D=1024, H=16, L=24, FA@L6, preIF@L5)',
+        'params_ref': None,
+    },
+    # ffn_ablation: D=512, H=8, L=8, FFN=1024 (2×D) — ep3: PPL=32.00, passkey=96.7%
+    # Confirms FFN=2×D optimal: beats Moonshot-58M (FFN=4×D) by 3.04 PPL with 8.4M fewer params
+    'ffn_ablation': {
+        'arch':       'moonshot_58m',
+        'D':          512, 'H': 8, 'FFN': 1024, 'L': 8, 'full_layer': 2,
+        'interference': 1,
+        'checkpoint': os.path.join(os.path.dirname(CKPT_ROOT), 'autoresearch', 'checkpoints', 'ffn_ablation_best.pt'),
+        'tokenizer':  os.path.join(os.path.dirname(CKPT_ROOT), 'results', 'fineweb_tokenizer_32k.json'),
+        'label':      'FFN-Ablation ep3 (FFN=1024=2×D, D=512, H=8, L=8, FA@L2, preIF@L1)',
+        'params_ref': None,
+    },
+    # d768_l24: D=768, H=12, L=24, FFN=1536, FA@L6, preIF@L5, 154M params, FineWeb-Edu 3 epochs
+    # ep3: PPL=29.16, passkey=95.0% (d=1-1024 ≥90%, d=1536=80%)
+    'd768_l24': {
+        'arch':       'd768_l24',
+        'D':          768, 'H': 12, 'FFN': 1536, 'L': 24, 'full_layer': 6,
+        'interference': 5,
+        'checkpoint': os.path.join(os.path.dirname(CKPT_ROOT), 'autoresearch', 'checkpoints', 'd768_l24_fa6_best.pt'),
+        'tokenizer':  os.path.join(os.path.dirname(CKPT_ROOT), 'results', 'fineweb_tokenizer_32k.json'),
+        'label':      'D768-L24-FA6 ep3 (J24 se015, D=768, H=12, L=24, FA@L6, preIF@L5)',
+        'params_ref': None,
+    },
+    # d768_l32: D=768, H=12, L=32, FFN=1536, FA@L8, preIF@L7, 196.6M params, FineWeb-Edu ep2
+    # ep2: PPL=28.79, passkey=96.7% (d=16-1536 all 100%, d=1-8 90%)
+    'd768_l32': {
+        'arch':       'd768_l32',
+        'D':          768, 'H': 12, 'FFN': 1536, 'L': 32, 'full_layer': 8,
+        'interference': 7,
+        'checkpoint': os.path.join(os.path.dirname(CKPT_ROOT), 'autoresearch', 'checkpoints', 'd768_l32_fa8_best.pt'),
+        'tokenizer':  os.path.join(os.path.dirname(CKPT_ROOT), 'results', 'fineweb_tokenizer_32k.json'),
+        'label':      'D768-L32-FA8 ep2 (J24 se015, D=768, H=12, L=32, FA@L8, preIF@L7)',
+        'params_ref': None,
+    },
+    # d768_l32_cont: continued pretraining on FineWeb-Edu 80% + Wikipedia 20%, ep3
+    # ep3: PPL=25.64, passkey=96.7% (d=16-1536 all 100%, d=1-8 90%)
+    'd768_l32_cont': {
+        'arch':       'd768_l32',
+        'D':          768, 'H': 12, 'FFN': 1536, 'L': 32, 'full_layer': 8,
+        'interference': 7,
+        'checkpoint': os.path.join(os.path.dirname(CKPT_ROOT), 'autoresearch', 'checkpoints', 'd768_l32_fa8_ep3_eval.pt'),
+        'tokenizer':  os.path.join(os.path.dirname(CKPT_ROOT), 'results', 'fineweb_tokenizer_32k.json'),
+        'label':      'D768-L32-FA8 cont-ep3 (FineWeb+Wiki 80/20, PPL=25.64)',
+        'params_ref': None,
+    },
+    # d768_l32_sft: SFT on SQuAD+TriviaQA+Dolly-15k (134K examples, 3 epochs)
+    # ep3: val PPL=9.76, passkey=95.8% (relay PRESERVED), scale_embed frozen
+    'd768_l32_sft': {
+        'arch':       'd768_l32',
+        'D':          768, 'H': 12, 'FFN': 1536, 'L': 32, 'full_layer': 8,
+        'interference': 7,
+        'checkpoint': os.path.join(os.path.dirname(CKPT_ROOT), 'autoresearch', 'checkpoints', 'd768_l32_sft_eval.pt'),
+        'tokenizer':  os.path.join(os.path.dirname(CKPT_ROOT), 'results', 'fineweb_tokenizer_32k.json'),
+        'label':      'D768-L32-FA8 SFT (SQuAD+TriviaQA+Dolly, PPL=9.76, passkey=95.8%)',
+        'params_ref': None,
+    },
+    # d768_l32_smoltalk: SFT on smol-smoltalk (46K examples, frozen scale_embed)
+    # ep2: val PPL=6.27, passkey=91.7% (slow drift, no collapse)
+    'd768_l32_smoltalk': {
+        'arch':       'd768_l32',
+        'D':          768, 'H': 12, 'FFN': 1536, 'L': 32, 'full_layer': 8,
+        'interference': 7,
+        'checkpoint': os.path.join(os.path.dirname(CKPT_ROOT), 'autoresearch', 'checkpoints', 'd768_l32_smoltalk_ep2_eval.pt'),
+        'tokenizer':  os.path.join(os.path.dirname(CKPT_ROOT), 'results', 'fineweb_tokenizer_32k.json'),
+        'label':      'D768-L32-FA8 Smoltalk SFT ep2 (46K chat, PPL=6.27, passkey=91.7%)',
+        'params_ref': None,
+    },
+    # d768_l32_oh_orca: SFT on OpenHermes-2.5 + Open-Orca (75K, 60/40 blend, 2 epochs, frozen scale_embed)
+    # ep2: val PPL=5.49, passkey=87.5%
+    'd768_l32_oh_orca': {
+        'arch':       'd768_l32',
+        'D':          768, 'H': 12, 'FFN': 1536, 'L': 32, 'full_layer': 8,
+        'interference': 7,
+        'checkpoint': os.path.join(os.path.dirname(CKPT_ROOT), 'autoresearch', 'checkpoints', 'd768_l32_oh_orca_sft_best.pt'),
+        'tokenizer':  os.path.join(os.path.dirname(CKPT_ROOT), 'results', 'fineweb_tokenizer_32k.json'),
+        'label':      'D768-L32-FA8 OH+Orca SFT ep2 (75K CoT, PPL=5.49, passkey=87.5%)',
+        'params_ref': None,
+    },
+    # d768_l32_mixed_frozen: mixed-domain continuation (60% FW-Edu/25% PG19/15% Stack)
+    # scale_embed FROZEN — test K/Q topology robustness to domain shift
+    # ep1: PPL=18.75, passkey=99.2% (baseline 96.7%, +2.5pp)
+    'd768_l32_mixed_frozen': {
+        'arch':       'd768_l32',
+        'D':          768, 'H': 12, 'FFN': 1536, 'L': 32, 'full_layer': 8,
+        'interference': 7,
+        'checkpoint': os.path.join(os.path.dirname(CKPT_ROOT), 'autoresearch', 'checkpoints', 'd768_l32_mixed_frozen_se_best.pt'),
+        'tokenizer':  os.path.join(os.path.dirname(CKPT_ROOT), 'results', 'fineweb_tokenizer_32k.json'),
+        'label':      'D768-L32-FA8 Mixed-Frozen-SE ep1 (60% FW/25% PG19/15% Stack, PPL=18.75, passkey=99.2%)',
+        'params_ref': None,
+    },
+    # d768_l32_mixed_scratch: from-scratch on mixed domains (60% FW-Edu/25% PG19/15% Stack)
+    # H3 hypothesis test — relay self-forms natively without pretrained inheritance
+    # ep2: PPL=24.16, passkey=70.0% (relay active); ep3 checkpoint also recovered
+    'd768_l32_mixed_scratch': {
+        'arch':       'd768_l32',
+        'D':          768, 'H': 12, 'FFN': 1536, 'L': 32, 'full_layer': 8,
+        'interference': 7,
+        'checkpoint': os.path.join(os.path.dirname(CKPT_ROOT), 'autoresearch', 'checkpoints', 'd768_l32_mixed_scratch_best.pt'),
+        'tokenizer':  os.path.join(os.path.dirname(CKPT_ROOT), 'results', 'fineweb_tokenizer_32k.json'),
+        'label':      'D768-L32-FA8 Mixed-Scratch ep2-best (from-scratch 60% FW/25% PG19/15% Stack, PPL=24.16, passkey=70%)',
+        'params_ref': None,
+    },
+
+    # d768_l32_mixed_scratch_no_d4: mixed-scratch ep2 with delta=4 offset surgically zeroed
+    # Tests whether removing the inhibitory offset recovers relay — all 62 DSQG scale_embed/pos_bias rows for j=3 zeroed
+    'd768_l32_mixed_scratch_no_d4': {
+        'arch':       'd768_l32',
+        'D':          768, 'H': 12, 'FFN': 1536, 'L': 32, 'full_layer': 8,
+        'interference': 7,
+        'checkpoint': os.path.join(os.path.dirname(CKPT_ROOT), 'autoresearch', 'checkpoints', 'd768_l32_mixed_scratch_no_d4.pt'),
+        'tokenizer':  os.path.join(os.path.dirname(CKPT_ROOT), 'results', 'fineweb_tokenizer_32k.json'),
+        'label':      'D768-L32-FA8 Mixed-Scratch ep2 (δ=4 zeroed — inhibitory offset ablation)',
+        'params_ref': None,
+    },
+
+    # triadic_l13_so2_mixed: D=512, H=8, L=13, FA@L3, preIF@L2+L3, SO(2) MOVT, mixed-domain from scratch
+    # ep3: PPL=33.64, passkey=98.3% (d=1-1024 all 100%, d=1536=80%) SE|max|=3.09
+    'triadic_l13_so2_mixed': {
+        'arch':       'triadic_j96',
+        'D':          512, 'H': 8, 'FFN': 1024, 'L': 13, 'full_layer': 3,
+        'interference': 2,
+        'train_script': 'train/train_d512_l13_triadic_aabbc_mixed_scratch_4090_bf16.py',
+        'checkpoint': os.path.join(os.path.dirname(CKPT_ROOT), 'autoresearch', 'checkpoints', 'd512_l13_triadic_aabbc_mixed_scratch_best.pt'),
+        'tokenizer':  os.path.join(os.path.dirname(CKPT_ROOT), 'results', 'fineweb_tokenizer_32k.json'),
+        'label':      'Triadic-J96 L13 D512 SO(2) Mixed-Scratch ep3 (48M, PPL=33.64, passkey=98.3%, SE|max|=3.09)',
+        'params_ref': 48_359_073,
+    },
+
+    # triadic_l13: D=512, H=8, L=13, FFN=1024, FA@L3, preIF@L2, triadic J=96 (32/layer)
+    # ep3: PPL=48.91, passkey=92.5% (d=1-1024 all 90-100%, d=1536=40%)
+    # First validated D=512/L>8 relay — triadic partitioning solved bandwidth constraint
+    'triadic_l13': {
+        'arch':       'triadic_j96',
+        'D':          512, 'H': 8, 'FFN': 1024, 'L': 13, 'full_layer': 3,
+        'interference': 2,
+        'checkpoint': os.path.join(os.path.dirname(CKPT_ROOT), 'autoresearch', 'checkpoints', 'd512_l13_triadic_j96_best.pt'),
+        'tokenizer':  os.path.join(os.path.dirname(CKPT_ROOT), 'results', 'fineweb_tokenizer_32k.json'),
+        'label':      'Triadic-J96 L13 D512 ep3 (J=32/layer, 4 triads, FA@L3, preIF@L2, PPL=48.91)',
+        'params_ref': 48_359_073,
+    },
+
+    # triadic_l25_d768: D=768, H=12, L=25, FFN=1536, FA@L6, preIF@L5, triadic J=96 (32/layer)
+    # ep1: PPL=40.59, passkey=80.0% (d=1536=40%) — relay active after ep1, first D=768 triadic
+    'triadic_l25_d768': {
+        'arch':       'triadic_j96',
+        'D':          768, 'H': 12, 'FFN': 1536, 'L': 25, 'full_layer': 6,
+        'interference': 2,
+        'train_script': 'train/train_d768_l25_triadic_j96_4090_bf16.py',
+        'checkpoint': os.path.join(os.path.dirname(CKPT_ROOT), 'autoresearch', 'checkpoints', 'd768_l25_triadic_j96_best.pt'),
+        'tokenizer':  os.path.join(os.path.dirname(CKPT_ROOT), 'results', 'fineweb_tokenizer_32k.json'),
+        'label':      'Triadic-J96 L25 D768 (J=32/layer, 8 triads, FA@L6, phase-informed, 160M params)',
+        'params_ref': 159_977_185,
+    },
+
+    # triadic_l25_mixed: D=768, H=12, L=25, FFN=1536, FA@L6, triadic J=96 — FROM SCRATCH on mixed domains
+    # ep3: PPL=22.88, passkey=97.5% (d=1536=100%), SE|max|=2.00 — ar_score=4.38 new champion
+    # trained on 60% FineWeb-Edu / 25% PG19 / 15% Stack, UNFROZEN SE, no freeze workaround
+    'triadic_l25_mixed': {
+        'arch':       'triadic_j96',
+        'D':          768, 'H': 12, 'FFN': 1536, 'L': 25, 'full_layer': 6,
+        'interference': 2,
+        'train_script': 'train/train_d768_l25_triadic_mixed_scratch_3090_bf16.py',
+        'checkpoint': os.path.join(os.path.dirname(CKPT_ROOT), 'autoresearch', 'checkpoints', 'd768_l25_triadic_mixed_scratch_best.pt'),
+        'tokenizer':  os.path.join(os.path.dirname(CKPT_ROOT), 'results', 'fineweb_tokenizer_32k.json'),
+        'label':      'Triadic-J96 L25 D768 Mixed-Domain from Scratch (160M, PPL=22.88, passkey=97.5%)',
+        'params_ref': 159_977_185,
+    },
+
+    # triadic_l25_d1024_mixed: D=1024, H=16, L=25, FFN=2048, FA@L6, preIF@L5, triadic J=96 [A,A,B,B,C,C]
+    # ep3: PPL=20.92, passkey=96.7% (d=1-512=100%, d=1024/1536=80%), SE|max|=2.34 — 273M params
+    # trained from scratch on mixed domains (60% FineWeb-Edu / 25% PG19 / 15% Stack), LR_MULT=34
+    'triadic_l25_d1024_mixed': {
+        'arch':       'triadic_j96',
+        'D':          1024, 'H': 16, 'FFN': 2048, 'L': 25, 'full_layer': 6,
+        'interference': 2,
+        'train_script': 'train/train_d1024_l25_triadic_aabbc_h200_bf16.py',
+        'checkpoint': os.path.join(os.path.dirname(CKPT_ROOT), 'autoresearch', 'checkpoints', 'd1024_l25_triadic_aabbc_mixed_scratch_best.pt'),
+        'tokenizer':  os.path.join(os.path.dirname(CKPT_ROOT), 'results', 'fineweb_tokenizer_32k.json'),
+        'label':      'Triadic-J96 L25 D1024 Mixed-Domain from Scratch (273M, PPL=20.92, passkey=96.7%)',
+        'params_ref': 273_100_000,
+    },
+
+    # triadic_l25_sft: D=768 L=25 triadic J=96 SFT on OH+Orca 75K
+    # base: triadic_l25_mixed pretrain; ep3: PPL=6.40, passkey=95.8%, SE|max|=1.9902
+    # unfrozen scale_embed throughout SFT -- group redundancy proved freeze unnecessary
+    'triadic_l25_sft': {
+        'arch':       'triadic_j96',
+        'D':          768, 'H': 12, 'FFN': 1536, 'L': 25, 'full_layer': 6,
+        'interference': 2,
+        'train_script': 'train/train_d768_l25_triadic_sft_oh_orca_4090_bf16.py',
+        'checkpoint': os.path.join(os.path.dirname(CKPT_ROOT), 'autoresearch', 'checkpoints', 'd768_l25_triadic_sft_oh_orca_best.pt'),
+        'tokenizer':  os.path.join(os.path.dirname(CKPT_ROOT), 'results', 'fineweb_tokenizer_32k.json'),
+        'label':      'Triadic-J96 L25 D768 SFT OH+Orca ep3 (160M, PPL=6.40, passkey=95.8%, unfrozen SE)',
+        'params_ref': 159_977_185,
+    },
+
+    # pure_dsqg_l13_so2: D=512, H=8, L=13, FFN=1024, NO FA LAYER, J=96 triadic [A,A,B,B,C,C]
+    # ep1: PPL=61.38, passkey=13.3% — FIRST NON-ZERO pure DSQG passkey in DWARF history
+    # SO(2) MOVT + preIF on GROUP_C + percolation-triggered content activation
+    # layout: [A,B,C+preIF,C+preIF,B,C,C,A,A,B,B,C,C] — FA@L3 replaced with 2nd DSQG-C+preIF
+    'pure_dsqg_l13_so2': {
+        'arch':       'triadic_j96',
+        'D':          512, 'H': 8, 'FFN': 1024, 'L': 13, 'full_layer': None,
+        'interference': 2,
+        'train_script': 'train/train_d512_l13_pure_dsqg_so2_4090_bf16.py',
+        'checkpoint': os.path.join(os.path.dirname(CKPT_ROOT), 'autoresearch', 'checkpoints', 'd512_l13_pure_dsqg_so2_best.pt'),
+        'tokenizer':  os.path.join(os.path.dirname(CKPT_ROOT), 'results', 'fineweb_tokenizer_32k.json'),
+        'label':      'Pure DSQG L13 D512 SO(2) ep1 — NO FA (48M, PPL=61.38, passkey=13.3% FIRST EVER)',
+        'params_ref': 48_000_000,
+    },
+
+    # triadic_l9: D=512, H=8, L=9, FFN=1024, FA@L3, preIF@L2, triadic J=96 (32/layer)
+    # ep3: 3 triads, less post-FA depth than L=13
+    'triadic_l9': {
+        'arch':       'triadic_j96',
+        'D':          512, 'H': 8, 'FFN': 1024, 'L': 9, 'full_layer': 3,
+        'interference': 2,
+        'checkpoint': os.path.join(os.path.dirname(CKPT_ROOT), 'autoresearch', 'checkpoints', 'd512_l9_triadic_j96_best.pt'),
+        'tokenizer':  os.path.join(os.path.dirname(CKPT_ROOT), 'results', 'fineweb_tokenizer_32k.json'),
+        'label':      'Triadic-J96 L9 D512 ep3 (J=32/layer, 3 triads, FA@L3, preIF@L2)',
+        'params_ref': None,
+    },
+
+    # moonshot_58m_sft: same arch, SFT fine-tuned on smol-smoltalk 50K (3 epochs)
+    # Best val PPL on smoltalk: 7.00 (ep3)
+    'moonshot_58m_sft': {
+        'arch':       'moonshot_58m',
+        'D':          512, 'H': 8, 'FFN': 2048, 'L': 8, 'full_layer': 2,
+        'interference': 1,
+        'checkpoint': os.path.join(os.path.dirname(CKPT_ROOT), 'autoresearch', 'checkpoints',
+                                   'smol_dwarf_sft', 'smol_dwarf_sft_best.pt'),
+        'tokenizer':  os.path.join(os.path.dirname(CKPT_ROOT), 'results', 'fineweb_tokenizer_32k.json'),
+        'label':      'Moonshot-58M-SFT (smol-smoltalk 3ep, J24 se015, D=512, H=8, L=8)',
         'params_ref': None,
     },
 }
@@ -1274,6 +1530,96 @@ def build_model(cfg):
             interference_interval=cfg.get('interference', 2),
             scale_embed_init_val=0.1,
         )
+    elif arch == 'moonshot_58m':
+        import importlib.util as _ilu
+        _repo = os.path.normpath(os.path.join(SCRIPT_DIR, '..'))
+        for _d in [os.path.join(_repo, 'kernels'), _repo]:
+            if _d not in sys.path:
+                sys.path.insert(0, _d)
+        _script = os.path.join(_repo, 'train', 'train_moonshot_58m_4090_bf16.py')
+        _spec = _ilu.spec_from_file_location('moonshot_58m_train', _script)
+        _mod  = _ilu.module_from_spec(_spec)
+        _spec.loader.exec_module(_mod)
+        return _mod.AutoresearchTransformerPhysics(
+            vocab_size=VOCAB_SIZE, embedding_dim=D, num_layers=L,
+            num_heads=H, ffn_dim=FFN, seq_len=MAX_SEQ_LEN,
+            full_attn_layer=cfg.get('full_layer', 2),
+            interference_interval=cfg.get('interference', 1),
+            scale_embed_init_val=0.1,
+        )
+    elif arch == 'd1024_267m':
+        import importlib.util as _ilu
+        _repo = os.path.normpath(os.path.join(SCRIPT_DIR, '..'))
+        for _d in [os.path.join(_repo, 'kernels'), _repo]:
+            if _d not in sys.path:
+                sys.path.insert(0, _d)
+        _script = os.path.join(_repo, 'train', 'train_d1024_267m_h100_bf16.py')
+        _spec = _ilu.spec_from_file_location('d1024_267m_train', _script)
+        _mod  = _ilu.module_from_spec(_spec)
+        _spec.loader.exec_module(_mod)
+        return _mod.AutoresearchTransformerPhysics(
+            vocab_size=VOCAB_SIZE, embedding_dim=D, num_layers=L,
+            num_heads=H, ffn_dim=FFN, seq_len=MAX_SEQ_LEN,
+            full_attn_layer=cfg.get('full_layer', 6),
+            scale_embed_init_val=0.1,
+        )
+    elif arch == 'd768_l24':
+        import importlib.util as _ilu
+        _repo = os.path.normpath(os.path.join(SCRIPT_DIR, '..'))
+        for _d in [os.path.join(_repo, 'kernels'), _repo]:
+            if _d not in sys.path:
+                sys.path.insert(0, _d)
+        _script = os.path.join(_repo, 'train', 'train_d768_l24_h100_bf16.py')
+        _spec = _ilu.spec_from_file_location('d768_l24_train', _script)
+        _mod  = _ilu.module_from_spec(_spec)
+        _spec.loader.exec_module(_mod)
+        return _mod.AutoresearchTransformerPhysics(
+            vocab_size=VOCAB_SIZE, embedding_dim=D, num_layers=L,
+            num_heads=H, ffn_dim=FFN, seq_len=MAX_SEQ_LEN,
+            full_attn_layer=cfg.get('full_layer', 6),
+            scale_embed_init_val=0.15,
+        )
+    elif arch == 'd768_l32':
+        import importlib.util as _ilu
+        _repo = os.path.normpath(os.path.join(SCRIPT_DIR, '..'))
+        for _d in [os.path.join(_repo, 'kernels'), _repo]:
+            if _d not in sys.path:
+                sys.path.insert(0, _d)
+        _script = os.path.join(_repo, 'train', 'train_d768_l32_h100_bf16.py')
+        _spec = _ilu.spec_from_file_location('d768_l32_train', _script)
+        _mod  = _ilu.module_from_spec(_spec)
+        _spec.loader.exec_module(_mod)
+        return _mod.AutoresearchTransformerPhysics(
+            vocab_size=VOCAB_SIZE, embedding_dim=D, num_layers=L,
+            num_heads=H, ffn_dim=FFN, seq_len=MAX_SEQ_LEN,
+            full_attn_layer=cfg.get('full_layer', 8),
+            scale_embed_init_val=0.15,
+        )
+    elif arch == 'triadic_j96':
+        import importlib.util as _ilu
+        _repo = os.path.normpath(os.path.join(SCRIPT_DIR, '..'))
+        for _d in [os.path.join(_repo, 'kernels'), _repo]:
+            if _d not in sys.path:
+                sys.path.insert(0, _d)
+        # Use the arch-specific train script so VOCAB_SIZE and LAYER_LAYOUT are correct
+        _train_script = cfg.get('train_script',
+            os.path.join(_repo, 'train', 'train_d512_l13_triadic_j96_4090_bf16.py'))
+        if not os.path.isabs(_train_script):
+            _train_script = os.path.join(_repo, _train_script)
+        _spec = _ilu.spec_from_file_location('triadic_j96_train', _train_script)
+        _mod  = _ilu.module_from_spec(_spec)
+        _spec.loader.exec_module(_mod)
+        _triadic_vs = getattr(_mod, 'VOCAB_SIZE', VOCAB_SIZE)
+        import inspect as _inspect
+        _triadic_sig = _inspect.signature(_mod.TriadicJ96.__init__)
+        _triadic_kwargs = dict(
+            vocab_size=_triadic_vs, embedding_dim=D,
+            num_heads=H, ffn_dim=FFN, seq_len=MAX_SEQ_LEN,
+            scale_embed_init_val=0.15,
+        )
+        if 'full_attn_layer' in _triadic_sig.parameters:
+            _triadic_kwargs['full_attn_layer'] = cfg.get('full_layer', 6)
+        return _mod.TriadicJ96(**_triadic_kwargs)
     else:
         raise ValueError(f"Unknown arch: {arch}")
 
@@ -1522,7 +1868,14 @@ def eval_few_shot_copy(model, tokenizer, device, temperature=0.1, top_p=0.9):
 # ─── 4. PASSKEY RETRIEVAL ─────────────────────────────────────────────────────
 
 _PASSKEY_WORDS   = ['apple', 'banana', 'orange', 'cherry', 'grape',
-                    'mango', 'peach', 'plum', 'kiwi', 'melon']
+                    'mango', 'peach', 'plum', 'pear', 'lime']
+# NOTE: 'kiwi' → [' k', 'iwi'] and 'melon' → [' mel', 'on'] in fineweb_tokenizer_32k.
+# Both tokenize as multi-token words; first-token scoring picks common subwords
+# (' k' id=477, ' mel' id=6194) which inflate eval accuracy for weak/no-retrieval models.
+# Replaced with 'pear' (id=14660) and 'lime' (id=17254) — both single-token.
+# See: Explorations/2026-03-29-flan-noffn-vocab-frequency-artifact.md
+# Also: 'berry' → [' b', 'erry'] (id=281 = ' b') was used in older train scripts;
+# corrected here. 'lemon' → [' lemon'] (id=9806) is fine.
 _FILLER_SENTENCE = 'the weather was mild and the air was still . '
 _INTRO_TEMPLATE  = 'the secret word is {word} .'
 _RETRIEVAL_CUE   = 'the secret word is'  # model predicts " <word>" next (space-prefixed)
@@ -1638,8 +1991,11 @@ def main():
     cfg   = MODEL_REGISTRY[args.model]
     print(f'  Model: {cfg["label"]}')
 
-    # Load tokenizer + model
+    # Load tokenizer + model (use per-model tokenizer if specified in registry)
     print('\n  Loading tokenizer...')
+    global TOKENIZER
+    if 'tokenizer' in cfg and os.path.exists(cfg['tokenizer']):
+        TOKENIZER = cfg['tokenizer']
     tokenizer = load_tokenizer()
     print('  Loading model...')
     model, n_params = load_model(cfg, device)

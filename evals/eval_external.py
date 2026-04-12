@@ -134,6 +134,72 @@ ARCH_CONFIGS = {
     'borg_L11': {'arch': 'borg_L11', 'D': 512, 'H': 8, 'FFN': 2048, 'L': 11, 'full_layer': 5, 'interference': 2},
     # cond_delta: L=6, V9 delta rule kernel, J26D topology
     'cond_delta': {'arch': 'cond_delta', 'D': 512, 'H': 8, 'FFN': 2048, 'L': 6, 'full_layer': 5, 'interference': 2},
+    # moonshot_58m: J24 se015 offsets, D=512, H=8, L=8, FFN=2048, FA@L2, preIF@L1, cold-start base model
+    'moonshot_58m': {'arch': 'moonshot_58m', 'D': 512, 'H': 8, 'FFN': 2048, 'L': 8, 'full_layer': 2, 'interference': 1,
+                     'tokenizer': 'fineweb_tokenizer_32k.json'},
+    # d1024_267m: J24 se015, D=1024, H=16, L=24, FFN=2048, FA@L6, preIF@L5
+    # ep2 checkpoint: PPL=43.13, passkey=100% all 12 distances
+    'd1024_267m': {'arch': 'd1024_267m', 'D': 1024, 'H': 16, 'FFN': 2048, 'L': 24, 'full_layer': 6, 'interference': 5,
+                   # 574K-seq ep1: 27.75 PPL, 100% passkey all distances
+                   'tokenizer': 'fineweb_tokenizer_32k.json'},
+    # moonshot_58m_sft: same arch, SFT fine-tuned on smol-smoltalk (3 epochs, val PPL 7.00)
+    'moonshot_58m_sft': {'arch': 'moonshot_58m', 'D': 512, 'H': 8, 'FFN': 2048, 'L': 8, 'full_layer': 2, 'interference': 1,
+                         'tokenizer': 'fineweb_tokenizer_32k.json',
+                         'checkpoint': os.path.join(os.path.normpath(os.path.join(SCRIPT_DIR, '..')),
+                                                     'autoresearch', 'checkpoints',
+                                                     'smol_dwarf_sft', 'smol_dwarf_sft_best.pt')},
+    # moonshot_58m_mixed: same arch, trained on 60/25/15 FineWeb/PG19/Stack blend (mixed_tokenizer_32k, ep3)
+    'moonshot_58m_mixed': {'arch': 'moonshot_58m', 'D': 512, 'H': 8, 'FFN': 2048, 'L': 8, 'full_layer': 2, 'interference': 1,
+                           'tokenizer': 'mixed_tokenizer_32k.json',
+                           'checkpoint': os.path.join(os.path.normpath(os.path.join(SCRIPT_DIR, '..')),
+                                                       'autoresearch', 'checkpoints',
+                                                       'moonshot_58m_mixed_ep3_full_attn.pt')},
+    # ffn_ablation: same as moonshot_58m but FFN=1024 (2×D) — ep3: PPL=32.00, passkey=96.7%
+    'ffn_ablation': {'arch': 'moonshot_58m', 'D': 512, 'H': 8, 'FFN': 1024, 'L': 8, 'full_layer': 2, 'interference': 1,
+                     'tokenizer': 'fineweb_tokenizer_32k.json',
+                     'checkpoint': os.path.join(os.path.dirname(os.path.abspath(__file__)), '..',
+                                                'autoresearch', 'checkpoints', 'ffn_ablation_best.pt')},
+    # d768_l16: D=768, H=12, L=16, FFN=1536, FA@L4, preIF@L3, 111.5M params, FineWeb-Edu 3 epochs
+    # ep3: PPL=34.42, passkey=100% all 12 distances
+    'd768_l16': {'arch': 'd768_l16', 'D': 768, 'H': 12, 'FFN': 1536, 'L': 16, 'full_layer': 4, 'interference': 3,
+                 'tokenizer': 'fineweb_tokenizer_32k.json',
+                 'checkpoint': os.path.join(os.path.dirname(os.path.abspath(__file__)), '..',
+                                            'autoresearch', 'checkpoints', 'd768_l16_fa4_ep3_full_attn.pt')},
+    # d768_l24: D=768, H=12, L=24, FFN=1536, FA@L6, preIF@L5, 154M params, FineWeb-Edu 3 epochs
+    # ep3: PPL=29.16, passkey=95.0% (d=1-1024 all ≥90%, d=1536=80%)
+    'd768_l24': {'arch': 'd768_l24', 'D': 768, 'H': 12, 'FFN': 1536, 'L': 24, 'full_layer': 6, 'interference': 5,
+                 'tokenizer': 'fineweb_tokenizer_32k.json',
+                 'checkpoint': os.path.join(os.path.dirname(os.path.abspath(__file__)), '..',
+                                            'autoresearch', 'checkpoints', 'd768_l24_fa6_best.pt')},
+    'd768_l32': {'arch': 'd768_l32', 'D': 768, 'H': 12, 'FFN': 1536, 'L': 32, 'full_layer': 8, 'interference': 7,
+                 'tokenizer': 'fineweb_tokenizer_32k.json',
+                 'checkpoint': os.path.join(os.path.dirname(os.path.abspath(__file__)), '..',
+                                            'autoresearch', 'checkpoints', 'd768_l32_fa8_best.pt')},
+'d768_l32_cont': {'arch': 'd768_l32', 'D': 768, 'H': 12, 'FFN': 1536, 'L': 32, 'full_layer': 8, 'interference': 7,
+                 'tokenizer': 'fineweb_tokenizer_32k.json',
+                 'checkpoint': os.path.join(os.path.dirname(os.path.abspath(__file__)), '..',
+                                            'autoresearch', 'checkpoints', 'd768_l32_fa8_ep3_eval.pt')},
+'d768_l32_sft': {'arch': 'd768_l32', 'D': 768, 'H': 12, 'FFN': 1536, 'L': 32, 'full_layer': 8, 'interference': 7,
+                 'tokenizer': 'fineweb_tokenizer_32k.json',
+                 'checkpoint': os.path.join(os.path.dirname(os.path.abspath(__file__)), '..',
+                                            'autoresearch', 'checkpoints', 'd768_l32_sft_eval.pt')},
+'d768_l32_smoltalk': {'arch': 'd768_l32', 'D': 768, 'H': 12, 'FFN': 1536, 'L': 32, 'full_layer': 8, 'interference': 7,
+                      'tokenizer': 'fineweb_tokenizer_32k.json',
+                      'checkpoint': os.path.join(os.path.dirname(os.path.abspath(__file__)), '..',
+                                                 'autoresearch', 'checkpoints', 'd768_l32_smoltalk_ep2_eval.pt')},
+'d768_l32_oh_orca': {'arch': 'd768_l32', 'D': 768, 'H': 12, 'FFN': 1536, 'L': 32, 'full_layer': 8, 'interference': 7,
+                     'tokenizer': 'fineweb_tokenizer_32k.json',
+                     'checkpoint': os.path.join(os.path.dirname(os.path.abspath(__file__)), '..',
+                                                'autoresearch', 'checkpoints', 'd768_l32_oh_orca_sft_best.pt')},
+'d768_l32_mixed_scratch': {'arch': 'd768_l32', 'D': 768, 'H': 12, 'FFN': 1536, 'L': 32, 'full_layer': 8, 'interference': 7,
+                           'tokenizer': 'fineweb_tokenizer_32k.json',
+                           'checkpoint': os.path.join(os.path.dirname(os.path.abspath(__file__)), '..',
+                                                      'autoresearch', 'checkpoints', 'd768_l32_mixed_scratch_best.pt')},
+'triadic_l13_so2_mixed': {'arch': 'triadic_j96', 'D': 512, 'H': 8, 'FFN': 1024, 'L': 13, 'full_layer': 3,
+                          'train_script': 'train/train_d512_l13_triadic_aabbc_mixed_scratch_4090_bf16.py',
+                          'tokenizer': 'fineweb_tokenizer_32k.json',
+                          'checkpoint': os.path.join(os.path.dirname(os.path.abspath(__file__)), '..',
+                                                     'autoresearch', 'checkpoints', 'd512_l13_triadic_aabbc_mixed_scratch_best.pt')},
 }
 
 TASKS = ['hellaswag', 'piqa', 'arc_easy', 'arc_challenge', 'winogrande', 'lambada']
@@ -455,6 +521,119 @@ def load_model_from_arch(arch_name, checkpoint_path, device):
             scale_embed_init_val=0.1,
         ).to(device)
 
+    elif arch == 'moonshot_58m':
+        # Moonshot-58M: J24 se015, D=512, H=8, L=8, FA@L2, preIF@L1
+        import importlib.util
+        repo_root = os.path.normpath(os.path.join(SCRIPT_DIR, '..'))
+        for _d in [os.path.join(repo_root, 'kernels'), repo_root]:
+            if _d not in sys.path:
+                sys.path.insert(0, _d)
+        train_script = os.path.join(repo_root, 'train', 'train_moonshot_58m_4090_bf16.py')
+        spec = importlib.util.spec_from_file_location('moonshot_58m_train', train_script)
+        mod  = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        model = mod.AutoresearchTransformerPhysics(
+            vocab_size=VOCAB_SIZE, embedding_dim=D, num_layers=L,
+            num_heads=H, ffn_dim=FFN, seq_len=MAX_SEQ_LEN,
+            full_attn_layer=cfg.get('full_layer', 2),
+            interference_interval=cfg.get('interference', 1),
+            scale_embed_init_val=0.1,
+        ).to(device)
+
+    elif arch == 'd1024_267m':
+        # D1024-267M: J24 se015, D=1024, H=16, L=24, FA@L6, preIF@L5
+        import importlib.util
+        repo_root = os.path.normpath(os.path.join(SCRIPT_DIR, '..'))
+        for _d in [os.path.join(repo_root, 'kernels'), repo_root]:
+            if _d not in sys.path:
+                sys.path.insert(0, _d)
+        train_script = os.path.join(repo_root, 'train', 'train_d1024_267m_h100_bf16.py')
+        spec = importlib.util.spec_from_file_location('d1024_267m_train', train_script)
+        mod  = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        model = mod.AutoresearchTransformerPhysics(
+            vocab_size=VOCAB_SIZE, embedding_dim=D, num_layers=L,
+            num_heads=H, ffn_dim=FFN, seq_len=MAX_SEQ_LEN,
+            full_attn_layer=cfg.get('full_layer', 6),
+            scale_embed_init_val=0.1,
+        ).to(device)
+
+    elif arch == 'd768_l16':
+        # D768-L16: J24 se015, D=768, H=12, L=16, FFN=1536, FA@L4, preIF@L3, 111.5M params
+        import importlib.util
+        repo_root = os.path.normpath(os.path.join(SCRIPT_DIR, '..'))
+        for _d in [os.path.join(repo_root, 'kernels'), repo_root]:
+            if _d not in sys.path:
+                sys.path.insert(0, _d)
+        train_script = os.path.join(repo_root, 'train', 'train_d768_l16_4090_bf16.py')
+        spec = importlib.util.spec_from_file_location('d768_l16_train', train_script)
+        mod  = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        model = mod.AutoresearchTransformerPhysics(
+            vocab_size=VOCAB_SIZE, embedding_dim=D, num_layers=L,
+            num_heads=H, ffn_dim=FFN, seq_len=MAX_SEQ_LEN,
+            full_attn_layer=cfg.get('full_layer', 4),
+            scale_embed_init_val=0.15,
+        ).to(device)
+
+    elif arch == 'd768_l24':
+        # D768-L24: J24 se015, D=768, H=12, L=24, FFN=1536, FA@L6, preIF@L5, 154M params
+        import importlib.util
+        repo_root = os.path.normpath(os.path.join(SCRIPT_DIR, '..'))
+        for _d in [os.path.join(repo_root, 'kernels'), repo_root]:
+            if _d not in sys.path:
+                sys.path.insert(0, _d)
+        train_script = os.path.join(repo_root, 'train', 'train_d768_l24_h100_bf16.py')
+        spec = importlib.util.spec_from_file_location('d768_l24_train', train_script)
+        mod  = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        model = mod.AutoresearchTransformerPhysics(
+            vocab_size=VOCAB_SIZE, embedding_dim=D, num_layers=L,
+            num_heads=H, ffn_dim=FFN, seq_len=MAX_SEQ_LEN,
+            full_attn_layer=cfg.get('full_layer', 6),
+            scale_embed_init_val=0.15,
+        ).to(device)
+
+    elif arch == 'd768_l32':
+        # D768-L32: J24 se015, D=768, H=12, L=32, FFN=1536, FA@L8, preIF@L7, 169.8M params
+        import importlib.util
+        repo_root = os.path.normpath(os.path.join(SCRIPT_DIR, '..'))
+        for _d in [os.path.join(repo_root, 'kernels'), repo_root]:
+            if _d not in sys.path:
+                sys.path.insert(0, _d)
+        train_script = os.path.join(repo_root, 'train', 'train_d768_l32_h100_bf16.py')
+        spec = importlib.util.spec_from_file_location('d768_l32_train', train_script)
+        mod  = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        model = mod.AutoresearchTransformerPhysics(
+            vocab_size=VOCAB_SIZE, embedding_dim=D, num_layers=L,
+            num_heads=H, ffn_dim=FFN, seq_len=MAX_SEQ_LEN,
+            full_attn_layer=cfg.get('full_layer', 8),
+            scale_embed_init_val=0.15,
+        ).to(device)
+
+    elif arch == 'triadic_j96':
+        # Triadic J=96 family — dynamically import the specific train script
+        # so the correct LAYER_LAYOUT (e.g. AABBC vs ABC) is used.
+        import importlib.util
+        repo_root = os.path.normpath(os.path.join(SCRIPT_DIR, '..'))
+        for _d in [os.path.join(repo_root, 'kernels'), repo_root]:
+            if _d not in sys.path:
+                sys.path.insert(0, _d)
+        _ts = cfg.get('train_script', 'train/train_d512_l13_triadic_j96_4090_bf16.py')
+        if not os.path.isabs(_ts):
+            _ts = os.path.join(repo_root, _ts)
+        spec = importlib.util.spec_from_file_location('triadic_j96_train', _ts)
+        mod  = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        model = mod.TriadicJ96(
+            vocab_size=getattr(mod, 'VOCAB_SIZE', VOCAB_SIZE),
+            embedding_dim=D, num_heads=H, ffn_dim=FFN,
+            seq_len=MAX_SEQ_LEN,
+            full_attn_layer=cfg.get('full_layer', 3),
+            scale_embed_init_val=0.15,
+        ).to(device)
+
     else:
         raise ValueError(f'Unhandled arch: {arch}')
 
@@ -672,6 +851,8 @@ def main():
                              f'Options: {list(ARCH_CONFIGS.keys())}')
     parser.add_argument('--label', type=str, default=None,
                         help='Label for results (default: model/arch name)')
+    parser.add_argument('--tokenizer', type=str, default=None,
+                        help='Path to tokenizer JSON (overrides default; also auto-set by --arch for moonshot models)')
     parser.add_argument('--tasks', nargs='+', default=None,
                         choices=TASKS,
                         help='Tasks to run (default: all)')
@@ -710,6 +891,29 @@ def main():
     if args.max:
         print(f'  Max examples/task: {args.max} ({"--fast" if args.max == 500 else "--max"})')
 
+    # Allow --tokenizer override, or auto-select from arch config / model registry
+    global TOKENIZER
+    if args.tokenizer:
+        TOKENIZER = args.tokenizer
+    elif args.arch and args.arch in ARCH_CONFIGS and 'tokenizer' in ARCH_CONFIGS[args.arch]:
+        tok_name = ARCH_CONFIGS[args.arch]['tokenizer']
+        tok_path = next((p for p in [
+            os.path.join(REPO_ROOT, 'results', tok_name),
+            os.path.join(SCRIPT_DIR, 'results', tok_name),
+        ] if os.path.exists(p)), os.path.join(REPO_ROOT, 'results', tok_name))
+        TOKENIZER = tok_path
+    elif args.model:
+        # Check if the model registry entry specifies a tokenizer path
+        try:
+            if SCRIPT_DIR not in sys.path:
+                sys.path.insert(0, SCRIPT_DIR)
+            from eval_suite import MODEL_REGISTRY
+            cfg = MODEL_REGISTRY.get(args.model, {})
+            tok_path = cfg.get('tokenizer')
+            if tok_path and os.path.exists(tok_path):
+                TOKENIZER = tok_path
+        except Exception:
+            pass
     tokenizer = load_tokenizer()
     print(f'  Tokenizer: {TOKENIZER}')
 

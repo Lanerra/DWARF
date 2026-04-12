@@ -79,6 +79,16 @@ _TRAIN_SCRIPTS = {
     'borg_adapt_warmstart': 'train/train_borg_adapt_13m_bf16.py',
     'borg_midattn': 'train/train_borg_midattn_bf16.py',
     'borg_lastattn': 'train/train_borg_lastattn_bf16.py',
+    # J13D / Moonshot lineage
+    'j13d_v2_30m':       'train/train_borg_j13d_v2_30m_4090_bf16.py',
+    'j13d_v3_30m':       'train/train_borg_j13d_v3_l8_4090_bf16.py',
+    'moonshot_58m':      'train/train_moonshot_58m_4090_bf16.py',
+    'moonshot_58m_sft':  'train/train_moonshot_58m_4090_bf16.py',
+    'd1024_267m':        'train/train_d1024_267m_h100_bf16.py',
+    'd768_l16':          'train/train_d768_l16_4090_bf16.py',
+    'ffn_ablation':      'train/train_ffn_ablation_4090_bf16.py',
+    'd768_l24':          'train/train_d768_l24_h100_bf16.py',
+    'd768_l32':          'train/train_d768_l32_h100_bf16.py',
 }
 
 _MODEL_CLASSES = {
@@ -103,6 +113,16 @@ _MODEL_CLASSES = {
     'borg_adapt_warmstart': 'AutoresearchTransformerPhysics',
     'borg_midattn': 'AutoresearchTransformerPhysics',
     'borg_lastattn': 'AutoresearchTransformerPhysics',
+    # J13D / Moonshot lineage
+    'j13d_v2_30m':       'AutoresearchTransformerPhysics',
+    'j13d_v3_30m':       'AutoresearchTransformerPhysics',
+    'moonshot_58m':      'AutoresearchTransformerPhysics',
+    'moonshot_58m_sft':  'AutoresearchTransformerPhysics',
+    'd1024_267m':        'AutoresearchTransformerPhysics',
+    'd768_l16':          'AutoresearchTransformerPhysics',
+    'ffn_ablation':      'AutoresearchTransformerPhysics',
+    'd768_l24':          'AutoresearchTransformerPhysics',
+    'd768_l32':          'AutoresearchTransformerPhysics',
 }
 
 _ARCH_CONFIGS = {
@@ -138,6 +158,55 @@ _ARCH_CONFIGS = {
         'embedding_dim': 512, 'num_heads': 8, 'ffn_dim': 768,
         'num_layers': 6, 'full_attn_layer': 5, 'interference_interval': 2,
     },
+    # J13D / Moonshot lineage
+    'j13d_v2_30m': {
+        'embedding_dim': 512, 'num_heads': 8, 'ffn_dim': 2048,
+        'num_layers': 6, 'full_attn_layer': 2, 'interference_interval': 1,
+    },
+    'j13d_v3_30m': {
+        'embedding_dim': 512, 'num_heads': 8, 'ffn_dim': 2048,
+        'num_layers': 8, 'full_attn_layer': 2, 'interference_interval': 1,
+    },
+    'moonshot_58m': {
+        'embedding_dim': 512, 'num_heads': 8, 'ffn_dim': 2048,
+        'num_layers': 8, 'full_attn_layer': 2, 'interference_interval': 1,
+    },
+    'moonshot_58m_sft': {
+        'embedding_dim': 512, 'num_heads': 8, 'ffn_dim': 2048,
+        'num_layers': 8, 'full_attn_layer': 2, 'interference_interval': 1,
+    },
+    'd1024_267m': {
+        'embedding_dim': 1024, 'num_heads': 16, 'ffn_dim': 2048,
+        'num_layers': 24, 'full_attn_layer': 6,
+    },
+    'd768_l16': {
+        'embedding_dim': 768, 'num_heads': 12, 'ffn_dim': 1536,
+        'num_layers': 16, 'full_attn_layer': 4,
+    },
+    'ffn_ablation': {
+        'embedding_dim': 512, 'num_heads': 8, 'ffn_dim': 1024,
+        'num_layers': 8, 'full_attn_layer': 2,
+    },
+    'd768_l24': {
+        'embedding_dim': 768, 'num_heads': 12, 'ffn_dim': 1536,
+        'num_layers': 24, 'full_attn_layer': 6,
+    },
+    'd768_l32': {
+        'embedding_dim': 768, 'num_heads': 12, 'ffn_dim': 1536,
+        'num_layers': 32, 'full_attn_layer': 8,
+    },
+}
+
+# Archs using preIF (interference layer before FA, no interval param)
+_PREIF_ARCHS = {
+    'j13d_v2_30m', 'j13d_v3_30m', 'moonshot_58m', 'moonshot_58m_sft',
+    'd1024_267m', 'd768_l16', 'ffn_ablation', 'd768_l24', 'd768_l32',
+}
+
+# Archs that use fineweb_tokenizer_32k instead of condI
+_FINEWEB_TOK_ARCHS = {
+    'j13d_v2_30m', 'j13d_v3_30m', 'moonshot_58m', 'moonshot_58m_sft',
+    'd1024_267m', 'd768_l16', 'ffn_ablation', 'd768_l24', 'd768_l32',
 }
 
 _IS_STANDARD = {'std_85m', 'std_13m'}
@@ -238,9 +307,12 @@ def load_model(arch, checkpoint_path, root, device):
     return model, full_attn_layer, m
 
 
-def load_tokenizer(m, root):
-    """Load tokenizer from the train script module."""
-    tokenizer_path = os.path.join(root, 'results/2048_condI_tokenizer.json')
+def load_tokenizer(m, root, arch=None):
+    """Load tokenizer from the train script module (arch-aware)."""
+    tok_file = ('results/fineweb_tokenizer_32k.json'
+                if arch in _FINEWEB_TOK_ARCHS
+                else 'results/2048_condI_tokenizer.json')
+    tokenizer_path = os.path.join(root, tok_file)
     from tokenizers import Tokenizer
     tok = Tokenizer.from_file(tokenizer_path)
     return m.BPETokenizerWrapper(tok)
@@ -579,7 +651,7 @@ def main():
         args.arch, args.checkpoint, root, device)
 
     print('Loading tokenizer...')
-    tokenizer = load_tokenizer(m, root)
+    tokenizer = load_tokenizer(m, root, arch=args.arch)
 
     num_layers = len(model.blocks)
     print(f'  Model has {num_layers} layers, FA at layer {full_attn_layer}')
@@ -630,32 +702,32 @@ def main():
         if seq_idx == 0:
             plot_norm_progression(
                 norm_stats, full_attn_layer, num_layers,
-                os.path.join(args.out, 'norm_progression.png')
+                os.path.join(args.out, 'norm_progression.jpg')
             )
 
             for key in ['before_fa', 'after_fa']:
                 if key in similarities:
                     plot_cosine_heatmap(
                         similarities, passkey_pos, cue_pos, key,
-                        os.path.join(args.out, f'cosim_{key}.png')
+                        os.path.join(args.out, f'cosim_{key}.jpg')
                     )
 
             for key in ['before_fa', 'after_fa']:
                 if key in pca_results:
                     plot_pca_scatter(
                         pca_results[key], passkey_pos, cue_pos, key,
-                        os.path.join(args.out, f'pca_{key}.png')
+                        os.path.join(args.out, f'pca_{key}.jpg')
                     )
 
             plot_fa_delta(
                 fa_delta, passkey_pos, cue_pos,
-                os.path.join(args.out, 'fa_delta.png')
+                os.path.join(args.out, 'fa_delta.jpg')
             )
 
             plot_summary(
                 norm_stats, pca_results, fa_delta, similarities,
                 full_attn_layer, num_layers, passkey_pos, cue_pos,
-                os.path.join(args.out, 'summary.png')
+                os.path.join(args.out, 'summary.jpg')
             )
 
     capture.remove_hooks()

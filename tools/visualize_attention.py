@@ -32,142 +32,11 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 from matplotlib.gridspec import GridSpec
 
-# DSQG offset sets per arch (set at runtime via --arch)
-_J44 = list(range(33)) + [48, 64, 96, 128, 192, 256, 384, 512, 768, 1024, 1536]  # J=44
-
-_OFFSET_SETS = {
-    'condu':    _J44,
-    'd41s3':    list(range(42)) + [48, 128, 384],           # J=44 (dense=41 + 3 sparse)
-    'd41s5':    list(range(42)) + [48, 128, 384, 768, 1536], # J=47 (dense=41 + 5 sparse)
-    'd41_35m':  list(range(49)) + [96, 128, 384],            # J=52 (dense=48 + 3 sparse)
-    # Extended archs
-    'condx_v2': _J44,   # condX-v2 35M BF16 — bypass gate, same offsets as condU
-    'condm_85m': _J44,  # condM 85M — 12 layers, no scale_embed
-    'condu_v5':  _J44,  # condU-v5 38M — MOVT/QK-OVT/NPCI, same offsets
-    'condv':     _J44,  # condV 13M — Huygens K/V injection
-    'condw':     _J44,  # condW 13M — pure DSQG, no FA layer
-    'std_85m':   [],    # Standard 85M transformer — no DSQG offsets
-    'std_13m':   [],    # Standard 13M transformer — no DSQG offsets
-    # J-series autoresearch models
-    'j24d_int2_physics': [1,2,3,4,5,6,7,8,9,10,13,15,16,21,23,28,48,64,96,192,384,512,768,1024],
-    'j26d_int2_physics': [1,2,3,4,5,6,7,8,9,10,13,15,16,21,23,28,48,64,96,192,384,512,768,1024],  # pos_bias J=24 (δ=11,δ=32 handled in kernel, not pos_bias)
-    'j20d_v10_L8':  [1,2,3,4,5,6,7,8,9,11,13,15,16,23,32,64,128,256,512,1024],  # J=20 V10 offsets
-    'j20d_v10_L10': [1,2,3,4,5,6,7,8,9,11,13,15,16,23,32,64,128,256,512,1024],
-    'j20d_v10_L12': [1,2,3,4,5,6,7,8,9,11,13,15,16,23,32,64,128,256,512,1024],
-    'j20d_v10_L32': [1,2,3,4,5,6,7,8,9,11,13,15,16,23,32,64,128,256,512,1024],
-    'curve_27m':         [1,2,3,4,5,6,7,8,9,10,13,15,16,21,23,28,48,64,96,192,384,512,768,1024],
-    # Borg architecture variants (J=26 offsets, V8 kernel)
-    # Borg models use V8 kernel — pos_bias covers J=24 offsets only
-    # δ=11 and δ=32 are kernel-internal, no learned pos_bias entry
-    'borg_adapt_warmstart': [1,2,3,4,5,6,7,8,9,10,13,15,16,21,23,28,48,64,96,192,384,512,768,1024],
-    'borg_midattn':         [1,2,3,4,5,6,7,8,9,10,13,15,16,21,23,28,48,64,96,192,384,512,768,1024],
-    'borg_lastattn':        [1,2,3,4,5,6,7,8,9,10,13,15,16,21,23,28,48,64,96,192,384,512,768,1024],
-    'borg_midattn_gen2':    [1,2,3,4,5,6,7,8,9,10,13,15,16,21,23,28,48,64,96,192,384,512,768,1024],
-    'borg_midfa_L0':        [1,2,3,4,5,6,7,8,9,10,13,15,16,21,23,28,48,64,96,192,384,512,768,1024],
-    'borg2_dual_fa':        [1,2,3,4,5,6,7,8,9,10,13,15,16,21,23,28,48,64,96,192,384,512,768,1024],
-    'borg_L11':             [1,2,3,4,5,6,7,8,9,10,13,15,16,21,23,28,48,64,96,192,384,512,768,1024],
-    'borg_gen3_L8':         [1,2,3,4,5,6,7,8,9,10,13,15,16,21,23,28,48,64,96,192,384,512,768,1024],
-    'borg_gen5_L11_preIF':  [1,2,3,4,5,6,7,8,9,10,13,15,16,21,23,28,48,64,96,192,384,512,768,1024],
-    'borg_gen5_L8_preIF':   [1,2,3,4,5,6,7,8,9,10,13,15,16,21,23,28,48,64,96,192,384,512,768,1024],
-    'borg_gen4_L11':        [1,2,3,4,5,6,7,8,9,10,13,15,16,21,23,28,48,64,96,192,384,512,768,1024],
-    'borg_j12_30m':         [1, 2, 4, 8, 16, 64, 96, 192, 384, 512, 768, 1024],
-    'dwarf_1b_d4096':       [1,2,3,4,5,6,7,8,9,10,13,15,16,21,23,28,48,64,96,192,384,512,768,1024],
-    'cond_delta':           [1,2,3,4,5,6,7,8,9,10,13,15,16,21,23,28,48,64,96,192,384,512,768,1024],
-}
-
-_TRAIN_SCRIPTS = {
-    'condu':    'train/train_2048_condU.py',
-    'd41s3':    'train/train_2048_14m_d41s3.py',
-    'd41s5':    'train/train_2048_14m_d41s5.py',
-    'd41_35m':  'train/train_2048_35m_d41.py',
-    # Extended
-    'condx_v2': 'train/train_2048_35m_condX_v2_bf16.py',
-    'condm_85m': 'train/train_2048_85m_condM.py',
-    'condu_v5': 'train/train_2048_condU_v5.py',
-    'condv':    'train/train_2048_condV.py',
-    'condw':    'train/train_2048_condW.py',
-    'std_85m':  'train/train_2048_85m_standard_baseline.py',
-    'std_13m':  'train/train_2048_85m_standard_baseline.py',  # same class, same script
-    # J-series autoresearch models
-    'j24d_int2_physics': 'train/train_j24d_int2_physics_bf16.py',
-    'j26d_int2_physics': 'train/train_j26d_int2_physics_bf16.py',
-    'j20d_v10_L8':  'train/train_j20d_v10_L8_bf16.py',
-    'j20d_v10_L10': 'train/train_j20d_v10_L10_bf16.py',
-    'j20d_v10_L12': 'train/train_j20d_v10_L12_bf16.py',
-    'j20d_v10_L32': 'train/train_j20d_v10_L32_bf16.py',
-    'curve_27m':         'train/train_curve_27m_bf16.py',
-    # Borg architecture variants
-    'borg_adapt_warmstart': 'train/train_borg_adapt_13m_bf16.py',
-    'borg_midattn':         'train/train_borg_midattn_bf16.py',
-    'borg_lastattn':        'train/train_borg_lastattn_bf16.py',
-    'borg_midattn_gen2':    'train/train_borg_midattn_unfreeze_bf16.py',
-    'borg_midfa_L0':        'train/train_borg_midfa_L0_bf16.py',
-    'borg2_dual_fa':        'train/train_borg2_dual_fa_bf16.py',
-    'borg_L11':             'train/train_borg_L11_bf16.py',
-    'borg_gen3_L8':         'train/train_borg_gen3_L8_bf16.py',
-    'borg_gen5_L11_preIF':  'train/train_borg_gen5_L11_preIF_bf16.py',
-    'borg_gen5_L8_preIF':   'train/train_borg_gen5_L8_preIF_bf16.py',
-    'borg_gen4_L11':        'train/train_borg_gen4_L11_bf16.py',
-    'borg_j12_30m':         'train/train_borg_j12_30m_4090_bf16.py',
-    'dwarf_1b_d4096':       'train/train_dwarf_1b_d4096_bf16.py',
-    'cond_delta':           'train/train_cond_delta_bf16.py',
-}
-
-# Model class name to instantiate from the train script
-_MODEL_CLASSES = {
-    'condu':    'CondMTransformer',
-    'd41s3':    'CondMTransformer',
-    'd41s5':    'CondMTransformer',
-    'd41_35m':  'CondMTransformer',
-    'condx_v2': 'CondXTransformer',
-    'condm_85m': 'CondMTransformer',
-    'condu_v5': 'CondUV5Transformer',
-    'condv':    'CondMTransformer',
-    'condw':    'CondWTransformer',
-    'std_85m':  'StandardTransformer85M',
-    'std_13m':  'StandardTransformer85M',
-    # J-series autoresearch models
-    'j24d_int2_physics': 'AutoresearchTransformerPhysics',
-    'j26d_int2_physics': 'AutoresearchTransformerPhysics',
-    'j20d_v10_L8':  'AutoresearchTransformerPhysics',
-    'j20d_v10_L10': 'AutoresearchTransformerPhysics',
-    'j20d_v10_L12': 'AutoresearchTransformerPhysics',
-    'j20d_v10_L32': 'AutoresearchTransformerPhysics',
-    'curve_27m':         'CurveTransformer',
-    # Borg architecture variants
-    'borg_adapt_warmstart': 'AutoresearchTransformerPhysics',
-    'borg_midattn':         'AutoresearchTransformerPhysics',
-    'borg_lastattn':        'AutoresearchTransformerPhysics',
-    'borg_midattn_gen2':    'AutoresearchTransformerPhysics',
-    'borg_midfa_L0':        'AutoresearchTransformerPhysics',
-    'borg2_dual_fa':        'AutoresearchTransformerPhysics',
-    'borg_L11':             'AutoresearchTransformerPhysics',
-    'borg_gen3_L8':         'AutoresearchTransformerPhysics',
-    'borg_gen5_L11_preIF':  'AutoresearchTransformerPhysics',
-    'borg_gen5_L8_preIF':   'AutoresearchTransformerPhysics',
-    'borg_gen4_L11':        'AutoresearchTransformerPhysics',
-    'borg_j12_30m':         'AutoresearchTransformerPhysics',
-    'dwarf_1b_d4096':       'AutoresearchTransformerPhysics',
-    'cond_delta':           'AutoresearchTransformerCondDelta',
-}
-
-# Archs without DSQG layers (standard transformers only)
-_IS_STANDARD = {'std_85m', 'std_13m'}
-
-# Archs where interference_interval was removed from __init__ (gen3/gen4 cleanup Mar 19)
-# Note: gen5 scripts still accept interference_interval — only gen3/gen4 had it removed
-# borg_j12_30m also has no interference_interval (preIF-only from the start)
-_PREIF_ARCHS = {
-    'borg_gen4_L11', 'borg_gen3_L8', 'borg_j12_30m',
-}
-
-# Archs without a full attention layer (pure DSQG)
-_NO_FULL_ATTN = {'condw'}
-
-# Archs whose DSQG kernel lacks scale_embed — pass zeros during extraction
-_NO_SCALE_EMBED = {'condm_85m'}
-# Default — overridden in main() via --arch
-ALL_OFFSETS = _OFFSET_SETS['condu']
+from model_registry import (
+    MODEL_REGISTRY, build_model, load_checkpoint, get_tokenizer, get_offsets,
+    J44_OFFSETS, SE015_OFFSETS, SE096_OFFSETS, REPO,
+)
+from kernels.topk_sparse_attn import TopKSparseAttention
 
 
 def detect_arch_from_results(results_json_path: str) -> str | None:
@@ -195,50 +64,43 @@ def detect_arch_from_results(results_json_path: str) -> str | None:
 # Pure Python DSQG forward — computes attention weights (not just output)
 # ---------------------------------------------------------------------------
 
-def dsqg_attention_weights(q, k, pos_bias, scale_embed):
+def dsqg_attention_weights(q, k, pos_bias, scale_embed, offsets):
     """
-    Compute DSQG attention weight matrix over 44 offsets.
+    Compute DSQG attention weight matrix over the given offset set.
 
     Args:
         q:           [B, H, N, HD]   query vectors
         k:           [B, H, N, HD]   key vectors
-        pos_bias:    [44, H]         learned frequency prior
-        scale_embed: [44, HD]        Q-weighted matched filter
+        pos_bias:    [J, H]          learned frequency prior
+        scale_embed: [J, HD]         Q-weighted matched filter
+        offsets:     list[int]       offset values
 
     Returns:
-        alpha: [B, H, N, 44]   attention weights (softmax over offsets)
-        score: [B, H, N, 44]   raw scores (pre-softmax)
+        alpha: [B, H, N, J]   attention weights (softmax over offsets)
+        score: [B, H, N, J]   raw scores (pre-softmax)
     """
     B, H, N, HD = q.shape
-    J = len(ALL_OFFSETS)
+    J = len(offsets)
     device = q.device
     INF = float('-inf')
 
-    # Pad k so we can index negative positions
-    max_offset = ALL_OFFSETS[-1]
-    k_padded = F.pad(k, (0, 0, max_offset, 0))  # [B, H, max_offset+N, HD]
+    max_offset = offsets[-1]
+    k_padded = F.pad(k, (0, 0, max_offset, 0))
 
     scores = torch.full((B, H, N, J), INF, device=device)
 
-    for j_idx, delta in enumerate(ALL_OFFSETS):
-        # Valid positions: n >= delta
+    for j_idx, delta in enumerate(offsets):
         if delta == 0:
             valid_n = slice(None)
-            k_j = k_padded[:, :, max_offset:, :]  # [B, H, N, HD]
+            k_j = k_padded[:, :, max_offset:, :]
         else:
-            k_j = k_padded[:, :, max_offset - delta: max_offset - delta + N, :]  # [B, H, N, HD]
+            k_j = k_padded[:, :, max_offset - delta: max_offset - delta + N, :]
             valid_n = torch.arange(N, device=device) >= delta
 
-        # Content score: Q · K_j / sqrt(HD)
-        qk = (q * k_j).sum(-1) / math.sqrt(HD)          # [B, H, N]
-
-        # Pos bias: pos_bias[j, h]
-        pb = pos_bias[j_idx].view(1, H, 1).expand(B, H, N)   # [B, H, N]
-
-        # Q-weighted scale: Q · scale_embed[j] / sqrt(HD)
-        se = (q * scale_embed[j_idx].view(1, 1, 1, HD)).sum(-1) / math.sqrt(HD)  # [B, H, N]
-
-        raw = qk + pb + se                                # [B, H, N]
+        qk = (q * k_j).sum(-1) / math.sqrt(HD)
+        pb = pos_bias[j_idx].view(1, H, 1).expand(B, H, N)
+        se = (q * scale_embed[j_idx].view(1, 1, 1, HD)).sum(-1) / math.sqrt(HD)
+        raw = qk + pb + se
 
         if isinstance(valid_n, slice):
             scores[:, :, :, j_idx] = raw
@@ -246,10 +108,8 @@ def dsqg_attention_weights(q, k, pos_bias, scale_embed):
             valid_mask = valid_n.view(1, 1, N)
             scores[:, :, :, j_idx] = torch.where(valid_mask, raw, torch.tensor(INF, device=device))
 
-    # Softmax over offset dimension (J=44)
-    # Mask out -inf before softmax
     alpha = torch.softmax(scores, dim=-1)
-    alpha = torch.nan_to_num(alpha, nan=0.0)   # positions with all-inf get 0
+    alpha = torch.nan_to_num(alpha, nan=0.0)
 
     return alpha, scores
 
@@ -272,15 +132,13 @@ def capture_full_attention(model, x, full_layer_idx):
             scale = math.sqrt(HD)
 
             if hasattr(module, 'qkv_proj'):
-                # Standard: FullCausalAttention
                 qkv = module.qkv_proj(h_inp)
                 q, k, _ = qkv.split(D, dim=-1)
             elif hasattr(module, 'q_proj') and hasattr(module, 'kv_proj'):
-                # Bypass: FullCausalAttentionBypass (condX-v2)
                 q = module.q_proj(h_inp)
                 k, _ = module.kv_proj(h_inp).split(D, dim=-1)
             else:
-                return  # Unknown attention type — skip
+                return
 
             q = q.view(B, N, H, HD).permute(0, 2, 1, 3)
             k = k.view(B, N, H, HD).permute(0, 2, 1, 3)
@@ -291,6 +149,75 @@ def capture_full_attention(model, x, full_layer_idx):
 
     handle = model.blocks[full_layer_idx].attn.register_forward_hook(hook_fn)
     return weights_store, handle
+
+
+def capture_topk_attention(model, topk_layer_idx, topk_k):
+    """Hook into TopK attention layer to capture sparse attention weights.
+
+    Returns the full softmax-after-topk-mask weights [B, H, N, N].
+    """
+    weights_store = {}
+
+    def hook_fn(module, inp, out):
+        with torch.no_grad():
+            h_inp = inp[0]
+            B, N, D = h_inp.shape
+            H, hd = module.H, module.hd
+
+            def reshape(t):
+                return t.reshape(B, N, H, hd).transpose(1, 2)
+
+            Q = reshape(module.W_q(h_inp))
+            K = reshape(module.W_k(h_inp))
+            scores = (Q @ K.transpose(-2, -1)) / math.sqrt(hd)
+
+            causal_mask = torch.triu(
+                torch.ones(N, N, device=h_inp.device, dtype=torch.bool), diagonal=1)
+            scores = scores.masked_fill(causal_mask[None, None], float('-inf'))
+
+            if topk_k < N:
+                topk_vals, _ = scores.topk(topk_k, dim=-1)
+                threshold = topk_vals[..., -1:]
+                scores = scores.masked_fill(scores < threshold, float('-inf'))
+
+            attn_w = torch.softmax(scores, dim=-1)
+            weights_store['topk_attn'] = attn_w.detach().cpu()
+
+    handle = model.blocks[topk_layer_idx].attn.register_forward_hook(hook_fn)
+    return weights_store, handle
+
+
+def plot_topk_attention(attn_w, topk_k, title_prefix, out_path):
+    """Plot TopK sparse attention matrix — H subplots showing sparsity pattern."""
+    B, H, N, _ = attn_w.shape
+    N_show = min(N, 256)
+    ncols = min(H, 4)
+    nrows = math.ceil(H / ncols)
+    fig, axes = plt.subplots(nrows, ncols, figsize=(ncols * 5, nrows * 4))
+    if H == 1:
+        axes = [[axes]]
+    elif nrows == 1:
+        axes = [axes]
+    axes = [ax for row in axes for ax in (row if hasattr(row, '__iter__') else [row])]
+
+    for h in range(H):
+        ax = axes[h]
+        img = attn_w[0, h, :N_show, :N_show].numpy()
+        im = ax.imshow(img, aspect='auto', origin='upper',
+                       cmap='hot', vmin=0, vmax=img.max() * 0.95 + 1e-8)
+        ax.set_title(f'Head {h}', fontsize=10)
+        ax.set_xlabel('Key position', fontsize=8)
+        ax.set_ylabel('Query position', fontsize=8)
+        plt.colorbar(im, ax=ax, shrink=0.6)
+
+    for h in range(H, len(axes)):
+        axes[h].set_visible(False)
+
+    fig.suptitle(f'{title_prefix}\nTopK Sparse Attention (k={topk_k})', fontsize=12)
+    plt.tight_layout()
+    plt.savefig(out_path, dpi=150, bbox_inches='tight')
+    plt.close()
+    print(f'  Saved: {out_path}')
 
 
 # ---------------------------------------------------------------------------
@@ -322,9 +249,13 @@ def plot_dsqg_combs(alpha, offsets, title_prefix, out_path, token_texts=None):
         axes = [axes]
     axes = [ax for row in axes for ax in (row if hasattr(row, '__iter__') else [row])]
 
-    # Clamp to displayable range
+    # Show a window where all offset groups have valid targets.
+    # For triadic J=96, GROUP_C offsets go up to ~2048; we want positions
+    # where even the longest offsets have fired. Use the last 256 positions
+    # of the sequence (or all if N<=256).
     N_show = min(N, 256)
-    alpha_show = alpha[:, :N_show, :]  # [H, N_show, J]
+    start = max(0, N - N_show)  # last N_show positions
+    alpha_show = alpha[:, start:start + N_show, :]  # [H, N_show, J]
 
     label_positions, label_texts = zip(*offset_labels(offsets))
 
@@ -334,7 +265,7 @@ def plot_dsqg_combs(alpha, offsets, title_prefix, out_path, token_texts=None):
         im = ax.imshow(img, aspect='auto', origin='lower',
                        cmap='hot', vmin=0, vmax=img.max() * 0.9 + 1e-8)
         ax.set_title(f'Head {h}', fontsize=10)
-        ax.set_xlabel('Token position', fontsize=8)
+        ax.set_xlabel(f'Token position (t={start}–{start+N_show-1})', fontsize=8)
         ax.set_ylabel('Offset δ', fontsize=8)
         ax.set_yticks(list(label_positions))
         ax.set_yticklabels(list(label_texts), fontsize=7)
@@ -498,56 +429,6 @@ def plot_side_by_side(dsqg_alpha, full_attn, offsets, out_path):
 # Main
 # ---------------------------------------------------------------------------
 
-def _dims_from_checkpoint(ckpt_path):
-    """Infer StandardTransformer dimensions from checkpoint state dict keys/shapes."""
-    ck = torch.load(ckpt_path, map_location='cpu', weights_only=False)
-    sd = ck.get('model_state_dict', ck)
-    # Count layers
-    num_layers = sum(1 for k in sd if k.startswith('blocks.') and k.endswith('.ln1.weight'))
-    # Embedding dim from token embedding
-    D = sd['token_emb.weight'].shape[1]
-    # FFN dim from first block's fc1
-    F = sd['blocks.0.ffn.fc1.weight'].shape[0]
-    # Num heads: can't read directly, infer from qkv_proj (3*D*H / D = 3*H... actually 3*D)
-    # Head count stored in checkpoint indirectly; default 8 works for all our runs
-    return {'embedding_dim': D, 'num_layers': num_layers, 'ffn_dim': F, 'num_heads': 8}
-
-
-def _instantiate_model(m, arch, vocab_size=None, ckpt_path=None):
-    """Instantiate the correct model class for the given arch."""
-    class_name = _MODEL_CLASSES[arch]
-    cls = getattr(m, class_name)
-    vs = vocab_size or m.VOCAB_SIZE
-    D  = getattr(m, 'EMBEDDING_DIM', 256)
-    L  = getattr(m, 'NUM_LAYERS', 6)
-    H  = getattr(m, 'NUM_HEADS', 8)
-    F  = getattr(m, 'FFN_DIM', 1024)
-    fa = getattr(m, 'FULL_ATTN_LAYER', 5)
-    iv = getattr(m, 'INTERFERENCE', 3)
-
-    if arch in _IS_STANDARD:
-        # Infer exact dims from checkpoint to handle 13M vs 85M differences
-        if ckpt_path is not None:
-            dims = _dims_from_checkpoint(ckpt_path)
-            D, L, H, F = dims['embedding_dim'], dims['num_layers'], dims['num_heads'], dims['ffn_dim']
-        return cls(vocab_size=vs, embedding_dim=D, num_layers=L,
-                   num_heads=H, ffn_dim=F, seq_len=2048)
-    elif arch in _NO_FULL_ATTN:
-        # Pure DSQG — no full_attn_layer arg
-        return cls(vocab_size=vs, embedding_dim=D, num_layers=L,
-                   num_heads=H, ffn_dim=F, seq_len=2048,
-                   interference_interval=iv)
-    elif arch in _PREIF_ARCHS:
-        # preIF-only archs: interference_interval removed from __init__
-        return cls(vocab_size=vs, embedding_dim=D, num_layers=L,
-                   num_heads=H, ffn_dim=F, seq_len=2048,
-                   full_attn_layer=fa)
-    else:
-        return cls(vocab_size=vs, embedding_dim=D, num_layers=L,
-                   num_heads=H, ffn_dim=F, seq_len=2048,
-                   full_attn_layer=fa, interference_interval=iv)
-
-
 def load_and_extract(checkpoint_path, arch, ids_tensor, device, root):
     """
     Load a checkpoint for the given arch, run inference, and return all
@@ -556,32 +437,11 @@ def load_and_extract(checkpoint_path, arch, ids_tensor, device, root):
     Returns dict with keys: dsqg_alphas, dsqg_layers, full_attn,
     if_gains, pos_bias, checkpoint_name, offsets.
     """
-    import importlib.util
+    cfg = MODEL_REGISTRY[arch]
+    offsets = get_offsets(arch)
 
-    offsets = _OFFSET_SETS[arch]
-    global ALL_OFFSETS
-    ALL_OFFSETS = offsets if offsets else _J44  # use J44 as fallback for DSQG weight fn
-
-    spec = importlib.util.spec_from_file_location(
-        f'train_script_{arch}',
-        os.path.join(root, _TRAIN_SCRIPTS[arch]),
-    )
-    m = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(m)
-
-    abs_ckpt = os.path.join(root, checkpoint_path)
-    model = _instantiate_model(m, arch, ckpt_path=abs_ckpt)
-    ck = torch.load(abs_ckpt, map_location='cpu', weights_only=False)
-    state = ck.get('model_state_dict', ck)
-    # Strip torch.compile _orig_mod prefixes if present
-    if any('_orig_mod' in k for k in state):
-        state = {k.replace('._orig_mod', '').replace('_orig_mod.', ''): v
-                 for k, v in state.items()}
-    model.load_state_dict(state, strict=False)
-    model.to(device)
-    model.eval()
-    val_ppl = ck.get('val_ppl', '?')
-    print(f'  Loaded: {checkpoint_path}  (val_ppl={val_ppl})')
+    model, run_cfg, m = build_model(arch, device=device, checkpoint_path=checkpoint_path)
+    val_ppl = run_cfg.get('_val_ppl', '?')
 
     checkpoint_name = os.path.splitext(os.path.basename(checkpoint_path))[0]
     if '/' in checkpoint_path:
@@ -591,8 +451,7 @@ def load_and_extract(checkpoint_path, arch, ids_tensor, device, root):
     N = ids_tensor.shape[1]
 
     # ── Standard transformer path (no DSQG) ──────────────────────────────────
-    if arch in _IS_STANDARD:
-        # Hook full attention on the last block
+    if cfg.get('is_standard', False):
         last_block_idx = len(model.blocks) - 1
         full_weights_store = {}
         def _std_hook(module, inp, out):
@@ -601,15 +460,14 @@ def load_and_extract(checkpoint_path, arch, ids_tensor, device, root):
                 B2, N2, D2 = h_inp.shape
                 q2, k2, _ = module.qkv_proj(h_inp).split(D2, dim=-1)
                 H2 = module.num_heads; HD2 = D2 // H2
-                q2 = q2.view(B2,N2,H2,HD2).permute(0,2,1,3)
-                k2 = k2.view(B2,N2,H2,HD2).permute(0,2,1,3)
+                q2 = q2.view(B2, N2, H2, HD2).permute(0, 2, 1, 3)
+                k2 = k2.view(B2, N2, H2, HD2).permute(0, 2, 1, 3)
                 scale2 = math.sqrt(HD2)
-                mask2 = torch.triu(torch.full((N2,N2), float('-inf'), device=h_inp.device), diagonal=1)
-                attn2 = torch.matmul(q2, k2.transpose(-2,-1)) / scale2 + mask2
+                mask2 = torch.triu(torch.full((N2, N2), float('-inf'), device=h_inp.device), diagonal=1)
+                attn2 = torch.matmul(q2, k2.transpose(-2, -1)) / scale2 + mask2
                 full_weights_store['full_attn'] = torch.softmax(attn2, dim=-1).detach().cpu()
         handle = model.blocks[last_block_idx].attn.register_forward_hook(_std_hook)
         with torch.no_grad():
-            # Standard models use token_emb/pos_emb, not embedding/pos_embed
             _ = model(ids_tensor)
         handle.remove()
         print(f'  Standard transformer: captured full attention on layer {last_block_idx}')
@@ -620,22 +478,33 @@ def load_and_extract(checkpoint_path, arch, ids_tensor, device, root):
         }
 
     # ── DSQG path (all other archs) ───────────────────────────────────────────
+    is_topk = cfg.get('is_topk', False)
+
     with torch.no_grad():
         pos = torch.arange(N, device=device).unsqueeze(0)
 
-        # Full attention capture (skip for pure DSQG archs)
         full_weights_store = {}
+        topk_weights_store = {}
         hook_handle = None
-        if arch not in _NO_FULL_ATTN:
-            # Handle dual-FA models (full_attn_layers list) and single-FA (full_attn_layer int)
+        topk_hook_handle = None
+
+        if is_topk:
+            full_layer_idx = model.full_attn_layer
+            topk_k = cfg.get('topk_k', 64)
+            topk_weights_store, topk_hook_handle = capture_topk_attention(
+                model, full_layer_idx, topk_k)
+        elif not cfg.get('no_full_attn', False):
             if hasattr(model, 'full_attn_layers'):
                 full_layer_idx = model.full_attn_layers[-1]
             else:
                 full_layer_idx = model.full_attn_layer
             full_weights_store, hook_handle = capture_full_attention(model, None, full_layer_idx)
+
         _ = model(ids_tensor)
         if hook_handle is not None:
             hook_handle.remove()
+        if topk_hook_handle is not None:
+            topk_hook_handle.remove()
 
         if hasattr(model, 'pos_embed'):
             x_running = model.embedding(ids_tensor) + model.pos_embed(pos)
@@ -656,9 +525,11 @@ def load_and_extract(checkpoint_path, arch, ids_tensor, device, root):
                 q = q.view(*x_running.shape[:2], H, HD).permute(0, 2, 1, 3)
                 k = k.view(*x_running.shape[:2], H, HD).permute(0, 2, 1, 3)
 
-                # Handle archs without scale_embed (e.g. condm_85m)
-                if arch in _NO_SCALE_EMBED or not hasattr(attn, 'scale_embed'):
-                    J = len(ALL_OFFSETS)
+                # Per-layer offsets for triadic; global offsets otherwise
+                layer_offsets = attn.offsets_dev.tolist() if hasattr(attn, 'offsets_dev') else offsets
+
+                if cfg.get('no_scale_embed', False) or not hasattr(attn, 'scale_embed'):
+                    J = len(layer_offsets)
                     se = torch.zeros(J, HD)
                 else:
                     se = attn.scale_embed.float().cpu()
@@ -667,7 +538,9 @@ def load_and_extract(checkpoint_path, arch, ids_tensor, device, root):
                     q.float().cpu(), k.float().cpu(),
                     attn.pos_bias.float().cpu(),
                     se,
+                    layer_offsets,
                 )
+
                 dsqg_alphas[i] = alpha[0].cpu()
                 dsqg_layers.append(i)
                 print(f'  Layer {i} DSQG: alpha shape {alpha.shape}, '
@@ -680,7 +553,6 @@ def load_and_extract(checkpoint_path, arch, ids_tensor, device, root):
         if hasattr(block, 'attn') and hasattr(block.attn, 'if_gain'):
             if_gains[i] = block.attn.if_gain.detach().cpu().tolist()
 
-    # pos_bias from first DSQG layer
     pos_bias = None
     for block in model.blocks:
         if hasattr(block, 'attn') and hasattr(block.attn, 'pos_bias'):
@@ -691,6 +563,9 @@ def load_and_extract(checkpoint_path, arch, ids_tensor, device, root):
         'dsqg_alphas': dsqg_alphas,
         'dsqg_layers': dsqg_layers,
         'full_attn': full_weights_store.get('full_attn'),
+        'topk_attn': topk_weights_store.get('topk_attn') if is_topk else None,
+        'is_topk': is_topk,
+        'topk_k': cfg.get('topk_k', 64) if is_topk else None,
         'if_gains': if_gains,
         'pos_bias': pos_bias,
         'checkpoint_name': checkpoint_name,
@@ -772,12 +647,26 @@ def plot_compare_checkpoints(data_a, data_b, label_a, label_b, out_path):
     print(f'  Saved: {out_path}')
 
 
-def build_passkey_text(tokenizer, n_tokens=400, key_pos=50, key_val=42):
-    """Build a passkey-retrieval sequence for visualization."""
+def build_passkey_text(tokenizer, n_tokens=2000, key_pos=512, key_val=42):
+    """Build a passkey-retrieval sequence for visualization.
+
+    key_pos: approximate token position for the secret number insertion.
+    We build ~2000 tokens so all triadic groups (GROUP_A local, GROUP_B mid
+    δ≥48, GROUP_C long δ≥384) have valid KV targets visible in the window.
+    """
     filler = "The meeting was scheduled for the following week. All participants were expected to attend and review the materials beforehand. "
-    prompt = filler * 20  # long filler
-    # Insert passkey early
-    parts = [filler[:key_pos * 5], f" REMEMBER THE NUMBER {key_val}. ", filler[key_pos * 5:], f" What was the number? The number was {key_val}."]
+    # Encode filler to measure tokens per character
+    filler_ids = tokenizer.encode(filler)
+    chars_per_tok = len(filler) / max(len(filler_ids), 1)
+    target_chars = int(n_tokens * chars_per_tok)
+    key_char_pos = int(key_pos * chars_per_tok)
+    filler_long = (filler * ((target_chars // len(filler)) + 2))[:target_chars]
+    parts = [
+        filler_long[:key_char_pos],
+        f" REMEMBER THE NUMBER {key_val}. ",
+        filler_long[key_char_pos:],
+        f" What was the number? The number was {key_val}.",
+    ]
     return ''.join(parts)
 
 
@@ -802,16 +691,11 @@ def _run_compare(args, root):
     arch_a = _resolve_arch(args.arch_a, args.results_a, args.arch, root)
     arch_b = _resolve_arch(args.arch_b, args.results_b, args.arch, root)
 
-    # Build tokenizer from arch A's train script (shared input text)
     import importlib.util
-    spec = importlib.util.spec_from_file_location(
-        'train_script_tok', os.path.join(root, _TRAIN_SCRIPTS[arch_a]))
-    m = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(m)
-
-    tokenizer = m.BPETokenizerWrapper(
-        __import__('tokenizers').Tokenizer.from_file(
-            os.path.join(root, 'results/2048_condI_tokenizer.json')))
+    from model_registry import _import_train_script
+    m = _import_train_script(MODEL_REGISTRY[arch_a]['train_script'])
+    tok = get_tokenizer(arch_a)
+    tokenizer = m.BPETokenizerWrapper(tok)
 
     if args.passkey:
         text = build_passkey_text(tokenizer)
@@ -843,7 +727,7 @@ def _run_compare(args, root):
 
     name_a = data_a['checkpoint_name']
     name_b = data_b['checkpoint_name']
-    out_path = os.path.join(out_dir, f'compare_{name_a}_vs_{name_b}.png')
+    out_path = os.path.join(out_dir, f'compare_{name_a}_vs_{name_b}.jpg')
 
     plot_compare_checkpoints(data_a, data_b, label_a, label_b, out_path)
     print(f'\nDone. Comparison saved to {out_path}')
@@ -851,19 +735,17 @@ def _run_compare(args, root):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--arch', default='condu', choices=list(_OFFSET_SETS.keys()),
-                        help=('Model architecture: condu, d41s3, d41s5, d41_35m, '
-                              'condx_v2, condm_85m, condu_v5, condv, condw, '
-                              'std_85m, std_13m'))
+    parser.add_argument('--arch', default='condu', choices=list(MODEL_REGISTRY.keys()),
+                        help='Model architecture')
 
     checkpoint_group = parser.add_mutually_exclusive_group()
     checkpoint_group.add_argument('--checkpoint', default=None)
     checkpoint_group.add_argument('--compare', nargs=2, metavar=('CHECKPOINT_A', 'CHECKPOINT_B'),
                                   help='Compare two checkpoints side by side')
 
-    parser.add_argument('--arch_a', default=None, choices=list(_OFFSET_SETS.keys()),
+    parser.add_argument('--arch_a', default=None, choices=list(MODEL_REGISTRY.keys()),
                         help='Architecture for checkpoint A (compare mode)')
-    parser.add_argument('--arch_b', default=None, choices=list(_OFFSET_SETS.keys()),
+    parser.add_argument('--arch_b', default=None, choices=list(MODEL_REGISTRY.keys()),
                         help='Architecture for checkpoint B (compare mode)')
     parser.add_argument('--results_a', default=None,
                         help='Results JSON for checkpoint A (auto-detect arch)')
@@ -889,34 +771,18 @@ def main():
         _run_compare(args, root)
         return
 
-    # Apply arch-specific offset set globally
-    global ALL_OFFSETS
-    ALL_OFFSETS = _OFFSET_SETS[args.arch]
+    arch_offsets = get_offsets(args.arch)
 
     os.makedirs(os.path.join(root, args.out_dir), exist_ok=True)
     device = torch.device(args.device)
 
-    # Load model
     print('Loading model...')
-    import importlib.util
-    spec = importlib.util.spec_from_file_location('train_script',
-           os.path.join(root, _TRAIN_SCRIPTS[args.arch]))
-    m = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(m)
+    from model_registry import _import_train_script
+    m = _import_train_script(MODEL_REGISTRY[args.arch]['train_script'])
+    model, run_cfg, _m = build_model(args.arch, device=device, checkpoint_path=args.checkpoint)
 
-    abs_ckpt_main = os.path.join(root, args.checkpoint)
-    model = _instantiate_model(m, args.arch, ckpt_path=abs_ckpt_main)
-    ck = torch.load(abs_ckpt_main, map_location='cpu', weights_only=False)
-    state = ck.get('model_state_dict', ck)
-    model.load_state_dict(state, strict=False)
-    model.to(device)
-    model.eval()
-    print(f'  Loaded: {args.checkpoint}  (val_ppl={ck.get("val_ppl", "?")})')
-
-    # Tokenize
-    tokenizer = m.BPETokenizerWrapper(
-        __import__('tokenizers').Tokenizer.from_file(
-            os.path.join(root, 'results/2048_condI_tokenizer.json')))
+    tok = get_tokenizer(args.arch)
+    tokenizer = m.BPETokenizerWrapper(tok)
 
     if args.passkey:
         text = build_passkey_text(tokenizer)
@@ -936,7 +802,6 @@ def main():
     N = ids_t.shape[1]
     print(f'  Sequence length: {N} tokens')
 
-    # Use load_and_extract for unified extraction logic
     print('Extracting attention weights...')
 
     checkpoint_name = os.path.splitext(os.path.basename(args.checkpoint))[0]
@@ -945,31 +810,36 @@ def main():
         checkpoint_name = f'{ck_dir}_{checkpoint_name}'
 
     extracted = load_and_extract(args.checkpoint, args.arch, ids_t, device, root)
-    dsqg_alphas     = extracted['dsqg_alphas']
-    dsqg_layers     = extracted['dsqg_layers']
+    dsqg_alphas = extracted['dsqg_alphas']
+    dsqg_layers = extracted['dsqg_layers']
     full_attn_store = extracted['full_attn']
+    topk_attn_store = extracted['topk_attn']
     if_gains_per_layer = extracted['if_gains']
-    pos_bias_l0     = extracted['pos_bias']    # may be None for std archs
+    pos_bias_l0 = extracted['pos_bias']
     full_weights_store = {'full_attn': full_attn_store}
-    full_layer_idx  = getattr(model, 'full_attn_layer', len(model.blocks) - 1)
+    full_layer_idx = getattr(model, 'full_attn_layer', len(model.blocks) - 1)
 
-    # ---------------------------------------------------------------------------
-    # Generate plots
-    # ---------------------------------------------------------------------------
     out_dir = os.path.join(root, args.out_dir)
     print(f'\nGenerating visualizations in {out_dir}/')
 
-    # 1. Side-by-side money shot (DSQG archs only)
+    if topk_attn_store is not None:
+        topk_k = extracted['topk_k']
+        plot_topk_attention(
+            topk_attn_store,
+            topk_k,
+            f'Layer {full_layer_idx} (TopK Sparse)',
+            os.path.join(out_dir, f'{checkpoint_name}_topk_attn.jpg')
+        )
+
     if dsqg_layers and full_weights_store.get('full_attn') is not None:
         mean_dsqg = dsqg_alphas[dsqg_layers[0]]
         plot_side_by_side(
             mean_dsqg,
             full_weights_store['full_attn'],
-            ALL_OFFSETS,
-            os.path.join(out_dir, f'{checkpoint_name}_comparison.png')
+            arch_offsets,
+            os.path.join(out_dir, f'{checkpoint_name}_comparison.jpg')
         )
 
-    # 2. DSQG per-layer per-head combs (DSQG archs only)
     if dsqg_layers:
         layer_choice = args.layer if args.layer is not None else dsqg_layers
         if isinstance(layer_choice, int):
@@ -979,42 +849,38 @@ def main():
             if layer_idx in dsqg_alphas:
                 plot_dsqg_combs(
                     dsqg_alphas[layer_idx],
-                    ALL_OFFSETS,
+                    arch_offsets,
                     f'Layer {layer_idx}',
-                    os.path.join(out_dir, f'{checkpoint_name}_dsqg_layer{layer_idx}.png')
+                    os.path.join(out_dir, f'{checkpoint_name}_dsqg_layer{layer_idx}.jpg')
                 )
 
-    # 3. Full attention
     if full_weights_store.get('full_attn') is not None:
         plot_full_attention(
             full_weights_store['full_attn'],
             f'Layer {full_layer_idx} (Full Causal)',
-            os.path.join(out_dir, f'{checkpoint_name}_full_attn.png')
+            os.path.join(out_dir, f'{checkpoint_name}_full_attn.jpg')
         )
 
-    # 4. pos_bias heatmap (DSQG only)
-    if pos_bias_l0 is not None and ALL_OFFSETS:
+    if pos_bias_l0 is not None and arch_offsets:
         plot_pos_bias(
             pos_bias_l0,
-            ALL_OFFSETS,
-            os.path.join(out_dir, f'{checkpoint_name}_pos_bias.png')
+            arch_offsets,
+            os.path.join(out_dir, f'{checkpoint_name}_pos_bias.jpg')
         )
 
-    # 5. IF gains (DSQG only)
     if if_gains_per_layer:
         plot_if_gains(
             if_gains_per_layer,
-            os.path.join(out_dir, f'{checkpoint_name}_if_gains.png')
+            os.path.join(out_dir, f'{checkpoint_name}_if_gains.jpg')
         )
 
-    # Save summary JSON
     summary = {
         'checkpoint': args.checkpoint,
         'n_tokens': N,
         'dsqg_layers': dsqg_layers,
         'if_gains': if_gains_per_layer,
         'pos_bias_l0_per_head_mean': pos_bias_l0.mean(0).tolist() if pos_bias_l0 is not None else [],
-        'offsets': ALL_OFFSETS,
+        'offsets': arch_offsets,
     }
     with open(os.path.join(out_dir, f'{checkpoint_name}_summary.json'), 'w') as f:
         json.dump(summary, f, indent=2)

@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DWARF Hyperparameter Calculator</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #232636;
+    --border: #2e3248;
+    --accent: #7c8ff7;
+    --accent2: #a78bfa;
+    --green: #4ade80;
+    --yellow: #fbbf24;
+    --red: #f87171;
+    --text: #e2e8f0;
+    --muted: #8892a4;
+    --small: 0.82rem;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 24px 16px;
+    font-size: 14px;
+  }
+  h1 { font-size: 1.4rem; color: var(--accent); margin-bottom: 4px; }
+  .subtitle { color: var(--muted); font-size: var(--small); margin-bottom: 24px; }
+  .layout { display: grid; grid-template-columns: 360px 1fr; gap: 20px; max-width: 1100px; margin: 0 auto; }
+  @media (max-width: 800px) { .layout { grid-template-columns: 1fr; } }
+
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px;
+  }
+  .panel h2 { font-size: 0.9rem; color: var(--accent2); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 14px; }
+
+  .preset-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 18px; }
+  .preset-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    padding: 8px 10px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: var(--small);
+    text-align: left;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .preset-btn:hover { border-color: var(--accent); background: #1e2235; }
+  .preset-btn.active { border-color: var(--accent); background: #1e2235; color: var(--accent); }
+  .preset-name { font-weight: bold; display: block; }
+  .preset-sub { color: var(--muted); font-size: 0.75rem; }
+
+  .field { margin-bottom: 12px; }
+  .field label { display: block; color: var(--muted); font-size: var(--small); margin-bottom: 4px; }
+  .field input, .field select {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    padding: 7px 10px;
+    font-family: inherit;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .field input:focus, .field select:focus { border-color: var(--accent); }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .field-note { font-size: 0.72rem; color: var(--muted); margin-top: 3px; }
+
+  .radio-group { display: flex; gap: 10px; margin-bottom: 12px; }
+  .radio-group label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--muted);
+    font-size: var(--small);
+    cursor: pointer;
+  }
+  .radio-group input[type="radio"] { accent-color: var(--accent); }
+  .radio-group-label { display: block; color: var(--muted); font-size: var(--small); margin-bottom: 6px; }
+
+  .checkbox-group { display: flex; align-items: center; gap: 6px; margin-bottom: 12px; }
+  .checkbox-group label { color: var(--muted); font-size: var(--small); cursor: pointer; }
+  .checkbox-group input[type="checkbox"] { accent-color: var(--accent); }
+
+  .result-section { margin-bottom: 18px; }
+  .result-section h3 { font-size: 0.8rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+  .result-row { display: flex; justify-content: space-between; align-items: baseline; padding: 5px 0; border-bottom: 1px solid #1e2235; }
+  .result-row:last-child { border-bottom: none; }
+  .result-label { color: var(--muted); font-size: var(--small); }
+  .result-value { font-weight: bold; color: var(--text); font-size: 0.95rem; }
+  .result-value.highlight { color: var(--green); }
+  .result-value.warn { color: var(--yellow); }
+  .result-value.danger { color: var(--red); }
+  .result-value.good { color: var(--accent); }
+
+  .formula {
+    font-size: 0.7rem;
+    color: var(--muted);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 2px 6px;
+    margin-left: 8px;
+    font-style: italic;
+  }
+
+  .warning-box {
+    background: #2a1f00;
+    border: 1px solid #5a3e00;
+    border-radius: 6px;
+    padding: 10px 12px;
+    font-size: var(--small);
+    color: var(--yellow);
+    margin-bottom: 12px;
+    display: none;
+  }
+  .warning-box.visible { display: block; }
+
+  .callout-box {
+    background: #1a0f00;
+    border: 1px solid var(--red);
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-size: var(--small);
+    color: var(--red);
+    margin-bottom: 16px;
+    line-height: 1.5;
+  }
+  .callout-box strong { color: #fca5a5; }
+
+  .divider { height: 1px; background: var(--border); margin: 14px 0; }
+
+  .compare-table { width: 100%; border-collapse: collapse; font-size: var(--small); }
+  .compare-table th { color: var(--muted); text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.06em; padding: 6px 8px; text-align: right; border-bottom: 1px solid var(--border); }
+  .compare-table th:first-child { text-align: left; }
+  .compare-table td { padding: 6px 8px; border-bottom: 1px solid #1a1d27; text-align: right; }
+  .compare-table td:first-child { text-align: left; color: var(--accent); }
+  .compare-table tr:hover td { background: var(--surface2); }
+  .compare-table .current-row td { color: var(--green); }
+  .compare-table .current-row td:first-child { color: var(--green); }
+
+  select option { background: var(--surface2); }
+  .tag { font-size: 0.68rem; background: var(--surface2); border: 1px solid var(--border); border-radius: 3px; padding: 1px 5px; color: var(--muted); margin-left: 4px; }
+  .tag.new { border-color: var(--green); color: var(--green); }
+
+  .layer-diagram {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 12px;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 0.75rem;
+    color: var(--accent);
+    white-space: pre;
+    overflow-x: auto;
+    margin-top: 8px;
+    display: none;
+    line-height: 1.6;
+  }
+  .layer-diagram.visible { display: block; }
+</style>
+</head>
+<body>
+
+<div style="max-width:1100px;margin:0 auto;">
+  <h1>⚡ DWARF Hyperparameter Calculator</h1>
+  <div class="subtitle">DSQG + relay architecture · J=24 se015 offsets · FA@~25% depth · μP √D scaling · Triadic J=96 supported</div>
+
+  <div class="layout">
+    <div>
+      <div class="panel" style="margin-bottom:16px;">
+        <h2>Architecture Presets</h2>
+        <div class="preset-grid" id="presetGrid"></div>
+      </div>
+
+      <div class="panel">
+        <h2>Architecture</h2>
+        <div class="field-row">
+          <div class="field">
+            <label>Hidden dim D</label>
+            <input type="number" id="D" value="512" min="64" step="64" oninput="calc()">
+          </div>
+          <div class="field">
+            <label>Num heads H</label>
+            <input type="number" id="H" value="8" min="1" step="1" oninput="calc()">
+            <div class="field-note" id="hdNote">head_dim = 64</div>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Layers L</label>
+            <input type="number" id="L" value="8" min="1" step="1" oninput="calc()">
+          </div>
+          <div class="field">
+            <label>FFN dim</label>
+            <input type="number" id="FFN" value="1024" min="64" step="64" oninput="calc()">
+            <div class="field-note" id="ffnRatioNote">2×D</div>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Vocab size</label>
+            <input type="number" id="V" value="32000" min="1000" step="1000" oninput="calc()">
+          </div>
+          <div class="field">
+            <label>Seq length</label>
+            <input type="number" id="SEQ" value="2048" min="128" step="128" oninput="calc()">
+          </div>
+        </div>
+        <div class="field">
+          <label>Tied embeddings</label>
+          <select id="tied" onchange="calc()">
+            <option value="1">Yes (tied lm_head)</option>
+            <option value="0" selected>No (untied lm_head)</option>
+          </select>
+        </div>
+
+        <div class="divider"></div>
+        <h2 style="margin-bottom:14px;">DWARF-Specific</h2>
+
+        <div class="radio-group-label">Offset mode</div>
+        <div class="radio-group">
+          <label><input type="radio" name="offsetMode" value="standard" checked onchange="onOffsetModeChange()"> Standard (J=24)</label>
+          <label><input type="radio" name="offsetMode" value="triadic" onchange="onOffsetModeChange()"> Triadic J=96 (J=32/layer)</label>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label>J offsets</label>
+            <input type="number" id="J" value="24" min="1" step="1" oninput="calc()">
+            <div class="field-note">se015 = 24</div>
+          </div>
+          <div class="field">
+            <label>FA layer</label>
+            <input type="number" id="FA_LAYER" value="2" min="0" step="1" oninput="calc()">
+            <div class="field-note" id="faPlacementNote">25% depth</div>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>δ_relay_min</label>
+            <input type="number" id="DELTA_RELAY" value="48" min="1" step="1" oninput="calc()">
+            <div class="field-note">for EMA init</div>
+          </div>
+          <div class="field">
+            <label>Scale embed init</label>
+            <input type="number" id="SE_INIT" value="0.1" min="0.001" step="0.01" oninput="calc()">
+          </div>
+        </div>
+
+        <div class="divider"></div>
+        <h2 style="margin-bottom:14px;">Domain &amp; Training</h2>
+
+        <div class="radio-group-label">Domain mode</div>
+        <div class="radio-group">
+          <label><input type="radio" name="domainMode" value="single" checked onchange="calc()"> Single (FineWeb/Wiki)</label>
+          <label><input type="radio" name="domainMode" value="mixed" onchange="calc()"> Mixed (+PG19/Stack)</label>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label>Chinchilla %</label>
+            <input type="number" id="CHIN_PCT" value="22" min="1" max="100" step="1" oninput="calc()">
+          </div>
+          <div class="field">
+            <label>Epochs</label>
+            <input type="number" id="EPOCHS" value="3" min="1" step="1" oninput="calc()">
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Batch size (seqs)</label>
+            <input type="number" id="BS" value="16" min="1" step="1" oninput="calc()">
+          </div>
+          <div class="field">
+            <label>Grad accum</label>
+            <input type="number" id="GRAD_ACCUM" value="8" min="1" step="1" oninput="calc()">
+          </div>
+        </div>
+        <div class="field">
+          <label>MAX_TRAIN_SEQS (0 = derive from Chinchilla)</label>
+          <input type="number" id="MAX_TRAIN_SEQS" value="0" min="0" step="10000" oninput="calc()">
+          <div class="field-note">Override sequence count for percolation predictor</div>
+        </div>
+        <div class="field">
+          <label>GPU</label>
+          <select id="GPU" onchange="calc()">
+            <option value="82.6">RTX 4090 (82.6 TFLOPS BF16)</option>
+            <option value="35.58">RTX 3090 (35.58 TFLOPS BF16)</option>
+            <option value="989">H200 SXM (989 TFLOPS BF16)</option>
+            <option value="494.5">H100 NVL (494.5 TFLOPS BF16)</option>
+            <option value="312">H100 SXM (312 TFLOPS BF16)</option>
+            <option value="77.97">A100 40GB (77.97 TFLOPS BF16)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>GPU MFU estimate</label>
+          <select id="MFU" onchange="calc()">
+            <option value="0.45">45% (typical DSQG Triton)</option>
+            <option value="0.35">35% (conservative)</option>
+            <option value="0.55">55% (optimistic)</option>
+            <option value="0.65">65% (Flash-only baseline)</option>
+          </select>
+        </div>
+
+        <div class="checkbox-group">
+          <input type="checkbox" id="adamw8bit" checked onchange="calc()">
+          <label for="adamw8bit">AdamW8bit (default in all train scripts)</label>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="callout-box">
+        ⚠ <strong>Freeze scale_embed during SFT and mixed-domain continuation.</strong><br>
+        LR_MULT amplification causes amplitude decay → passkey collapse.<br>
+        Unfrozen SFT: 98.3%→73.3%. Unfrozen mixed-domain: 99.2%→79.2%.
+      </div>
+
+      <div id="warnBox" class="warning-box"></div>
+
+      <div class="panel" style="margin-bottom:16px;">
+        <h2>Architecture Summary</h2>
+        <div class="result-section">
+          <div class="result-row">
+            <span class="result-label">Total parameters</span>
+            <span class="result-value highlight" id="r_total_params">—</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label">Non-embedding params</span>
+            <span class="result-value" id="r_non_emb_params">—</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label">Embedding params</span>
+            <span class="result-value" id="r_emb_params">—</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label">head_dim (D/H)</span>
+            <span class="result-value" id="r_hd">—</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label">FFN ratio</span>
+            <span class="result-value" id="r_ffn_ratio">—</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label">DSQG : FA ratio</span>
+            <span class="result-value" id="r_dsqg_ratio">—</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label">FA placement (% depth)</span>
+            <span class="result-value" id="r_fa_pct">—</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label">Post-FA relay layers</span>
+            <span class="result-value" id="r_post_fa">—</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label">Coherence ceiling <span class="formula">⌊D/35⌋</span></span>
+            <span class="result-value" id="r_coherence_ceiling">—</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label">L_optimal <span class="formula">(10+phase2)/0.75</span></span>
+            <span class="result-value" id="r_l_optimal">—</span>
+          </div>
+        </div>
+        <div id="triadicDiagram" class="layer-diagram"></div>
+      </div>
+
+      <div class="panel" style="margin-bottom:16px;">
+        <h2>DWARF Hyperparameters</h2>
+        <div class="result-section">
+          <div class="result-row">
+            <span class="result-label" id="r_ema_init_label">EMA_INIT (1/δ_relay_min) <span class="formula">se015</span></span>
+            <span class="result-value good" id="r_ema_init">—</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label" id="r_ema_window_label">EMA window at init (tokens)</span>
+            <span class="result-value" id="r_ema_window">—</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label">LR_MULT <span class="formula" id="r_lr_mult_formula">15×√(D/512)</span></span>
+            <span class="result-value good" id="r_lr_mult">—</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label">Base LR</span>
+            <span class="result-value" id="r_lr">—</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label">Scale embed LR <span class="formula">base×mult</span></span>
+            <span class="result-value" id="r_se_lr">—</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label">Scale embed init</span>
+            <span class="result-value" id="r_se_init">—</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label" id="r_relay_bw_label">Relay bandwidth (J×HD)</span>
+            <span class="result-value" id="r_relay_bw">—</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label">Relay / residual stream <span class="formula" id="r_relay_note"></span></span>
+            <span class="result-value" id="r_relay_ratio">—</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label">J required for ratio≥1.0 <span class="formula">⌈D/hd⌉</span></span>
+            <span class="result-value" id="r_j_required">—</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" style="margin-bottom:16px;">
+        <h2>Chinchilla &amp; Training</h2>
+        <div class="result-section">
+          <div class="result-row">
+            <span class="result-label">100% Chinchilla tokens</span>
+            <span class="result-value" id="r_chin_100_tokens">—</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label">100% Chinchilla sequences</span>
+            <span class="result-value" id="r_chin_100_seqs">—</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label">Target sequences (<span id="r_chin_pct_label">22</span>%)</span>
+            <span class="result-value highlight" id="r_target_seqs">—</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label">Target tokens</span>
+            <span class="result-value" id="r_target_tokens">—</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label">Steps per epoch</span>
+            <span class="result-value" id="r_steps_epoch">—</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label">Total steps</span>
+            <span class="result-value" id="r_total_steps">—</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label">Effective batch (tokens)</span>
+            <span class="result-value" id="r_eff_batch_tokens">—</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" style="margin-bottom:16px;">
+        <h2>Percolation &amp; Phase Transition</h2>
+        <div class="result-section">
+          <div class="result-row">
+            <span class="result-label">Percolation est. step</span>
+            <span class="result-value" id="r_percolation_step">—</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label">Steps per epoch</span>
+            <span class="result-value" id="r_perc_steps_epoch">—</span>
+          </div>
+          <div class="result-row" id="r_perc_warn_row" style="display:none;">
+            <span class="result-label" style="color:var(--yellow);" id="r_perc_warn_text"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" style="margin-bottom:16px;">
+        <h2>Compute &amp; Runtime</h2>
+        <div class="result-section">
+          <div class="result-row">
+            <span class="result-label">FLOPs per token <span class="formula">6×non-emb</span></span>
+            <span class="result-value" id="r_flops_token">—</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label">Total training FLOPs</span>
+            <span class="result-value" id="r_total_flops">—</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label">GPU peak TFLOPS (BF16)</span>
+            <span class="result-value" id="r_gpu_tflops">—</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label">Effective throughput (MFU)</span>
+            <span class="result-value" id="r_eff_tflops">—</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label">Est. time per epoch</span>
+            <span class="result-value warn" id="r_time_epoch">—</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label">Est. total runtime</span>
+            <span class="result-value warn" id="r_time_total">—</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label">Model weights (BF16)</span>
+            <span class="result-value" id="r_model_gb">—</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label" id="r_optim_label">Optimizer states (AdamW8bit)</span>
+            <span class="result-value" id="r_optim_gb">—</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label">Est. peak VRAM</span>
+            <span class="result-value warn" id="r_vram">—</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Architecture Comparison</h2>
+        <table class="compare-table">
+          <thead>
+            <tr>
+              <th>Config</th>
+              <th>Params</th>
+              <th>PPL</th>
+              <th>Passkey</th>
+              <th>ar_score</th>
+            </tr>
+          </thead>
+          <tbody id="compareBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const PRESETS = [
+  {
+    name: "Moonshot-58M",
+    sub: "100% Chinchilla champion",
+    tag: "best",
+    D:512, H:8, L:8, FFN:1024, V:32000, SEQ:2048, tied:0,
+    J:24, FA_LAYER:2, DELTA_RELAY:48, SE_INIT:0.1,
+    CHIN_PCT:22, EPOCHS:3, BS:16, GRAD_ACCUM:8
+  },
+  {
+    name: "d768_l16",
+    sub: "Borderline coherence",
+    tag: null,
+    D:768, H:12, L:16, FFN:1536, V:32000, SEQ:2048, tied:0,
+    J:24, FA_LAYER:4, DELTA_RELAY:48, SE_INIT:0.15,
+    CHIN_PCT:22, EPOCHS:3, BS:16, GRAD_ACCUM:8
+  },
+  {
+    name: "d768_l24",
+    sub: "Inhibitory attractor",
+    tag: null,
+    D:768, H:12, L:24, FFN:1536, V:32000, SEQ:2048, tied:0,
+    J:24, FA_LAYER:6, DELTA_RELAY:48, SE_INIT:0.15,
+    CHIN_PCT:22, EPOCHS:3, BS:32, GRAD_ACCUM:4
+  },
+  {
+    name: "d768_l32",
+    sub: "Best baseline (cont_ep2)",
+    tag: "best",
+    D:768, H:12, L:32, FFN:1536, V:32000, SEQ:2048, tied:0,
+    J:24, FA_LAYER:8, DELTA_RELAY:48, SE_INIT:0.15,
+    CHIN_PCT:22, EPOCHS:3, BS:32, GRAD_ACCUM:4
+  },
+  {
+    name: "d1024_267M",
+    sub: "First perfect relay",
+    tag: "best",
+    D:1024, H:16, L:24, FFN:2048, V:32000, SEQ:2048, tied:0,
+    J:24, FA_LAYER:6, DELTA_RELAY:48, SE_INIT:0.15,
+    CHIN_PCT:22, EPOCHS:3, BS:16, GRAD_ACCUM:4
+  },
+  {
+    name: "Triadic L=9",
+    sub: "3-triad J=96, D=512",
+    tag: "new",
+    D:512, H:8, L:9, FFN:1024, V:32000, SEQ:2048, tied:0,
+    J:96, FA_LAYER:3, DELTA_RELAY:48, SE_INIT:0.1,
+    CHIN_PCT:22, EPOCHS:3, BS:16, GRAD_ACCUM:8
+  },
+  {
+    name: "Triadic L=13",
+    sub: "4-triad J=96, more slack",
+    tag: "new",
+    D:512, H:8, L:13, FFN:1024, V:32000, SEQ:2048, tied:0,
+    J:96, FA_LAYER:3, DELTA_RELAY:48, SE_INIT:0.1,
+    CHIN_PCT:22, EPOCHS:3, BS:16, GRAD_ACCUM:8
+  },
+  {
+    name: "D=2048 Billion",
+    sub: "J=96, safe ratio target",
+    tag: "hypo",
+    D:2048, H:16, L:24, FFN:4096, V:32000, SEQ:2048, tied:0,
+    J:96, FA_LAYER:6, DELTA_RELAY:48, SE_INIT:0.15,
+    CHIN_PCT:22, EPOCHS:3, BS:32, GRAD_ACCUM:4
+  },
+];
+
+const KNOWN_RESULTS = [
+  { name:"Moonshot-58M ep2",      params:"45.6M", ppl:35.04,  passkey:"99.2%",  ar:null    },
+  { name:"d768_l32 cont_ep2",     params:"197M",  ppl:25.85,  passkey:"98.3%",  ar:"34.5%" },
+  { name:"d768_l32 Mixed-Frozen", params:"197M",  ppl:18.75,  passkey:"99.2%",  ar:"34.7%" },
+  { name:"H3 From-Scratch Mix",   params:"197M",  ppl:24.16,  passkey:"70.0%",  ar:null    },
+  { name:"LFM2.5-350M-Base",      params:"350M",  ppl:null,   passkey:"6.7%",   ar:"34.4%" },
+  { name:"Triadic L=13 (live)",   params:"48.4M", ppl:null,   passkey:"TBD",    ar:null    },
+];
+
+function fmtN(n, decimals=0) {
+  if (n === null || isNaN(n)) return "—";
+  if (n >= 1e12) return (n/1e12).toFixed(decimals || 2) + "T";
+  if (n >= 1e9)  return (n/1e9).toFixed(decimals || 2) + "B";
+  if (n >= 1e6)  return (n/1e6).toFixed(decimals || 1) + "M";
+  if (n >= 1e3)  return (n/1e3).toFixed(decimals || 1) + "K";
+  return n.toFixed(decimals);
+}
+
+function fmtTime(seconds) {
+  if (seconds < 60) return seconds.toFixed(0) + "s";
+  if (seconds < 3600) return (seconds/60).toFixed(1) + " min";
+  if (seconds < 86400) return (seconds/3600).toFixed(1) + "h";
+  return (seconds/86400).toFixed(1) + " days";
+}
+
+function set(id, val, cls="") {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = val;
+  el.className = "result-value" + (cls ? " " + cls : "");
+}
+
+function getOffsetMode() {
+  return document.querySelector('input[name="offsetMode"]:checked').value;
+}
+
+function getDomainMode() {
+  return document.querySelector('input[name="domainMode"]:checked').value;
+}
+
+function onOffsetModeChange() {
+  const mode = getOffsetMode();
+  const jInput = document.getElementById("J");
+  if (mode === "triadic") {
+    jInput.value = 96;
+  } else {
+    jInput.value = 24;
+  }
+  calc();
+}
+
+function buildTriadicDiagram(L, FA_LAYER) {
+  const layers = [];
+  for (let i = 0; i < L; i++) {
+    if (i === FA_LAYER) {
+      layers.push("FA");
+    } else if (i >= L - 3 && L > 6) {
+      layers.push("T");
+    } else {
+      const pos = i < FA_LAYER ? i : i - 1;
+      const inTriad = pos % 3;
+      layers.push(["A", "B", "C"][inTriad]);
+    }
+  }
+
+  let diagram = "Layers: ";
+  let groups = [];
+  let current = [];
+  for (let i = 0; i < layers.length; i++) {
+    if (layers[i] === "FA") {
+      if (current.length) groups.push(current.join(" "));
+      groups.push("FA");
+      current = [];
+    } else {
+      current.push(layers[i]);
+      if (current.length === 3 && layers[i + 1] !== "FA") {
+        groups.push(current.join(" "));
+        current = [];
+      }
+    }
+  }
+  if (current.length) groups.push(current.join(" "));
+  diagram += groups.join(" | ");
+
+  const triadCount = Math.floor((L - 1) / 3);
+  const remainder = (L - 1) % 3;
+  diagram += `\nTriads: ${triadCount} complete` + (remainder ? ` + ${remainder} tail` : "") + ` + 1 FA`;
+
+  return diagram;
+}
+
+function isTriadicCompatible(L) {
+  const nonFA = L - 1;
+  return nonFA % 3 === 0 || (nonFA - 3) % 3 === 0;
+}
+
+function calc() {
+  const D          = parseInt(document.getElementById("D").value) || 512;
+  const H          = parseInt(document.getElementById("H").value) || 8;
+  const L          = parseInt(document.getElementById("L").value) || 8;
+  const FFN        = parseInt(document.getElementById("FFN").value) || 1024;
+  const V          = parseInt(document.getElementById("V").value) || 32000;
+  const SEQ        = parseInt(document.getElementById("SEQ").value) || 2048;
+  const tied       = parseInt(document.getElementById("tied").value);
+  const J          = parseInt(document.getElementById("J").value) || 24;
+  const FA_LAYER   = parseInt(document.getElementById("FA_LAYER").value);
+  const DELTA_RELAY= parseInt(document.getElementById("DELTA_RELAY").value) || 48;
+  const SE_INIT    = parseFloat(document.getElementById("SE_INIT").value) || 0.1;
+  const CHIN_PCT   = parseFloat(document.getElementById("CHIN_PCT").value) || 22;
+  const EPOCHS     = parseInt(document.getElementById("EPOCHS").value) || 3;
+  const BS         = parseInt(document.getElementById("BS").value) || 16;
+  const GRAD_ACCUM = parseInt(document.getElementById("GRAD_ACCUM").value) || 8;
+  const GPU_TFLOPS = parseFloat(document.getElementById("GPU").value) || 82.6;
+  const MFU        = parseFloat(document.getElementById("MFU").value) || 0.45;
+  const maxTrainSeqsRaw = parseInt(document.getElementById("MAX_TRAIN_SEQS").value) || 0;
+  const adamw8bit  = document.getElementById("adamw8bit").checked;
+
+  const offsetMode = getOffsetMode();
+  const domainMode = getDomainMode();
+  const isTriadic  = offsetMode === "triadic";
+  const isMixed    = domainMode === "mixed";
+
+  const HD = D / H;
+
+  const emb_params = tied ? V * D : V * D * 2;
+  const relay_extra = J * H + J * HD + 10 * H;
+  const dsqg_layer = 4 * D * D + 2 * D * FFN + 4 * D + relay_extra;
+  const fa_layer = 4 * D * D + 2 * D;
+  const preIF_layer = 2 * D * D + J * H * 2 + J * HD;
+  const n_dsqg = L - 1 - 1;
+  const layer_params = n_dsqg * dsqg_layer + fa_layer + preIF_layer;
+  const non_emb = layer_params;
+  const total_params = emb_params + non_emb;
+
+  const ema_init = 1 / DELTA_RELAY;
+  const ema_window = Math.round(1 / ema_init);
+
+  const lr_mult_base = 15 * Math.sqrt(D / 512);
+  const lr_mult = isMixed ? lr_mult_base * 1.306 : lr_mult_base;
+  const base_lr = 3e-4;
+
+  const ema_init_single = 0.0208;
+  const ema_init_mixed = 0.010;
+  const ema_window_single = Math.round(1 / ema_init_single);
+  const ema_window_mixed = Math.round(1 / ema_init_mixed);
+
+  const j_per_layer = isTriadic ? 32 : J;
+  const relay_bw = j_per_layer * HD;
+  const relay_ratio = relay_bw / D;
+
+  const fa_pct = ((FA_LAYER + 1) / L * 100);
+  const post_fa = L - FA_LAYER - 1;
+  const dsqg_ratio = L - 1;
+
+  const chin_100_tokens = 20 * total_params;
+  const chin_100_seqs = Math.round(chin_100_tokens / SEQ);
+  const target_seqs = Math.round(chin_100_seqs * CHIN_PCT / 100);
+  const target_tokens = target_seqs * SEQ;
+  const eff_batch_seqs = BS * GRAD_ACCUM;
+  const eff_batch_tokens = eff_batch_seqs * SEQ;
+  const actual_train_seqs = maxTrainSeqsRaw > 0 ? maxTrainSeqsRaw : target_seqs;
+  const steps_epoch = Math.ceil(actual_train_seqs / eff_batch_seqs);
+  const total_steps = steps_epoch * EPOCHS;
+
+  const flops_token = 6 * non_emb;
+  const total_flops = flops_token * target_tokens * EPOCHS;
+  const eff_tflops = GPU_TFLOPS * MFU * 1e12;
+  const total_seconds = total_flops / eff_tflops;
+  const seconds_per_epoch = total_seconds / EPOCHS;
+
+  const model_gb = total_params * 2 / 1e9;
+  const optim_bytes_per_param = adamw8bit ? 6 : 12;
+  const optim_gb = non_emb * optim_bytes_per_param / 1e9;
+  const activations_gb = BS * SEQ * D * 2 * L / 1e9;
+  const CE_CHUNK = 512;
+  const logits_gb = (BS * CE_CHUNK * V * 2) / 1e9;
+  const vram_est = model_gb + optim_gb + activations_gb + logits_gb;
+
+  const ffn_optimal = 2 * D;
+  const coherence_ceiling = Math.floor(D / 35);
+  const j_required = Math.ceil(D / HD);
+
+  const phase2_layers = 10;
+  const l_optimal = Math.round((10 + phase2_layers) / 0.75);
+
+  const perc_step_single = "~700–800";
+  const perc_step_mixed = "~900–1000";
+  const perc_step = isMixed ? perc_step_mixed : perc_step_single;
+
+  const warns = [];
+
+  if (HD < 64) {
+    warns.push(`🔴 hd < 64 — relay formation confirmed broken at hd=32. Minimum validated: hd=64.`);
+  } else if (HD !== 64) {
+    warns.push(`⚠ head_dim=${HD} — kernel tuned for hd=64 (D÷H=64 → sm_89/sm_90 fast path). Non-64 values use slower autotune fallback.`);
+  }
+
+  if (post_fa < 5) warns.push(`⚠ Only ${post_fa} post-FA relay layers — minimum validated is 5.`);
+  if (post_fa > coherence_ceiling) warns.push(`⚠ ${post_fa} post-FA layers exceeds coherence ceiling (~${coherence_ceiling} for D=${D}). May exceed relay coherence length.`);
+
+  if (fa_pct < 15 || fa_pct > 35) warns.push(`🔴 FA at ${fa_pct.toFixed(0)}% depth — outside validated range (15–35%). FA@L/4 (25%) is canonical.`);
+  else if (fa_pct < 20 || fa_pct > 30) warns.push(`⚠ FA at ${fa_pct.toFixed(0)}% depth — outside optimal range (20–30%). 25% validated best.`);
+
+  if (FFN < D) warns.push(`🔴 FFN=${FFN} < D — definitely too narrow. Relay cannot form.`);
+  else if (Math.abs(FFN - ffn_optimal) / ffn_optimal > 0.25) {
+    warns.push(`⚠ FFN=${FFN} differs >25% from optimal ${ffn_optimal} (2×D for all scales).`);
+  }
+
+  if (relay_ratio > 6.0) {
+    warns.push(`🔴 Bandwidth ratio ${relay_ratio.toFixed(1)}× >6.0× — J=96/D=512 uniform at 12.0× confirmed unstable (gradient competition).`);
+  } else if (relay_ratio > 4.0) {
+    warns.push(`⚠ Bandwidth ratio ${relay_ratio.toFixed(1)}× >4.0× — approaching validated limit. Monitor percolation.`);
+  } else if (relay_ratio < 1.0 && relay_ratio >= 0.9) {
+    warns.push(`⚠ relay/residual = ${relay_ratio.toFixed(2)}× borderline <1.0 — test carefully. J≥${j_required} needed for ratio≥1.0.`);
+  } else if (relay_ratio < 0.9) {
+    warns.push(`🔴 relay/residual = ${relay_ratio.toFixed(2)}× < 1.0: DSQG bandwidth insufficient. Geometry collapse (D=4096/J=24). Need J≥${j_required} or increase hd.`);
+  }
+
+  if (!isTriadic && D === 512 && L > 8) {
+    warns.push(`⚠ D=512 with L=${L} > 8 — exceeds validated depth for standard J=24 at this width.`);
+  }
+
+  if (isTriadic) {
+    if (!isTriadicCompatible(L)) {
+      warns.push(`⚠ L=${L} is not triadic-compatible. Recommended: L=9 (3 triads) or L=13 (4 triads).`);
+    }
+  }
+
+  if (CHIN_PCT < 15) warns.push(`⚠ Only ${CHIN_PCT}% Chinchilla — percolation threshold may not cross in ep1. Minimum validated: ~22%.`);
+
+  if (steps_epoch < 1200) {
+    warns.push(`⚠ Short epoch (${steps_epoch} steps) — consider ≥200K sequences for adequate post-crossing crystallization.`);
+  }
+
+  const warnBox = document.getElementById("warnBox");
+  if (warns.length) {
+    warnBox.innerHTML = warns.join("<br>");
+    warnBox.classList.add("visible");
+  } else {
+    warnBox.classList.remove("visible");
+  }
+
+  document.getElementById("hdNote").textContent = `head_dim = ${HD}${HD < 64 ? " 🔴" : (HD !== 64 ? " ⚠" : " ✓")}`;
+  document.getElementById("ffnRatioNote").textContent = `${(FFN/D).toFixed(1)}×D (rec: 2×D)`;
+  document.getElementById("faPlacementNote").textContent = `${fa_pct.toFixed(0)}% depth`;
+  document.getElementById("r_chin_pct_label").textContent = CHIN_PCT;
+
+  set("r_total_params",  fmtN(total_params), "highlight");
+  set("r_non_emb_params", fmtN(non_emb));
+  set("r_emb_params",    fmtN(emb_params));
+  set("r_hd",            `${HD}${HD < 64 ? " 🔴 < 64" : (HD !== 64 ? " ⚠ not 64" : "")}`, HD < 64 ? "danger" : (HD !== 64 ? "warn" : ""));
+  set("r_ffn_ratio",     `${(FFN/D).toFixed(1)}×D`);
+  set("r_dsqg_ratio",    `${dsqg_ratio}:1`);
+  set("r_fa_pct",        `${fa_pct.toFixed(0)}% (layer ${FA_LAYER}/${L-1})`,
+      fa_pct >= 20 && fa_pct <= 30 ? "good" : "warn");
+  set("r_post_fa",       `${post_fa} layers`,
+      post_fa >= 5 && post_fa <= coherence_ceiling ? "good" : "warn");
+  set("r_coherence_ceiling", `${coherence_ceiling} layers (D=${D})`, "");
+  set("r_l_optimal",     `${l_optimal} layers`, L === l_optimal ? "highlight" : "");
+
+  const triadicDiagram = document.getElementById("triadicDiagram");
+  if (isTriadic) {
+    triadicDiagram.textContent = buildTriadicDiagram(L, FA_LAYER);
+    triadicDiagram.classList.add("visible");
+  } else {
+    triadicDiagram.classList.remove("visible");
+  }
+
+  if (isMixed) {
+    const emaLabel = document.getElementById("r_ema_init_label");
+    emaLabel.innerHTML = `EMA_INIT (mixed domain) <span class="formula">window ≈ ${ema_window_mixed}t</span>`;
+    set("r_ema_init", `${ema_init_mixed.toFixed(4)} (mixed)`, "good");
+    set("r_ema_window", `~${ema_window_mixed} tokens (closer to learned optimum 690–822t)`);
+  } else {
+    const emaLabel = document.getElementById("r_ema_init_label");
+    emaLabel.innerHTML = `EMA_INIT (single domain) <span class="formula">window ≈ ${ema_window_single}t</span>`;
+    set("r_ema_init", `${ema_init_single.toFixed(4)} (1/${DELTA_RELAY})`, "good");
+    set("r_ema_window", `~${ema_window_single} tokens`);
+  }
+
+  const lrMultFormula = document.getElementById("r_lr_mult_formula");
+  if (isMixed) {
+    lrMultFormula.textContent = "15×√(D/512)×1.306";
+    if (isTriadic) {
+      set("r_lr_mult", `${lr_mult.toFixed(1)} (mixed + triadic: 20.0 rec)`, "good");
+    } else {
+      set("r_lr_mult", `${lr_mult.toFixed(1)} (mixed domain)`, "good");
+    }
+  } else {
+    lrMultFormula.textContent = "15×√(D/512)";
+    set("r_lr_mult", lr_mult.toFixed(1), "good");
+  }
+
+  set("r_lr",            `${base_lr} (fixed)`);
+  const se_lr = base_lr * lr_mult;
+  set("r_se_lr",         se_lr.toExponential(2));
+  set("r_se_init",       SE_INIT.toFixed(3));
+
+  const bwLabel = isTriadic ? `Per-layer bandwidth (32×${HD})` : `Relay bandwidth (${J}×${HD})`;
+  document.getElementById("r_relay_bw_label").textContent = bwLabel;
+  set("r_relay_bw",      `${relay_bw} units`);
+
+  let relay_ratio_cls;
+  if (relay_ratio >= 1.5 && relay_ratio <= 4.0) relay_ratio_cls = "highlight";
+  else if (relay_ratio > 4.0 && relay_ratio <= 6.0) relay_ratio_cls = "warn";
+  else if (relay_ratio > 6.0) relay_ratio_cls = "danger";
+  else if (relay_ratio < 1.0) relay_ratio_cls = "danger";
+  else relay_ratio_cls = "good";
+
+  const relayNote = document.getElementById("r_relay_note");
+  relayNote.textContent = "Validated safe: 1.5–4.0×";
+
+  set("r_relay_ratio", `${relay_ratio.toFixed(2)}× residual`, relay_ratio_cls);
+  set("r_j_required",    `${j_required} (current: ${isTriadic ? "32/layer" : J})`,
+      (isTriadic ? 32 : J) >= j_required ? "good" : "warn");
+
+  set("r_chin_100_tokens", fmtN(chin_100_tokens));
+  set("r_chin_100_seqs",   fmtN(chin_100_seqs, 0));
+  set("r_target_seqs",     fmtN(target_seqs, 0) + " seqs", "highlight");
+  set("r_target_tokens",   fmtN(target_tokens));
+  set("r_steps_epoch",     fmtN(steps_epoch, 0) + " steps");
+  set("r_total_steps",     fmtN(total_steps, 0) + " steps");
+  set("r_eff_batch_tokens", fmtN(eff_batch_tokens) + " tokens");
+
+  set("r_percolation_step", perc_step, "good");
+  set("r_perc_steps_epoch", `${fmtN(steps_epoch, 0)} steps/epoch`);
+
+  const percWarnRow = document.getElementById("r_perc_warn_row");
+  const percWarnText = document.getElementById("r_perc_warn_text");
+  if (steps_epoch < 1200) {
+    percWarnRow.style.display = "flex";
+    percWarnText.textContent = `⚠ Short epoch — consider ≥200K sequences for adequate post-crossing crystallization.`;
+  } else {
+    percWarnRow.style.display = "none";
+  }
+
+  set("r_flops_token",    fmtN(flops_token) + " FLOPs");
+  set("r_total_flops",    fmtN(total_flops) + " FLOPs");
+  set("r_gpu_tflops",     GPU_TFLOPS.toFixed(1) + " TFLOPS");
+  set("r_eff_tflops",     (GPU_TFLOPS * MFU).toFixed(1) + " TFLOPS (" + (MFU*100).toFixed(0) + "% MFU)");
+  set("r_time_epoch",     fmtTime(seconds_per_epoch), "warn");
+  set("r_time_total",     fmtTime(total_seconds), "warn");
+  set("r_model_gb",       model_gb.toFixed(1) + " GB");
+
+  const optimLabel = document.getElementById("r_optim_label");
+  optimLabel.textContent = adamw8bit ? "Optimizer states (AdamW8bit)" : "Optimizer states (AdamW FP32)";
+  set("r_optim_gb",       optim_gb.toFixed(1) + " GB");
+  set("r_vram",           vram_est.toFixed(1) + " GB (chunked CE, no full logits)",
+      vram_est > 20 ? "warn" : "good");
+
+  updateActivePreset(D, H, L, FFN, V, SEQ, tied, J, FA_LAYER, DELTA_RELAY, SE_INIT, CHIN_PCT, EPOCHS, BS, GRAD_ACCUM);
+  renderCompare(total_params, target_seqs);
+}
+
+function renderCompare(cur_params, cur_seqs) {
+  const tbody = document.getElementById("compareBody");
+  tbody.innerHTML = "";
+  KNOWN_RESULTS.forEach(r => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${r.name}</td>
+      <td>${r.params}</td>
+      <td>${r.ppl !== null ? r.ppl.toFixed(2) : "—"}</td>
+      <td>${r.passkey}</td>
+      <td>${r.ar !== null ? r.ar : "—"}</td>`;
+    tbody.appendChild(tr);
+  });
+  const tr = document.createElement("tr");
+  tr.className = "current-row";
+  tr.innerHTML = `
+    <td>▶ Current config</td>
+    <td>${fmtN(cur_params)}</td>
+    <td>—</td>
+    <td>—</td>
+    <td>—</td>`;
+  tbody.appendChild(tr);
+}
+
+function buildPresets() {
+  const grid = document.getElementById("presetGrid");
+  PRESETS.forEach((p, i) => {
+    const btn = document.createElement("button");
+    btn.className = "preset-btn";
+    btn.id = "preset_" + i;
+    const tagHtml = p.tag ? `<span class="tag ${p.tag === 'new' ? 'new' : ''}">${p.tag}</span>` : "";
+    btn.innerHTML = `<span class="preset-name">${p.name}${tagHtml}</span><span class="preset-sub">${p.sub}</span>`;
+    btn.onclick = () => loadPreset(p, i);
+    grid.appendChild(btn);
+  });
+}
+
+function loadPreset(p, idx) {
+  ["D","H","L","FFN","V","SEQ"].forEach(k => document.getElementById(k).value = p[k]);
+  document.getElementById("tied").value = p.tied;
+  document.getElementById("J").value = p.J;
+  document.getElementById("FA_LAYER").value = p.FA_LAYER;
+  document.getElementById("DELTA_RELAY").value = p.DELTA_RELAY;
+  document.getElementById("SE_INIT").value = p.SE_INIT;
+  document.getElementById("CHIN_PCT").value = p.CHIN_PCT;
+  document.getElementById("EPOCHS").value = p.EPOCHS;
+  document.getElementById("BS").value = p.BS;
+  document.getElementById("GRAD_ACCUM").value = p.GRAD_ACCUM;
+
+  const isTriadic = p.J >= 96;
+  document.querySelector(`input[name="offsetMode"][value="${isTriadic ? "triadic" : "standard"}"]`).checked = true;
+
+  calc();
+}
+
+function updateActivePreset(D, H, L, FFN, V, SEQ, tied, J, FA_LAYER, DELTA_RELAY, SE_INIT, CHIN_PCT, EPOCHS, BS, GRAD_ACCUM) {
+  PRESETS.forEach((p, i) => {
+    const btn = document.getElementById("preset_" + i);
+    if (!btn) return;
+    const match = p.D===D && p.H===H && p.L===L && p.FFN===FFN && p.V===V &&
+                  p.SEQ===SEQ && p.tied===tied && p.J===J && p.FA_LAYER===FA_LAYER &&
+                  p.DELTA_RELAY===DELTA_RELAY && p.CHIN_PCT===CHIN_PCT &&
+                  p.EPOCHS===EPOCHS && p.BS===BS && p.GRAD_ACCUM===GRAD_ACCUM;
+    btn.classList.toggle("active", match);
+  });
+}
+
+buildPresets();
+calc();
+</script>
+</body>
+</html>
