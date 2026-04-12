@@ -1,21 +1,28 @@
 """
-DSQG Attention V13-dynamic-J — Two-pass streaming kernel with runtime-configurable J
-=====================================================================================
+DSQG Attention V17 — Tensor Core scale_embed + K-tile bandwidth optimization
+=============================================================================
 
-Merges V13's two-pass streaming Triton kernel with V8-dynamic-J's runtime-configurable
-J support. J, J_SMALL, J_LARGE are passed as tl.constexpr kernel parameters (not
-module-level constants), and offsets are loaded from a device pointer (not a hardcoded
-tuple).
+Derived from V13-dynamic-J. Key changes:
 
-V13 mechanisms preserved:
-  1. Two-pass forward decomposition (pass 1: scores, pass 2: softmax + weighted V sum)
-  2. MOVT in pass 2 for large offsets
-  3. BF16 fixes (.contiguous().clone() for pos_bias/scale_embed)
-  4. No @triton.autotune
-  5. Per-arch SM dispatch for BLOCK_N/num_warps/num_stages
+1. **Scale-embed scoring via tl.dot (Tensor Core)**
+   Forward Pass 1: Pre-computes ALL J scale_embed scores in one tl.dot GEMM:
+     se_all_scores = tl.dot(Q[BLOCK_N, HD], SE_T[HD, J_PAD]) * sc
+   Replaces J separate element-wise tl.sum(q * se_i, axis=1) calls.
+
+2. **dscale_embed backward via tl.dot (Tensor Core)**
+   Accumulates ds_v vectors during offset loop, then computes all J
+   dscale_embed contributions in one tl.dot GEMM:
+     dse_all = tl.dot(DSV_all[J_PAD, BLOCK_N], Q[BLOCK_N, HD]) * sc
+
+3. All other mechanisms preserved from V13:
+   - Two-pass forward (independent scores, then softmax + weighted V)
+   - MOVT 2-plane Givens rotation for large offsets
+   - Runtime-configurable J via device pointer
+   - BF16 .contiguous().clone() for gradient checkpointing safety
+   - Per-arch SM dispatch (SM90/SM89/SM86)
 
 Usage:
-  from dsqg_attention_v13_dynamic_j import DSQGAttentionV13Dynamic
+  from dsqg_attention_v17 import DSQGAttentionV17
 """
 
 import math
@@ -26,15 +33,6 @@ import triton
 import triton.language as tl
 
 R_PLANES = 2
-
-
-def _detect_gpu_capability():
-    if not torch.cuda.is_available():
-        return None, None
-    cc = torch.cuda.get_device_capability()
-    sm_90 = (cc[0] == 9 and cc[1] == 0) or cc[0] > 9
-    sm_89 = (cc[0] == 8 and cc[1] == 9)
-    return sm_90, sm_89
 
 
 def _next_pow2(n):
@@ -50,11 +48,11 @@ def _next_pow2(n):
 
 
 # ---------------------------------------------------------------------------
-# Forward Kernel — Two-pass decomposition with MOVT, dynamic J
+# Forward Kernel — Two-pass with Tensor Core scale_embed scoring
 # ---------------------------------------------------------------------------
 
 @triton.jit
-def _two_pass_fwd_v13_dj(
+def _two_pass_fwd_v17(
     Q, K, V, POS_BIAS, SCALE_EMBED,
     PHASE_BASE, PHASE_GAIN, Y_PRE, Z_PRE,
     OUT, LSE,
@@ -84,6 +82,7 @@ def _two_pass_fwd_v13_dj(
     nm = ns < N
     ds = tl.arange(0, BLOCK_HD)
     dm = ds < HD
+    js = tl.arange(0, J_PAD)
     sc = 1.0 / tl.sqrt(HD * 1.0)
 
     qb = Q + b * stride_qb + h * stride_qh
@@ -96,9 +95,18 @@ def _two_pass_fwd_v13_dj(
         other=0.0
     ).to(tl.float32)
 
-    # -- Pass 1: Compute all J scores independently (no serial mi/li chain) --
+    # -- Tensor Core: batch scale_embed scoring via tl.dot --
+    # Load SE transposed: SE_T[BLOCK_HD, J_PAD] from scale_embed[J, HD]
+    SE_T = tl.load(
+        SCALE_EMBED + ds[:, None] * stride_sed + js[None, :] * stride_sei,
+        mask=dm[:, None] & (js[None, :] < J_VAL),
+        other=0.0
+    ).to(tl.float32)
+    # GEMM: Q[BLOCK_N, BLOCK_HD] @ SE_T[BLOCK_HD, J_PAD] → [BLOCK_N, J_PAD]
+    se_all_scores = tl.dot(q, SE_T) * sc
+
+    # -- Pass 1: per-offset Q·K + pos_bias scoring --
     scores = tl.full([BLOCK_N, J_PAD], float('-inf'), tl.float32)
-    js = tl.arange(0, J_PAD)
 
     for i in range(J_VAL):
         delta = tl.load(OFFSETS + i).to(tl.int32)
@@ -113,17 +121,16 @@ def _two_pass_fwd_v13_dj(
 
         s = tl.sum(q * kt, axis=1) * sc
         s += tl.load(POS_BIAS + i * stride_pbi + h * stride_pbh)
-        se_i = tl.load(
-            SCALE_EMBED + i * stride_sei + ds * stride_sed,
-            mask=dm, other=0.0
-        ).to(tl.float32)
-        s += tl.sum(q * se_i[None, :], axis=1) * sc
         s = tl.where(val, s, float('-inf'))
 
         col_mask = js == i
         scores = tl.where(col_mask[None, :], s[:, None], scores)
 
-    # -- Softmax over J dimension (columns >= J_VAL are -inf -> contribute 0) --
+    # Combine: add pre-computed scale_embed scores
+    # -inf + finite = -inf (IEEE 754), so invalid positions stay -inf
+    scores = scores + se_all_scores
+
+    # -- Softmax over J dimension --
     mi = tl.max(scores, axis=1)
     all_invalid = mi == float('-inf')
     safe_mi = tl.where(all_invalid, 0.0, mi)
@@ -206,7 +213,7 @@ def _two_pass_fwd_v13_dj(
 # ---------------------------------------------------------------------------
 
 @triton.jit
-def _compute_D_v13_dj(
+def _compute_D_v17(
     DO, O, D,
     stride_dob, stride_doh, stride_don, stride_dod,
     stride_ob, stride_oh, stride_on, stride_od,
@@ -242,11 +249,11 @@ def _compute_D_v13_dj(
 
 
 # ---------------------------------------------------------------------------
-# Backward: dQ + dpos_bias + dscale_embed + dY_PRE
+# Backward: dQ + dpos_bias + dscale_embed (Tensor Core) + dY_PRE
 # ---------------------------------------------------------------------------
 
 @triton.jit
-def _bwd_dq_v13_dj(
+def _bwd_dq_v17(
     Q, K, V, POS_BIAS, SCALE_EMBED,
     PHASE_BASE, PHASE_GAIN, Y_PRE, Z_PRE,
     DO, LSE, Dv,
@@ -270,7 +277,7 @@ def _bwd_dq_v13_dj(
     stride_dyb, stride_dyh, stride_dyn,
     H: tl.constexpr, N, HD: tl.constexpr,
     BLOCK_N: tl.constexpr, BLOCK_HD: tl.constexpr,
-    J_VAL: tl.constexpr, J_SMALL_VAL: tl.constexpr,
+    J_VAL: tl.constexpr, J_SMALL_VAL: tl.constexpr, J_PAD: tl.constexpr,
 ):
     bh = tl.program_id(0)
     blk = tl.program_id(1)
@@ -282,6 +289,7 @@ def _bwd_dq_v13_dj(
     nm = ns < N
     ds = tl.arange(0, BLOCK_HD)
     dm = ds < HD
+    js = tl.arange(0, J_PAD)
     sc = 1.0 / tl.sqrt(HD * 1.0)
 
     qb = Q + b * stride_qb + h * stride_qh
@@ -312,9 +320,20 @@ def _bwd_dq_v13_dj(
     col0 = (ds == 0); col1 = (ds == 1)
     col2 = (ds == 2); col3 = (ds == 3)
 
+    # Pre-load scale_embed for score recomputation (Tensor Core path)
+    SE_T = tl.load(
+        SCALE_EMBED + ds[:, None] * stride_sed + js[None, :] * stride_sei,
+        mask=dm[:, None] & (js[None, :] < J_VAL),
+        other=0.0
+    ).to(tl.float32)
+    se_all_scores = tl.dot(q, SE_T) * sc
+
     dq = tl.zeros([BLOCK_N, BLOCK_HD], tl.float32)
     dy_pre0 = tl.zeros([BLOCK_N], tl.float32)
     dy_pre1 = tl.zeros([BLOCK_N], tl.float32)
+
+    # Accumulator for batched dscale_embed via Tensor Core
+    DSV_all = tl.zeros([J_PAD, BLOCK_N], tl.float32)
 
     for i in range(J_VAL):
         delta = tl.load(OFFSETS + i).to(tl.int32)
@@ -332,14 +351,12 @@ def _bwd_dq_v13_dj(
             other=0.0
         ).to(tl.float32)
 
-        se_i = tl.load(
-            SCALE_EMBED + i * stride_sei + ds * stride_sed,
-            mask=dm, other=0.0
-        ).to(tl.float32)
-
+        # Score recomputation (using pre-computed scale_embed via TC)
         s = tl.sum(q * kt, axis=1) * sc
         s += tl.load(POS_BIAS + i * stride_pbi + h * stride_pbh)
-        s += tl.sum(q * se_i[None, :], axis=1) * sc
+        col_mask = js == i
+        se_score_i = tl.sum(se_all_scores * col_mask[None, :].to(tl.float32), axis=1)
+        s += se_score_i
         s = tl.where(val, s, float('-inf'))
 
         diff = tl.minimum(s - lse, 0.0)
@@ -348,19 +365,19 @@ def _bwd_dq_v13_dj(
         if i < J_SMALL_VAL:
             dot_rv = tl.sum(do * vt, axis=1)
             ds_v = alpha * (dot_rv - Dval)
+            se_i_col = js == i
+            se_i_vec = tl.sum(SE_T * se_i_col[None, :].to(tl.float32), axis=1)
             dq += ds_v[:, None] * kt * sc
-            dq += ds_v[:, None] * se_i[None, :] * sc
+            dq += ds_v[:, None] * se_i_vec[None, :] * sc
 
             tl.store(
                 DPB_BUF + bh * stride_dpb_bh + blk * stride_dpb_blk + i,
                 tl.sum(tl.where(val, ds_v, 0.0))
             )
-            dse_i = tl.sum(ds_v[:, None] * q, axis=0) * sc
-            tl.store(
-                DSE_BUF + bh * stride_dse_bh + blk * stride_dse_blk + i * HD + ds,
-                tl.where(dm, dse_i, 0.0),
-                mask=dm
-            )
+
+            # Accumulate ds_v for batched dscale_embed
+            row_mask = js == i
+            DSV_all = tl.where(row_mask[:, None], ds_v[None, :], DSV_all)
         else:
             pi_idx = i - J_SMALL_VAL
             z0 = tl.load(zb + kp * stride_zn + 0, mask=val, other=0.0)
@@ -386,19 +403,19 @@ def _bwd_dq_v13_dj(
 
             dot_rv = tl.sum(do * vt_rot, axis=1)
             ds_v = alpha * (dot_rv - Dval)
+            se_i_col2 = js == i
+            se_i_vec2 = tl.sum(SE_T * se_i_col2[None, :].to(tl.float32), axis=1)
             dq += ds_v[:, None] * kt * sc
-            dq += ds_v[:, None] * se_i[None, :] * sc
+            dq += ds_v[:, None] * se_i_vec2[None, :] * sc
 
             tl.store(
                 DPB_BUF + bh * stride_dpb_bh + blk * stride_dpb_blk + i,
                 tl.sum(tl.where(val, ds_v, 0.0))
             )
-            dse_i = tl.sum(ds_v[:, None] * q, axis=0) * sc
-            tl.store(
-                DSE_BUF + bh * stride_dse_bh + blk * stride_dse_blk + i * HD + ds,
-                tl.where(dm, dse_i, 0.0),
-                mask=dm
-            )
+
+            # Accumulate ds_v for batched dscale_embed
+            row_mask = js == i
+            DSV_all = tl.where(row_mask[:, None], ds_v[None, :], DSV_all)
 
             do0 = tl.sum(do * f0[None, :], axis=1); do1 = tl.sum(do * f1[None, :], axis=1)
             do2 = tl.sum(do * f2[None, :], axis=1); do3 = tl.sum(do * f3[None, :], axis=1)
@@ -409,6 +426,7 @@ def _bwd_dq_v13_dj(
             dy_pre0 += dth0 * pg0 * z0
             dy_pre1 += dth1 * pg1 * z1
 
+    # Store dQ
     tl.store(
         DQ + b * stride_dqb + h * stride_dqh + ns[:, None] * stride_dqn + ds[None, :] * stride_dqd,
         dq.to(tl.bfloat16),
@@ -419,13 +437,25 @@ def _bwd_dq_v13_dj(
     tl.atomic_add(dyb + ns * stride_dyn + 0, tl.where(nm, dy_pre0, 0.0))
     tl.atomic_add(dyb + ns * stride_dyn + 1, tl.where(nm, dy_pre1, 0.0))
 
+    # Tensor Core: batched dscale_embed
+    # DSV_all: [J_PAD, BLOCK_N], q: [BLOCK_N, BLOCK_HD]
+    dse_all = tl.dot(DSV_all, q) * sc
+
+    # 2D store to DSE_BUF
+    buf_base = DSE_BUF + bh * stride_dse_bh + blk * stride_dse_blk
+    tl.store(
+        buf_base + js[:, None] * HD + ds[None, :],
+        dse_all,
+        mask=(js[:, None] < J_VAL) & dm[None, :]
+    )
+
 
 # ---------------------------------------------------------------------------
 # Backward: dK + dV + d_phase_base + d_phase_gain + dZ_PRE
 # ---------------------------------------------------------------------------
 
 @triton.jit
-def _bwd_dkdv_v13_dj(
+def _bwd_dkdv_v17(
     Q, K, V, POS_BIAS, SCALE_EMBED,
     PHASE_BASE, PHASE_GAIN, Y_PRE, Z_PRE,
     DO, LSE, Dv,
@@ -451,7 +481,7 @@ def _bwd_dkdv_v13_dj(
     stride_dzb, stride_dzh, stride_dzn,
     H: tl.constexpr, N, HD: tl.constexpr,
     BLOCK_M: tl.constexpr, BLOCK_HD: tl.constexpr,
-    J_VAL: tl.constexpr, J_SMALL_VAL: tl.constexpr,
+    J_VAL: tl.constexpr, J_SMALL_VAL: tl.constexpr, J_PAD: tl.constexpr,
 ):
     bh = tl.program_id(0)
     blk = tl.program_id(1)
@@ -606,7 +636,7 @@ def _bwd_dkdv_v13_dj(
 # Autograd function
 # ---------------------------------------------------------------------------
 
-class _DSQGV13DJFn(torch.autograd.Function):
+class _DSQGV17Fn(torch.autograd.Function):
 
     @staticmethod
     def forward(ctx, q, k, v, pos_bias, scale_embed,
@@ -615,11 +645,6 @@ class _DSQGV13DJFn(torch.autograd.Function):
         B, H, N, HD = q.shape
         assert q.dtype == torch.bfloat16
 
-        # Clone all inputs that will be saved for backward or passed to the Triton
-        # kernel. Under gradient checkpointing, autocast re-runs this forward in a
-        # new context that may rebind BF16 tensor storage in-place. Without owned
-        # copies, the saved_tensors retrieved in backward point at stale memory →
-        # illegal memory access.
         q = q.contiguous().clone()
         k = k.contiguous().clone()
         v = v.contiguous().clone()
@@ -652,7 +677,7 @@ class _DSQGV13DJFn(torch.autograd.Function):
         lse = torch.empty(B, H, N, device=q.device, dtype=torch.float32)
         grid = (B * H, triton.cdiv(N, BLOCK_N))
 
-        _two_pass_fwd_v13_dj[grid](
+        _two_pass_fwd_v17[grid](
             q, k, v, pos_bias, scale_embed,
             phase_base, phase_gain, y_pre, z_pre,
             out, lse,
@@ -684,6 +709,7 @@ class _DSQGV13DJFn(torch.autograd.Function):
         ctx.j_val = j_val
         ctx.j_small = j_small
         ctx.j_large = j_large
+        ctx.J_PAD = J_PAD
         return out
 
     @staticmethod
@@ -699,13 +725,14 @@ class _DSQGV13DJFn(torch.autograd.Function):
         j_val = ctx.j_val
         j_small = ctx.j_small
         j_large = ctx.j_large
+        J_PAD = ctx.J_PAD
 
         dout = dout.contiguous()
 
         D = torch.zeros(B, H, N, device=q.device, dtype=torch.float32)
         grid = (B * H, triton.cdiv(N, BN))
 
-        _compute_D_v13_dj[grid](
+        _compute_D_v17[grid](
             dout, out, D,
             dout.stride(0), dout.stride(1), dout.stride(2), dout.stride(3),
             out.stride(0), out.stride(1), out.stride(2), out.stride(3),
@@ -718,10 +745,10 @@ class _DSQGV13DJFn(torch.autograd.Function):
         blocks_n = triton.cdiv(N, BN)
         dq = torch.zeros_like(q)
         dpb_buf = torch.zeros(B * H, blocks_n, j_val, device=q.device, dtype=torch.float32)
-        dse_buf = torch.zeros(B * H, blocks_n, j_val * HD, device=q.device, dtype=torch.float32)
+        dse_buf = torch.zeros(B * H, blocks_n, J_PAD * HD, device=q.device, dtype=torch.float32)
         dy_pre = torch.zeros_like(y_pre)
 
-        _bwd_dq_v13_dj[grid](
+        _bwd_dq_v17[grid](
             q, k, v, pos_bias, scale_embed,
             phase_base, phase_gain, y_pre, z_pre,
             dout, lse, D,
@@ -737,7 +764,7 @@ class _DSQGV13DJFn(torch.autograd.Function):
             pos_bias.stride(0), pos_bias.stride(1),
             scale_embed.stride(0), scale_embed.stride(1),
             blocks_n * j_val, j_val,
-            blocks_n * j_val * HD, j_val * HD,
+            blocks_n * J_PAD * HD, J_PAD * HD,
             phase_base.stride(0), phase_base.stride(1),
             phase_gain.stride(0), phase_gain.stride(1),
             y_pre.stride(0), y_pre.stride(1), y_pre.stride(2),
@@ -745,12 +772,12 @@ class _DSQGV13DJFn(torch.autograd.Function):
             dy_pre.stride(0), dy_pre.stride(1), dy_pre.stride(2),
             H=H, N=N, HD=HD,
             BLOCK_N=BN, BLOCK_HD=BHD,
-            J_VAL=j_val, J_SMALL_VAL=j_small,
+            J_VAL=j_val, J_SMALL_VAL=j_small, J_PAD=J_PAD,
             num_warps=NW, num_stages=NS,
         )
 
         dpb = dpb_buf.view(B, H, blocks_n, j_val).sum(dim=(0, 2)).permute(1, 0).contiguous()
-        dse = dse_buf.view(B, H, blocks_n, j_val, HD).sum(dim=(0, 1, 2)).contiguous()
+        dse = dse_buf.view(B, H, blocks_n, J_PAD, HD)[:, :, :, :j_val, :].sum(dim=(0, 1, 2)).contiguous()
 
         dk = torch.zeros_like(k)
         dv = torch.zeros_like(v)
@@ -764,7 +791,7 @@ class _DSQGV13DJFn(torch.autograd.Function):
         stride_buf_bh = blocks_n * j_large * 2
         stride_buf_blk = j_large * 2
 
-        _bwd_dkdv_v13_dj[grid](
+        _bwd_dkdv_v17[grid](
             q, k, v, pos_bias, scale_embed,
             phase_base, phase_gain, y_pre, z_pre,
             dout, lse, D,
@@ -790,7 +817,7 @@ class _DSQGV13DJFn(torch.autograd.Function):
             dz_pre.stride(0), dz_pre.stride(1), dz_pre.stride(2),
             H=H, N=N, HD=HD,
             BLOCK_M=BN, BLOCK_HD=BHD,
-            J_VAL=j_val, J_SMALL_VAL=j_small,
+            J_VAL=j_val, J_SMALL_VAL=j_small, J_PAD=J_PAD,
             num_warps=NW, num_stages=NS,
         )
 
@@ -812,35 +839,16 @@ class _DSQGV13DJFn(torch.autograd.Function):
 # Public API
 # ---------------------------------------------------------------------------
 
-def dsqg_attention_v13_dj(q, k, v, pos_bias, scale_embed,
-                          phase_base, phase_gain, y_pre, z_pre,
-                          j_val, j_small, j_large, offsets_dev):
-    """
-    DSQG V13-dynamic-J attention — two-pass streaming kernel with configurable J.
-
-    Args:
-        q, k, v:       [B, H, N, HD] bfloat16
-        pos_bias:      [J, H]        float32
-        scale_embed:   [J, HD]       float32
-        phase_base:    [J_LARGE, H, 2] float32
-        phase_gain:    [J_LARGE, H, 2] float32
-        y_pre:         [B, H, N, 2]  float32
-        z_pre:         [B, H, N, 2]  float32
-        j_val:         int — total number of offsets
-        j_small:       int — number of small offsets (no MOVT)
-        j_large:       int — number of large offsets (MOVT applied)
-        offsets_dev:   [J] int32 tensor on device
-
-    Returns:
-        out: [B, H, N, HD] bfloat16
-    """
+def dsqg_attention_v17(q, k, v, pos_bias, scale_embed,
+                       phase_base, phase_gain, y_pre, z_pre,
+                       j_val, j_small, j_large, offsets_dev):
     orig_dtype = q.dtype
     if orig_dtype != torch.bfloat16:
         q = q.to(torch.bfloat16)
         k = k.to(torch.bfloat16)
         v = v.to(torch.bfloat16)
 
-    out = _DSQGV13DJFn.apply(
+    out = _DSQGV17Fn.apply(
         q, k, v,
         pos_bias.float(), scale_embed.float(),
         phase_base.float(), phase_gain.float(),
@@ -852,15 +860,15 @@ def dsqg_attention_v13_dj(q, k, v, pos_bias, scale_embed,
 
 
 # ---------------------------------------------------------------------------
-# Module
+# Module (drop-in replacement for DSQGAttentionV13Dynamic)
 # ---------------------------------------------------------------------------
 
-class DSQGAttentionV13Dynamic(nn.Module):
+class DSQGAttentionV17(nn.Module):
     """
-    DSQG V13-dynamic-J: Two-pass streaming attention with runtime-configurable J.
+    DSQG V17: Tensor Core scale_embed + two-pass streaming with MOVT.
 
-    Constructor takes offsets list, j_small count, j_large count.
-    MOVT (2-plane Givens rotation) applied to V for large offsets (indices j_small..j-1).
+    Drop-in replacement for DSQGAttentionV13Dynamic with identical
+    parameter shapes, forward signature, and numerical behavior.
     """
 
     def __init__(
@@ -883,7 +891,7 @@ class DSQGAttentionV13Dynamic(nn.Module):
         HD = self.head_dim
         self.seq_len = seq_len
 
-        assert HD >= 4, "HD must be >= 4 for 2-plane Givens rotation on channels (0,1),(2,3)"
+        assert HD >= 4, "HD must be >= 4 for 2-plane Givens rotation"
 
         j_val = len(offsets)
         assert j_small + j_large == j_val, (
@@ -917,10 +925,8 @@ class DSQGAttentionV13Dynamic(nn.Module):
         self.phase_gain = nn.Parameter(torch.zeros(j_large, H, R_PLANES))
         self.phase_gate = nn.Parameter(torch.zeros(j_large))
         self.content_layer_norm = nn.LayerNorm(R_PLANES, elementwise_affine=False)
-        # Non-zero probe init: LayerNorm(zeros)=zeros, which starves phase_gain from step 0
         self.query_probes = nn.Parameter(torch.randn(R_PLANES, HD) * 0.02)
         self.key_probes = nn.Parameter(torch.randn(R_PLANES, HD) * 0.02)
-        # content_active: False until percolation (SE|max|>=2.0); training loop flips this
         self.register_buffer('content_active', torch.tensor(False), persistent=True)
         self.npci_theta_k = nn.Parameter(torch.zeros(H))
         self.npci_theta_v = nn.Parameter(torch.zeros(H))
@@ -955,10 +961,8 @@ class DSQGAttentionV13Dynamic(nn.Module):
         y_raw = torch.einsum('bhnd,rd->bhnr', q_norm, qp_norm)
         z_raw = torch.einsum('bhnd,rd->bhnr', k_norm, kp_norm)
         if self.content_active:
-            # Post-percolation: LayerNorm content signal active, phase_gain learns
             y_pre = self.content_layer_norm(y_raw * z_raw).contiguous()
         else:
-            # Pre-percolation: content signal off, relay forms on pure position geometry
             y_pre = torch.zeros_like(y_raw)
         z_pre = torch.ones_like(y_pre)
 
@@ -966,12 +970,12 @@ class DSQGAttentionV13Dynamic(nn.Module):
         gated_phase_base = self.phase_base * gate
         gated_phase_gain = self.phase_gain * gate
 
-        out = dsqg_attention_v13_dj(q, k, v,
-                                    self.pos_bias, self.scale_embed,
-                                    gated_phase_base, gated_phase_gain,
-                                    y_pre, z_pre,
-                                    self.j_val, self.j_small, self.j_large,
-                                    self.offsets_dev)
+        out = dsqg_attention_v17(q, k, v,
+                                  self.pos_bias, self.scale_embed,
+                                  gated_phase_base, gated_phase_gain,
+                                  y_pre, z_pre,
+                                  self.j_val, self.j_small, self.j_large,
+                                  self.offsets_dev)
 
         out = out * self.if_gain.view(1, H, 1, 1)
         out_flat = out.permute(0, 2, 1, 3).reshape(B, N, D).contiguous()
@@ -985,8 +989,7 @@ class DSQGAttentionV13Dynamic(nn.Module):
         arch = "sm_90" if _sm90 else ("sm_89" if _sm89 else "sm_86")
         return {
             "arch": arch,
-            "kernel": "v13_two_pass_movt_dynamic_j",
-            "autotune": False,
+            "kernel": "v17_tc_scale_embed",
             "j_val": self.j_val,
             "j_small": self.j_small,
             "j_large": self.j_large,
@@ -1032,8 +1035,160 @@ class DSQGAttentionV13Dynamic(nn.Module):
             'key_probe_norm': kp.norm(dim=1).tolist(),
             'npci_theta_k': thk.tolist(),
             'npci_theta_v': thv.tolist(),
-            'v13_dynamic_j_kernel': 'two_pass_streaming_movt',
+            'v17_kernel': 'tc_scale_embed_two_pass',
             'j_val': self.j_val,
             'j_small': self.j_small,
             'j_large': self.j_large,
         }
+
+
+# ---------------------------------------------------------------------------
+# Reference (pure PyTorch — for correctness testing)
+# ---------------------------------------------------------------------------
+
+def _reference_v17(q, k, v, pos_bias, scale_embed,
+                   phase_base, phase_gain, y_pre, z_pre,
+                   j_val, j_small, j_large, offsets):
+    B, H, N, HD = q.shape
+    sc = HD ** -0.5
+    off = torch.tensor(offsets, device=q.device, dtype=torch.long)
+    max_delta = int(off.max().item())
+
+    kp = F.pad(k.float(), (0, 0, max_delta, 0))
+    vp = F.pad(v.float(), (0, 0, max_delta, 0))
+    ni = torch.arange(N, device=q.device)
+    gi = max_delta - off[:j_val, None] + ni[None, :]
+    gi = gi.T
+    Ka = kp[:, :, gi, :]
+    Va = vp[:, :, gi, :]
+
+    s = (q.float().unsqueeze(3) * Ka).sum(-1) * sc
+    s += pos_bias[:j_val].T[None, :, None, :]
+    s += (q.float().unsqueeze(3) * scale_embed[:j_val][None, None, :, :]).sum(-1) * sc
+    s = s.masked_fill(
+        (ni[:, None] < off[:j_val][None, :]).unsqueeze(0).unsqueeze(0), float('-inf'))
+    a = F.softmax(s, dim=-1)
+    a = torch.nan_to_num(a, nan=0.0)
+
+    if j_large > 0:
+        z_pad = F.pad(z_pre, (0, 0, max_delta, 0))
+        gi_lg = gi[:, j_small:]
+        za_lg = z_pad[:, :, gi_lg, :]
+        ya_lg = y_pre.unsqueeze(3).expand(-1, -1, -1, j_large, -1)
+
+        pb_exp = phase_base.permute(1, 0, 2)[None, :, None, :, :]
+        pg_exp = phase_gain.permute(1, 0, 2)[None, :, None, :, :]
+
+        theta = pb_exp + pg_exp * ya_lg * za_lg
+        theta0 = theta[..., 0]
+        theta1 = theta[..., 1]
+
+        cos0 = torch.cos(theta0); sin0 = torch.sin(theta0)
+        cos1 = torch.cos(theta1); sin1 = torch.sin(theta1)
+
+        Va_rot = Va.clone()
+        v0 = Va[:, :, :, j_small:, 0]; v1 = Va[:, :, :, j_small:, 1]
+        Va_rot[:, :, :, j_small:, 0] = cos0 * v0 - sin0 * v1
+        Va_rot[:, :, :, j_small:, 1] = sin0 * v0 + cos0 * v1
+        v2 = Va[:, :, :, j_small:, 2]; v3 = Va[:, :, :, j_small:, 3]
+        Va_rot[:, :, :, j_small:, 2] = cos1 * v2 - sin1 * v3
+        Va_rot[:, :, :, j_small:, 3] = sin1 * v2 + cos1 * v3
+    else:
+        Va_rot = Va
+
+    out = (a.unsqueeze(-1) * Va_rot).sum(3)
+    return out.to(q.dtype)
+
+
+# ---------------------------------------------------------------------------
+# Tests
+# ---------------------------------------------------------------------------
+
+def run_tests(device='cuda'):
+    print("=" * 70)
+    print("DSQG V17 — Correctness Tests (TC scale_embed + two-pass + MOVT)")
+    print("=" * 70)
+
+    from dsqg_attention_v8_dynamic_j import ALL_OFFSETS
+
+    cfgs = [
+        (1, 4,   64, 64, "tiny D=256 H=4"),
+        (1, 4,  128, 64, "small D=256 H=4"),
+        (2, 4,  512, 64, "mid D=256 H=4"),
+    ]
+
+    def _count_sm_lg(offs):
+        js = sum(1 for d in offs if d <= 28)
+        jl = sum(1 for d in offs if d >= 48)
+        return js, jl
+
+    offset_sets = [
+        ("J=24 (first 24)", ALL_OFFSETS[:24]),
+        ("J=32 (first 32)", ALL_OFFSETS[:32]),
+    ]
+
+    ok_all = True
+    for off_label, offsets in offset_sets:
+        j_val = len(offsets)
+        j_small, j_large = _count_sm_lg(offsets)
+        assert j_small + j_large == j_val
+        print(f"\n  Offset set: {off_label} (J={j_val}, J_SMALL={j_small}, J_LARGE={j_large})")
+
+        for B, H, N, HD, lbl in cfgs:
+            torch.manual_seed(42)
+            q = torch.randn(B, H, N, HD, device=device, dtype=torch.bfloat16) * 0.1
+            k = torch.randn(B, H, N, HD, device=device, dtype=torch.bfloat16) * 0.1
+            v = torch.randn(B, H, N, HD, device=device, dtype=torch.bfloat16) * 0.1
+            pb = torch.randn(j_val, H, device=device, dtype=torch.float32) * 0.5
+            se = torch.randn(j_val, HD, device=device, dtype=torch.float32) * 0.05
+            phb = torch.randn(j_large, H, 2, device=device, dtype=torch.float32) * 0.3
+            phg = torch.randn(j_large, H, 2, device=device, dtype=torch.float32) * 0.1
+            qpr = torch.randn(2, HD, device=device, dtype=torch.float32) * 0.1
+            kpr = torch.randn(2, HD, device=device, dtype=torch.float32) * 0.1
+            sc = HD ** -0.5
+            y = torch.einsum('bhnd,rd->bhnr', q.float(), qpr).mul(sc).contiguous()
+            z = torch.einsum('bhnd,rd->bhnr', k.float(), kpr).mul(sc).contiguous()
+
+            offsets_dev = torch.tensor(offsets, device=device, dtype=torch.int32)
+
+            ref = _reference_v17(q, k, v, pb, se, phb, phg, y, z,
+                                 j_val, j_small, j_large, offsets)
+            out = dsqg_attention_v17(q.clone(), k.clone(), v.clone(),
+                                      pb, se, phb, phg, y, z,
+                                      j_val, j_small, j_large, offsets_dev)
+            fe = (ref.float() - out.float()).abs().max().item()
+            ok = fe < 0.05
+            if not ok:
+                ok_all = False
+            print(f"    {lbl:28s}  fwd_err={fe:.4f}  {'PASS' if ok else 'FAIL'}")
+
+    print()
+    print("  Module forward+backward (D=256, H=4, N=128, J=32):")
+    torch.manual_seed(99)
+    D_model = 256
+    H_test = 4
+    N_test = 128
+    B_test = 1
+    offsets_32 = ALL_OFFSETS[:32]
+    js32, jl32 = _count_sm_lg(offsets_32)
+    model = DSQGAttentionV17(D_model, H_test, offsets_32, js32, jl32,
+                              seq_len=N_test, dropout=0.0).to(device)
+    x = torch.randn(B_test, N_test, D_model, device=device)
+    out = model(x)
+    loss = out.sum()
+    loss.backward()
+    grad_ok = model.qkv_proj.weight.grad is not None
+    print(f"    {'module fwd+bwd':28s}  out_shape={tuple(out.shape)}  grad_ok={grad_ok}  {'PASS' if grad_ok else 'FAIL'}")
+    if not grad_ok:
+        ok_all = False
+
+    print("=" * 70)
+    print(f"{'ALL PASSED' if ok_all else 'SOME FAILED'}")
+    return ok_all
+
+
+if __name__ == "__main__":
+    import sys
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    ok = run_tests(device)
+    sys.exit(0 if ok else 1)

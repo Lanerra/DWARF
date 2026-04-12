@@ -1,5 +1,5 @@
 """
-DSQG Attention V8 — J=24 relay-optimal offset set (J24_D)
+DSQG Attention V8 4090 — J=24 relay-optimal offset set (J24_D), 4090/sm_89 tuned
 ==========================================================
 
 Same mechanisms as V7 (MOVT + QK-OVT + NPCI) but with the J24_D offset set:
@@ -35,15 +35,15 @@ import triton.language as tl
 warnings.filterwarnings("ignore", message=".*tl.advance.*", category=UserWarning)
 warnings.filterwarnings("ignore", message=".*not being used.*", category=UserWarning)
 
-ALL_OFFSETS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13, 15, 16, 21, 23, 28, 48, 64, 96, 192, 384, 512, 768, 1024]
-J         = len(ALL_OFFSETS)   # 24
-J_SMALL   = 14                 # indices 0-13: δ≤21 — local, no MOVT
-J_LARGE   = 10                 # indices 14-23: δ≥23 — distal, MOVT applied
-assert J == 24 and J_SMALL + J_LARGE == J
+ALL_OFFSETS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13, 15, 16, 19, 21, 23, 28, 48, 64, 96, 121, 161, 192, 212, 245, 273, 295, 342, 375, 384, 413, 441, 473, 512, 549, 579, 593, 631, 653, 694, 716, 768, 826, 846, 900, 936, 970, 1000, 1024, 1074, 1108, 1144, 1166, 1190, 1218, 1244, 1288, 1322, 1385, 1423, 1451, 1497, 1522, 1550, 1581, 1603, 1617, 1634, 1651, 1661, 1710, 1743, 1780, 1810, 1820, 1852, 1860, 1876, 1886, 1897, 1903, 1916, 1926, 1929, 1941, 1965, 1983, 2006, 2011, 2029, 2037, 2044, 2068, 2097, 2113, 2199]
+J         = len(ALL_OFFSETS)   # 96
+J_SMALL   = 17                 # indices 0-16: δ≤28 — local, no MOVT
+J_LARGE   = 79                 # indices 17-95: δ≥48 — distal, MOVT applied
+assert J == 96 and J_SMALL + J_LARGE == J
 
 R_PLANES  = 2   # number of Givens rotation planes; constexpr throughout
 
-MAX_DELTA = max(ALL_OFFSETS)   # 1024
+MAX_DELTA = max(ALL_OFFSETS)   # 2199
 
 def _next_pow2(n):
     if n <= 0: return 1
@@ -82,6 +82,16 @@ def npci_rotate(x: torch.Tensor, x_delta: torch.Tensor,
 # Forward Kernel V8 — single static_range(J) loop, direct loads for all offsets
 # ─────────────────────────────────────────────────────────────────────────────
 
+@triton.autotune(
+    configs=[
+        triton.Config({"BLOCK_N": 128, "BLOCK_HD": 64}, num_warps=8, num_stages=4),
+        triton.Config({"BLOCK_N": 128, "BLOCK_HD": 64}, num_warps=8, num_stages=2),
+        triton.Config({"BLOCK_N": 64,  "BLOCK_HD": 64}, num_warps=8, num_stages=2),
+        triton.Config({"BLOCK_N": 64,  "BLOCK_HD": 64}, num_warps=4, num_stages=2),
+        triton.Config({"BLOCK_N": 32,  "BLOCK_HD": 64}, num_warps=4, num_stages=2),
+    ],
+    key=["HD", "H", "N"],
+)
 @triton.jit
 def _fwd_v8(
     Q, K, V, POS_BIAS, SE, PHASE_BASE, PHASE_GAIN, Y_PRE, Z_PRE, OUT, LSE,
@@ -131,8 +141,8 @@ def _fwd_v8(
     li  = tl.zeros([BLOCK_N], tl.float32)
     acc = tl.zeros([BLOCK_N, BLOCK_HD], tl.float32)
 
-    for i in tl.static_range(24):
-        delta = (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13, 15, 16, 21, 23, 28, 48, 64, 96, 192, 384, 512, 768, 1024)[i]
+    for i in tl.static_range(96):
+        delta = (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13, 15, 16, 19, 21, 23, 28, 48, 64, 96, 121, 161, 192, 212, 245, 273, 295, 342, 375, 384, 413, 441, 473, 512, 549, 579, 593, 631, 653, 694, 716, 768, 826, 846, 900, 936, 970, 1000, 1024, 1074, 1108, 1144, 1166, 1190, 1218, 1244, 1288, 1322, 1385, 1423, 1451, 1497, 1522, 1550, 1581, 1603, 1617, 1634, 1651, 1661, 1710, 1743, 1780, 1810, 1820, 1852, 1860, 1876, 1886, 1897, 1903, 1916, 1926, 1929, 1941, 1965, 1983, 2006, 2011, 2029, 2037, 2044, 2068, 2097, 2113, 2199)[i]
         kp    = ns - delta
         val   = (kp >= 0) & nm
 
@@ -153,7 +163,7 @@ def _fwd_v8(
         vt    = tl.load(vb + kp[:,None]*stride_vn + ds[None,:]*stride_vd,
                         mask=val[:,None] & dm[None,:], other=0.0).to(tl.float32)
 
-        if i < 14:
+        if i < 17:
             acc = acc * cor[:,None] + p[:,None] * vt
         else:
             pi  = i - 14
@@ -197,6 +207,16 @@ def _fwd_v8(
 # D computation — unchanged from V7
 # ─────────────────────────────────────────────────────────────────────────────
 
+@triton.autotune(
+    configs=[
+        triton.Config({"BLOCK_N": 128, "BLOCK_HD": 64}, num_warps=8, num_stages=4),
+        triton.Config({"BLOCK_N": 128, "BLOCK_HD": 64}, num_warps=8, num_stages=2),
+        triton.Config({"BLOCK_N": 64,  "BLOCK_HD": 64}, num_warps=8, num_stages=2),
+        triton.Config({"BLOCK_N": 64,  "BLOCK_HD": 64}, num_warps=4, num_stages=2),
+        triton.Config({"BLOCK_N": 32,  "BLOCK_HD": 64}, num_warps=4, num_stages=2),
+    ],
+    key=["HD", "H", "N"],
+)
 @triton.jit
 def _compute_D_v8(
     DO, O, D,
@@ -225,6 +245,16 @@ def _compute_D_v8(
 # Backward: dQ + dPOS_BIAS + dSCALE_EMBED + dY_PRE
 # ─────────────────────────────────────────────────────────────────────────────
 
+@triton.autotune(
+    configs=[
+        triton.Config({"BLOCK_N": 128, "BLOCK_HD": 64}, num_warps=8, num_stages=4),
+        triton.Config({"BLOCK_N": 128, "BLOCK_HD": 64}, num_warps=8, num_stages=2),
+        triton.Config({"BLOCK_N": 64,  "BLOCK_HD": 64}, num_warps=8, num_stages=2),
+        triton.Config({"BLOCK_N": 64,  "BLOCK_HD": 64}, num_warps=4, num_stages=2),
+        triton.Config({"BLOCK_N": 32,  "BLOCK_HD": 64}, num_warps=4, num_stages=2),
+    ],
+    key=["HD", "H", "N"],
+)
 @triton.jit
 def _bwd_dq_v8(
     Q, K, V, PB, SE, PHASE_BASE, PHASE_GAIN, Y_PRE, Z_PRE,
@@ -238,10 +268,8 @@ def _bwd_dq_v8(
     stride_lb,   stride_lh,   stride_ln,
     stride_Db,   stride_Dh,   stride_Dn,
     stride_dqb,  stride_dqh,  stride_dqn,  stride_dqd,
-    stride_dpbi, stride_dpbh,
     stride_pbi,  stride_pbh,
     stride_sei,  stride_sed,
-    stride_dsei, stride_dsed,
     stride_phi,  stride_phh,
     stride_pgi,  stride_pgh,
     stride_yb,   stride_yh,   stride_yn,
@@ -283,8 +311,8 @@ def _bwd_dq_v8(
     dy_pre0 = tl.zeros([BLOCK_N], tl.float32)
     dy_pre1 = tl.zeros([BLOCK_N], tl.float32)
 
-    for i in tl.static_range(24):
-        delta = (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13, 15, 16, 21, 23, 28, 48, 64, 96, 192, 384, 512, 768, 1024)[i]
+    for i in tl.static_range(96):
+        delta = (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13, 15, 16, 19, 21, 23, 28, 48, 64, 96, 121, 161, 192, 212, 245, 273, 295, 342, 375, 384, 413, 441, 473, 512, 549, 579, 593, 631, 653, 694, 716, 768, 826, 846, 900, 936, 970, 1000, 1024, 1074, 1108, 1144, 1166, 1190, 1218, 1244, 1288, 1322, 1385, 1423, 1451, 1497, 1522, 1550, 1581, 1603, 1617, 1634, 1651, 1661, 1710, 1743, 1780, 1810, 1820, 1852, 1860, 1876, 1886, 1897, 1903, 1916, 1926, 1929, 1941, 1965, 1983, 2006, 2011, 2029, 2037, 2044, 2068, 2097, 2113, 2199)[i]
         kp    = ns - delta
         val   = (kp >= 0) & nm
 
@@ -300,15 +328,16 @@ def _bwd_dq_v8(
         s     = tl.where(val, s, float('-inf'))
         alpha = tl.where(val, tl.exp(s - lse), 0.0)
 
-        if i < 14:
+        if i < 17:
             dot_rv = tl.sum(do * vt, axis=1)
             ds_v   = alpha * (dot_rv - Dval)
             dq    += ds_v[:,None] * kt * sc
             dq    += ds_v[:,None] * se_i[None,:] * sc
-            tl.atomic_add(DPB + i*stride_dpbi + h*stride_dpbh,
+            tl.atomic_add(DPB + i*stride_pbi + h*stride_pbh,
                           tl.sum(tl.where(val, ds_v, 0.0)))
             dse_i = tl.sum(ds_v[:,None] * q, axis=0) * sc
-            tl.atomic_add(DSE + i*stride_dsei + ds*stride_dsed, tl.where(dm, dse_i, 0.0))
+            tl.atomic_add(DSE + i*stride_sei + ds*stride_sed,
+                          tl.where(dm, dse_i, 0.0), mask=dm)
         else:
             pi  = i - 14
             z0  = tl.load(zb + kp*stride_zn + 0, mask=val, other=0.0)
@@ -336,10 +365,11 @@ def _bwd_dq_v8(
             ds_v   = alpha * (dot_rv - Dval)
             dq    += ds_v[:,None] * kt * sc
             dq    += ds_v[:,None] * se_i[None,:] * sc
-            tl.atomic_add(DPB + i*stride_dpbi + h*stride_dpbh,
+            tl.atomic_add(DPB + i*stride_pbi + h*stride_pbh,
                           tl.sum(tl.where(val, ds_v, 0.0)))
             dse_i = tl.sum(ds_v[:,None] * q, axis=0) * sc
-            tl.atomic_add(DSE + i*stride_dsei + ds*stride_dsed, tl.where(dm, dse_i, 0.0))
+            tl.atomic_add(DSE + i*stride_sei + ds*stride_sed,
+                          tl.where(dm, dse_i, 0.0), mask=dm)
 
             do0 = tl.sum(do * f0[None,:], axis=1); do1 = tl.sum(do * f1[None,:], axis=1)
             do2 = tl.sum(do * f2[None,:], axis=1); do3 = tl.sum(do * f3[None,:], axis=1)
@@ -355,14 +385,24 @@ def _bwd_dq_v8(
              dq.to(tl.bfloat16), mask=nm[:,None] & dm[None,:])
 
     dyb = DY_PRE + b*stride_dyb + h*stride_dyh
-    tl.atomic_add(dyb + ns*stride_dyn + 0, tl.where(nm, dy_pre0, 0.0))
-    tl.atomic_add(dyb + ns*stride_dyn + 1, tl.where(nm, dy_pre1, 0.0))
+    tl.store(dyb + ns*stride_dyn + 0, tl.where(nm, dy_pre0, 0.0), mask=nm)
+    tl.store(dyb + ns*stride_dyn + 1, tl.where(nm, dy_pre1, 0.0), mask=nm)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Backward: dK + dV + d_phase_base + d_phase_gain + dZ_PRE
 # ─────────────────────────────────────────────────────────────────────────────
 
+@triton.autotune(
+    configs=[
+        triton.Config({"BLOCK_M": 128, "BLOCK_HD": 64}, num_warps=8, num_stages=4),
+        triton.Config({"BLOCK_M": 128, "BLOCK_HD": 64}, num_warps=8, num_stages=2),
+        triton.Config({"BLOCK_M": 64,  "BLOCK_HD": 64}, num_warps=8, num_stages=2),
+        triton.Config({"BLOCK_M": 64,  "BLOCK_HD": 64}, num_warps=4, num_stages=2),
+        triton.Config({"BLOCK_M": 32,  "BLOCK_HD": 64}, num_warps=4, num_stages=2),
+    ],
+    key=["HD", "H", "N"],
+)
 @triton.jit
 def _bwd_dkdv_v8(
     Q, K, V, PB, SE, PHASE_BASE, PHASE_GAIN, Y_PRE, Z_PRE,
@@ -426,8 +466,8 @@ def _bwd_dkdv_v8(
     dz_pre0 = tl.zeros([BLOCK_M], tl.float32)
     dz_pre1 = tl.zeros([BLOCK_M], tl.float32)
 
-    for i in tl.static_range(24):
-        delta = (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13, 15, 16, 21, 23, 28, 48, 64, 96, 192, 384, 512, 768, 1024)[i]
+    for i in tl.static_range(96):
+        delta = (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13, 15, 16, 19, 21, 23, 28, 48, 64, 96, 121, 161, 192, 212, 245, 273, 295, 342, 375, 384, 413, 441, 473, 512, 549, 579, 593, 631, 653, 694, 716, 768, 826, 846, 900, 936, 970, 1000, 1024, 1074, 1108, 1144, 1166, 1190, 1218, 1244, 1288, 1322, 1385, 1423, 1451, 1497, 1522, 1550, 1581, 1603, 1617, 1634, 1651, 1661, 1710, 1743, 1780, 1810, 1820, 1852, 1860, 1876, 1886, 1897, 1903, 1916, 1926, 1929, 1941, 1965, 1983, 2006, 2011, 2029, 2037, 2044, 2068, 2097, 2113, 2199)[i]
         np_   = ms + delta          # query positions n = t + delta
         val   = (np_ < N) & mm
 
@@ -448,7 +488,7 @@ def _bwd_dkdv_v8(
         s     = tl.where(val, s, float('-inf'))
         alpha = tl.where(val, tl.exp(s - lsen), 0.0)
 
-        if i < 14:
+        if i < 17:
             dot_rv = tl.sum(don * vt, axis=1)
             ds_v   = alpha * (dot_rv - Dn)
             dk    += ds_v[:,None] * qn * sc
@@ -527,31 +567,14 @@ class _DSQGFnV8(torch.autograd.Function):
         assert y_pre.shape       == (B, H, N, R_PLANES)
         assert z_pre.shape       == (B, H, N, R_PLANES)
 
-        _cc = torch.cuda.get_device_capability()
-        _sm90 = (_cc[0] == 9 and _cc[1] == 0) or _cc[0] > 9
-        _sm89 = (_cc[0] == 8 and _cc[1] == 9)
-        if HD <= 64:
-            if _sm90:   BLOCK_N, _num_warps, _num_stages = 128, 16, 4
-            elif _sm89: BLOCK_N, _num_warps, _num_stages = 64, 8, 4
-            else:       BLOCK_N, _num_warps, _num_stages = 64, 4, 2
-        elif HD <= 128:
-            if _sm90:   BLOCK_N, _num_warps, _num_stages = 128, 16, 4
-            elif _sm89: BLOCK_N, _num_warps, _num_stages = 64, 8, 4
-            else:       BLOCK_N, _num_warps, _num_stages = 32, 4, 2
-        elif HD <= 256:
-            if _sm90:   BLOCK_N, _num_warps, _num_stages = 32, 4, 4
-            elif _sm89: BLOCK_N, _num_warps, _num_stages = 32, 4, 4
-            else:       BLOCK_N, _num_warps, _num_stages = 16, 4, 2
-        else:
-            if _sm90:   BLOCK_N, _num_warps, _num_stages = 16, 4, 4
-            elif _sm89: BLOCK_N, _num_warps, _num_stages = 16, 4, 4
-            else:       BLOCK_N, _num_warps, _num_stages = 8, 4, 2
         BLOCK_HD = _next_pow2(HD)
         out = torch.empty_like(q)
         lse = torch.empty(B, H, N, device=q.device, dtype=torch.float32)
-        g   = (B * H, triton.cdiv(N, BLOCK_N))
 
-        _fwd_v8[g](
+        def grid(meta):
+            return (B * H, triton.cdiv(N, meta['BLOCK_N']))
+
+        _fwd_v8[grid](
             q, k, v, pos_bias, scale_embed, phase_base, phase_gain,
             y_pre, z_pre, out, lse,
             q.stride(0),    q.stride(1),    q.stride(2),    q.stride(3),
@@ -565,15 +588,16 @@ class _DSQGFnV8(torch.autograd.Function):
             phase_gain.stride(0),  phase_gain.stride(1),
             y_pre.stride(0),       y_pre.stride(1),       y_pre.stride(2),
             z_pre.stride(0),       z_pre.stride(1),       z_pre.stride(2),
-            H=H, N=N, HD=HD, BLOCK_N=BLOCK_N, BLOCK_HD=BLOCK_HD,
-            num_warps=_num_warps, num_stages=_num_stages,
+            H=H, N=N, HD=HD,
         )
+        # Save autotuned block config for backward — best_config is set after first call
+        _cfg = _fwd_v8.best_config
         ctx.save_for_backward(q, k, v, pos_bias, scale_embed,
                               phase_base, phase_gain, y_pre, z_pre, out, lse)
-        ctx.BLOCK_N    = BLOCK_N
-        ctx.BLOCK_HD   = BLOCK_HD
-        ctx.num_warps  = _num_warps
-        ctx.num_stages = _num_stages
+        ctx.BLOCK_N   = _cfg.kwargs['BLOCK_N']
+        ctx.BLOCK_HD  = _cfg.kwargs.get('BLOCK_HD', BLOCK_HD)
+        ctx.num_warps = _cfg.num_warps
+        ctx.num_stages = _cfg.num_stages
         return out
 
     @staticmethod
@@ -585,23 +609,28 @@ class _DSQGFnV8(torch.autograd.Function):
         dout = dout.contiguous()
 
         D  = torch.empty(B, H, N, device=q.device, dtype=torch.float32)
-        g  = (B * H, triton.cdiv(N, BN))
 
-        _compute_D_v8[g](
+        def grid_n(meta):
+            return (B * H, triton.cdiv(N, meta['BLOCK_N']))
+
+        _compute_D_v8[grid_n](
             dout, out, D,
             dout.stride(0), dout.stride(1), dout.stride(2), dout.stride(3),
             out.stride(0),  out.stride(1),  out.stride(2),  out.stride(3),
             D.stride(0),    D.stride(1),    D.stride(2),
-            H=H, N=N, HD=HD, BLOCK_N=BN, BLOCK_HD=BHD,
-            num_warps=NW, num_stages=NS,
+            H=H, N=N, HD=HD,
         )
 
-        dq     = torch.empty_like(q)
+        blocks_n = (N + BN - 1) // BN
+        _dev     = q.device
+
+        dq     = torch.zeros_like(q)
+        dy_pre = torch.zeros_like(y_pre)
+        # dpb/dse accumulated via atomic_add in _bwd_dq_v8
         dpb    = torch.zeros_like(pb)
         dse    = torch.zeros_like(se)
-        dy_pre = torch.zeros_like(y_pre)
 
-        _bwd_dq_v8[g](
+        _bwd_dq_v8[grid_n](
             q, k, v, pb, se, phase_base, phase_gain, y_pre, z_pre,
             dout, out, lse, D,
             dq, dpb, dse, dy_pre,
@@ -613,33 +642,30 @@ class _DSQGFnV8(torch.autograd.Function):
             lse.stride(0),  lse.stride(1),  lse.stride(2),
             D.stride(0),    D.stride(1),    D.stride(2),
             dq.stride(0),   dq.stride(1),   dq.stride(2),   dq.stride(3),
-            dpb.stride(0),  dpb.stride(1),
             pb.stride(0),   pb.stride(1),
             se.stride(0),   se.stride(1),
-            dse.stride(0),  dse.stride(1),
             phase_base.stride(0), phase_base.stride(1),
             phase_gain.stride(0), phase_gain.stride(1),
             y_pre.stride(0),      y_pre.stride(1),      y_pre.stride(2),
             z_pre.stride(0),      z_pre.stride(1),      z_pre.stride(2),
             dy_pre.stride(0),     dy_pre.stride(1),     dy_pre.stride(2),
-            H=H, N=N, HD=HD, BLOCK_N=BN, BLOCK_HD=BHD,
-            num_warps=NW, num_stages=NS,
+            H=H, N=N, HD=HD,
         )
 
-        dk     = torch.empty_like(k)
-        dv     = torch.empty_like(v)
+        dk     = torch.zeros_like(k)
+        dv     = torch.zeros_like(v)
         dz_pre = torch.zeros_like(z_pre)
-
-        blocks_n = (N + BN - 1) // BN
-        _dev     = q.device
-        phase_base_buf = torch.empty(B * H, blocks_n, J_LARGE * 2,
+        phase_base_buf = torch.zeros(B * H, blocks_n, J_LARGE * 2,
                                      device=_dev, dtype=torch.float32)
-        phase_gain_buf = torch.empty(B * H, blocks_n, J_LARGE * 2,
+        phase_gain_buf = torch.zeros(B * H, blocks_n, J_LARGE * 2,
                                      device=_dev, dtype=torch.float32)
         stride_buf_bh  = blocks_n * J_LARGE * 2
         stride_buf_blk = J_LARGE * 2
 
-        _bwd_dkdv_v8[g](
+        def grid_m(meta):
+            return (B * H, triton.cdiv(N, meta['BLOCK_M']))
+
+        _bwd_dkdv_v8[grid_m](
             q, k, v, pb, se, phase_base, phase_gain, y_pre, z_pre,
             dout, lse, D,
             dk, dv,
@@ -661,8 +687,7 @@ class _DSQGFnV8(torch.autograd.Function):
             z_pre.stride(0),      z_pre.stride(1),      z_pre.stride(2),
             stride_buf_bh, stride_buf_blk,
             dz_pre.stride(0),     dz_pre.stride(1),     dz_pre.stride(2),
-            H=H, N=N, HD=HD, BLOCK_M=BN, BLOCK_HD=BHD,
-            num_warps=NW, num_stages=NS,
+            H=H, N=N, HD=HD,
         )
 
         def _reduce_phase_buf(buf):
@@ -671,10 +696,7 @@ class _DSQGFnV8(torch.autograd.Function):
         d_phase_base = _reduce_phase_buf(phase_base_buf)
         d_phase_gain = _reduce_phase_buf(phase_gain_buf)
 
-        dq_total = dq.float()
-        dk_total = dk.float()
-
-        return (dq_total.bfloat16(), dk_total.bfloat16(), dv,
+        return (dq, dk, dv,
                 dpb, dse, d_phase_base, d_phase_gain, dy_pre, dz_pre)
 
 
@@ -706,7 +728,7 @@ def dsqg_attention_v8(q, k, v, pos_bias, scale_embed,
 # Module
 # ─────────────────────────────────────────────────────────────────────────────
 
-class DSQGAttentionV8(nn.Module):
+class DSQGAttentionV8_4090(nn.Module):
     """
     DSQG V8: J=24 relay-optimal offsets + MOVT(r=2) + QK-OVT + NPCI.
 
@@ -724,7 +746,7 @@ class DSQGAttentionV8(nn.Module):
       npci_theta_k  [H]        NPCI K rotation angle (zero-init)
       npci_theta_v  [H]        NPCI V rotation angle (zero-init)
     """
-    def __init__(self, embedding_dim, num_heads, seq_len=2048, dropout=0.1):
+    def __init__(self, embedding_dim, num_heads, seq_len=4096, dropout=0.1):
         super().__init__()
         self.num_heads = num_heads
         self.head_dim  = embedding_dim // num_heads
@@ -841,7 +863,7 @@ def _reference_v8(q, k, v, pos_bias, scale_embed,
     kp   = F.pad(k.float(), (0, 0, MAX_DELTA, 0))
     vp   = F.pad(v.float(), (0, 0, MAX_DELTA, 0))
     ni   = torch.arange(N, device=q.device)
-    gi   = MAX_DELTA - off[None, :] + ni[:, None]   # [N, 24]
+    gi   = MAX_DELTA - off[None, :] + ni[:, None]   # [N, J]
     Ka   = kp[:, :, gi, :]                           # [B, H, N, 24, HD]
     Va   = vp[:, :, gi, :]                           # [B, H, N, 24, HD]
 
