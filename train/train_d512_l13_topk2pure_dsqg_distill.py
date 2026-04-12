@@ -54,7 +54,7 @@ from kernels.topk_sparse_attn import TopKSparseAttention
 
 TOPK_K          = 64
 LR              = 2.5e-4          # mixed-domain LR for D=512
-BATCH_SIZE      = int(os.environ.get('DWARF_BS', '2'))
+BATCH_SIZE      = int(os.environ.get('DWARF_BS', '1'))
 GRAD_ACCUM      = int(os.environ.get('DWARF_GA', '8'))
 MAX_TRAIN_SEQS  = 20_000
 MAX_VAL_SEQS    = 1_000
@@ -365,6 +365,10 @@ def train():
 
     # At TOPK_LAYER=3, blocks[3].attn is already DSQGAttentionGrouped from TriadicJ96.
     # No weight loading from teacher (random init) — pure student.
+
+    # NOTE: Gradient checkpointing removed — breaks hook capture during backward recompute
+    print(f"  No gradient checkpointing (hook compatibility required)")
+
     print(f"  Student built. Layout: L{TOPK_LAYER}=DSQG (no teacher warm-start)")
     print(f"  Layout: {', '.join(f'L{i}:{_l[0]}' for i, _l in enumerate(LAYER_LAYOUT) if _l[0] != 'FA')}")
     n_params = sum(p.numel() for p in student.parameters())
@@ -381,15 +385,19 @@ def train():
     assert (BATCH_SIZE * GRAD_ACCUM) % 2 == 0, "effective batch must be even"
     eff_batch = BATCH_SIZE * GRAD_ACCUM
     lr_mult = SCALE_EMBED_LR_MULT
-    scale_embed_lr = LR * lr_mult
-    opt_params = [
-        {'params': student.parameters(), 'lr': LR, 'weight_decay': 0.1},
-    ]
-
+    se_ids = {id(p) for p in student.scale_embed_parameters()}
+    se_params = [p for p in student.parameters() if id(p) in se_ids]
+    other_params = [p for p in student.parameters() if id(p) not in se_ids]
     if _BNB:
-        optimizer = bnb.optim.AdamW8bit(opt_params, betas=(0.9, 0.95))
+        optimizer = bnb.optim.AdamW8bit([
+            {'params': other_params, 'lr': LR, 'weight_decay': 0.1},
+            {'params': se_params, 'lr': LR * SCALE_EMBED_LR_MULT},
+        ], betas=(0.9, 0.95))
     else:
-        optimizer = torch.optim.AdamW(opt_params, betas=(0.9, 0.95))
+        optimizer = torch.optim.AdamW8bit([
+            {'params': other_params, 'lr': LR, 'weight_decay': 0.1},
+            {'params': se_params, 'lr': LR * SCALE_EMBED_LR_MULT},
+        ], betas=(0.9, 0.95))
 
     total_steps = (len(train_data) // eff_batch) * EPOCHS
     warmup_steps = WARMUP_STEPS
@@ -400,7 +408,7 @@ def train():
     scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda)
 
     print(f"\n  Optimizer: {'AdamW8bit' if _BNB else 'AdamW8bit'}")
-    print(f"  LR={LR}, scale_embed_LR={scale_embed_lr:.2e} (×{lr_mult:.1f})")
+    print(f"  LR={LR}, se_LR={LR * SCALE_EMBED_LR_MULT:.2e} (x{SCALE_EMBED_LR_MULT})")
     print(f"  steps_per_epoch={len(train_data)//eff_batch}, total_steps={total_steps}")
 
     # ── Mixed Precision ───────────────────────────────────────────────────────
@@ -475,10 +483,14 @@ def train():
         hit = run_passkey(student, tokenizer, device, PASSKEY_DISTANCES, PASSKEY_TRIALS, PASSKEY_BATCH_SIZE)
         mean_passkey = sum(hit.values()) / len(hit)
 
-        # scale_embed stats
-        se = student.blocks[TOPK_LAYER].attn.scale_embed
-        se_max = se.detach().abs().max().item()
-        se_mean = se.detach().abs().mean().item()
+        # scale_embed stats — find DSQGAttentionGrouped modules (student uses FA layout but we monitor DSQG layers)
+        se_modules = [m for m in student.modules() if hasattr(m, 'scale_embed')]
+        if se_modules:
+            se_vals = torch.cat([m.scale_embed.detach().abs().flatten() for m in se_modules])
+            se_max = se_vals.max().item()
+            se_mean = se_vals.mean().item()
+        else:
+            se_max = se_mean = 0.0
 
         elapsed = time.time() - t_start
         print(f"\n{'='*70}")

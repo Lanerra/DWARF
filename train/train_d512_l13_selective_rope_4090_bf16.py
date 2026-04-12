@@ -1,29 +1,14 @@
 """
-🚀 DWARF D=512 L=13 Triadic J=96 — offset partitioning, 4090, cold start
+🧪 DWARF D=512 L=13 Selective RoPE — position-dependent Q/K rotation for distal offsets
 
 Architecture: D=512, H=8 (hd=64), L=13, FFN=1024, TIED lm_head
-  Triadic partitioning: 96 offsets split into 3 groups of 32 + tail group of 51
-  Per-layer bandwidth ratio at D=512: (32×64)/512 = 4.0x (safe)
-  Tail bandwidth: (51×64)/512 = 6.4x (consolidation, acceptable)
-
-  L0: DSQGBlock(GROUP_A)   -- triad 1 (local + low-mid, J=32)
-  L1: DSQGBlock(GROUP_B)   -- triad 1 (mid range, J=32)
-  L2: DSQGBlock(GROUP_C)   -- triad 1 (long range, J=32) + preIF
-  L3: FullAttentionBlock   -- FA at 33% depth
-  L4: DSQGBlock(GROUP_A)   -- triad 2
-  L5: DSQGBlock(GROUP_B)
-  L6: DSQGBlock(GROUP_C)
-  L7: DSQGBlock(GROUP_A)   -- triad 3
-  L8: DSQGBlock(GROUP_B)
-  L9: DSQGBlock(GROUP_C)
-  L10: DSQGBlock(GROUP_A)  -- triad 4
-  L11: DSQGBlock(GROUP_B)
-  L12: DSQGBlock(GROUP_C)
-
-  Full J=96 topological coverage achieved within each 3-layer triad.
+  Same triadic [A,A,B,B,C,C] layout as d512_l13_triadic_aabbc.
+  DSQGAttentionGroupedSelectiveRoPE replaces DSQGAttentionGrouped:
+    Groups B and C (j_small=0, all J_LARGE) get absolute-position RoPE on Q/K.
+    Group A (j_small=17, j_large=15): two-pass merge (small unrotated, large rotated).
 
 Run:
-  CUDA_VISIBLE_DEVICES=0 .venv/bin/python3 -u train/train_d512_l13_triadic_j96_4090_bf16.py
+  CUDA_VISIBLE_DEVICES=0 .venv/bin/python3 -u train/train_d512_l13_selective_rope_4090_bf16.py
 """
 
 import contextlib, math, os, subprocess, sys, time
@@ -43,13 +28,7 @@ except ImportError:
 torch.set_float32_matmul_precision('medium')
 os.environ.setdefault('PYTORCH_CUDA_ALLOC_CONF', 'expandable_segments:True')
 
-try:
-    from liger_kernel.transformers.fused_linear_cross_entropy import LigerFusedLinearCrossEntropyLoss
-    _LIGER_AVAILABLE = True
-except ImportError:
-    _LIGER_AVAILABLE = False
-
-USE_LIGER_CE = _LIGER_AVAILABLE and os.getenv("DWARF_LIGER", "0") != "0"  # disabled by default on 4090
+USE_LIGER_CE = False
 
 import pathlib as _pl
 _project_root = str(_pl.Path(__file__).resolve().parent.parent)
@@ -58,11 +37,10 @@ for _d in [_kernel_dir, _project_root]:
     if _d not in sys.path:
         sys.path.insert(0, _d)
 
-import triton
-from dsqg_attention_v8_dynamic_j import (
-    ALL_OFFSETS as _ALL_96,
-    _fwd_v8, _compute_D_v8, _bwd_dq_v8, _bwd_dkdv_v8,
-    npci_rotate, R_PLANES, _next_pow2,
+from dsqg_attention_v8_dynamic_j import ALL_OFFSETS as _ALL_96
+from dsqg_attention_v8_selective_rope import (
+    DSQGAttentionGroupedSelectiveRoPE as DSQGAttentionGrouped,
+    npci_rotate, R_PLANES,
 )
 from causal_ema_scan import causal_ema_scan as _causal_ema_scan
 
@@ -82,10 +60,10 @@ def _count_small_large(offsets):
         f"J_SMALL({j_small}) + J_LARGE({j_large}) != J({len(offsets)})")
     return j_small, j_large
 
-J_SMALL_A, J_LARGE_A = _count_small_large(GROUP_A)  # 17, 15
-J_SMALL_B, J_LARGE_B = _count_small_large(GROUP_B)  # 0, 32
-J_SMALL_C, J_LARGE_C = _count_small_large(GROUP_C)  # 0, 32
-J_SMALL_T, J_LARGE_T = _count_small_large(GROUP_T)  # 3, 48
+J_SMALL_A, J_LARGE_A = _count_small_large(GROUP_A)
+J_SMALL_B, J_LARGE_B = _count_small_large(GROUP_B)
+J_SMALL_C, J_LARGE_C = _count_small_large(GROUP_C)
+J_SMALL_T, J_LARGE_T = _count_small_large(GROUP_T)
 
 # =============================================================================
 # EXPERIMENT KNOBS
@@ -99,7 +77,7 @@ FULL_ATTN_LAYER  = 3
 VOCAB_SIZE       = 32768
 
 SCALE_EMBED_INIT_VAL = 0.15
-SCALE_EMBED_LR_MULT  = 20.0  # bumped from 15.0; D=512 mixed-domain validated, need ep1 percolation crossing
+SCALE_EMBED_LR_MULT  = 20.0
 EMA_INIT  = 0.020833
 EMA_FLOOR = 0.00001
 LR        = 3e-4
@@ -107,7 +85,7 @@ DROPOUT   = 0.1
 
 BATCH_SIZE     = int(os.environ.get('DWARF_BS', '16'))
 GRAD_ACCUM     = int(os.environ.get('DWARF_GA', '8'))
-MAX_TRAIN_SEQS = int(os.environ.get('DWARF_MAX_TRAIN_SEQS', '200000'))  # 1562 steps/epoch; ~860 steps post-percolation; 3 epochs = ~127% Chinchilla total
+MAX_TRAIN_SEQS = int(os.environ.get('DWARF_MAX_TRAIN_SEQS', '200000'))
 MAX_SEQ_LEN    = 2048
 MAX_VAL_SEQS   = 5_582
 CE_CHUNK       = 512
@@ -123,7 +101,7 @@ _FILLER_SENTENCE  = 'the weather was mild and the air was still . '
 _INTRO_TEMPLATE   = 'the secret word is {word} .'
 _RETRIEVAL_CUE    = 'the secret word is'
 CHECKPOINT_DIR    = 'autoresearch/checkpoints'
-CKPT_BASE_NAME    = 'd512_l13_triadic_j96'
+CKPT_BASE_NAME    = 'd512_l13_selective_rope'
 
 CHECKPOINT_STRATEGY = os.getenv('DWARF_CKPT', 'none').lower()
 
@@ -132,314 +110,22 @@ CHECKPOINT_STRATEGY = os.getenv('DWARF_CKPT', 'none').lower()
 # =============================================================================
 
 LAYER_LAYOUT = [
-    ('A', GROUP_A, J_SMALL_A, J_LARGE_A, False),   # L0: triad 1
-    ('B', GROUP_B, J_SMALL_B, J_LARGE_B, False),   # L1
-    ('C', GROUP_C, J_SMALL_C, J_LARGE_C, True),    # L2 + preIF
+    ('A', GROUP_A, J_SMALL_A, J_LARGE_A, False),   # L0: cycle 1
+    ('A', GROUP_A, J_SMALL_A, J_LARGE_A, False),   # L1
+    ('B', GROUP_B, J_SMALL_B, J_LARGE_B, True),    # L2 + preIF
     ('FA', None, 0, 0, False),                       # L3: FullAttention
-    ('A', GROUP_A, J_SMALL_A, J_LARGE_A, False),   # L4: triad 2
-    ('B', GROUP_B, J_SMALL_B, J_LARGE_B, False),   # L5
+    ('B', GROUP_B, J_SMALL_B, J_LARGE_B, False),   # L4: cycle 1 cont.
+    ('C', GROUP_C, J_SMALL_C, J_LARGE_C, False),   # L5
     ('C', GROUP_C, J_SMALL_C, J_LARGE_C, False),   # L6
-    ('A', GROUP_A, J_SMALL_A, J_LARGE_A, False),   # L7: triad 3
-    ('B', GROUP_B, J_SMALL_B, J_LARGE_B, False),   # L8
-    ('C', GROUP_C, J_SMALL_C, J_LARGE_C, False),   # L9
-    ('A', GROUP_A, J_SMALL_A, J_LARGE_A, False),   # L10: triad 4
-    ('B', GROUP_B, J_SMALL_B, J_LARGE_B, False),   # L11
+    ('A', GROUP_A, J_SMALL_A, J_LARGE_A, False),   # L7: cycle 2
+    ('A', GROUP_A, J_SMALL_A, J_LARGE_A, False),   # L8
+    ('B', GROUP_B, J_SMALL_B, J_LARGE_B, False),   # L9
+    ('B', GROUP_B, J_SMALL_B, J_LARGE_B, False),   # L10
+    ('C', GROUP_C, J_SMALL_C, J_LARGE_C, False),   # L11
     ('C', GROUP_C, J_SMALL_C, J_LARGE_C, False),   # L12
 ]
 
 assert len(LAYER_LAYOUT) == NUM_LAYERS
-
-# =============================================================================
-# GROUPED AUTOGRAD FUNCTION
-# =============================================================================
-
-class _DSQGFnGrouped(torch.autograd.Function):
-    @staticmethod
-    def forward(ctx, q, k, v, pos_bias, scale_embed,
-                phase_base, phase_gain, y_pre, z_pre,
-                offsets_dev, j_val, j_small, j_large):
-        B, H, N, HD = q.shape
-        assert q.dtype == torch.bfloat16
-        assert pos_bias.shape == (j_val, H)
-        assert scale_embed.shape == (j_val, HD)
-        assert phase_base.shape == (j_large, H, R_PLANES) if j_large > 0 else True
-        assert phase_gain.shape == (j_large, H, R_PLANES) if j_large > 0 else True
-        assert y_pre.shape == (B, H, N, R_PLANES)
-        assert z_pre.shape == (B, H, N, R_PLANES)
-
-        _cc = torch.cuda.get_device_capability()
-        _sm90 = (_cc[0] == 9 and _cc[1] == 0) or _cc[0] > 9
-        _sm89 = (_cc[0] == 8 and _cc[1] == 9)
-
-        if HD <= 64:
-            if _sm90:   BLOCK_N, _num_warps, _num_stages = 128, 8, 3
-            elif _sm89: BLOCK_N, _num_warps, _num_stages = 64, 8, 2
-            else:       BLOCK_N, _num_warps, _num_stages = 64, 4, 2
-        elif HD <= 128:
-            if _sm90:   BLOCK_N, _num_warps, _num_stages = 128, 8, 3
-            elif _sm89: BLOCK_N, _num_warps, _num_stages = 64, 4, 2
-            else:       BLOCK_N, _num_warps, _num_stages = 32, 4, 2
-        elif HD <= 256:
-            if _sm90:   BLOCK_N, _num_warps, _num_stages = 32, 4, 3
-            elif _sm89: BLOCK_N, _num_warps, _num_stages = 32, 4, 2
-            else:       BLOCK_N, _num_warps, _num_stages = 16, 4, 2
-        else:
-            if _sm90:   BLOCK_N, _num_warps, _num_stages = 16, 4, 3
-            elif _sm89: BLOCK_N, _num_warps, _num_stages = 16, 4, 2
-            else:       BLOCK_N, _num_warps, _num_stages = 8, 4, 2
-
-        BLOCK_HD = _next_pow2(HD)
-        out = torch.empty_like(q)
-        lse = torch.empty(B, H, N, device=q.device, dtype=torch.float32)
-        g = (B * H, triton.cdiv(N, BLOCK_N))
-
-        _fwd_v8[g](
-            q, k, v, pos_bias, scale_embed, phase_base, phase_gain,
-            y_pre, z_pre, out, lse,
-            offsets_dev,
-            q.stride(0), q.stride(1), q.stride(2), q.stride(3),
-            k.stride(0), k.stride(1), k.stride(2), k.stride(3),
-            v.stride(0), v.stride(1), v.stride(2), v.stride(3),
-            out.stride(0), out.stride(1), out.stride(2), out.stride(3),
-            lse.stride(0), lse.stride(1), lse.stride(2),
-            pos_bias.stride(0), pos_bias.stride(1),
-            scale_embed.stride(0), scale_embed.stride(1),
-            phase_base.stride(0), phase_base.stride(1),
-            phase_gain.stride(0), phase_gain.stride(1),
-            y_pre.stride(0), y_pre.stride(1), y_pre.stride(2),
-            z_pre.stride(0), z_pre.stride(1), z_pre.stride(2),
-            H=H, N=N, HD=HD, BLOCK_N=BLOCK_N, BLOCK_HD=BLOCK_HD,
-            J_VAL=j_val, J_SMALL_VAL=j_small,
-            num_warps=_num_warps, num_stages=_num_stages,
-        )
-
-        ctx.save_for_backward(q, k, v, pos_bias, scale_embed,
-                              phase_base, phase_gain, y_pre, z_pre,
-                              out, lse, offsets_dev)
-        ctx.BLOCK_N = BLOCK_N
-        ctx.BLOCK_HD = BLOCK_HD
-        ctx.num_warps = _num_warps
-        ctx.num_stages = _num_stages
-        ctx.j_val = j_val
-        ctx.j_small = j_small
-        ctx.j_large = j_large
-        return out
-
-    @staticmethod
-    def backward(ctx, dout):
-        (q, k, v, pb, se, phase_base, phase_gain,
-         y_pre, z_pre, out, lse, offsets_dev) = ctx.saved_tensors
-        B, H, N, HD = q.shape
-        BN, BHD = ctx.BLOCK_N, ctx.BLOCK_HD
-        NW, NS = ctx.num_warps, ctx.num_stages
-        j_val, j_small, j_large = ctx.j_val, ctx.j_small, ctx.j_large
-        dout = dout.contiguous()
-
-        D = torch.empty(B, H, N, device=q.device, dtype=torch.float32)
-        g = (B * H, triton.cdiv(N, BN))
-
-        _compute_D_v8[g](
-            dout, out, D,
-            dout.stride(0), dout.stride(1), dout.stride(2), dout.stride(3),
-            out.stride(0), out.stride(1), out.stride(2), out.stride(3),
-            D.stride(0), D.stride(1), D.stride(2),
-            H=H, N=N, HD=HD, BLOCK_N=BN, BLOCK_HD=BHD,
-            num_warps=NW, num_stages=NS,
-        )
-
-        blocks_n = (N + BN - 1) // BN
-        _dev = q.device
-
-        dq = torch.zeros_like(q)
-        dy_pre = torch.zeros_like(y_pre)
-        dpb_buf = torch.empty(B * H, blocks_n, j_val, device=_dev, dtype=torch.float32)
-        dse_buf = torch.empty(B * H, blocks_n, j_val * HD, device=_dev, dtype=torch.float32)
-
-        _bwd_dq_v8[g](
-            q, k, v, pb, se, phase_base, phase_gain, y_pre, z_pre,
-            dout, out, lse, D,
-            dq, dpb_buf, dse_buf, dy_pre,
-            offsets_dev,
-            q.stride(0), q.stride(1), q.stride(2), q.stride(3),
-            k.stride(0), k.stride(1), k.stride(2), k.stride(3),
-            v.stride(0), v.stride(1), v.stride(2), v.stride(3),
-            dout.stride(0), dout.stride(1), dout.stride(2), dout.stride(3),
-            out.stride(0), out.stride(1), out.stride(2), out.stride(3),
-            lse.stride(0), lse.stride(1), lse.stride(2),
-            D.stride(0), D.stride(1), D.stride(2),
-            dq.stride(0), dq.stride(1), dq.stride(2), dq.stride(3),
-            blocks_n * j_val, j_val,
-            pb.stride(0), pb.stride(1),
-            se.stride(0), se.stride(1),
-            blocks_n * j_val * HD, j_val * HD,
-            phase_base.stride(0), phase_base.stride(1),
-            phase_gain.stride(0), phase_gain.stride(1),
-            y_pre.stride(0), y_pre.stride(1), y_pre.stride(2),
-            z_pre.stride(0), z_pre.stride(1), z_pre.stride(2),
-            dy_pre.stride(0), dy_pre.stride(1), dy_pre.stride(2),
-            H=H, N=N, HD=HD, BLOCK_N=BN, BLOCK_HD=BHD,
-            J_VAL=j_val, J_SMALL_VAL=j_small,
-            num_warps=NW, num_stages=NS,
-        )
-        dpb = dpb_buf.view(B, H, blocks_n, j_val).sum(dim=(0, 2)).permute(1, 0).contiguous()
-        dse = dse_buf.view(B, H, blocks_n, j_val, HD).sum(dim=(0, 1, 2)).contiguous()
-
-        dk = torch.zeros_like(k)
-        dv = torch.zeros_like(v)
-        dz_pre = torch.zeros_like(z_pre)
-
-        if j_large > 0:
-            phase_base_buf = torch.empty(B * H, blocks_n, j_large * 2,
-                                         device=_dev, dtype=torch.float32)
-            phase_gain_buf = torch.empty(B * H, blocks_n, j_large * 2,
-                                         device=_dev, dtype=torch.float32)
-        else:
-            phase_base_buf = torch.empty(B * H, blocks_n, 1,
-                                         device=_dev, dtype=torch.float32)
-            phase_gain_buf = torch.empty(B * H, blocks_n, 1,
-                                         device=_dev, dtype=torch.float32)
-
-        stride_buf_bh = blocks_n * max(j_large, 1) * 2
-        stride_buf_blk = max(j_large, 1) * 2
-
-        _bwd_dkdv_v8[g](
-            q, k, v, pb, se, phase_base, phase_gain, y_pre, z_pre,
-            dout, lse, D,
-            dk, dv,
-            phase_base_buf, phase_gain_buf,
-            dz_pre,
-            offsets_dev,
-            q.stride(0), q.stride(1), q.stride(2), q.stride(3),
-            k.stride(0), k.stride(1), k.stride(2), k.stride(3),
-            v.stride(0), v.stride(1), v.stride(2), v.stride(3),
-            dout.stride(0), dout.stride(1), dout.stride(2), dout.stride(3),
-            lse.stride(0), lse.stride(1), lse.stride(2),
-            D.stride(0), D.stride(1), D.stride(2),
-            dk.stride(0), dk.stride(1), dk.stride(2), dk.stride(3),
-            dv.stride(0), dv.stride(1), dv.stride(2), dv.stride(3),
-            pb.stride(0), pb.stride(1),
-            se.stride(0), se.stride(1),
-            phase_base.stride(0), phase_base.stride(1),
-            phase_gain.stride(0), phase_gain.stride(1),
-            y_pre.stride(0), y_pre.stride(1), y_pre.stride(2),
-            z_pre.stride(0), z_pre.stride(1), z_pre.stride(2),
-            stride_buf_bh, stride_buf_blk,
-            dz_pre.stride(0), dz_pre.stride(1), dz_pre.stride(2),
-            H=H, N=N, HD=HD, BLOCK_M=BN, BLOCK_HD=BHD,
-            J_VAL=j_val, J_SMALL_VAL=j_small,
-            num_warps=NW, num_stages=NS,
-        )
-
-        if j_large > 0:
-            def _reduce_phase_buf(buf):
-                r = buf.view(B, H, blocks_n, j_large, 2).sum(dim=(0, 2))
-                return r.permute(1, 0, 2).contiguous()
-            d_phase_base = _reduce_phase_buf(phase_base_buf)
-            d_phase_gain = _reduce_phase_buf(phase_gain_buf)
-        else:
-            d_phase_base = torch.zeros_like(phase_base)
-            d_phase_gain = torch.zeros_like(phase_gain)
-
-        return (dq, dk, dv, dpb, dse, d_phase_base, d_phase_gain,
-                dy_pre, dz_pre, None, None, None, None)
-
-
-def dsqg_attention_grouped(q, k, v, pos_bias, scale_embed,
-                           phase_base, phase_gain, y_pre, z_pre,
-                           offsets_dev, j_val, j_small, j_large):
-    orig = q.dtype
-    if orig != torch.bfloat16:
-        q, k, v = q.bfloat16(), k.bfloat16(), v.bfloat16()
-    out = _DSQGFnGrouped.apply(
-        q, k, v,
-        pos_bias.float(), scale_embed.float(),
-        phase_base.float(), phase_gain.float(),
-        y_pre.float(), z_pre.float(),
-        offsets_dev, j_val, j_small, j_large,
-    )
-    return out if orig == torch.bfloat16 else out.to(orig)
-
-
-# =============================================================================
-# GROUPED ATTENTION MODULE
-# =============================================================================
-
-class DSQGAttentionGrouped(nn.Module):
-    def __init__(self, embedding_dim, num_heads, offsets, j_small, j_large,
-                 seq_len=2048, dropout=0.1):
-        super().__init__()
-        self.num_heads = num_heads
-        self.head_dim = embedding_dim // num_heads
-        HD = self.head_dim
-        j_val = len(offsets)
-        self.j_val = j_val
-        self.j_small = j_small
-        self.j_large = j_large
-        assert HD >= 4
-
-        self.register_buffer(
-            'offsets_dev',
-            torch.tensor(offsets, dtype=torch.int32),
-            persistent=False,
-        )
-
-        self.qkv_proj = nn.Linear(embedding_dim, 3 * embedding_dim, bias=True)
-        self.out_proj = nn.Linear(embedding_dim, embedding_dim, bias=True)
-        self.gate_proj = nn.Linear(embedding_dim, embedding_dim, bias=True)
-        nn.init.constant_(self.gate_proj.bias, 0.0)
-
-        alphas = torch.linspace(0.2, 2.0, num_heads)
-        delta_vals = torch.tensor([math.log(1.0 + d) for d in offsets],
-                                  dtype=torch.float32)
-        self.pos_bias = nn.Parameter(-delta_vals.unsqueeze(1) * alphas.unsqueeze(0))
-        self.scale_embed = nn.Parameter(torch.zeros(j_val, HD))
-        self.if_gain = nn.Parameter(torch.ones(num_heads))
-
-        self.phase_base = nn.Parameter(torch.zeros(max(j_large, 1), num_heads, R_PLANES))
-        self.phase_gain = nn.Parameter(torch.zeros(max(j_large, 1), num_heads, R_PLANES))
-
-        self.query_probes = nn.Parameter(torch.zeros(R_PLANES, HD))
-        self.key_probes = nn.Parameter(torch.zeros(R_PLANES, HD))
-
-        self.npci_theta_k = nn.Parameter(torch.zeros(num_heads))
-        self.npci_theta_v = nn.Parameter(torch.zeros(num_heads))
-
-        self.dropout = nn.Dropout(dropout)
-
-    def forward(self, x, kv_inject=None):
-        B, N, D = x.shape
-        H, HD = self.num_heads, self.head_dim
-
-        qkv = self.qkv_proj(x)
-        q, k, v = qkv.split(D, dim=-1)
-        q = q.view(B, N, H, HD).permute(0, 2, 1, 3).contiguous()
-        k = k.view(B, N, H, HD).permute(0, 2, 1, 3).contiguous()
-        v = v.view(B, N, H, HD).permute(0, 2, 1, 3).contiguous()
-
-        if kv_inject is not None:
-            k_delta, v_delta = kv_inject
-            k = npci_rotate(k, k_delta, self.npci_theta_k)
-            v = npci_rotate(v, v_delta, self.npci_theta_v)
-
-        sc = HD ** -0.5
-        y_pre = torch.einsum('bhnd,rd->bhnr',
-                             q, self.query_probes.to(q.dtype)).mul(sc).float().contiguous()
-        z_pre = torch.einsum('bhnd,rd->bhnr',
-                             k, self.key_probes.to(k.dtype)).mul(sc).float().contiguous()
-
-        out = dsqg_attention_grouped(
-            q, k, v,
-            self.pos_bias, self.scale_embed,
-            self.phase_base, self.phase_gain,
-            y_pre, z_pre,
-            self.offsets_dev, self.j_val, self.j_small, self.j_large,
-        )
-
-        out = out * self.if_gain.view(1, H, 1, 1)
-        out_flat = out.permute(0, 2, 1, 3).reshape(B, N, D)
-        gate = torch.sigmoid(self.gate_proj(x))
-        return self.dropout(self.out_proj(out_flat * gate))
-
 
 # =============================================================================
 # MODEL BLOCKS
@@ -642,19 +328,10 @@ class TriadicJ96(nn.Module):
             if isinstance(m, DSQGAttentionGrouped):
                 yield m.scale_embed
 
-    def phase_parameters(self):
-        for m in self.modules():
-            if isinstance(m, DSQGAttentionGrouped):
-                yield m.phase_gain
-                yield m.phase_gate
-                yield m.query_probes
-                yield m.key_probes
-
     def non_scale_embed_parameters(self):
-        exclude_ids = {id(p) for p in self.scale_embed_parameters()}
-        exclude_ids.update(id(p) for p in self.phase_parameters())
+        se_ids = {id(p) for p in self.scale_embed_parameters()}
         for p in self.parameters():
-            if id(p) not in exclude_ids:
+            if id(p) not in se_ids:
                 yield p
 
     def physics_summary(self):
@@ -673,7 +350,10 @@ class TriadicJ96(nn.Module):
                 label = block.group_label
                 j = block.attn.j_val
                 iflag = '+IF' if block.interference else ''
-                parts.append(f'L{i}:DSQG-{label}(J={j}){iflag}')
+                rope = '+RoPE' if (block.attn.j_small == 0 and block.attn.j_large > 0) else ''
+                if block.attn.j_small > 0 and block.attn.j_large > 0:
+                    rope = '+RoPE(mixed)'
+                parts.append(f'L{i}:DSQG-{label}(J={j}){iflag}{rope}')
             else:
                 parts.append(f'L{i}:FA')
         return '  '.join(parts)
@@ -783,10 +463,10 @@ def save_full_attn_checkpoint(model, epoch, git_hash, checkpoint_dir):
         "config": {
             "embedding_dim": EMBEDDING_DIM, "num_heads": NUM_HEADS,
             "ffn_dim": FFN_DIM, "seq_len": MAX_SEQ_LEN,
-            "source_script": "train/train_d512_l13_triadic_j96_4090_bf16.py",
+            "source_script": "train/train_d512_l13_selective_rope_4090_bf16.py",
             "source_layer": FULL_ATTN_LAYER, "num_layers": NUM_LAYERS,
             "epoch": epoch, "git_hash": git_hash,
-            "note": (f"Triadic J=96 L=13: D={EMBEDDING_DIM} H={NUM_HEADS} "
+            "note": (f"Selective RoPE L=13: D={EMBEDDING_DIM} H={NUM_HEADS} "
                      f"FA@L{FULL_ATTN_LAYER}. Epoch {epoch}/{SCREEN_EPOCHS}."),
         },
     }
@@ -808,7 +488,7 @@ def train():
         ['git', 'rev-parse', '--short', 'HEAD']).decode().strip()
 
     print('=' * 70)
-    print('  🚀 DWARF D512-L9 Triadic J=96 — offset partitioning, cold start')
+    print('  🧪 DWARF D512-L13 Selective RoPE')
     print(f'  FA@L{FULL_ATTN_LAYER}, preIF@L{FULL_ATTN_LAYER-1}')
     print('=' * 70)
     if torch.cuda.is_available():
@@ -819,15 +499,13 @@ def train():
           f'C(J={len(GROUP_C)}) T(J={len(GROUP_T)})')
     print(f'  Bandwidth ratios: A/B/C={(len(GROUP_A)*64)/EMBEDDING_DIM:.1f}x  '
           f'T={(len(GROUP_T)*64)/EMBEDDING_DIM:.1f}x')
+    print(f'  Selective RoPE: J_LARGE offsets get position-based Q/K rotation')
     print(f'  scale_embed init={SCALE_EMBED_INIT_VAL}, LR mult={SCALE_EMBED_LR_MULT}')
     print(f'  EMA α₀={EMA_INIT} (window≈{round(1/EMA_INIT)}t)')
     print(f'  MAX_TRAIN_SEQS={MAX_TRAIN_SEQS:,}, Epochs={SCREEN_EPOCHS}')
     print(f'  Batch: BS={BATCH_SIZE} × GA={GRAD_ACCUM} = eff_batch={BATCH_SIZE*GRAD_ACCUM}')
     print(f'  checkpoint_strategy={CHECKPOINT_STRATEGY}')
-    if USE_LIGER_CE:
-        print('  Using Liger fused CE')
-    else:
-        print('  Using chunked CE')
+    print('  Using chunked CE (Liger disabled)')
     print(f'  git={git_hash}')
 
     tok_path = next((p for p in TOKENIZER_CANDIDATES if os.path.exists(p)), None)
@@ -868,14 +546,11 @@ def train():
     os.makedirs(CHECKPOINT_DIR, exist_ok=True)
 
     scale_embed_params = list(model.scale_embed_parameters())
-    phase_params = list(model.phase_parameters())
-    other_params = list(model.non_scale_embed_parameters())
+    non_scale_embed_params = list(model.non_scale_embed_parameters())
     optimizer = (bnb.optim.AdamW8bit if _BNB_AVAILABLE else torch.optim.AdamW)([
-        {'params': other_params, 'lr': LR},
+        {'params': non_scale_embed_params, 'lr': LR},
         {'params': scale_embed_params, 'lr': LR * SCALE_EMBED_LR_MULT},
-        {'params': phase_params, 'lr': LR * 50, 'name': 'phase'},
     ], weight_decay=0.1, betas=(0.9, 0.95))
-    print(f'  phase params LR: {LR * 50:.2e} (50× base)')
 
     total_steps = SCREEN_EPOCHS * math.ceil(
         len(train_data) / BATCH_SIZE / GRAD_ACCUM)
@@ -887,8 +562,7 @@ def train():
 
     scheduler = torch.optim.lr_scheduler.LambdaLR(
         optimizer,
-        lr_lambda=[lambda s: _lr_lambda(s, 0), lambda s: _lr_lambda(s, 1),
-                   lambda s: _lr_lambda(s, 2)])
+        lr_lambda=[lambda s: _lr_lambda(s, 0), lambda s: _lr_lambda(s, 1)])
 
     freeze_se = os.getenv('DWARF_FREEZE_SE', '0') == '1'
     if freeze_se:
@@ -914,9 +588,6 @@ def train():
     passkey_results = {}
     ppl_results = {}
 
-    if USE_LIGER_CE:
-        liger_ce_fn = LigerFusedLinearCrossEntropyLoss()
-
     tokens_per_step = BATCH_SIZE * GRAD_ACCUM * (MAX_SEQ_LEN - 1)
 
     for epoch in range(start_epoch, SCREEN_EPOCHS + 1):
@@ -938,35 +609,24 @@ def train():
                 x = batch[:, :-1].to(device, non_blocking=True)
                 y = batch[:, 1:].to(device, non_blocking=True)
 
-                if USE_LIGER_CE:
-                    with _amp_context(device):
-                        hidden = model.forward_hidden(x)
-                        loss = liger_ce_fn(
-                            hidden.contiguous().reshape(-1, hidden.size(-1)),
-                            model.out.weight,
-                            y.view(-1))
-                    (loss / GRAD_ACCUM).backward()
-                    loss_val = loss.item()
-                    del hidden, loss
-                else:
-                    with _amp_context(device):
-                        logits = model(x)
-                    logits_flat = logits.reshape(-1, logits.size(-1))
-                    y_flat = y.reshape(-1)
-                    T = logits_flat.size(0)
-                    grad_logits = torch.empty_like(logits_flat)
-                    total_loss = 0.0
-                    for chunk_start in range(0, T, CE_CHUNK):
-                        chunk_end = min(chunk_start + CE_CHUNK, T)
-                        chunk = logits_flat[chunk_start:chunk_end].detach().requires_grad_(True)
-                        chunk_loss = F.cross_entropy(
-                            chunk, y_flat[chunk_start:chunk_end], reduction='sum')
-                        chunk_loss.backward()
-                        grad_logits[chunk_start:chunk_end] = chunk.grad
-                        total_loss += chunk_loss.item()
-                    logits_flat.backward(grad_logits / (T * GRAD_ACCUM))
-                    loss_val = total_loss / T
-                    del logits, logits_flat, y_flat, grad_logits
+                with _amp_context(device):
+                    logits = model(x)
+                logits_flat = logits.reshape(-1, logits.size(-1))
+                y_flat = y.reshape(-1)
+                T = logits_flat.size(0)
+                grad_logits = torch.empty_like(logits_flat)
+                total_loss = 0.0
+                for chunk_start in range(0, T, CE_CHUNK):
+                    chunk_end = min(chunk_start + CE_CHUNK, T)
+                    chunk = logits_flat[chunk_start:chunk_end].detach().requires_grad_(True)
+                    chunk_loss = F.cross_entropy(
+                        chunk, y_flat[chunk_start:chunk_end], reduction='sum')
+                    chunk_loss.backward()
+                    grad_logits[chunk_start:chunk_end] = chunk.grad
+                    total_loss += chunk_loss.item()
+                logits_flat.backward(grad_logits / (T * GRAD_ACCUM))
+                loss_val = total_loss / T
+                del logits, logits_flat, y_flat, grad_logits
 
             torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
             optimizer.step()
@@ -1050,7 +710,7 @@ def train():
     print(f'num_layers: {NUM_LAYERS}')
     print(f'scale_embed_lr_mult: {SCALE_EMBED_LR_MULT}')
     print(f'ema_init: {EMA_INIT}')
-    print(f'description: Triadic J=96 L=13 D={EMBEDDING_DIM} H={NUM_HEADS} '
+    print(f'description: d512_l13_selective_rope L=13 D={EMBEDDING_DIM} H={NUM_HEADS} '
           f'FFN={FFN_DIM} FA@L{FULL_ATTN_LAYER} preIF@L{FULL_ATTN_LAYER-1} '
           f'groups=A({len(GROUP_A)})+B({len(GROUP_B)})+C({len(GROUP_C)})+T({len(GROUP_T)})')
 

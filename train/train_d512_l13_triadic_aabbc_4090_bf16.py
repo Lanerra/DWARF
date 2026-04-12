@@ -123,7 +123,7 @@ _FILLER_SENTENCE  = 'the weather was mild and the air was still . '
 _INTRO_TEMPLATE   = 'the secret word is {word} .'
 _RETRIEVAL_CUE    = 'the secret word is'
 CHECKPOINT_DIR    = 'autoresearch/checkpoints'
-CKPT_BASE_NAME    = 'd512_l13_triadic_j96'
+CKPT_BASE_NAME    = 'd512_l13_triadic_aabbc_j96'
 
 CHECKPOINT_STRATEGY = os.getenv('DWARF_CKPT', 'none').lower()
 
@@ -131,19 +131,22 @@ CHECKPOINT_STRATEGY = os.getenv('DWARF_CKPT', 'none').lower()
 # LAYER LAYOUT: L=13, FA@L3
 # =============================================================================
 
+# [A,A,B,B,C,C] paired layout: 2 complete cycles of 6 across 12 DSQG layers
+# Hypothesis: B<->C adjacency (corr=0.827) compounds across consecutive same-group layers
+# vs [A,B,C] round-robin which breaks B<->C pairing every 3rd layer
 LAYER_LAYOUT = [
-    ('A', GROUP_A, J_SMALL_A, J_LARGE_A, False),   # L0: triad 1
-    ('B', GROUP_B, J_SMALL_B, J_LARGE_B, False),   # L1
-    ('C', GROUP_C, J_SMALL_C, J_LARGE_C, True),    # L2 + preIF
+    ('A', GROUP_A, J_SMALL_A, J_LARGE_A, False),   # L0: cycle 1
+    ('A', GROUP_A, J_SMALL_A, J_LARGE_A, False),   # L1
+    ('B', GROUP_B, J_SMALL_B, J_LARGE_B, True),    # L2 + preIF
     ('FA', None, 0, 0, False),                       # L3: FullAttention
-    ('A', GROUP_A, J_SMALL_A, J_LARGE_A, False),   # L4: triad 2
-    ('B', GROUP_B, J_SMALL_B, J_LARGE_B, False),   # L5
+    ('B', GROUP_B, J_SMALL_B, J_LARGE_B, False),   # L4: cycle 1 cont.
+    ('C', GROUP_C, J_SMALL_C, J_LARGE_C, False),   # L5
     ('C', GROUP_C, J_SMALL_C, J_LARGE_C, False),   # L6
-    ('A', GROUP_A, J_SMALL_A, J_LARGE_A, False),   # L7: triad 3
-    ('B', GROUP_B, J_SMALL_B, J_LARGE_B, False),   # L8
-    ('C', GROUP_C, J_SMALL_C, J_LARGE_C, False),   # L9
-    ('A', GROUP_A, J_SMALL_A, J_LARGE_A, False),   # L10: triad 4
-    ('B', GROUP_B, J_SMALL_B, J_LARGE_B, False),   # L11
+    ('A', GROUP_A, J_SMALL_A, J_LARGE_A, False),   # L7: cycle 2
+    ('A', GROUP_A, J_SMALL_A, J_LARGE_A, False),   # L8
+    ('B', GROUP_B, J_SMALL_B, J_LARGE_B, False),   # L9
+    ('B', GROUP_B, J_SMALL_B, J_LARGE_B, False),   # L10
+    ('C', GROUP_C, J_SMALL_C, J_LARGE_C, False),   # L11
     ('C', GROUP_C, J_SMALL_C, J_LARGE_C, False),   # L12
 ]
 
@@ -642,19 +645,10 @@ class TriadicJ96(nn.Module):
             if isinstance(m, DSQGAttentionGrouped):
                 yield m.scale_embed
 
-    def phase_parameters(self):
-        for m in self.modules():
-            if isinstance(m, DSQGAttentionGrouped):
-                yield m.phase_gain
-                yield m.phase_gate
-                yield m.query_probes
-                yield m.key_probes
-
     def non_scale_embed_parameters(self):
-        exclude_ids = {id(p) for p in self.scale_embed_parameters()}
-        exclude_ids.update(id(p) for p in self.phase_parameters())
+        se_ids = {id(p) for p in self.scale_embed_parameters()}
         for p in self.parameters():
-            if id(p) not in exclude_ids:
+            if id(p) not in se_ids:
                 yield p
 
     def physics_summary(self):
@@ -868,14 +862,11 @@ def train():
     os.makedirs(CHECKPOINT_DIR, exist_ok=True)
 
     scale_embed_params = list(model.scale_embed_parameters())
-    phase_params = list(model.phase_parameters())
-    other_params = list(model.non_scale_embed_parameters())
+    non_scale_embed_params = list(model.non_scale_embed_parameters())
     optimizer = (bnb.optim.AdamW8bit if _BNB_AVAILABLE else torch.optim.AdamW)([
-        {'params': other_params, 'lr': LR},
+        {'params': non_scale_embed_params, 'lr': LR},
         {'params': scale_embed_params, 'lr': LR * SCALE_EMBED_LR_MULT},
-        {'params': phase_params, 'lr': LR * 50, 'name': 'phase'},
     ], weight_decay=0.1, betas=(0.9, 0.95))
-    print(f'  phase params LR: {LR * 50:.2e} (50× base)')
 
     total_steps = SCREEN_EPOCHS * math.ceil(
         len(train_data) / BATCH_SIZE / GRAD_ACCUM)
@@ -887,8 +878,7 @@ def train():
 
     scheduler = torch.optim.lr_scheduler.LambdaLR(
         optimizer,
-        lr_lambda=[lambda s: _lr_lambda(s, 0), lambda s: _lr_lambda(s, 1),
-                   lambda s: _lr_lambda(s, 2)])
+        lr_lambda=[lambda s: _lr_lambda(s, 0), lambda s: _lr_lambda(s, 1)])
 
     freeze_se = os.getenv('DWARF_FREEZE_SE', '0') == '1'
     if freeze_se:

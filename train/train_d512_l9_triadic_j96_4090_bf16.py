@@ -634,10 +634,19 @@ class TriadicJ96(nn.Module):
             if isinstance(m, DSQGAttentionGrouped):
                 yield m.scale_embed
 
+    def phase_parameters(self):
+        for m in self.modules():
+            if isinstance(m, DSQGAttentionGrouped):
+                yield m.phase_gain
+                yield m.phase_gate
+                yield m.query_probes
+                yield m.key_probes
+
     def non_scale_embed_parameters(self):
-        se_ids = {id(p) for p in self.scale_embed_parameters()}
+        exclude_ids = {id(p) for p in self.scale_embed_parameters()}
+        exclude_ids.update(id(p) for p in self.phase_parameters())
         for p in self.parameters():
-            if id(p) not in se_ids:
+            if id(p) not in exclude_ids:
                 yield p
 
     def physics_summary(self):
@@ -851,11 +860,14 @@ def train():
     os.makedirs(CHECKPOINT_DIR, exist_ok=True)
 
     scale_embed_params = list(model.scale_embed_parameters())
-    non_scale_embed_params = list(model.non_scale_embed_parameters())
+    phase_params = list(model.phase_parameters())
+    other_params = list(model.non_scale_embed_parameters())
     optimizer = (bnb.optim.AdamW8bit if _BNB_AVAILABLE else torch.optim.AdamW)([
-        {'params': non_scale_embed_params, 'lr': LR},
+        {'params': other_params, 'lr': LR},
         {'params': scale_embed_params, 'lr': LR * SCALE_EMBED_LR_MULT},
+        {'params': phase_params, 'lr': LR * 50, 'name': 'phase'},
     ], weight_decay=0.1, betas=(0.9, 0.95))
+    print(f'  phase params LR: {LR * 50:.2e} (50× base)')
 
     total_steps = SCREEN_EPOCHS * math.ceil(
         len(train_data) / BATCH_SIZE / GRAD_ACCUM)
@@ -867,7 +879,8 @@ def train():
 
     scheduler = torch.optim.lr_scheduler.LambdaLR(
         optimizer,
-        lr_lambda=[lambda s: _lr_lambda(s, 0), lambda s: _lr_lambda(s, 1)])
+        lr_lambda=[lambda s: _lr_lambda(s, 0), lambda s: _lr_lambda(s, 1),
+                   lambda s: _lr_lambda(s, 2)])
 
     freeze_se = os.getenv('DWARF_FREEZE_SE', '0') == '1'
     if freeze_se:

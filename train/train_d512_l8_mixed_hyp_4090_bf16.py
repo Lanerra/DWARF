@@ -307,10 +307,19 @@ class DWARFModel(nn.Module):
             if isinstance(m, DSQGAttentionV6):
                 yield m.scale_embed
 
+    def phase_params(self):
+        for m in self.modules():
+            if isinstance(m, DSQGAttentionV6):
+                yield m.phase_gain
+                yield m.phase_gate
+                yield m.query_probes
+                yield m.key_probes
+
     def non_scale_embed_params(self):
-        ids = {id(p) for p in self.scale_embed_params()}
+        exclude_ids = {id(p) for p in self.scale_embed_params()}
+        exclude_ids.update(id(p) for p in self.phase_params())
         for p in self.parameters():
-            if id(p) not in ids:
+            if id(p) not in exclude_ids:
                 yield p
 
     def se_stats(self):
@@ -484,7 +493,9 @@ def train():
     optimizer = _AdamW([
         {'params': list(model.non_scale_embed_params()), 'lr': LR},
         {'params': list(model.scale_embed_params()),     'lr': LR * SCALE_EMBED_LR_MULT},
+        {'params': list(model.phase_params()),           'lr': LR * 50, 'name': 'phase'},
     ], weight_decay=0.1, betas=(0.9, 0.95))
+    print(f'  phase params LR: {LR * 50:.2e} (50× base)')
 
     total_steps = SCREEN_EPOCHS * math.ceil(
         len(train_data) / BATCH_SIZE / GRAD_ACCUM)

@@ -1,29 +1,48 @@
 """
-🚀 DWARF D=512 L=13 Triadic J=96 — offset partitioning, 4090, cold start
+🔧 DWARF D=1024 L=25 Triadic J=96 — OH+Orca SFT, UNFROZEN scale_embed (freak flag)
 
-Architecture: D=512, H=8 (hd=64), L=13, FFN=1024, TIED lm_head
-  Triadic partitioning: 96 offsets split into 3 groups of 32 + tail group of 51
-  Per-layer bandwidth ratio at D=512: (32×64)/512 = 4.0x (safe)
-  Tail bandwidth: (51×64)/512 = 6.4x (consolidation, acceptable)
+Architecture: D=1024, H=12 (hd=64), L=25, FFN=1536, TIED lm_head
+  Triadic partitioning: 96 offsets split into 3 pure groups of 32 (no tail)
+  Per-layer bandwidth ratio at D=1024: (32×64)/768 = 2.67x (safe ≤ 3.0x)
 
-  L0: DSQGBlock(GROUP_A)   -- triad 1 (local + low-mid, J=32)
-  L1: DSQGBlock(GROUP_B)   -- triad 1 (mid range, J=32)
-  L2: DSQGBlock(GROUP_C)   -- triad 1 (long range, J=32) + preIF
-  L3: FullAttentionBlock   -- FA at 33% depth
-  L4: DSQGBlock(GROUP_A)   -- triad 2
-  L5: DSQGBlock(GROUP_B)
-  L6: DSQGBlock(GROUP_C)
-  L7: DSQGBlock(GROUP_A)   -- triad 3
-  L8: DSQGBlock(GROUP_B)
-  L9: DSQGBlock(GROUP_C)
-  L10: DSQGBlock(GROUP_A)  -- triad 4
+SFT notes:
+  - Resumes from d1024_l25_triadic_mixed_scratch_best.pt (ep3, PPL=22.88, passkey=100%)
+  - scale_embed UNFROZEN — triadic group redundancy should absorb SFT gradients
+  - LR=5e-5 (conservative SFT), SCALE_EMBED_LR_MULT=2.0 (reduced from 18.37)
+  - Dataset: OH+Orca 75K (45K OpenHermes + 30K Orca)
+  - Passkey eval every epoch — canary for relay degradation
+
+  L00: DSQGBlock(GROUP_A)  -- triad 1 (local + low-mid, J=32)
+  L01: DSQGBlock(GROUP_B)  -- triad 1 (mid range)
+  L02: DSQGBlock(GROUP_C)  -- triad 1 (long range)
+  L03: DSQGBlock(GROUP_A)  -- triad 2
+  L04: DSQGBlock(GROUP_B)
+  L05: DSQGBlock(GROUP_C)  + preIF
+  L06: FullAttentionBlock  -- FA at 24% depth
+  L07: DSQGBlock(GROUP_A)  -- triad 3 (Phase-1)
+  L08: DSQGBlock(GROUP_B)
+  L09: DSQGBlock(GROUP_C)
+  L10: DSQGBlock(GROUP_A)  -- triad 4 (Phase-1)
   L11: DSQGBlock(GROUP_B)
   L12: DSQGBlock(GROUP_C)
+  L13: DSQGBlock(GROUP_A)  -- triad 5 (Phase-2 start)
+  L14: DSQGBlock(GROUP_B)
+  L15: DSQGBlock(GROUP_C)
+  L16: DSQGBlock(GROUP_A)  -- triad 6
+  L17: DSQGBlock(GROUP_B)
+  L18: DSQGBlock(GROUP_C)
+  L19: DSQGBlock(GROUP_A)  -- triad 7
+  L20: DSQGBlock(GROUP_B)
+  L21: DSQGBlock(GROUP_C)
+  L22: DSQGBlock(GROUP_A)  -- triad 8
+  L23: DSQGBlock(GROUP_B)
+  L24: DSQGBlock(GROUP_C)
 
-  Full J=96 topological coverage achieved within each 3-layer triad.
+  pre-FA: 2 triads (L0-5), post-FA: 6 triads (L7-24) — both perfectly divisible.
+  Full J=96 topological coverage within each 3-layer triad.
 
 Run:
-  CUDA_VISIBLE_DEVICES=0 .venv/bin/python3 -u train/train_d512_l13_triadic_j96_4090_bf16.py
+  CUDA_VISIBLE_DEVICES=1 .venv/bin/python3 -u train/train_d1024_l25_triadic_sft_finetome_3090_bf16.py
 """
 
 import contextlib, math, os, subprocess, sys, time
@@ -64,6 +83,16 @@ from dsqg_attention_v8_dynamic_j import (
     _fwd_v8, _compute_D_v8, _bwd_dq_v8, _bwd_dkdv_v8,
     npci_rotate, R_PLANES, _next_pow2,
 )
+_USE_V13 = os.environ.get('DWARF_USE_V13', '1') == '1'
+_V13Cls = None
+if _USE_V13:
+    try:
+        from dsqg_attention_v13_dynamic_j import DSQGAttentionV13Dynamic as _V13Cls
+        print('  Kernel: V13-dynamic-J (two-pass, faster)')
+    except Exception as _e:
+        print(f'  V13 import failed ({_e}), falling back to V8')
+        _USE_V13 = False
+_DSQG_TYPES = None  # set after DSQGAttentionGrouped is defined
 from causal_ema_scan import causal_ema_scan as _causal_ema_scan
 
 # =============================================================================
@@ -73,8 +102,6 @@ from causal_ema_scan import causal_ema_scan as _causal_ema_scan
 GROUP_A = _ALL_96[0:32]
 GROUP_B = _ALL_96[32:64]
 GROUP_C = _ALL_96[64:96]
-GROUP_T = sorted([1, 2, 3] + _ALL_96[48:], key=lambda d: (0 if d <= 28 else 1, d))
-
 def _count_small_large(offsets):
     j_small = sum(1 for d in offsets if d <= 28)
     j_large = sum(1 for d in offsets if d >= 48)
@@ -85,33 +112,32 @@ def _count_small_large(offsets):
 J_SMALL_A, J_LARGE_A = _count_small_large(GROUP_A)  # 17, 15
 J_SMALL_B, J_LARGE_B = _count_small_large(GROUP_B)  # 0, 32
 J_SMALL_C, J_LARGE_C = _count_small_large(GROUP_C)  # 0, 32
-J_SMALL_T, J_LARGE_T = _count_small_large(GROUP_T)  # 3, 48
 
 # =============================================================================
 # EXPERIMENT KNOBS
 # =============================================================================
 
-EMBEDDING_DIM    = 512
-NUM_HEADS        = 8
-FFN_DIM          = 1024
-NUM_LAYERS       = 13
-FULL_ATTN_LAYER  = 3
+EMBEDDING_DIM    = 1024
+NUM_HEADS        = 16
+FFN_DIM          = 2048
+NUM_LAYERS       = 25
+FULL_ATTN_LAYER  = 6
 VOCAB_SIZE       = 32768
 
 SCALE_EMBED_INIT_VAL = 0.15
-SCALE_EMBED_LR_MULT  = 20.0  # bumped from 15.0; D=512 mixed-domain validated, need ep1 percolation crossing
+SCALE_EMBED_LR_MULT  = 2.0   # SFT: D=1024   # SFT: reduced from 18.37 — relay topology already crystallized
 EMA_INIT  = 0.020833
 EMA_FLOOR = 0.00001
-LR        = 3e-4
+LR        = 5e-5   # SFT conservative
 DROPOUT   = 0.1
 
-BATCH_SIZE     = int(os.environ.get('DWARF_BS', '16'))
-GRAD_ACCUM     = int(os.environ.get('DWARF_GA', '8'))
-MAX_TRAIN_SEQS = int(os.environ.get('DWARF_MAX_TRAIN_SEQS', '200000'))  # 1562 steps/epoch; ~860 steps post-percolation; 3 epochs = ~127% Chinchilla total
+BATCH_SIZE     = int(os.environ.get('DWARF_BS', '4'))
+GRAD_ACCUM     = int(os.environ.get('DWARF_GA', '32'))
+MAX_TRAIN_SEQS = int(os.environ.get('DWARF_MAX_TRAIN_SEQS', '99523'))   # SFT: full FineTome-100K-dedup
 MAX_SEQ_LEN    = 2048
 MAX_VAL_SEQS   = 5_582
 CE_CHUNK       = 512
-SCREEN_EPOCHS  = 3
+SCREEN_EPOCHS  = 3   # SFT epochs
 
 TOKENIZER_CANDIDATES = ['results/fineweb_tokenizer_32k.json']
 PASSKEY_DISTANCES    = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 1536]
@@ -123,28 +149,40 @@ _FILLER_SENTENCE  = 'the weather was mild and the air was still . '
 _INTRO_TEMPLATE   = 'the secret word is {word} .'
 _RETRIEVAL_CUE    = 'the secret word is'
 CHECKPOINT_DIR    = 'autoresearch/checkpoints'
-CKPT_BASE_NAME    = 'd512_l13_triadic_j96'
+CKPT_BASE_NAME    = 'd1024_l25_triadic_sft_finetome'
 
 CHECKPOINT_STRATEGY = os.getenv('DWARF_CKPT', 'none').lower()
 
 # =============================================================================
-# LAYER LAYOUT: L=13, FA@L3
+# LAYER LAYOUT: L=25, FA@L6, AABBCC paired layout (matches pretrained checkpoint)
 # =============================================================================
 
 LAYER_LAYOUT = [
-    ('A', GROUP_A, J_SMALL_A, J_LARGE_A, False),   # L0: triad 1
-    ('B', GROUP_B, J_SMALL_B, J_LARGE_B, False),   # L1
-    ('C', GROUP_C, J_SMALL_C, J_LARGE_C, True),    # L2 + preIF
-    ('FA', None, 0, 0, False),                       # L3: FullAttention
-    ('A', GROUP_A, J_SMALL_A, J_LARGE_A, False),   # L4: triad 2
-    ('B', GROUP_B, J_SMALL_B, J_LARGE_B, False),   # L5
-    ('C', GROUP_C, J_SMALL_C, J_LARGE_C, False),   # L6
-    ('A', GROUP_A, J_SMALL_A, J_LARGE_A, False),   # L7: triad 3
-    ('B', GROUP_B, J_SMALL_B, J_LARGE_B, False),   # L8
-    ('C', GROUP_C, J_SMALL_C, J_LARGE_C, False),   # L9
-    ('A', GROUP_A, J_SMALL_A, J_LARGE_A, False),   # L10: triad 4
-    ('B', GROUP_B, J_SMALL_B, J_LARGE_B, False),   # L11
+    ('A', GROUP_A, J_SMALL_A, J_LARGE_A, False),   # L00: pre-FA AABBCC
+    ('A', GROUP_A, J_SMALL_A, J_LARGE_A, False),   # L01
+    ('B', GROUP_B, J_SMALL_B, J_LARGE_B, False),   # L02
+    ('B', GROUP_B, J_SMALL_B, J_LARGE_B, False),   # L03
+    ('C', GROUP_C, J_SMALL_C, J_LARGE_C, False),   # L04
+    ('C', GROUP_C, J_SMALL_C, J_LARGE_C, True),    # L05 + preIF (GROUP_C retains pre-FA priming)
+    ('FA', None, 0, 0, False),                       # L06: FullAttention @ 24% depth
+    ('A', GROUP_A, J_SMALL_A, J_LARGE_A, False),   # L07: post-FA cycle 1
+    ('A', GROUP_A, J_SMALL_A, J_LARGE_A, False),   # L08
+    ('B', GROUP_B, J_SMALL_B, J_LARGE_B, False),   # L09
+    ('B', GROUP_B, J_SMALL_B, J_LARGE_B, False),   # L10
+    ('C', GROUP_C, J_SMALL_C, J_LARGE_C, False),   # L11
     ('C', GROUP_C, J_SMALL_C, J_LARGE_C, False),   # L12
+    ('A', GROUP_A, J_SMALL_A, J_LARGE_A, False),   # L13: post-FA cycle 2
+    ('A', GROUP_A, J_SMALL_A, J_LARGE_A, False),   # L14
+    ('B', GROUP_B, J_SMALL_B, J_LARGE_B, False),   # L15
+    ('B', GROUP_B, J_SMALL_B, J_LARGE_B, False),   # L16
+    ('C', GROUP_C, J_SMALL_C, J_LARGE_C, False),   # L17
+    ('C', GROUP_C, J_SMALL_C, J_LARGE_C, False),   # L18
+    ('A', GROUP_A, J_SMALL_A, J_LARGE_A, False),   # L19: post-FA cycle 3
+    ('A', GROUP_A, J_SMALL_A, J_LARGE_A, False),   # L20
+    ('B', GROUP_B, J_SMALL_B, J_LARGE_B, False),   # L21
+    ('B', GROUP_B, J_SMALL_B, J_LARGE_B, False),   # L22
+    ('C', GROUP_C, J_SMALL_C, J_LARGE_C, False),   # L23
+    ('C', GROUP_C, J_SMALL_C, J_LARGE_C, False),   # L24
 ]
 
 assert len(LAYER_LAYOUT) == NUM_LAYERS
@@ -397,6 +435,7 @@ class DSQGAttentionGrouped(nn.Module):
 
         self.phase_base = nn.Parameter(torch.zeros(max(j_large, 1), num_heads, R_PLANES))
         self.phase_gain = nn.Parameter(torch.zeros(max(j_large, 1), num_heads, R_PLANES))
+        self.phase_gate = nn.Parameter(torch.zeros(max(j_large, 1)))
 
         self.query_probes = nn.Parameter(torch.zeros(R_PLANES, HD))
         self.key_probes = nn.Parameter(torch.zeros(R_PLANES, HD))
@@ -421,16 +460,23 @@ class DSQGAttentionGrouped(nn.Module):
             k = npci_rotate(k, k_delta, self.npci_theta_k)
             v = npci_rotate(v, v_delta, self.npci_theta_v)
 
-        sc = HD ** -0.5
+        q_norm = F.normalize(q.float(), dim=-1)
+        k_norm = F.normalize(k.float(), dim=-1)
+        qp_norm = F.normalize(self.query_probes.float(), dim=-1)
+        kp_norm = F.normalize(self.key_probes.float(), dim=-1)
         y_pre = torch.einsum('bhnd,rd->bhnr',
-                             q, self.query_probes.to(q.dtype)).mul(sc).float().contiguous()
+                             q_norm, qp_norm).contiguous()
         z_pre = torch.einsum('bhnd,rd->bhnr',
-                             k, self.key_probes.to(k.dtype)).mul(sc).float().contiguous()
+                             k_norm, kp_norm).contiguous()
+
+        gate = torch.sigmoid(self.phase_gate)[:, None, None]
+        gated_phase_base = self.phase_base * gate
+        gated_phase_gain = self.phase_gain * gate
 
         out = dsqg_attention_grouped(
             q, k, v,
             self.pos_bias, self.scale_embed,
-            self.phase_base, self.phase_gain,
+            gated_phase_base, gated_phase_gain,
             y_pre, z_pre,
             self.offsets_dev, self.j_val, self.j_small, self.j_large,
         )
@@ -483,7 +529,8 @@ class DSQGBlockTriadic(nn.Module):
         self.head_dim = embedding_dim // num_heads
         self.norm1 = nn.LayerNorm(embedding_dim)
         self.norm2 = nn.LayerNorm(embedding_dim)
-        self.attn = DSQGAttentionGrouped(
+        _AttnCls = _V13Cls if (_USE_V13 and _V13Cls is not None) else DSQGAttentionGrouped
+        self.attn = _AttnCls(
             embedding_dim, num_heads, offsets, j_small, j_large,
             seq_len=seq_len, dropout=dropout)
         self.ffn = FFN(embedding_dim, ffn_dim, dropout)
@@ -592,12 +639,16 @@ class TriadicJ96(nn.Module):
         for m in self.modules():
             if hasattr(m, 'gate_proj') and isinstance(m.gate_proj, nn.Linear):
                 nn.init.constant_(m.gate_proj.bias, 0.0)
+        global _DSQG_TYPES
+        if _DSQG_TYPES is None:
+            _DSQG_TYPES = (DSQGAttentionGrouped,) + ((_V13Cls,) if _USE_V13 else ())
         for m in self.modules():
-            if isinstance(m, DSQGAttentionGrouped):
+            if isinstance(m, _DSQG_TYPES):
                 nn.init.normal_(m.phase_base, 0.0, 0.01)
                 nn.init.normal_(m.query_probes, 0.0, 0.01)
                 nn.init.normal_(m.key_probes, 0.0, 0.01)
                 nn.init.normal_(m.phase_gain, 0.0, 0.001)
+                nn.init.zeros_(m.phase_gate)
                 if scale_embed_init_val != 0.0:
                     nn.init.constant_(m.scale_embed, scale_embed_init_val)
 
@@ -639,12 +690,12 @@ class TriadicJ96(nn.Module):
 
     def scale_embed_parameters(self):
         for m in self.modules():
-            if isinstance(m, DSQGAttentionGrouped):
+            if isinstance(m, _DSQG_TYPES):
                 yield m.scale_embed
 
     def phase_parameters(self):
         for m in self.modules():
-            if isinstance(m, DSQGAttentionGrouped):
+            if isinstance(m, _DSQG_TYPES):
                 yield m.phase_gain
                 yield m.phase_gate
                 yield m.query_probes
@@ -696,22 +747,28 @@ class BPETokenizerWrapper:
 
 @torch.inference_mode()
 def evaluate(model, data, device):
+    """Evaluate on SFT val data (list of (ids, labels) tuples).
+    Uses _collate_sft so only response tokens count toward loss."""
     model.eval()
     total_loss, total_tokens = 0.0, 0
     bs = max(1, BATCH_SIZE // 2)
     for i in range(0, len(data) - bs + 1, bs):
-        x = data[i:i+bs, :-1].to(device, non_blocking=True)
-        y = data[i:i+bs, 1:].to(device, non_blocking=True)
+        batch = data[i:i+bs]
+        x, y = _collate_sft(batch, device)
         with _amp_context(device):
             logits = model(x)
         T, V = logits.size(1), logits.size(2)
+        # only count response tokens (y != -100)
+        mask = (y != -100)
+        if not mask.any():
+            continue
         batch_loss = 0.0
         for c in range(0, T, CE_CHUNK):
             lc = logits[:, c:c+CE_CHUNK, :].reshape(-1, V).float()
             yc = y[:, c:c+CE_CHUNK].reshape(-1)
-            batch_loss += F.cross_entropy(lc, yc, reduction='sum').item()
+            batch_loss += F.cross_entropy(lc, yc, ignore_index=-100, reduction='sum').item()
         total_loss += batch_loss
-        total_tokens += y.numel()
+        total_tokens += mask.sum().item()
     return total_loss / max(total_tokens, 1)
 
 
@@ -799,6 +856,28 @@ def save_full_attn_checkpoint(model, epoch, git_hash, checkpoint_dir):
 # TRAINING
 # =============================================================================
 
+def _collate_sft(examples, device, pad_id=0):
+    """Collate SFT dict examples {'input_ids', 'label_mask'} into (x, y) tensors.
+    y uses -100 for tokens not in the loss mask (prompt tokens)."""
+    def _ids(e):   return e['input_ids'] if isinstance(e, dict) else e[0]
+    def _mask(e):  return e['label_mask'] if isinstance(e, dict) else e[1]
+    max_len = min(max(len(_ids(e)) for e in examples), MAX_SEQ_LEN)
+    input_ids = torch.full((len(examples), max_len), pad_id, dtype=torch.long)
+    targets   = torch.full((len(examples), max_len), -100,   dtype=torch.long)
+    for i, e in enumerate(examples):
+        ids    = _ids(e)[:max_len]
+        labels = _mask(e)[:max_len]
+        seq_len = len(ids)
+        input_ids[i, :seq_len] = torch.as_tensor(ids,  dtype=torch.long)
+        for j, (tok, lbl) in enumerate(zip(ids, labels)):
+            if lbl == 1:
+                targets[i, j] = tok
+    # shift: x = tokens[:-1], y = targets[1:]
+    x = input_ids[:, :-1].contiguous().to(device, non_blocking=True)
+    y = targets[:,   1:].contiguous().to(device, non_blocking=True)
+    return x, y
+
+
 def train():
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     if torch.cuda.is_available():
@@ -808,17 +887,15 @@ def train():
         ['git', 'rev-parse', '--short', 'HEAD']).decode().strip()
 
     print('=' * 70)
-    print('  🚀 DWARF D512-L9 Triadic J=96 — offset partitioning, cold start')
+    print('  🚀 DWARF D1024-L25 Triadic J=96 — phase-informed partitioning, cold start')
     print(f'  FA@L{FULL_ATTN_LAYER}, preIF@L{FULL_ATTN_LAYER-1}')
     print('=' * 70)
     if torch.cuda.is_available():
         print(f'  GPU: {torch.cuda.get_device_name(0)}')
     print(f'  D={EMBEDDING_DIM}, H={NUM_HEADS}, hd={EMBEDDING_DIM//NUM_HEADS}, '
           f'L={NUM_LAYERS}, FFN={FFN_DIM}')
-    print(f'  Groups: A(J={len(GROUP_A)}) B(J={len(GROUP_B)}) '
-          f'C(J={len(GROUP_C)}) T(J={len(GROUP_T)})')
-    print(f'  Bandwidth ratios: A/B/C={(len(GROUP_A)*64)/EMBEDDING_DIM:.1f}x  '
-          f'T={(len(GROUP_T)*64)/EMBEDDING_DIM:.1f}x')
+    print(f'  Groups: A(J={len(GROUP_A)}) B(J={len(GROUP_B)}) C(J={len(GROUP_C)})')
+    print(f'  Per-layer bandwidth ratio: {(len(GROUP_A)*64)/EMBEDDING_DIM:.2f}x  (safe ≤ 3.0x)')
     print(f'  scale_embed init={SCALE_EMBED_INIT_VAL}, LR mult={SCALE_EMBED_LR_MULT}')
     print(f'  EMA α₀={EMA_INIT} (window≈{round(1/EMA_INIT)}t)')
     print(f'  MAX_TRAIN_SEQS={MAX_TRAIN_SEQS:,}, Epochs={SCREEN_EPOCHS}')
@@ -837,15 +914,15 @@ def train():
     tokenizer = BPETokenizerWrapper(Tokenizer.from_file(tok_path))
     print(f'Loaded tokenizer from {tok_path}')
 
-    encoded_path = 'logs/fineweb_edu_encoded_2048_v2.pt'
+    # SFT dataset: OH+Orca 75K — list of (ids_list, loss_mask_list) tuples
+    encoded_path = 'logs/finetome_sft_encoded.pt'
     if not os.path.exists(encoded_path):
-        raise FileNotFoundError(f'Dataset not found: {encoded_path}')
-    _cache = torch.load(encoded_path, weights_only=True)
-    train_data = _cache['train'].long()
-    val_data = _cache['val'].long()
-
+        raise FileNotFoundError(f'SFT dataset not found: {encoded_path}')
+    _cache = torch.load(encoded_path, weights_only=False)
+    train_data = list(_cache['train'])
+    val_data   = list(_cache['val'])
     if len(train_data) > MAX_TRAIN_SEQS:
-        train_data = train_data[torch.randperm(len(train_data))[:MAX_TRAIN_SEQS]]
+        import random; random.shuffle(train_data); train_data = train_data[:MAX_TRAIN_SEQS]
     if len(val_data) > MAX_VAL_SEQS:
         val_data = val_data[:MAX_VAL_SEQS]
     print(f'  train: {len(train_data):,} seqs  val: {len(val_data):,} seqs')
@@ -880,15 +957,14 @@ def train():
     total_steps = SCREEN_EPOCHS * math.ceil(
         len(train_data) / BATCH_SIZE / GRAD_ACCUM)
 
-    def _lr_lambda(step, group_idx):
-        if group_idx == 1:
-            return 1.0
-        return 0.5 * (1.0 + math.cos(math.pi * step / total_steps))
+    # SFT: both groups (non-SE and SE) follow cosine schedule
+    # scale_embed LR = LR * SCALE_EMBED_LR_MULT = 5e-5 * 2.0 = 1e-4 (controlled, unfrozen)
+    def _cosine_lambda(step):
+        return 0.5 * (1.0 + math.cos(math.pi * step / max(total_steps, 1)))
 
     scheduler = torch.optim.lr_scheduler.LambdaLR(
         optimizer,
-        lr_lambda=[lambda s: _lr_lambda(s, 0), lambda s: _lr_lambda(s, 1),
-                   lambda s: _lr_lambda(s, 2)])
+        lr_lambda=[_cosine_lambda, _cosine_lambda, _cosine_lambda])
 
     freeze_se = os.getenv('DWARF_FREEZE_SE', '0') == '1'
     if freeze_se:
@@ -896,14 +972,24 @@ def train():
             p.requires_grad_(False)
         optimizer.param_groups[1]['lr'] = 0.0
         print('  [FREEZE] scale_embed frozen (DWARF_FREEZE_SE=1)')
+    else:
+        print('  [UNFROZEN] scale_embed active — LR_MULT=2.0, effective SE LR=1e-4')
 
-    resume_path = os.getenv('DWARF_RESUME', '')
+    # SFT: default resume from pretrained ep3 best checkpoint
+    resume_path = os.getenv('DWARF_RESUME', 'autoresearch/checkpoints/d1024_l25_triadic_aabbc_mixed_scratch_best.pt')
     start_epoch = int(os.getenv('DWARF_START_EPOCH', '1'))
     if resume_path and os.path.isfile(resume_path):
         ckpt = torch.load(resume_path, map_location=device)
         if 'model_state_dict' in ckpt:
             model.load_state_dict(ckpt['model_state_dict'], strict=False)
-            optimizer.load_state_dict(ckpt['optimizer_state_dict'])
+            skip_opt = os.getenv('DWARF_SKIP_OPT', '0') == '1'
+            if not skip_opt:
+                try:
+                    optimizer.load_state_dict(ckpt['optimizer_state_dict'])
+                except (ValueError, RuntimeError) as _oe:
+                    print(f'  [resume] optimizer state mismatch ({_oe}); starting fresh optimizer (DWARF_SKIP_OPT=1 to suppress this warning)')
+            else:
+                print('  [resume] skipping optimizer state (DWARF_SKIP_OPT=1)')
             if 'scheduler_state_dict' in ckpt:
                 scheduler.load_state_dict(ckpt['scheduler_state_dict'])
         else:
@@ -921,7 +1007,8 @@ def train():
 
     for epoch in range(start_epoch, SCREEN_EPOCHS + 1):
         model.train()
-        indices = torch.randperm(len(train_data))
+        import random as _random
+        _random.shuffle(train_data)
         step = 0
         optimizer.zero_grad(set_to_none=True)
         steps_per_epoch = math.ceil(len(train_data) / BATCH_SIZE / GRAD_ACCUM)
@@ -934,39 +1021,19 @@ def train():
                 idx_start = (acc_step * GRAD_ACCUM + ga) * BATCH_SIZE
                 if idx_start >= len(train_data):
                     continue
-                batch = train_data[indices[idx_start:idx_start + BATCH_SIZE]]
-                x = batch[:, :-1].to(device, non_blocking=True)
-                y = batch[:, 1:].to(device, non_blocking=True)
+                raw_batch = train_data[idx_start:idx_start + BATCH_SIZE]
+                x, y = _collate_sft(raw_batch, device)
 
-                if USE_LIGER_CE:
-                    with _amp_context(device):
-                        hidden = model.forward_hidden(x)
-                        loss = liger_ce_fn(
-                            hidden.contiguous().reshape(-1, hidden.size(-1)),
-                            model.out.weight,
-                            y.view(-1))
-                    (loss / GRAD_ACCUM).backward()
-                    loss_val = loss.item()
-                    del hidden, loss
-                else:
-                    with _amp_context(device):
-                        logits = model(x)
-                    logits_flat = logits.reshape(-1, logits.size(-1))
-                    y_flat = y.reshape(-1)
-                    T = logits_flat.size(0)
-                    grad_logits = torch.empty_like(logits_flat)
-                    total_loss = 0.0
-                    for chunk_start in range(0, T, CE_CHUNK):
-                        chunk_end = min(chunk_start + CE_CHUNK, T)
-                        chunk = logits_flat[chunk_start:chunk_end].detach().requires_grad_(True)
-                        chunk_loss = F.cross_entropy(
-                            chunk, y_flat[chunk_start:chunk_end], reduction='sum')
-                        chunk_loss.backward()
-                        grad_logits[chunk_start:chunk_end] = chunk.grad
-                        total_loss += chunk_loss.item()
-                    logits_flat.backward(grad_logits / (T * GRAD_ACCUM))
-                    loss_val = total_loss / T
-                    del logits, logits_flat, y_flat, grad_logits
+                with _amp_context(device):
+                    logits = model(x)
+                logits_flat = logits.contiguous().reshape(-1, logits.size(-1))
+                y_flat = y.reshape(-1)
+                # SFT: use ignore_index=-100 (masked tokens not in loss)
+                loss = F.cross_entropy(logits_flat, y_flat,
+                                       ignore_index=-100, reduction='mean')
+                (loss / GRAD_ACCUM).backward()
+                loss_val = loss.item()
+                del logits, logits_flat, y_flat, loss
 
             torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
             optimizer.step()
@@ -979,7 +1046,7 @@ def train():
 
             if step % 100 == 0:
                 se_vals = [m.scale_embed.detach().abs()
-                           for m in model.modules() if isinstance(m, DSQGAttentionGrouped)]
+                           for m in model.modules() if isinstance(m, _DSQG_TYPES)]
                 se_max = torch.cat(se_vals).max().item() if se_vals else 0.0
                 avg_ms = sum(step_times) / len(step_times)
                 tok_s = tokens_per_step / (avg_ms / 1000.0)
@@ -1003,7 +1070,7 @@ def train():
         print(f'\nEp {epoch}/{SCREEN_EPOCHS} | Val PPL {val_ppl:.2f}{marker}')
 
         se_vals = [m.scale_embed.detach().abs()
-                   for m in model.modules() if isinstance(m, DSQGAttentionGrouped)]
+                   for m in model.modules() if isinstance(m, _DSQG_TYPES)]
         if se_vals:
             se_all = torch.cat(se_vals)
             print(f'  scale_embed |mean|={se_all.mean():.4f} |max|={se_all.max():.4f}')
@@ -1052,7 +1119,7 @@ def train():
     print(f'ema_init: {EMA_INIT}')
     print(f'description: Triadic J=96 L=13 D={EMBEDDING_DIM} H={NUM_HEADS} '
           f'FFN={FFN_DIM} FA@L{FULL_ATTN_LAYER} preIF@L{FULL_ATTN_LAYER-1} '
-          f'groups=A({len(GROUP_A)})+B({len(GROUP_B)})+C({len(GROUP_C)})+T({len(GROUP_T)})')
+          f'groups=A({len(GROUP_A)})+B({len(GROUP_B)})+C({len(GROUP_C)})')
 
 
 if __name__ == '__main__':

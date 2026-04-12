@@ -118,11 +118,11 @@ FULL_ATTN_LAYER  = 6
 VOCAB_SIZE       = 32768
 
 SCALE_EMBED_INIT_VAL = 0.15
-SCALE_EMBED_LR_MULT  = 18.37  # μP rule: 15 × √(D/512) = 15 × √(768/512) = 18.37
+SCALE_EMBED_LR_MULT  = float(os.environ.get('DWARF_LR_MULT', '24.0'))  # mixed-domain requires 24.0; FineWeb-only = 18.37
 EMA_INIT  = 0.020833
 EMA_FLOOR = 0.00001
 LR        = 3e-4
-DROPOUT   = 0.1
+DROPOUT   = 0.0
 
 BATCH_SIZE     = int(os.environ.get('DWARF_BS', '8'))
 GRAD_ACCUM     = int(os.environ.get('DWARF_GA', '16'))
@@ -428,6 +428,7 @@ class DSQGAttentionGrouped(nn.Module):
 
         self.phase_base = nn.Parameter(torch.zeros(max(j_large, 1), num_heads, R_PLANES))
         self.phase_gain = nn.Parameter(torch.zeros(max(j_large, 1), num_heads, R_PLANES))
+        self.phase_gate = nn.Parameter(torch.zeros(max(j_large, 1)))
 
         self.query_probes = nn.Parameter(torch.zeros(R_PLANES, HD))
         self.key_probes = nn.Parameter(torch.zeros(R_PLANES, HD))
@@ -452,16 +453,23 @@ class DSQGAttentionGrouped(nn.Module):
             k = npci_rotate(k, k_delta, self.npci_theta_k)
             v = npci_rotate(v, v_delta, self.npci_theta_v)
 
-        sc = HD ** -0.5
+        q_norm = F.normalize(q.float(), dim=-1)
+        k_norm = F.normalize(k.float(), dim=-1)
+        qp_norm = F.normalize(self.query_probes.float(), dim=-1)
+        kp_norm = F.normalize(self.key_probes.float(), dim=-1)
         y_pre = torch.einsum('bhnd,rd->bhnr',
-                             q, self.query_probes.to(q.dtype)).mul(sc).float().contiguous()
+                             q_norm, qp_norm).contiguous()
         z_pre = torch.einsum('bhnd,rd->bhnr',
-                             k, self.key_probes.to(k.dtype)).mul(sc).float().contiguous()
+                             k_norm, kp_norm).contiguous()
+
+        gate = torch.sigmoid(self.phase_gate)[:, None, None]
+        gated_phase_base = self.phase_base * gate
+        gated_phase_gain = self.phase_gain * gate
 
         out = dsqg_attention_grouped(
             q, k, v,
             self.pos_bias, self.scale_embed,
-            self.phase_base, self.phase_gain,
+            gated_phase_base, gated_phase_gain,
             y_pre, z_pre,
             self.offsets_dev, self.j_val, self.j_small, self.j_large,
         )
@@ -633,6 +641,7 @@ class TriadicJ96(nn.Module):
                 nn.init.normal_(m.query_probes, 0.0, 0.01)
                 nn.init.normal_(m.key_probes, 0.0, 0.01)
                 nn.init.normal_(m.phase_gain, 0.0, 0.001)
+                nn.init.zeros_(m.phase_gate)
                 if scale_embed_init_val != 0.0:
                     nn.init.constant_(m.scale_embed, scale_embed_init_val)
 
@@ -677,10 +686,19 @@ class TriadicJ96(nn.Module):
             if isinstance(m, _DSQG_TYPES):
                 yield m.scale_embed
 
+    def phase_parameters(self):
+        for m in self.modules():
+            if isinstance(m, _DSQG_TYPES):
+                yield m.phase_gain
+                yield m.phase_gate
+                yield m.query_probes
+                yield m.key_probes
+
     def non_scale_embed_parameters(self):
-        se_ids = {id(p) for p in self.scale_embed_parameters()}
+        exclude_ids = {id(p) for p in self.scale_embed_parameters()}
+        exclude_ids.update(id(p) for p in self.phase_parameters())
         for p in self.parameters():
-            if id(p) not in se_ids:
+            if id(p) not in exclude_ids:
                 yield p
 
     def physics_summary(self):
@@ -892,23 +910,27 @@ def train():
     os.makedirs(CHECKPOINT_DIR, exist_ok=True)
 
     scale_embed_params = list(model.scale_embed_parameters())
-    non_scale_embed_params = list(model.non_scale_embed_parameters())
+    phase_params = list(model.phase_parameters())
+    other_params = list(model.non_scale_embed_parameters())
     optimizer = (bnb.optim.AdamW8bit if _BNB_AVAILABLE else torch.optim.AdamW)([
-        {'params': non_scale_embed_params, 'lr': LR},
+        {'params': other_params, 'lr': LR},
         {'params': scale_embed_params, 'lr': LR * SCALE_EMBED_LR_MULT},
+        {'params': phase_params, 'lr': LR, 'name': 'phase'},
     ], weight_decay=0.1, betas=(0.9, 0.95))
+    print(f'  phase params LR: {LR:.2e} (1x base)')
 
     total_steps = SCREEN_EPOCHS * math.ceil(
         len(train_data) / BATCH_SIZE / GRAD_ACCUM)
 
     def _lr_lambda(step, group_idx):
-        if group_idx == 1:
+        if group_idx in (1, 2):
             return 1.0
         return 0.5 * (1.0 + math.cos(math.pi * step / total_steps))
 
     scheduler = torch.optim.lr_scheduler.LambdaLR(
         optimizer,
-        lr_lambda=[lambda s: _lr_lambda(s, 0), lambda s: _lr_lambda(s, 1)])
+        lr_lambda=[lambda s: _lr_lambda(s, 0), lambda s: _lr_lambda(s, 1),
+                   lambda s: _lr_lambda(s, 2)])
 
     freeze_se = os.getenv('DWARF_FREEZE_SE', '0') == '1'
     if freeze_se:
@@ -1083,7 +1105,7 @@ def train():
     print(f'ema_init: {EMA_INIT}')
     print(f'description: Triadic J=96 L=13 D={EMBEDDING_DIM} H={NUM_HEADS} '
           f'FFN={FFN_DIM} FA@L{FULL_ATTN_LAYER} preIF@L{FULL_ATTN_LAYER-1} '
-          f'groups=A({len(GROUP_A)})+B({len(GROUP_B)})+C({len(GROUP_C)})+T({len(GROUP_T)})')
+          f'groups=A({len(GROUP_A)})+B({len(GROUP_B)})+C({len(GROUP_C)})')
 
 
 if __name__ == '__main__':
