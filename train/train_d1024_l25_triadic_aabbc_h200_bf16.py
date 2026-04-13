@@ -73,11 +73,11 @@ from dsqg_attention_v8_dynamic_j import (
     npci_rotate, R_PLANES, _next_pow2,
 )
 
-from dsqg_attention_v13_dynamic_j import DSQGAttentionV13Dynamic as _V13Cls
-print('  Kernel: V13-dynamic-J (two-pass, faster)')
+from dsqg_attention_v17 import DSQGAttentionV17 as _V13Cls
+print('  Kernel: V17 (TC scale_embed + two-pass)')
 
 _DSQG_TYPES = None
-from causal_ema_scan import causal_ema_scan as _causal_ema_scan
+from causal_ema_parallel import causal_ema_parallel as _causal_ema_scan
 
 # =============================================================================
 # OFFSET GROUPS
@@ -116,8 +116,8 @@ EMA_FLOOR = 0.00001
 LR        = 3e-4
 DROPOUT   = 0.0
 
-BATCH_SIZE     = int(os.environ.get('DWARF_BS', '64'))
-GRAD_ACCUM     = int(os.environ.get('DWARF_GA', '2'))
+BATCH_SIZE     = int(os.environ.get('DWARF_BS', '16'))
+GRAD_ACCUM     = int(os.environ.get('DWARF_GA', '8'))
 MAX_TRAIN_SEQS = int(os.environ.get('DWARF_MAX_TRAIN_SEQS', '234000'))
 MAX_SEQ_LEN    = 2048
 MAX_VAL_SEQS   = 5_582
