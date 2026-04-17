@@ -794,8 +794,9 @@ def save_full_attn_checkpoint(model, epoch, git_hash, checkpoint_dir):
 # =============================================================================
 
 def train():
-    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
     if torch.cuda.is_available():
+        torch.cuda.set_device(0)
         torch.cuda.reset_peak_memory_stats()
     t_start = time.time()
     git_hash = subprocess.check_output(
