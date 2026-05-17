@@ -15,6 +15,7 @@ Usage: Replace HierarchicalSparseAttentionV14 in the training script.
 """
 
 import math
+import os
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -533,13 +534,24 @@ class _DSRHISAAttendFn(torch.autograd.Function):
             top_k_flat = top_k_packed.reshape(B, H, -1).contiguous().to(torch.int32)
             token_mask_flat = token_mask_packed.reshape(B, H, N).contiguous()
 
-        ctx.save_for_backward(Q, K, V, routing_weights, out, lse_out,
-                              top_k_flat, token_mask_flat)
+        # Check if replay mode is enabled
+        replay_mode = os.environ.get('HISA_RECOMPUTE', 'none').lower()
+
+        if replay_mode in ('out_lse', 'all'):
+            # Replay V1/V2: do NOT save out/lse_out — recompute in backward
+            ctx.save_for_backward(Q, K, V, routing_weights,
+                                  top_k_flat, token_mask_flat)
+        else:
+            # Baseline: save everything
+            ctx.save_for_backward(Q, K, V, routing_weights, out, lse_out,
+                                  top_k_flat, token_mask_flat)
+
         ctx.chunk_size = chunk_size
         ctx.training_flag = training_flag
         ctx.C = C
         ctx.k_val = k_val
         ctx.BLOCK_HD = BLOCK_HD
+        ctx.replay_mode = replay_mode
         # Replay metadata
         ctx.N_orig = N_orig
         ctx.pad_len = pad_len
@@ -549,13 +561,53 @@ class _DSRHISAAttendFn(torch.autograd.Function):
 
     @staticmethod
     def backward(ctx, grad_output):
-        Q, K, V, routing_weights, out, lse_out, top_k_flat, token_mask_flat = ctx.saved_tensors
-        B, H, N, hd = Q.shape
-        chunk_size = ctx.chunk_size
-        C = ctx.C
-        k_val = ctx.k_val
-        BLOCK_HD = ctx.BLOCK_HD
-        device = Q.device
+        replay_mode = ctx.replay_mode
+        saved = ctx.saved_tensors
+
+        if replay_mode in ('out_lse', 'all'):
+            # Replay mode: 6 saved tensors (no out/lse_out)
+            Q, K, V, routing_weights, top_k_flat, token_mask_flat = saved
+            # Recompute out and lse_out by re-running forward kernel
+            B, H, N, hd = Q.shape
+            chunk_size = ctx.chunk_size
+            C = ctx.C
+            k_val = ctx.k_val
+            BLOCK_HD = ctx.BLOCK_HD
+            device = Q.device
+
+            out = torch.zeros(B, H, N, hd, dtype=Q.dtype, device=device)
+            lse_out = torch.full((B, H, N), float('-inf'), dtype=torch.float32, device=device)
+
+            if C > 1:
+                _nw = 4
+                _ns = 2
+                grid = (B * H, C)
+                _dsr_fwd_hisa[grid](
+                    Q, K, V, routing_weights, top_k_flat, token_mask_flat, out, lse_out,
+                    Q.stride(0), Q.stride(1), Q.stride(2), Q.stride(3),
+                    K.stride(0), K.stride(1), K.stride(2), K.stride(3),
+                    V.stride(0), V.stride(1), V.stride(2), V.stride(3),
+                    routing_weights.stride(0), routing_weights.stride(1),
+                    routing_weights.stride(2), routing_weights.stride(3),
+                    top_k_flat.stride(0), top_k_flat.stride(1), top_k_flat.stride(2),
+                    token_mask_flat.stride(0), token_mask_flat.stride(1), token_mask_flat.stride(2),
+                    out.stride(0), out.stride(1), out.stride(2), out.stride(3),
+                    lse_out.stride(0), lse_out.stride(1), lse_out.stride(2),
+                    N=N, H=H, HD=hd,
+                    C=C, K_VAL=k_val,
+                    CHUNK_SIZE=chunk_size, BLOCK_HD=BLOCK_HD,
+                    TRAINING=1 if ctx.training_flag else 0,
+                    num_warps=_nw, num_stages=_ns,
+                )
+        else:
+            # Baseline: 8 saved tensors (includes out/lse_out)
+            Q, K, V, routing_weights, out, lse_out, top_k_flat, token_mask_flat = saved
+            B, H, N, hd = Q.shape
+            chunk_size = ctx.chunk_size
+            C = ctx.C
+            k_val = ctx.k_val
+            BLOCK_HD = ctx.BLOCK_HD
+            device = Q.device
 
         grad_output = grad_output.contiguous()
 

@@ -1,0 +1,70 @@
+{
+  "benchmark": "CP2: Replay V1 Benchmark",
+  "model": "D512-L10 HISA",
+  "trainer": "train_d512_l10_hisa_h16_v2_l3.py",
+  "config": {
+    "BS": 2,
+    "GA": 1,
+    "compile": false,
+    "bench_steps": 25,
+    "bench_window": 20
+  },
+  "gpu": "RTX 4090 (CUDA_VISIBLE_DEVICES=0)",
+  "results": {
+    "baseline_none": {
+      "DWARF_CKPT": "none",
+      "HISA_RECOMPUTE": "none",
+      "peak_vram_MB": 2581,
+      "steady_tok_s": 76910,
+      "first_step_ms": 1548.8,
+      "trailing_avg_ms": 53.2
+    },
+    "trainer_full_attn": {
+      "DWARF_CKPT": "full_attn",
+      "HISA_RECOMPUTE": "none",
+      "peak_vram_MB": 2467,
+      "steady_tok_s": 56346,
+      "first_step_ms": 655.9,
+      "trailing_avg_ms": 72.7
+    },
+    "recompute_out_lse": {
+      "DWARF_CKPT": "full_attn",
+      "HISA_RECOMPUTE": "out_lse",
+      "peak_vram_MB": 2467,
+      "steady_tok_s": 56858,
+      "first_step_ms": 666.5,
+      "trailing_avg_ms": 72.0
+    },
+    "recompute_all": {
+      "DWARF_CKPT": "full_attn",
+      "HISA_RECOMPUTE": "all",
+      "peak_vram_MB": 2467,
+      "steady_tok_s": 55459,
+      "first_step_ms": 655.5,
+      "trailing_avg_ms": 73.8
+    },
+    "trainer_all": {
+      "DWARF_CKPT": "all",
+      "HISA_RECOMPUTE": "none",
+      "peak_vram_MB": 1521,
+      "steady_tok_s": 38913,
+      "first_step_ms": 693.3,
+      "trailing_avg_ms": 105.2
+    }
+  },
+  "saved_state_probe": {
+    "D512_H8": {
+      "none": {"bytes": 141203200, "count": 248},
+      "out_lse": {"bytes": 136877824, "count": 246},
+      "all": {"bytes": 136877824, "count": 246},
+      "diff_bytes": 4325376,
+      "diff_percent": 3.1
+    },
+    "D768_H16": {
+      "none": {"bytes": 236563456, "count": 248},
+      "out_lse": {"bytes": 230009856, "count": 246},
+      "diff_bytes": 6553600,
+      "diff_percent": 2.8
+    }
+  }
+}

@@ -25,7 +25,7 @@ from datetime import datetime, timezone
 # ---------------------------------------------------------------------------
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-TRAINER = os.path.join(PROJECT_ROOT, "train", "train_d768_l24_hisa_hd64.py")
+TRAINER = os.path.join(PROJECT_ROOT, "train", "train_d512_l10_hisa_h16_v2_l3.py")
 PYTHON = os.path.join(PROJECT_ROOT, ".venv", "bin", "python3")
 RESULTS_DIR = os.path.join(PROJECT_ROOT, "results")
 
@@ -34,8 +34,8 @@ BASE_ENV = {
     "DWARF_BENCH_ONLY": "1",
     "DWARF_MAX_ACC_STEPS": "25",
     "DWARF_LOG_INTERVAL": "5",
-    "DWARF_BS": "8",
-    "DWARF_GA": "4",
+    "DWARF_BS": "2",
+    "DWARF_GA": "1",
     "DWARF_COMPILE": "0",
 }
 

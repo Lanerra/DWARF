@@ -1,0 +1,84 @@
+{
+  "benchmark": "D768-L24 HISA eager mode sweep",
+  "model": "D768-L24 HISA hd64",
+  "trainer": "train/train_d768_l24_hisa_hd64.py",
+  "config": {
+    "GA": 1,
+    "compile": false,
+    "bench_steps": 25,
+    "bench_window": 20
+  },
+  "gpu": "RTX 4090 (CUDA_VISIBLE_DEVICES=0)",
+  "results": {
+    "none_BS2": {
+      "DWARF_CKPT": "none",
+      "HISA_RECOMPUTE": "none",
+      "BS": 2,
+      "peak_vram_MB": 6378,
+      "steady_tok_s": 25039,
+      "first_step_ms": 697.4,
+      "trailing_avg_ms": 163.5
+    },
+    "full_attn_BS2": {
+      "DWARF_CKPT": "full_attn",
+      "HISA_RECOMPUTE": "none",
+      "BS": 2,
+      "peak_vram_MB": 6226,
+      "steady_tok_s": 23369,
+      "first_step_ms": 716.0,
+      "trailing_avg_ms": 175.2
+    },
+    "all_BS2": {
+      "DWARF_CKPT": "all",
+      "HISA_RECOMPUTE": "none",
+      "BS": 2,
+      "peak_vram_MB": 2525,
+      "steady_tok_s": 17819,
+      "first_step_ms": 3208.2,
+      "trailing_avg_ms": 229.8
+    },
+    "all_BS4": {
+      "DWARF_CKPT": "all",
+      "HISA_RECOMPUTE": "none",
+      "BS": 4,
+      "peak_vram_MB": 3821,
+      "steady_tok_s": 20737,
+      "first_step_ms": 952.9,
+      "trailing_avg_ms": 394.9
+    },
+    "all_BS8": {
+      "DWARF_CKPT": "all",
+      "HISA_RECOMPUTE": "none",
+      "BS": 8,
+      "peak_vram_MB": 6692,
+      "steady_tok_s": 21091,
+      "first_step_ms": 1263.1,
+      "trailing_avg_ms": 776.4
+    },
+    "all_BS10": {
+      "DWARF_CKPT": "all",
+      "HISA_RECOMPUTE": "none",
+      "BS": 10,
+      "peak_vram_MB": 8146,
+      "steady_tok_s": 19293,
+      "first_step_ms": 1608.2,
+      "trailing_avg_ms": 1061.0
+    },
+    "all_BS8_compile": {
+      "DWARF_CKPT": "all",
+      "HISA_RECOMPUTE": "none",
+      "BS": 8,
+      "compile": true,
+      "peak_vram_MB": 6692,
+      "steady_tok_s": 20799,
+      "first_step_ms": 7050.4,
+      "trailing_avg_ms": 787.3
+    }
+  },
+  "oom_cases": {
+    "none_BS4": "OOM",
+    "full_attn_BS4": "OOM",
+    "full_attn_BS8": "OOM",
+    "all_BS11": "OOM"
+  }
+}
