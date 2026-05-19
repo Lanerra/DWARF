@@ -84,6 +84,37 @@ def test_v17_candidate_train_eval_agree_without_dropout():
     assert diff < 1e-6
 
 
+def test_v17_candidate_routing_log_bias_is_train_only():
+    _, baseline = _make_pair(seed=14)
+    x = torch.randn(1, 130, 16)
+
+    biased = HierarchicalSparseAttentionV17HISAStrictTriton(
+        D=16,
+        H=2,
+        hd=8,
+        num_chunks=4,
+        top_k_chunks=2,
+        hisa_top_m_tokens=4,
+        routing_log_bias_scale=1.0,
+    )
+    biased.load_state_dict(baseline.state_dict())
+
+    with torch.no_grad():
+        baseline.eval()
+        y_baseline = baseline(x)
+
+        biased.train()
+        y_train = biased(x)
+
+        biased.eval()
+        y_eval = biased(x)
+
+    eval_diff = (y_eval - y_baseline).abs().max().item()
+    train_diff = (y_train - y_eval).abs().max().item()
+    assert eval_diff < 1e-6
+    assert train_diff > 1e-6
+
+
 def test_v17_stage1_mandatory_prev_chunk_uses_fixed_budget():
     B, H, N, C = 1, 1, 256, 4
     chunk_size = 64
