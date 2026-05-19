@@ -20,6 +20,7 @@ from hierarchical_sparse_attn_v17_hisa_strict_triton import (
     HierarchicalSparseAttentionV17HISAStrictTriton,
     _build_stage1_top_k_per_token_prev_mandatory,
     _build_stage2_token_indices_per_token_triton,
+    _strict_hisa_module_forward,
 )
 
 
@@ -113,6 +114,81 @@ def test_v17_candidate_routing_log_bias_is_train_only():
     train_diff = (y_train - y_eval).abs().max().item()
     assert eval_diff < 1e-6
     assert train_diff > 1e-6
+
+
+def test_v17_candidate_cuda_bias_backward_matches_eager_reference():
+    if not torch.cuda.is_available():
+        return
+
+    torch.manual_seed(31)
+    x = torch.randn(1, 130, 16, device='cuda', requires_grad=True)
+    mod = HierarchicalSparseAttentionV17HISAStrictTriton(
+        D=16,
+        H=2,
+        hd=8,
+        num_chunks=4,
+        top_k_chunks=2,
+        hisa_top_m_tokens=4,
+        routing_log_bias_scale=1.0,
+        backward_impl='triton',
+    ).train().cuda()
+
+    y = mod(x)
+    loss = y.square().mean()
+    loss.backward()
+    assert x.grad is not None
+    assert mod.W_q.weight.grad is not None
+    assert mod.W_k.weight.grad is not None
+    assert mod.W_v.weight.grad is not None
+    assert mod.W_o.weight.grad is not None
+    got = {
+        'x': x.grad.detach().clone(),
+        'W_q': mod.W_q.weight.grad.detach().clone(),
+        'W_k': mod.W_k.weight.grad.detach().clone(),
+        'W_v': mod.W_v.weight.grad.detach().clone(),
+        'W_o': mod.W_o.weight.grad.detach().clone(),
+    }
+
+    x_ref = x.detach().clone().requires_grad_(True)
+    W_q = mod.W_q.weight.detach().clone().requires_grad_(True)
+    W_k = mod.W_k.weight.detach().clone().requires_grad_(True)
+    W_v = mod.W_v.weight.detach().clone().requires_grad_(True)
+    W_o = mod.W_o.weight.detach().clone().requires_grad_(True)
+    y_ref = _strict_hisa_module_forward(
+        x_ref,
+        W_q,
+        W_k,
+        W_v,
+        W_o,
+        num_heads=mod.num_heads,
+        hd=mod.hd,
+        num_chunks_base=mod.num_chunks,
+        top_k_chunks=mod.top_k_chunks,
+        hisa_top_m_tokens=mod.hisa_top_m_tokens,
+        chunk_size=mod.chunk_size,
+        sparse_block_size=mod.sparse_block_size,
+        routing_log_bias_scale=mod.routing_log_bias_scale,
+        training=True,
+        use_fused=False,
+    )
+    loss_ref = y_ref.square().mean()
+    loss_ref.backward()
+    assert x_ref.grad is not None
+    assert W_q.grad is not None
+    assert W_k.grad is not None
+    assert W_v.grad is not None
+    assert W_o.grad is not None
+    want = {
+        'x': x_ref.grad.detach(),
+        'W_q': W_q.grad.detach(),
+        'W_k': W_k.grad.detach(),
+        'W_v': W_v.grad.detach(),
+        'W_o': W_o.grad.detach(),
+    }
+
+    for name in got:
+        diff = (got[name] - want[name]).abs().max().item()
+        assert diff < 1e-5, f"{name} grad mismatch: {diff}"
 
 
 def test_v17_stage1_mandatory_prev_chunk_uses_fixed_budget():

@@ -116,21 +116,24 @@ def _strict_hisa_compute_routing_weights(
     *,
     num_chunks: int,
     chunk_size: int,
+    detach_inputs: bool = True,
 ) -> torch.Tensor:
     N = Q.shape[2]
     hd = Q.shape[-1]
-    with torch.no_grad():
-        pad_len = chunk_size * num_chunks - N
-        K_pad = F.pad(K.detach(), (0, 0, 0, pad_len)) if pad_len > 0 else K.detach()
-        chunk_reps = _compute_chunk_representatives(K_pad, num_chunks)
-        return _compute_past_only_routing(
-            Q.detach(),
-            chunk_reps,
-            seq_len=N,
-            num_chunks=num_chunks,
-            chunk_size=chunk_size,
-            hd=hd,
-        )
+    if detach_inputs:
+        Q = Q.detach()
+        K = K.detach()
+    pad_len = chunk_size * num_chunks - N
+    K_pad = F.pad(K, (0, 0, 0, pad_len)) if pad_len > 0 else K
+    chunk_reps = _compute_chunk_representatives(K_pad, num_chunks)
+    return _compute_past_only_routing(
+        Q,
+        chunk_reps,
+        seq_len=N,
+        num_chunks=num_chunks,
+        chunk_size=chunk_size,
+        hd=hd,
+    )
 
 
 def _summarize_local_block(
@@ -1130,13 +1133,16 @@ def _strict_hisa_module_recompute_state(
         kv_inject=kv_inject,
     )
     routing_weights = None
+    stage2_routing_weights = None
     if training and routing_log_bias_scale != 0.0:
         routing_weights = _strict_hisa_compute_routing_weights(
             Q,
             K,
             num_chunks=C,
             chunk_size=chunk_size,
+            detach_inputs=False,
         )
+        stage2_routing_weights = routing_weights.detach()
     stage2_token_indices = _strict_hisa_build_stage2_token_indices(
         Q,
         K,
@@ -1144,7 +1150,7 @@ def _strict_hisa_module_recompute_state(
         top_k_chunks=top_k_chunks,
         hisa_top_m_tokens=hisa_top_m_tokens,
         chunk_size=chunk_size,
-        routing_weights=routing_weights,
+        routing_weights=stage2_routing_weights,
     )
     return Q, K, V, stage2_token_indices, routing_weights, C
 
@@ -1289,6 +1295,75 @@ class _StrictHISAModuleFn(torch.autograd.Function):
         cached_stage2_token_indices = None
         if packed_stage2_token_indices.numel() > 0:
             cached_stage2_token_indices = _unpack_stage2_token_indices(packed_stage2_token_indices)
+        if ctx.routing_log_bias_active:
+            # The train-only log(routing_weight) scaffold must propagate
+            # gradients back through the causal router. The fused Triton core
+            # backward treats routing weights as constants, so when the scaffold
+            # is active we intentionally fall back to a full eager autograd
+            # recompute for correctness.
+            with torch.enable_grad():
+                x_ = x.detach().requires_grad_(True)
+                W_q_ = W_q.detach().requires_grad_(True)
+                W_k_ = W_k.detach().requires_grad_(True)
+                W_v_ = W_v.detach().requires_grad_(True)
+                W_o_ = W_o.detach().requires_grad_(True)
+                with torch.autocast(
+                    device_type=ctx.device_type,
+                    dtype=ctx.autocast_dtype,
+                    enabled=ctx.autocast_enabled,
+                ):
+                    Q, K, V, C = _strict_hisa_module_project_qkv(
+                        x_,
+                        W_q_,
+                        W_k_,
+                        W_v_,
+                        num_heads=ctx.num_heads,
+                        hd=ctx.hd,
+                        num_chunks_base=ctx.num_chunks_base,
+                        top_k_chunks=ctx.top_k_chunks,
+                        hisa_top_m_tokens=ctx.hisa_top_m_tokens,
+                        chunk_size=ctx.chunk_size,
+                    )
+                    routing_weights = _strict_hisa_compute_routing_weights(
+                        Q,
+                        K,
+                        num_chunks=C,
+                        chunk_size=ctx.chunk_size,
+                        detach_inputs=False,
+                    )
+                    stage2_token_indices = cached_stage2_token_indices
+                    if stage2_token_indices is None:
+                        stage2_token_indices = _strict_hisa_build_stage2_token_indices(
+                            Q,
+                            K,
+                            num_chunks=C,
+                            top_k_chunks=ctx.top_k_chunks,
+                            hisa_top_m_tokens=ctx.hisa_top_m_tokens,
+                            chunk_size=ctx.chunk_size,
+                            routing_weights=routing_weights.detach(),
+                        )
+                    out_core = _strict_hisa_core(
+                        Q,
+                        K,
+                        V,
+                        stage2_token_indices,
+                        num_chunks=C,
+                        chunk_size=ctx.chunk_size,
+                        sparse_block_size=ctx.sparse_block_size,
+                        use_fused=False,
+                        routing_weights=routing_weights,
+                        routing_log_bias_scale=ctx.routing_log_bias_scale,
+                    )
+                    out_flat = out_core.transpose(1, 2).reshape(x.shape[0], x.shape[1], ctx.num_heads * ctx.hd)
+                    out = F.linear(out_flat, W_o_)
+            dx, dW_q, dW_k, dW_v, dW_o = torch.autograd.grad(
+                out,
+                (x_, W_q_, W_k_, W_v_, W_o_),
+                grad_out,
+                retain_graph=False,
+                allow_unused=False,
+            )
+            return dx, dW_q, dW_k, dW_v, dW_o, None, None, None, None, None, None, None, None, None, None
         if ctx.backward_impl == 'eager':
             with torch.enable_grad():
                 x_ = x.detach().requires_grad_(True)
