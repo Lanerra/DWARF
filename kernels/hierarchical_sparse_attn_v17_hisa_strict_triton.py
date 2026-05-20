@@ -136,6 +136,41 @@ def _strict_hisa_compute_routing_weights(
     )
 
 
+def _compute_stage1_routing_entropy_stats(
+    routing_weights: torch.Tensor,
+    *,
+    seq_len: int,
+    chunk_size: int,
+    num_chunks: int,
+    entropy_target: float | None = None,
+) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+    device = routing_weights.device
+    positions = torch.arange(seq_len, device=device)
+    query_chunks = torch.div(positions, chunk_size, rounding_mode='floor').clamp(max=num_chunks - 1)
+    valid_counts = query_chunks.view(1, 1, seq_len)
+    valid_mask = (valid_counts >= 2).expand_as(routing_weights[..., 0])
+
+    w = routing_weights.clamp(min=1e-8)
+    raw_per_token = -(routing_weights * w.log()).sum(dim=-1)
+    denom = torch.log(valid_counts.to(raw_per_token.dtype).clamp(min=2))
+    norm_per_token = torch.where(valid_mask, raw_per_token / denom, torch.ones_like(raw_per_token))
+
+    if valid_mask.any():
+        raw_mean = raw_per_token[valid_mask].mean()
+        norm_mean = norm_per_token[valid_mask].mean()
+    else:
+        raw_mean = raw_per_token.new_zeros(())
+        norm_mean = raw_per_token.new_ones(())
+
+    if entropy_target is None:
+        floor_penalty = raw_per_token.new_zeros(())
+    else:
+        target = norm_mean.new_tensor(entropy_target)
+        floor_penalty = torch.relu(target - norm_mean).square()
+
+    return raw_mean, norm_mean, floor_penalty
+
+
 def _summarize_local_block(
     q_chunk: torch.Tensor,
     k_local: torch.Tensor,
@@ -1545,6 +1580,8 @@ class HierarchicalSparseAttentionV17HISAStrictTriton(nn.Module):
         sparse_block_size: int = 64,
         backward_impl: str = 'triton',
         routing_log_bias_scale: float = 0.0,
+        routing_entropy_target: float = 0.0,
+        routing_entropy_reg_scale: float = 0.0,
     ):
         super().__init__()
         if backward_impl not in {'eager', 'triton'}:
@@ -1561,18 +1598,24 @@ class HierarchicalSparseAttentionV17HISAStrictTriton(nn.Module):
         self.sparse_block_size = sparse_block_size
         self.backward_impl = backward_impl
         self.routing_log_bias_scale = float(routing_log_bias_scale)
+        self.routing_entropy_target = float(routing_entropy_target)
+        self.routing_entropy_reg_scale = float(routing_entropy_reg_scale)
         self.W_q = nn.Linear(D, H * hd, bias=False)
         self.W_k = nn.Linear(D, H * hd, bias=False)
         self.W_v = nn.Linear(D, H * hd, bias=False)
         self.W_o = nn.Linear(H * hd, D, bias=False)
         self._routing_entropy: torch.Tensor | float = float('nan')
+        self._routing_entropy_norm: torch.Tensor | float = float('nan')
+        self._routing_entropy_reg_loss: torch.Tensor | float = 0.0
 
     def extra_repr(self) -> str:
         return (
             f'H={self.H}, hd={self.hd}, num_chunks={self.num_chunks}, '
             f'top_k_chunks={self.top_k_chunks}, hisa_top_m_tokens={self.hisa_top_m_tokens}, '
             f'chunk_size={self.chunk_size}, sparse_block_size={self.sparse_block_size}, '
-            f'backward_impl={self.backward_impl}, routing_log_bias_scale={self.routing_log_bias_scale}'
+            f'backward_impl={self.backward_impl}, routing_log_bias_scale={self.routing_log_bias_scale}, '
+            f'routing_entropy_target={self.routing_entropy_target}, '
+            f'routing_entropy_reg_scale={self.routing_entropy_reg_scale}'
         )
 
     def forward(self, x: torch.Tensor, kv_inject=None) -> torch.Tensor:
@@ -1580,6 +1623,7 @@ class HierarchicalSparseAttentionV17HISAStrictTriton(nn.Module):
         H, hd = self.H, self.hd
         C = max(self.num_chunks, math.ceil(max(N, 1) / self.chunk_size))
         chunk_size = self.chunk_size
+        self._routing_entropy_reg_loss = x.new_zeros(())
 
         if kv_inject is not None:
             return _strict_hisa_module_forward(
@@ -1610,8 +1654,34 @@ class HierarchicalSparseAttentionV17HISAStrictTriton(nn.Module):
                 num_chunks=C,
                 chunk_size=chunk_size,
             )
-            w = routing_weights.clamp(min=1e-8)
-            self._routing_entropy = (-(w * w.log()).sum(dim=-1).mean()).detach()
+            routing_entropy, routing_entropy_norm, _ = _compute_stage1_routing_entropy_stats(
+                routing_weights,
+                seq_len=N,
+                chunk_size=chunk_size,
+                num_chunks=C,
+            )
+            self._routing_entropy = routing_entropy.detach()
+            self._routing_entropy_norm = routing_entropy_norm.detach()
+
+        if self.training and self.routing_entropy_reg_scale != 0.0:
+            Q_reg = _to_heads(self.W_q(x), B, N, H, hd)
+            K_reg = _to_heads(self.W_k(x), B, N, H, hd)
+            routing_weights_reg = _strict_hisa_compute_routing_weights(
+                Q_reg,
+                K_reg,
+                num_chunks=C,
+                chunk_size=chunk_size,
+                detach_inputs=False,
+            )
+            _, routing_entropy_norm_reg, floor_penalty = _compute_stage1_routing_entropy_stats(
+                routing_weights_reg,
+                seq_len=N,
+                chunk_size=chunk_size,
+                num_chunks=C,
+                entropy_target=self.routing_entropy_target,
+            )
+            self._routing_entropy_norm = routing_entropy_norm_reg.detach()
+            self._routing_entropy_reg_loss = self.routing_entropy_reg_scale * floor_penalty
 
         if x.device.type != 'cuda' or triton is None:
             return _strict_hisa_module_forward(

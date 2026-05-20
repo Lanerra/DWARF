@@ -107,7 +107,9 @@ if HISA_BACKWARD_IMPL not in {'eager', 'triton'}:
     raise ValueError(
         f"Unsupported DWARF_HISA_BACKWARD_IMPL={HISA_BACKWARD_IMPL!r}; expected 'eager' or 'triton'"
     )
-HISA_ROUTING_LOG_BIAS = float(os.getenv('DWARF_HISA_ROUTING_LOG_BIAS', '1.0'))
+HISA_ROUTING_LOG_BIAS = float(os.getenv('DWARF_HISA_ROUTING_LOG_BIAS', '0.0'))
+HISA_ROUTING_ENTROPY_TARGET = float(os.getenv('DWARF_HISA_ROUTING_ENTROPY_TARGET', '0.80'))
+HISA_ROUTING_ENTROPY_REG = float(os.getenv('DWARF_HISA_ROUTING_ENTROPY_REG', '1.0'))
 
 HISA_IMPL_CLS = (
     HierarchicalSparseAttentionV16HISAStrict
@@ -333,6 +335,8 @@ class DSRBlock(nn.Module):
                 {
                     'backward_impl': HISA_BACKWARD_IMPL,
                     'routing_log_bias_scale': HISA_ROUTING_LOG_BIAS,
+                    'routing_entropy_target': HISA_ROUTING_ENTROPY_TARGET,
+                    'routing_entropy_reg_scale': HISA_ROUTING_ENTROPY_REG,
                 }
                 if HISA_IMPL == 'triton' else {}
             ),
@@ -575,7 +579,7 @@ def train():
 
     print('=' * 70)
     print('  DWARF D512-L10 Triadic J=96 — strict DSR/HISA@L3 + R_PLANES=4, TIED LM_HEAD')
-    print(f'  DSR@L{DSR_LAYER}: {HISA_IMPL_CLS.__name__}(C={NUM_CHUNKS}, chunk_size={MAX_SEQ_LEN // NUM_CHUNKS}, top_k={TOP_K_CHUNKS}, HISA_m={HISA_TOP_M_TOKENS}, backward={HISA_BACKWARD_IMPL}, train_log_bias={HISA_ROUTING_LOG_BIAS})')
+    print(f'  DSR@L{DSR_LAYER}: {HISA_IMPL_CLS.__name__}(C={NUM_CHUNKS}, chunk_size={MAX_SEQ_LEN // NUM_CHUNKS}, top_k={TOP_K_CHUNKS}, HISA_m={HISA_TOP_M_TOKENS}, backward={HISA_BACKWARD_IMPL}, train_log_bias={HISA_ROUTING_LOG_BIAS}, ent_target={HISA_ROUTING_ENTROPY_TARGET}, ent_reg={HISA_ROUTING_ENTROPY_REG})')
     print('  PURE LM loss only. No distillation. No teacher. Random init.')
     print('=' * 70)
     if torch.cuda.is_available():
@@ -595,7 +599,12 @@ def train():
     )
     print('  DSQG: V19 (sequential Givens, grouped sparse, SE gates)')
     print(f'  DSR:  {HISA_IMPL_LABEL} (exact local causal + past-only sparse retrieval)')
-    print(f'  HISA_IMPL={HISA_IMPL}  HISA_BACKWARD_IMPL={HISA_BACKWARD_IMPL}  HISA_ROUTING_LOG_BIAS={HISA_ROUTING_LOG_BIAS}')
+    print(
+        f'  HISA_IMPL={HISA_IMPL}  HISA_BACKWARD_IMPL={HISA_BACKWARD_IMPL}  '
+        f'HISA_ROUTING_LOG_BIAS={HISA_ROUTING_LOG_BIAS}  '
+        f'HISA_ROUTING_ENTROPY_TARGET={HISA_ROUTING_ENTROPY_TARGET}  '
+        f'HISA_ROUTING_ENTROPY_REG={HISA_ROUTING_ENTROPY_REG}'
+    )
     if USE_LIGER_CE:
         print('  Using Liger fused CE')
     else:
@@ -760,6 +769,7 @@ def train():
             t0 = time.time()
 
             loss_val = 0.0
+            entropy_reg_val = 0.0
             for ga in range(GRAD_ACCUM):
                 idx_start = (acc_step * GRAD_ACCUM + ga) * BATCH_SIZE
                 if idx_start >= len(train_data):
@@ -771,24 +781,39 @@ def train():
                 if USE_LIGER_CE:
                     with _amp_context(device):
                         hidden = model.forward_hidden(x)
+                    routing_entropy_reg = getattr(
+                        model_ref.blocks[DSR_LAYER].attn,
+                        '_routing_entropy_reg_loss',
+                        None,
+                    )
                     # LigerFusedLinearCrossEntropyLoss.forward(lin_weight, _input, target)
                     # lin_weight first, hidden states second
-                    loss = liger_ce_fn(
+                    ce_loss = liger_ce_fn(
                         model.out.weight,
                         hidden.contiguous().reshape(-1, hidden.size(-1)),
                         y.view(-1))
+                    loss = ce_loss
+                    if routing_entropy_reg is not None and getattr(routing_entropy_reg, 'requires_grad', False):
+                        loss = loss + (routing_entropy_reg / GRAD_ACCUM)
+                        entropy_reg_val += float(routing_entropy_reg.detach().item())
                     # Liger requires grad_output==1.0; scale grads manually after loop
                     loss.backward()
-                    loss_val = loss.item()
-                    del hidden, loss
+                    loss_val = ce_loss.item()
+                    del hidden, loss, ce_loss
                 else:
                     with _amp_context(device):
                         logits = model(x)
+                    routing_entropy_reg = getattr(
+                        model_ref.blocks[DSR_LAYER].attn,
+                        '_routing_entropy_reg_loss',
+                        None,
+                    )
                     logits_flat = logits.reshape(-1, logits.size(-1))
                     y_flat = y.reshape(-1)
                     T = logits_flat.size(0)
                     grad_logits = torch.empty_like(logits_flat)
                     total_loss = 0.0
+                    reg_backprop_needed = routing_entropy_reg is not None and getattr(routing_entropy_reg, 'requires_grad', False)
                     for chunk_start in range(0, T, CE_CHUNK):
                         chunk_end = min(chunk_start + CE_CHUNK, T)
                         chunk = logits_flat[chunk_start:chunk_end].detach().requires_grad_(True)
@@ -797,7 +822,10 @@ def train():
                         chunk_loss.backward()
                         grad_logits[chunk_start:chunk_end] = chunk.grad
                         total_loss += chunk_loss.item()
-                    logits_flat.backward(grad_logits / (T * GRAD_ACCUM))
+                    logits_flat.backward(grad_logits / (T * GRAD_ACCUM), retain_graph=reg_backprop_needed)
+                    if reg_backprop_needed:
+                        (routing_entropy_reg / GRAD_ACCUM).backward()
+                        entropy_reg_val += float(routing_entropy_reg.detach().item())
                     loss_val = total_loss / T
                     del logits, logits_flat, y_flat, grad_logits
 
@@ -828,12 +856,16 @@ def train():
                     p.grad.square().sum().item()
                     for p in model.parameters() if p.grad is not None))
                 lr_now = scheduler.get_last_lr()[0]
-                routing_entropy = getattr(
-                    model_ref.blocks[DSR_LAYER].attn,
-                    '_routing_entropy', None)
+                routing_attn = model_ref.blocks[DSR_LAYER].attn
+                routing_entropy = getattr(routing_attn, '_routing_entropy', None)
+                routing_entropy_norm = getattr(routing_attn, '_routing_entropy_norm', None)
                 entropy_str = ''
                 if routing_entropy is not None:
-                    entropy_str = f' routing_ent={routing_entropy:.3f}'
+                    entropy_str += f' routing_ent={routing_entropy:.3f}'
+                if routing_entropy_norm is not None:
+                    entropy_str += f' routing_ent_n={routing_entropy_norm:.3f}'
+                if entropy_reg_val:
+                    entropy_str += f' ent_reg={entropy_reg_val:.4f}'
                 print(f'  [ep{epoch} step {acc_step+1}/{steps_per_epoch}] '
                       f'ce={loss_val:.4f} se_max={se_max:.3f} '
                       f'grad_norm={total_norm:.4f} lr={lr_now:.2e} '
@@ -868,6 +900,9 @@ def train():
                     'dsr_layer': DSR_LAYER, 'num_layers': NUM_LAYERS,
                     'num_chunks': NUM_CHUNKS, 'top_k_chunks': TOP_K_CHUNKS,
                     'hisa_top_m_tokens': HISA_TOP_M_TOKENS,
+                    'hisa_routing_log_bias': HISA_ROUTING_LOG_BIAS,
+                    'hisa_routing_entropy_target': HISA_ROUTING_ENTROPY_TARGET,
+                    'hisa_routing_entropy_reg': HISA_ROUTING_ENTROPY_REG,
                     'r_planes': R_PLANES,
                     'tied_lm_head': True,
                 },
@@ -927,11 +962,14 @@ def train():
                 all_phase = torch.cat([phase_base.flatten(), phase_gain.flatten()])
                 print(f'  MOVT[L{i}]: |mean|={all_phase.mean():.4f} |max|={all_phase.max():.4f}')
 
-        routing_entropy = getattr(
-            model_ref.blocks[DSR_LAYER].attn, '_routing_entropy', None)
+        routing_attn = model_ref.blocks[DSR_LAYER].attn
+        routing_entropy = getattr(routing_attn, '_routing_entropy', None)
+        routing_entropy_norm = getattr(routing_attn, '_routing_entropy_norm', None)
         if routing_entropy is not None:
-            print(f'  DSR routing entropy: {routing_entropy:.4f} '
-                  f'(max={math.log(NUM_CHUNKS):.2f}, min=0.00)')
+            entropy_msg = f'  DSR routing entropy: {routing_entropy:.4f} (max={math.log(NUM_CHUNKS):.2f}, min=0.00)'
+            if routing_entropy_norm is not None:
+                entropy_msg += f'  normalized={routing_entropy_norm:.4f}'
+            print(entropy_msg)
 
         print(f'  Physics: {model_ref.physics_summary()}')
 

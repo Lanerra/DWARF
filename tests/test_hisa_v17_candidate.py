@@ -9,6 +9,8 @@ for _d in [_project_root, os.path.join(_project_root, 'kernels')]:
     if _d not in sys.path:
         sys.path.insert(0, _d)
 
+import hierarchical_sparse_attn_v17_hisa_strict_triton as hisa_v17
+
 from hierarchical_sparse_attn_v16_hisa_strict import (
     HierarchicalSparseAttentionV16HISAStrict,
     _build_stage1_top_k_per_token,
@@ -114,6 +116,64 @@ def test_v17_candidate_routing_log_bias_is_train_only():
     train_diff = (y_train - y_eval).abs().max().item()
     assert eval_diff < 1e-6
     assert train_diff > 1e-6
+
+
+def test_v17_stage1_entropy_stats_normalize_by_available_past_choices():
+    routing_weights = torch.zeros(1, 1, 16, 4)
+    routing_weights[..., 4:8, 0] = 1.0
+    routing_weights[..., 8:12, 0] = 0.5
+    routing_weights[..., 8:12, 1] = 0.5
+    routing_weights[..., 12:16, 0] = 0.7
+    routing_weights[..., 12:16, 1] = 0.2
+    routing_weights[..., 12:16, 2] = 0.1
+
+    raw_entropy, norm_entropy, floor_penalty = hisa_v17._compute_stage1_routing_entropy_stats(
+        routing_weights,
+        seq_len=16,
+        chunk_size=4,
+        num_chunks=4,
+        entropy_target=0.8,
+    )
+
+    expected_chunk2_raw = torch.log(torch.tensor(2.0))
+    p = torch.tensor([0.7, 0.2, 0.1])
+    expected_chunk3_raw = -(p * p.log()).sum()
+    expected_raw = (expected_chunk2_raw + expected_chunk3_raw) / 2.0
+    expected_norm = (1.0 + (expected_chunk3_raw / torch.log(torch.tensor(3.0)))) / 2.0
+    expected_penalty = torch.relu(torch.tensor(0.8) - expected_norm).square()
+
+    assert torch.isclose(raw_entropy, expected_raw, atol=1e-6)
+    assert torch.isclose(norm_entropy, expected_norm, atol=1e-6)
+    assert torch.isclose(floor_penalty, expected_penalty, atol=1e-6)
+
+
+def test_v17_candidate_exposes_entropy_regularizer_loss_only_in_training():
+    torch.manual_seed(15)
+    x = torch.randn(1, 130, 16, requires_grad=True)
+    mod = HierarchicalSparseAttentionV17HISAStrictTriton(
+        D=16,
+        H=2,
+        hd=8,
+        num_chunks=4,
+        top_k_chunks=2,
+        hisa_top_m_tokens=4,
+        routing_entropy_target=0.9,
+        routing_entropy_reg_scale=1.5,
+    ).train()
+
+    y = mod(x)
+    assert y.shape == x.shape
+    assert 0.0 <= float(mod._routing_entropy_norm) <= 1.0
+    assert mod._routing_entropy_reg_loss.requires_grad
+    loss = y.square().mean() + mod._routing_entropy_reg_loss
+    loss.backward()
+    assert mod.W_q.weight.grad is not None
+    assert mod.W_k.weight.grad is not None
+
+    mod.eval()
+    with torch.no_grad():
+        _ = mod(x.detach())
+    assert float(mod._routing_entropy_reg_loss) == 0.0
 
 
 def test_v17_candidate_cuda_bias_backward_matches_eager_reference():
