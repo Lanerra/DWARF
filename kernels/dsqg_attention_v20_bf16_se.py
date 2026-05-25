@@ -23,6 +23,7 @@ import triton
 import triton.language as tl
 
 R_PLANES = 4
+_LOG2E = 1.4426950408889634
 
 
 def _next_pow2(n):
@@ -70,12 +71,16 @@ def _orthogonal_phase_probes(r_planes: int, hd: int) -> tuple[torch.Tensor, torc
 GROUPED_MODE_IDS = {
     'baseline': 0,
     'overlap_slab': 1,
-    'packed_kv': 2,
     'overlap_slab_bwd': 3,
 }
+_UNIMPLEMENTED_GROUPED_MODES = {'packed_kv'}
 
 
 def _resolve_grouped_mode(mode: str) -> int:
+    if mode in _UNIMPLEMENTED_GROUPED_MODES:
+        raise NotImplementedError(
+            f"grouped_mode='{mode}' is advertised by older configs but is not implemented in this kernel"
+        )
     if mode not in GROUPED_MODE_IDS:
         allowed = ', '.join(sorted(GROUPED_MODE_IDS.keys()))
         raise ValueError(f"Unknown grouped_mode='{mode}'. Allowed: {allowed}")
@@ -233,7 +238,7 @@ def _verify_sparse_plan(offsets: list[int], j_small: int, plan: dict) -> None:
 @triton.jit
 def _fwd_v18_grouped(
     Q, K, V, POS_BIAS, SE, PHASE_BASE, PHASE_GAIN, Y_PRE, Z_PRE, OUT, LSE,
-    OFFSETS, SPARSE_ORDER,
+    OFFSETS,
     stride_qb, stride_qh, stride_qn, stride_qd,
     stride_kb, stride_kh, stride_kn, stride_kd,
     stride_vb, stride_vh, stride_vn, stride_vd,
@@ -340,12 +345,12 @@ def _fwd_v18_grouped(
     mi = tl.max(scores, axis=1)
     all_invalid = mi == float('-inf')
     safe_mi = tl.where(all_invalid, 0.0, mi)
-    exp_s = tl.exp2((scores - safe_mi[:, None]) * 1.4426950408889634)
+    exp_s = tl.exp2((scores - safe_mi[:, None]) * _LOG2E)
     exp_s = tl.where(js[None, :] < J_VAL, exp_s, 0.0)
     li = tl.sum(exp_s, axis=1)
     ls = tl.where(li > 0.0, li, 1.0)
     probs = exp_s / ls[:, None]
-    lse_val = tl.where(all_invalid, 0.0, safe_mi + tl.log2(ls) * 0.6931471805599453)
+    lse_val = tl.where(all_invalid, 0.0, safe_mi + tl.log2(ls) * (1.0 / _LOG2E))
 
     # ═══ Pass 2: weighted V sum with MOVT rotation ═══
     acc = tl.zeros([BLOCK_N, BLOCK_HD], tl.float32)
@@ -550,12 +555,12 @@ def _fwd_v18_overlap_slab(
     mi = tl.max(scores, axis=1)
     all_invalid = mi == float('-inf')
     safe_mi = tl.where(all_invalid, 0.0, mi)
-    exp_s = tl.exp2((scores - safe_mi[:, None]) * 1.4426950408889634)
+    exp_s = tl.exp2((scores - safe_mi[:, None]) * _LOG2E)
     exp_s = tl.where(js[None, :] < J_VAL, exp_s, 0.0)
     li = tl.sum(exp_s, axis=1)
     ls = tl.where(li > 0.0, li, 1.0)
     probs = exp_s / ls[:, None]
-    lse_val = tl.where(all_invalid, 0.0, safe_mi + tl.log2(ls) * 0.6931471805599453)
+    lse_val = tl.where(all_invalid, 0.0, safe_mi + tl.log2(ls) * (1.0 / _LOG2E))
 
     # ═══ Pass 2: weighted V sum with MOVT rotation ═══
     acc = tl.zeros([BLOCK_N, BLOCK_HD], tl.float32)
@@ -660,14 +665,13 @@ def _compute_D_v18_grouped(
 @triton.jit
 def _bwd_dq_v18_grouped(
     Q, K, V, PB, SE, PHASE_BASE, PHASE_GAIN, Y_PRE, Z_PRE,
-    DO, O, LSE, Dv,
+    DO, LSE, Dv,
     DQ, DPB, DSE, DY_PRE,
-    OFFSETS, SPARSE_ORDER,
+    OFFSETS,
     stride_qb, stride_qh, stride_qn, stride_qd,
     stride_kb, stride_kh, stride_kn, stride_kd,
     stride_vb, stride_vh, stride_vn, stride_vd,
     stride_dob, stride_doh, stride_don, stride_dod,
-    stride_ob, stride_oh, stride_on, stride_od,
     stride_lb, stride_lh, stride_ln,
     stride_Db, stride_Dh, stride_Dn,
     stride_dqb, stride_dqh, stride_dqn, stride_dqd,
@@ -747,7 +751,7 @@ def _bwd_dq_v18_grouped(
         s = tl.where(val.to(tl.int1), s, float('-inf'))
 
         alpha = tl.where(val & (lse > float('-inf')),
-                         tl.exp2((s - lse) * 1.4426950408889634), 0.0)
+                         tl.exp2((s - lse) * _LOG2E), 0.0)
 
         dot_rv = tl.sum(do * vt, axis=1)
         ds_v = alpha * (dot_rv - Dval)
@@ -784,7 +788,7 @@ def _bwd_dq_v18_grouped(
                 s = tl.where(val.to(tl.int1), s, float('-inf'))
 
                 alpha = tl.where(val & (lse > float('-inf')),
-                                 tl.exp2((s - lse) * 1.4426950408889634), 0.0)
+                                 tl.exp2((s - lse) * _LOG2E), 0.0)
 
                 # MOVT rotation path
                 pi_idx = i - J_SMALL_VAL
@@ -865,14 +869,13 @@ def _bwd_dq_v18_grouped(
 @triton.jit
 def _bwd_dq_v18_overlap_slab(
     Q, K, V, PB, SE, PHASE_BASE, PHASE_GAIN, Y_PRE, Z_PRE,
-    DO, O, LSE, Dv,
+    DO, LSE, Dv,
     DQ, DPB, DSE, DY_PRE,
     OFFSETS, SPARSE_ORDER, GROUP_START, GROUP_LEN, GROUP_DMIN, GROUP_DMAX,
     stride_qb, stride_qh, stride_qn, stride_qd,
     stride_kb, stride_kh, stride_kn, stride_kd,
     stride_vb, stride_vh, stride_vn, stride_vd,
     stride_dob, stride_doh, stride_don, stride_dod,
-    stride_ob, stride_oh, stride_on, stride_od,
     stride_lb, stride_lh, stride_ln,
     stride_Db, stride_Dh, stride_Dn,
     stride_dqb, stride_dqh, stride_dqn, stride_dqd,
@@ -885,7 +888,7 @@ def _bwd_dq_v18_overlap_slab(
     stride_dyb, stride_dyh, stride_dyn,
     H: tl.constexpr, N, HD: tl.constexpr,
     BLOCK_N: tl.constexpr, BLOCK_HD: tl.constexpr,
-    J_VAL: tl.constexpr, J_SMALL_VAL: tl.constexpr, J_LARGE_VAL: tl.constexpr,
+    J_VAL: tl.constexpr, J_SMALL_VAL: tl.constexpr,
     R_PLANES_VAL: tl.constexpr, J_PAD: tl.constexpr,
     K_GROUP_SIZE: tl.constexpr,
     NUM_GROUPS: tl.constexpr,
@@ -955,7 +958,7 @@ def _bwd_dq_v18_overlap_slab(
         s = tl.where(val.to(tl.int1), s, float('-inf'))
 
         alpha = tl.where(val & (lse > float('-inf')),
-                         tl.exp2((s - lse) * 1.4426950408889634), 0.0)
+                         tl.exp2((s - lse) * _LOG2E), 0.0)
 
         dot_rv = tl.sum(do * vt, axis=1)
         ds_v = alpha * (dot_rv - Dval)
@@ -1015,7 +1018,7 @@ def _bwd_dq_v18_overlap_slab(
                 s = tl.where(val.to(tl.int1), s, float('-inf'))
 
                 alpha = tl.where(val & (lse > float('-inf')),
-                                 tl.exp2((s - lse) * 1.4426950408889634), 0.0)
+                                 tl.exp2((s - lse) * _LOG2E), 0.0)
 
                 vt = tl.load(vb + kp[:, None] * stride_vn + ds[None, :] * stride_vd,
                              mask=val[:, None] & dm[None, :], other=0.0).to(tl.float32)
@@ -1115,7 +1118,7 @@ def _bwd_dkdv_v18_grouped(
     DK, DV,
     DPHASE_BASE, DPHASE_GAIN,
     DZ_PRE,
-    OFFSETS, SPARSE_ORDER,
+    OFFSETS,
     stride_qb, stride_qh, stride_qn, stride_qd,
     stride_kb, stride_kh, stride_kn, stride_kd,
     stride_vb, stride_vh, stride_vn, stride_vd,
@@ -1128,14 +1131,14 @@ def _bwd_dkdv_v18_grouped(
     stride_sei, stride_sed,
     stride_phi, stride_phh,
     stride_pgi, stride_pgh,
-    stride_dphi, stride_dphh, stride_dphr,
-    stride_dpgi, stride_dpgh, stride_dpgr,
+    stride_dphi, stride_dphh,
+    stride_dpgi, stride_dpgh,
     stride_yb, stride_yh, stride_yn,
     stride_zb, stride_zh, stride_zn,
     stride_dzb, stride_dzh, stride_dzn,
     H: tl.constexpr, N, HD: tl.constexpr,
     BLOCK_M: tl.constexpr, BLOCK_HD: tl.constexpr,
-    J_VAL: tl.constexpr, J_SMALL_VAL: tl.constexpr, J_LARGE_VAL: tl.constexpr,
+    J_SMALL_VAL: tl.constexpr, J_LARGE_VAL: tl.constexpr,
     R_PLANES_VAL: tl.constexpr, J_PAD: tl.constexpr,
     K_GROUP_SIZE: tl.constexpr,
 ):
@@ -1193,7 +1196,7 @@ def _bwd_dkdv_v18_grouped(
         s = tl.where(val.to(tl.int1), s, float('-inf'))
 
         alpha = tl.where(val & (lsen > float('-inf')),
-                        tl.exp2((s - lsen) * 1.4426950408889634), 0.0)
+                        tl.exp2((s - lsen) * _LOG2E), 0.0)
 
         dot_rv = tl.sum(don * vt, axis=1)
         ds_v = alpha * (dot_rv - Dn)
@@ -1227,7 +1230,7 @@ def _bwd_dkdv_v18_grouped(
                 s = tl.where(val.to(tl.int1), s, float('-inf'))
 
                 alpha = tl.where(val & (lsen > float('-inf')),
-                                 tl.exp2((s - lsen) * 1.4426950408889634), 0.0)
+                                 tl.exp2((s - lsen) * _LOG2E), 0.0)
 
                 pi_idx = i - J_SMALL_VAL
 
@@ -1316,7 +1319,7 @@ class _DSQGV18GroupedFn(torch.autograd.Function):
 
     @staticmethod
     def forward(ctx, q, k, v, pos_bias, scale_embed,
-                phase_base, phase_gain, phase_gate, y_pre, z_pre,
+                phase_base, phase_gain, y_pre, z_pre,
                 j_val, j_small, j_large,
                 offsets_dev, sparse_order_dev,
                 group_start_dev, group_len_dev, group_dmin_dev, group_dmax_dev,
@@ -1361,6 +1364,11 @@ class _DSQGV18GroupedFn(torch.autograd.Function):
 
         BLOCK_HD = _next_pow2(HD)
         J_PAD = _next_pow2(j_val)
+        if BLOCK_N < 16 or BLOCK_HD < 16 or J_PAD < 16:
+            raise RuntimeError(
+                f"Unsupported DSQG v20 launch shape for tl.dot: BLOCK_N={BLOCK_N}, "
+                f"BLOCK_HD={BLOCK_HD}, J_PAD={J_PAD}; each must be >= 16"
+            )
 
         out = torch.empty_like(q)
         lse = torch.empty(B, H, N, device=q.device, dtype=torch.float32)
@@ -1398,7 +1406,7 @@ class _DSQGV18GroupedFn(torch.autograd.Function):
             _fwd_v18_grouped[grid](
                 q, k, v, pos_bias, scale_embed, phase_base, phase_gain,
                 y_pre, z_pre, out, lse,
-                offsets_dev, sparse_order_dev,
+                offsets_dev,
                 q.stride(0), q.stride(1), q.stride(2), q.stride(3),
                 k.stride(0), k.stride(1), k.stride(2), k.stride(3),
                 v.stride(0), v.stride(1), v.stride(2), v.stride(3),
@@ -1418,7 +1426,7 @@ class _DSQGV18GroupedFn(torch.autograd.Function):
             )
 
         ctx.save_for_backward(q, k, v, pos_bias, scale_embed,
-                              phase_base, phase_gain, phase_gate, y_pre, z_pre,
+                              phase_base, phase_gain, y_pre, z_pre,
                               out, lse, offsets_dev, sparse_order_dev,
                               group_start_dev, group_len_dev, group_dmin_dev, group_dmax_dev)
         ctx.BLOCK_N = BLOCK_N
@@ -1438,7 +1446,7 @@ class _DSQGV18GroupedFn(torch.autograd.Function):
     @staticmethod
     def backward(ctx, dout):
         (q, k, v, pos_bias, scale_embed,
-         phase_base, phase_gain, phase_gate, y_pre, z_pre,
+         phase_base, phase_gain, y_pre, z_pre,
          out, lse, offsets_dev, sparse_order_dev,
          group_start_dev, group_len_dev, group_dmin_dev, group_dmax_dev) = ctx.saved_tensors
         B, H, N, HD = q.shape
@@ -1468,8 +1476,8 @@ class _DSQGV18GroupedFn(torch.autograd.Function):
         )
 
         # dQ + atomic dpos_bias + atomic dscale_embed + dy_pre
-        dq = torch.zeros_like(q)
-        dy_pre = torch.zeros_like(y_pre)
+        dq = torch.empty_like(q)
+        dy_pre = torch.empty_like(y_pre)
         dpb = torch.zeros(j_val, H, device=_dev, dtype=torch.float32)
         dse = torch.zeros(j_val, HD, device=_dev, dtype=torch.float32)
 
@@ -1477,7 +1485,7 @@ class _DSQGV18GroupedFn(torch.autograd.Function):
             _bwd_dq_v18_overlap_slab[grid](
                 q, k, v, pos_bias, scale_embed,
                 phase_base, phase_gain, y_pre, z_pre,
-                dout, out, lse, D,
+                dout, lse, D,
                 dq, dpb, dse, dy_pre,
                 offsets_dev, sparse_order_dev,
                 group_start_dev, group_len_dev, group_dmin_dev, group_dmax_dev,
@@ -1485,7 +1493,6 @@ class _DSQGV18GroupedFn(torch.autograd.Function):
                 k.stride(0), k.stride(1), k.stride(2), k.stride(3),
                 v.stride(0), v.stride(1), v.stride(2), v.stride(3),
                 dout.stride(0), dout.stride(1), dout.stride(2), dout.stride(3),
-                out.stride(0), out.stride(1), out.stride(2), out.stride(3),
                 lse.stride(0), lse.stride(1), lse.stride(2),
                 D.stride(0), D.stride(1), D.stride(2),
                 dq.stride(0), dq.stride(1), dq.stride(2), dq.stride(3),
@@ -1497,7 +1504,7 @@ class _DSQGV18GroupedFn(torch.autograd.Function):
                 z_pre.stride(0), z_pre.stride(1), z_pre.stride(2),
                 dy_pre.stride(0), dy_pre.stride(1), dy_pre.stride(2),
                 H=H, N=N, HD=HD, BLOCK_N=BN, BLOCK_HD=BHD,
-                J_VAL=j_val, J_SMALL_VAL=j_small, J_LARGE_VAL=j_large,
+                J_VAL=j_val, J_SMALL_VAL=j_small,
                 R_PLANES_VAL=R_PLANES, J_PAD=J_PAD,
                 K_GROUP_SIZE=k_group_size,
                 NUM_GROUPS=int(group_len_dev.numel()),
@@ -1509,14 +1516,13 @@ class _DSQGV18GroupedFn(torch.autograd.Function):
             _bwd_dq_v18_grouped[grid](
                 q, k, v, pos_bias, scale_embed,
                 phase_base, phase_gain, y_pre, z_pre,
-                dout, out, lse, D,
+                dout, lse, D,
                 dq, dpb, dse, dy_pre,
-                offsets_dev, sparse_order_dev,
+                offsets_dev,
                 q.stride(0), q.stride(1), q.stride(2), q.stride(3),
                 k.stride(0), k.stride(1), k.stride(2), k.stride(3),
                 v.stride(0), v.stride(1), v.stride(2), v.stride(3),
                 dout.stride(0), dout.stride(1), dout.stride(2), dout.stride(3),
-                out.stride(0), out.stride(1), out.stride(2), out.stride(3),
                 lse.stride(0), lse.stride(1), lse.stride(2),
                 D.stride(0), D.stride(1), D.stride(2),
                 dq.stride(0), dq.stride(1), dq.stride(2), dq.stride(3),
@@ -1535,9 +1541,9 @@ class _DSQGV18GroupedFn(torch.autograd.Function):
             )
 
         # dK + dV + atomic dphase_base + atomic dphase_gain + dz_pre
-        dk = torch.zeros_like(k)
-        dv = torch.zeros_like(v)
-        dz_pre = torch.zeros_like(z_pre)
+        dk = torch.empty_like(k)
+        dv = torch.empty_like(v)
+        dz_pre = torch.empty_like(z_pre)
         d_phase_base_buf = torch.zeros_like(phase_base)
         d_phase_gain_buf = torch.zeros_like(phase_gain)
 
@@ -1548,7 +1554,7 @@ class _DSQGV18GroupedFn(torch.autograd.Function):
             dk, dv,
             d_phase_base_buf, d_phase_gain_buf,
             dz_pre,
-            offsets_dev, sparse_order_dev,
+            offsets_dev,
             q.stride(0), q.stride(1), q.stride(2), q.stride(3),
             k.stride(0), k.stride(1), k.stride(2), k.stride(3),
             v.stride(0), v.stride(1), v.stride(2), v.stride(3),
@@ -1561,20 +1567,20 @@ class _DSQGV18GroupedFn(torch.autograd.Function):
             scale_embed.stride(0), scale_embed.stride(1),
             phase_base.stride(0), phase_base.stride(1),
             phase_gain.stride(0), phase_gain.stride(1),
-            d_phase_base_buf.stride(0), d_phase_base_buf.stride(1), d_phase_base_buf.stride(2),
-            d_phase_gain_buf.stride(0), d_phase_gain_buf.stride(1), d_phase_gain_buf.stride(2),
+            d_phase_base_buf.stride(0), d_phase_base_buf.stride(1),
+            d_phase_gain_buf.stride(0), d_phase_gain_buf.stride(1),
             y_pre.stride(0), y_pre.stride(1), y_pre.stride(2),
             z_pre.stride(0), z_pre.stride(1), z_pre.stride(2),
             dz_pre.stride(0), dz_pre.stride(1), dz_pre.stride(2),
             H=H, N=N, HD=HD, BLOCK_M=BN, BLOCK_HD=BHD,
-            J_VAL=j_val, J_SMALL_VAL=j_small, J_LARGE_VAL=j_large,
+            J_SMALL_VAL=j_small, J_LARGE_VAL=j_large,
             R_PLANES_VAL=R_PLANES, J_PAD=J_PAD,
             K_GROUP_SIZE=k_group_size,
             num_warps=NW, num_stages=NS,
         )
 
         return (dq, dk, dv,
-                dpb, dse, d_phase_base_buf, d_phase_gain_buf, None, dy_pre, dz_pre,
+                dpb, dse, d_phase_base_buf, d_phase_gain_buf, dy_pre, dz_pre,
                 None, None, None,
                 None, None,
                 None, None, None, None,
@@ -1587,7 +1593,7 @@ class _DSQGV18GroupedFn(torch.autograd.Function):
 # ===========================================================================
 
 def dsqg_attention_v18_grouped(q, k, v, pos_bias, scale_embed,
-                               phase_base, phase_gain, phase_gate, y_pre, z_pre,
+                               phase_base, phase_gain, y_pre, z_pre,
                                j_val, j_small, j_large,
                                offsets_dev, sparse_order_dev,
                                group_start_dev, group_len_dev, group_dmin_dev, group_dmax_dev,
@@ -1601,7 +1607,7 @@ def dsqg_attention_v18_grouped(q, k, v, pos_bias, scale_embed,
     out = _DSQGV18GroupedFn.apply(
         q, k, v,
         pos_bias.float(), scale_embed.float(),
-        phase_base.float(), phase_gain.float(), phase_gate,
+        phase_base.float(), phase_gain.float(),
         y_pre.float(), z_pre.float(),
         j_val, j_small, j_large,
         offsets_dev, sparse_order_dev,
@@ -1625,8 +1631,12 @@ class DSQGAttentionV19(nn.Module):
         D = embedding_dim
         H = num_heads
         self.num_heads = H
+        if D % H != 0:
+            raise ValueError(f"embedding_dim={D} must be divisible by num_heads={H}")
         self.head_dim = D // H
         HD = self.head_dim
+        if HD < 16:
+            raise ValueError(f"head_dim={HD} is too small for Triton tl.dot paths; require head_dim >= 16")
         self.seq_len = seq_len
         self.k_group_size = k_group_size
         self.grouped_mode = grouped_mode
@@ -1639,6 +1649,11 @@ class DSQGAttentionV19(nn.Module):
             # Keep slab tiles bounded for the first streaming/tiling implementation.
             # Larger spreads can be enabled explicitly after profiling/tuning.
             max_group_spread = 64
+        if max_group_size is not None and int(max_group_size) > int(k_group_size):
+            raise ValueError(
+                f"max_group_size={max_group_size} cannot exceed k_group_size={k_group_size}; "
+                "overlap-slab kernels iterate only K_GROUP_SIZE slots per group"
+            )
         self.max_group_size = max_group_size
         self.max_group_spread = max_group_spread
 
@@ -1646,6 +1661,8 @@ class DSQGAttentionV19(nn.Module):
 
         j_val = len(offsets)
         assert j_small + j_large == j_val
+        if _next_pow2(j_val) < 16:
+            raise ValueError(f"j_val={j_val} is too small for Triton tl.dot paths; require padded J >= 16")
         self.j_val = j_val
         self.j_small = j_small
         self.j_large = j_large
@@ -1662,6 +1679,10 @@ class DSQGAttentionV19(nn.Module):
             max_group_size=max_group_size,
             max_group_spread=max_group_spread,
         )
+        if int(plan['max_group_len']) > int(k_group_size):
+            raise ValueError(
+                f"sparse planner produced max_group_len={plan['max_group_len']} > k_group_size={k_group_size}"
+            )
         if self.verify_mode:
             _verify_sparse_plan(offsets, j_small, plan)
 
@@ -1751,7 +1772,7 @@ class DSQGAttentionV19(nn.Module):
         out = dsqg_attention_v18_grouped(
             q, k, v,
             self.pos_bias, self.scale_embed,
-            gated_phase_base, gated_phase_gain, self.phase_gate,
+            gated_phase_base, gated_phase_gain,
             y_pre, z_pre,
             self.j_val, self.j_small, self.j_large,
             self.offsets_dev, self.sparse_order_dev,
