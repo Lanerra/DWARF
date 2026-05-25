@@ -77,6 +77,8 @@ _UNIMPLEMENTED_GROUPED_MODES = {'packed_kv'}
 
 
 def _resolve_grouped_mode(mode: str) -> int:
+    if not isinstance(mode, str):
+        raise TypeError(f"grouped_mode must be a string, got {type(mode).__name__}")
     if mode in _UNIMPLEMENTED_GROUPED_MODES:
         raise NotImplementedError(
             f"grouped_mode='{mode}' is advertised by older configs but is not implemented in this kernel"
@@ -85,6 +87,59 @@ def _resolve_grouped_mode(mode: str) -> int:
         allowed = ', '.join(sorted(GROUPED_MODE_IDS.keys()))
         raise ValueError(f"Unknown grouped_mode='{mode}'. Allowed: {allowed}")
     return GROUPED_MODE_IDS[mode]
+
+
+def _normalize_int_arg(name: str, value, *, minimum: int) -> int:
+    """Normalize integer configuration args without accepting bool/float coercions."""
+    if isinstance(value, bool):
+        raise TypeError(f"{name} must be an integer >= {minimum}, got bool")
+    try:
+        ivalue = value.__index__()
+    except AttributeError as exc:
+        raise TypeError(f"{name} must be an integer >= {minimum}, got {type(value).__name__}") from exc
+    except TypeError as exc:
+        raise TypeError(f"{name} must be an integer >= {minimum}, got {type(value).__name__}") from exc
+    if ivalue < minimum:
+        raise ValueError(f"{name}={ivalue} must be >= {minimum}")
+    return int(ivalue)
+
+
+def _normalize_grouping_args(
+    k_group_size,
+    max_group_size,
+    max_group_spread,
+    grouped_mode_id: int | None = None,
+) -> tuple[int, int, int | None]:
+    """Validate sparse grouping knobs and return canonical integer values.
+
+    k_group_size is the compiled kernel capacity: kernels iterate exactly this
+    many slots per sparse group. max_group_size is only a planner cap: it may be
+    smaller than k_group_size to reduce slab waste, but it can never be larger.
+    """
+    k_group_size = _normalize_int_arg('k_group_size', k_group_size, minimum=1)
+
+    if max_group_size is None:
+        max_group_size = k_group_size
+    else:
+        max_group_size = _normalize_int_arg('max_group_size', max_group_size, minimum=1)
+        if max_group_size > k_group_size:
+            raise ValueError(
+                f"max_group_size={max_group_size} cannot exceed k_group_size={k_group_size}; "
+                "overlap-slab kernels iterate only K_GROUP_SIZE slots per group"
+            )
+
+    if grouped_mode_id in (
+        GROUPED_MODE_IDS['overlap_slab'],
+        GROUPED_MODE_IDS['overlap_slab_bwd'],
+    ) and max_group_spread is None:
+        # Keep slab tiles bounded for the first streaming/tiling implementation.
+        # Larger spreads can be enabled explicitly after profiling/tuning.
+        max_group_spread = 64
+
+    if max_group_spread is not None:
+        max_group_spread = _normalize_int_arg('max_group_spread', max_group_spread, minimum=0)
+
+    return k_group_size, max_group_size, max_group_spread
 
 
 def _plan_sparse_groups(
@@ -97,9 +152,17 @@ def _plan_sparse_groups(
     """Plan sparse grouping for overlap-slab scheduling.
 
     This is schedule metadata only; logical index semantics remain unchanged.
+    k_group_size is kernel capacity; max_group_size is a planner cap that may
+    be smaller than, but never larger than, k_group_size.
     The planner minimizes a row-cost proxy: sum(BN + spread_g), approximated
     by minimizing (group_count * k_group_size + sum(spread_g)) for fixed knobs.
     """
+    k_group_size, max_group_size, max_group_spread = _normalize_grouping_args(
+        k_group_size=k_group_size,
+        max_group_size=max_group_size,
+        max_group_spread=max_group_spread,
+    )
+
     sparse = list(range(j_small, len(offsets)))
     sparse.sort(key=lambda i: offsets[i])
     n_sparse = len(sparse)
@@ -117,10 +180,7 @@ def _plan_sparse_groups(
             'max_group_spread': 0,
         }
 
-    gmax = int(max_group_size or k_group_size)
-    gmax = max(1, gmax)
-    if max_group_spread is not None:
-        max_group_spread = int(max_group_spread)
+    gmax = max_group_size
 
     # DP over sorted sparse offsets.
     inf = 10**18
@@ -153,8 +213,8 @@ def _plan_sparse_groups(
     if prev[n_sparse] is None:
         # Fallback: fixed-size chunking of sorted sparse indices.
         sparse_order = sparse
-        groups = [(i0, min(i0 + k_group_size, n_sparse))
-                  for i0 in range(0, n_sparse, max(k_group_size, 1))]
+        groups = [(i0, min(i0 + gmax, n_sparse))
+                  for i0 in range(0, n_sparse, gmax)]
     else:
         groups_rev = []
         cur = n_sparse
@@ -1638,22 +1698,16 @@ class DSQGAttentionV19(nn.Module):
         if HD < 16:
             raise ValueError(f"head_dim={HD} is too small for Triton tl.dot paths; require head_dim >= 16")
         self.seq_len = seq_len
-        self.k_group_size = k_group_size
         self.grouped_mode = grouped_mode
         self.grouped_mode_id = _resolve_grouped_mode(grouped_mode)
         self.verify_mode = bool(verify_mode)
-        if self.grouped_mode_id in (
-            GROUPED_MODE_IDS['overlap_slab'],
-            GROUPED_MODE_IDS['overlap_slab_bwd'],
-        ) and max_group_spread is None:
-            # Keep slab tiles bounded for the first streaming/tiling implementation.
-            # Larger spreads can be enabled explicitly after profiling/tuning.
-            max_group_spread = 64
-        if max_group_size is not None and int(max_group_size) > int(k_group_size):
-            raise ValueError(
-                f"max_group_size={max_group_size} cannot exceed k_group_size={k_group_size}; "
-                "overlap-slab kernels iterate only K_GROUP_SIZE slots per group"
-            )
+        k_group_size, max_group_size, max_group_spread = _normalize_grouping_args(
+            k_group_size=k_group_size,
+            max_group_size=max_group_size,
+            max_group_spread=max_group_spread,
+            grouped_mode_id=self.grouped_mode_id,
+        )
+        self.k_group_size = k_group_size
         self.max_group_size = max_group_size
         self.max_group_spread = max_group_spread
 
@@ -1679,6 +1733,10 @@ class DSQGAttentionV19(nn.Module):
             max_group_size=max_group_size,
             max_group_spread=max_group_spread,
         )
+        if int(plan['max_group_len']) > int(max_group_size):
+            raise ValueError(
+                f"sparse planner produced max_group_len={plan['max_group_len']} > max_group_size={max_group_size}"
+            )
         if int(plan['max_group_len']) > int(k_group_size):
             raise ValueError(
                 f"sparse planner produced max_group_len={plan['max_group_len']} > k_group_size={k_group_size}"
