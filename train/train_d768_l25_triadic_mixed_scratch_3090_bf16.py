@@ -599,14 +599,16 @@ class FullAttentionBlock(nn.Module):
 
 class TriadicJ96(nn.Module):
     def __init__(self, vocab_size, embedding_dim, num_heads, ffn_dim, seq_len,
-                 full_attn_layer, scale_embed_init_val=0.15, dropout=0.1):
+                 full_attn_layer, scale_embed_init_val=0.15, dropout=0.1,
+                 layer_layout=None):
         super().__init__()
         self.embedding = nn.Embedding(vocab_size, embedding_dim)
         self.drop = nn.Dropout(dropout)
         self.full_attn_layer = full_attn_layer
 
+        _layout = LAYER_LAYOUT if layer_layout is None else layer_layout
         blocks = []
-        for i, (label, offsets, js, jl, has_if) in enumerate(LAYER_LAYOUT):
+        for i, (label, offsets, js, jl, has_if) in enumerate(_layout):
             if label == 'FA':
                 blocks.append(FullAttentionBlock(
                     embedding_dim, num_heads, ffn_dim, dropout))
@@ -718,6 +720,8 @@ class TriadicJ96(nn.Module):
                 j = block.attn.j_val
                 iflag = '+IF' if block.interference else ''
                 parts.append(f'L{i}:DSQG-{label}(J={j}){iflag}')
+            elif hasattr(block.attn, 'num_chunks'):
+                parts.append(f'L{i}:DSR(C={block.attn.num_chunks},top_k={block.attn.top_k_chunks})')
             else:
                 parts.append(f'L{i}:FA')
         return '  '.join(parts)

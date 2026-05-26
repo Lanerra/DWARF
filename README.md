@@ -18,6 +18,14 @@ One standard full causal attention layer remains, providing global context bindi
 
 ---
 
+## Repository contents
+
+This public repository is intended to contain source code, kernels, tests, verification tooling, and curated documentation/results. Large generated artifacts are intentionally excluded from Git: checkpoints, encoded datasets, raw dataset caches, experiment logs, notebook scratch, and local virtual environments.
+
+To recreate a working environment, install the Python dependencies from `requirements.txt`. Training/evaluation runs should write generated outputs under ignored paths such as `checkpoints/`, `datasets/`, `logs/`, `outputs/`, or `wandb/` rather than committing them.
+
+---
+
 ## Results
 
 ### Headline numbers

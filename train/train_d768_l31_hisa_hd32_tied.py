@@ -102,6 +102,9 @@ for _d in [_kernel_dir, _project_root]:
     if _d not in sys.path:
         sys.path.insert(0, _d)
 
+from tools.passkey_eval import PasskeyConfig, format_passkey_results, passkey_prefix_consistency_audit
+
+
 from dsqg_attention_v20_bf16_se import (
     DSQGAttentionV19,
     dsqg_attention_v18_grouped,
@@ -513,62 +516,35 @@ def evaluate(model, data, device):
     return total_loss / max(total_tokens, 1)
 
 
+def _passkey_config():
+    return PasskeyConfig(
+        max_seq_len=MAX_SEQ_LEN,
+        distances=list(PASSKEY_DISTANCES),
+        trials=PASSKEY_TRIALS,
+        batch_size=PASSKEY_BATCH_SIZE,
+        words=list(_PASSKEY_WORDS),
+        filler_sentence=_FILLER_SENTENCE,
+        intro_template=_INTRO_TEMPLATE,
+        retrieval_cue=_RETRIEVAL_CUE,
+        pad_id=0,
+    )
+
+
 @torch.inference_mode()
 def passkey_accuracy(model, tokenizer, device):
-    model.eval()
-    filler_ids = tokenizer.encode(_FILLER_SENTENCE)
-    cue_ids = tokenizer.encode(_RETRIEVAL_CUE)
-    pad_id = 0
-    word_token_ids = {}
-    for word in _PASSKEY_WORDS:
-        encoded = tokenizer.encode(' ' + word) or tokenizer.encode(word)
-        if not encoded:
-            raise ValueError(f'Could not encode passkey word: {word}')
-        word_token_ids[word] = encoded[0]
-
-    results = {}
-    for d in PASSKEY_DISTANCES:
-        seqs, last_pos, cand_rows = [], [], []
-        for i in range(PASSKEY_TRIALS):
-            target = _PASSKEY_WORDS[i % len(_PASSKEY_WORDS)]
-            others = [w for w in _PASSKEY_WORDS if w != target]
-            intro_ids = tokenizer.encode(_INTRO_TEMPLATE.format(word=target))
-            available = MAX_SEQ_LEN - 1 - len(intro_ids) - len(cue_ids) - 1
-            if d > available:
-                continue
-            filler = []
-            while len(filler) < d:
-                filler.extend(filler_ids)
-            full_seq = intro_ids + filler[:d] + cue_ids
-            if len(full_seq) >= MAX_SEQ_LEN:
-                continue
-            seqs.append(full_seq + [pad_id] * (MAX_SEQ_LEN - len(full_seq)))
-            last_pos.append(len(full_seq) - 1)
-            cand_words = [target] + others[:9]
-            cand_rows.append([word_token_ids[w] for w in cand_words])
-
-        if not seqs:
-            results[d] = 0.0
-            continue
-
-        ids = torch.tensor(seqs, dtype=torch.long, device=device)
-        pos = torch.tensor(last_pos, dtype=torch.long, device=device)
-        cand = torch.tensor(cand_rows, dtype=torch.long, device=device)
-
-        correct = 0
-        total = ids.size(0)
-        for start in range(0, total, PASSKEY_BATCH_SIZE):
-            ids_b = ids[start:start + PASSKEY_BATCH_SIZE]
-            pos_b = pos[start:start + PASSKEY_BATCH_SIZE]
-            cand_b = cand[start:start + PASSKEY_BATCH_SIZE]
-            with _amp_context(device):
-                logits = model(ids_b)
-            row = torch.arange(ids_b.size(0), device=device)
-            next_logits = logits[row, pos_b, :]
-            cand_logits = torch.gather(next_logits, 1, cand_b)
-            correct += (cand_logits.argmax(dim=1) == 0).sum().item()
-        results[d] = correct / total
-    return results
+    audit = passkey_prefix_consistency_audit(model, tokenizer, device, _passkey_config())
+    print(
+        f"  [passkey audit] clean={audit['prefix_consistent']} "
+        f"max_pad_delta={audit['max_pad_logit_delta']:.3e} "
+        f"max_suffix_delta={audit['max_suffix_logit_delta']:.3e}",
+        flush=True,
+    )
+    if not audit['prefix_consistent']:
+        print(
+            '  [passkey audit] WARNING: prefix-only score is reported; legacy padded passkey is contaminated.',
+            flush=True,
+        )
+    return audit['prefix_accuracy']
 
 
 # =============================================================================
@@ -944,8 +920,7 @@ def train():
         pk_mean = sum(pk.values()) / len(pk)
         passkey_results[epoch] = pk_mean * 100
         print(f'  Passkey mean={pk_mean * 100:.1f}%')
-        parts = [f'd={d}:{int(pk[d] * 100)}%' for d in PASSKEY_DISTANCES]
-        print('  ' + '  '.join(parts))
+        print('  ' + format_passkey_results(pk))
 
     elapsed_s = time.time() - t_start
     memory_mb = torch.cuda.max_memory_allocated() / 1e6

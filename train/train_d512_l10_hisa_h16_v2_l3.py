@@ -5,7 +5,7 @@ Architecture: D=512, H=8 (hd=64), L=10, FFN=1536, tied lm_head
   Triadic partitioning: 96 offsets split into 3 pure groups of 32
   HISA at L3 (replacing the first post-triad relay slot)
   HISA block: HierarchicalSparseAttentionV15HISA(C=32, top_k=4, HISA_m=32)
-  All DSQG blocks use the V20 R_PLANES=4 Triton kernel with scale_embed + MOVT.
+  All DSQG blocks use the V20-compatible R_PLANES=4 Triton kernel with scale_embed + sequential MOVT.
 
 Layout:
   L00: DSQGBlock(GROUP_A)
@@ -47,7 +47,7 @@ try:
 except ImportError:
     _LIGER_AVAILABLE = False
 
-USE_LIGER_CE = _LIGER_AVAILABLE and os.getenv("DWARF_LIGER", "1") != "1"
+USE_LIGER_CE = _LIGER_AVAILABLE and os.getenv("DWARF_LIGER", "1") != "0"
 
 try:
     from liger_kernel.transformers import LigerLayerNorm
@@ -77,6 +77,9 @@ for _d in [_kernel_dir, _project_root]:
     if _d not in sys.path:
         sys.path.insert(0, _d)
 
+from tools.passkey_eval import PasskeyConfig, format_passkey_results, passkey_prefix_consistency_audit
+
+
 from dsqg_attention_v20_bf16_se import (
     DSQGAttentionV19,
     dsqg_attention_v18_grouped,
@@ -85,7 +88,7 @@ from dsqg_attention_v20_bf16_se import (
 from dsqg_attention_v8_dynamic_j_r4 import ALL_OFFSETS as _ALL_96
 assert R_PLANES == 4, f"Expected R_PLANES=4, got {R_PLANES}"
 _DSQG_TYPES = (DSQGAttentionV19,)
-print('  Kernel: V19 (sequential Givens, grouped sparse, SE gates)')
+print('  Kernel: V20-compatible DSQG (R=4 sequential Givens, grouped sparse, SE gates)')
 from causal_ema_scan import causal_ema_scan as _causal_ema_scan
 
 # =============================================================================
@@ -130,18 +133,19 @@ HISA_TOP_M_TOKENS = 32
 
 SCALE_EMBED_INIT_VAL = 0.15
 # Requested override: LR_MULT=24 for scale_embed
-SCALE_EMBED_LR_MULT  = 27.0
+SCALE_EMBED_LR_MULT  = 18.0
 EMA_INIT  = 0.020833
 EMA_FLOOR = 0.00001
 LR        = 3e-4
 DROPOUT   = 0.1
 
-BATCH_SIZE     = int(os.environ.get('DWARF_BS', '32'))
-GRAD_ACCUM     = int(os.environ.get('DWARF_GA', '2'))
+BATCH_SIZE     = int(os.environ.get('DWARF_BS', '48'))
+GRAD_ACCUM     = int(os.environ.get('DWARF_GA', '3'))
 MAX_TRAIN_SEQS = int(os.environ.get('DWARF_MAX_TRAIN_SEQS', '325000'))
 MAX_SEQ_LEN    = 2048
 MAX_VAL_SEQS   = 5_582
-CE_CHUNK       = 1024
+CE_CHUNK       = int(os.environ.get('DWARF_CE_ROWS', '2048'))  # rows per streamed final-projection CE chunk
+PIN_DATASET    = os.getenv('DWARF_PIN_DATASET', '0') == '1'
 SCREEN_EPOCHS  = 10
 
 TRAIN_LOG_INTERVAL = int(os.environ.get('DWARF_LOG_INTERVAL', '100'))
@@ -173,7 +177,7 @@ _RETRIEVAL_CUE    = 'the secret word is'
 CHECKPOINT_DIR    = 'autoresearch/checkpoints'
 CKPT_BASE_NAME    = 'd512_l10_hisa_h16_v2_l3'
 
-CHECKPOINT_STRATEGY = os.getenv('DWARF_CKPT', 'all').lower()
+CHECKPOINT_STRATEGY = os.getenv('DWARF_CKPT', 'every_other').lower()
 
 # =============================================================================
 # LAYER LAYOUT: L=10, DSR/HISA@L3
@@ -402,6 +406,7 @@ class TriadicJ96Dsr(nn.Module):
     def phase_parameters(self):
         for m in self.modules():
             if isinstance(m, _DSQG_TYPES):
+                yield m.phase_base
                 yield m.phase_gain
                 yield m.phase_gate
                 yield m.query_probes
@@ -447,83 +452,102 @@ class BPETokenizerWrapper:
         return self.tokenizer.get_vocab_size()
 
 
+def _streamed_linear_ce_loss(hidden: torch.Tensor,
+                             targets: torch.Tensor,
+                             weight: torch.Tensor,
+                             *,
+                             chunk_rows: int,
+                             grad_denom: float | None = None) -> tuple[torch.Tensor, int]:
+    """Compute tied final-projection CE without materializing [B,T,V] logits.
+
+    In training mode (grad_denom is not None), this streams CE chunks through a
+    detached hidden leaf, accumulates the tied output-weight gradient chunk by
+    chunk, stores only d_hidden [B*T,D], and then calls hidden.backward(d_hidden)
+    once. That avoids both the full logits/grad_logits tensors and the severe
+    checkpoint recompute overhead caused by calling backward through the full
+    model once per CE chunk.
+    """
+    hidden_c = hidden.contiguous()
+    h = hidden_c.view(-1, hidden_c.size(-1))
+    y = targets.reshape(-1)
+    n_rows = h.size(0)
+    total_loss = torch.zeros((), device=h.device, dtype=torch.float32)
+    chunk_rows = max(1, int(chunk_rows))
+    grad_h = torch.empty_like(h) if grad_denom is not None else None
+
+    for s in range(0, n_rows, chunk_rows):
+        e = min(s + chunk_rows, n_rows)
+        h_chunk = h[s:e]
+        if grad_denom is not None:
+            h_chunk = h_chunk.detach().requires_grad_(True)
+        with _amp_context(h.device.type):
+            logits = F.linear(h_chunk, weight)
+        loss_sum = F.cross_entropy(logits.float(), y[s:e], reduction='sum')
+        total_loss = total_loss + loss_sum.detach()
+        if grad_denom is not None:
+            (loss_sum / float(grad_denom)).backward()
+            grad_h[s:e].copy_(h_chunk.grad)
+        del logits, loss_sum, h_chunk
+
+    if grad_h is not None:
+        hidden_c.backward(grad_h.view_as(hidden_c))
+
+    return total_loss, n_rows
+
+
 @torch.inference_mode()
 def evaluate(model, data, device):
     model.eval()
+    model_ref = _unwrap_compiled_module(model)
     total_loss, total_tokens = 0.0, 0
     bs = max(1, BATCH_SIZE // 2)
     for i in range(0, len(data) - bs + 1, bs):
         x = data[i:i+bs, :-1].to(device, non_blocking=True)
-        y = data[i:i+bs, 1:].to(device, non_blocking=True)
+        if x.dtype not in (torch.int32, torch.int64):
+            x = x.long()
+        y = data[i:i+bs, 1:].to(device, non_blocking=True).long()
         with _amp_context(device):
-            logits = model(x)
-        T, V = logits.size(1), logits.size(2)
-        batch_loss = 0.0
-        for c in range(0, T, CE_CHUNK):
-            lc = logits[:, c:c+CE_CHUNK, :].reshape(-1, V).float()
-            yc = y[:, c:c+CE_CHUNK].reshape(-1)
-            batch_loss += F.cross_entropy(lc, yc, reduction='sum').item()
-        total_loss += batch_loss
-        total_tokens += y.numel()
+            hidden = model.forward_hidden(x)
+            loss_sum, n_rows = _streamed_linear_ce_loss(
+                hidden, y, model_ref.out.weight,
+                chunk_rows=CE_CHUNK,
+                grad_denom=None,
+            )
+        total_loss += float(loss_sum.item())
+        total_tokens += n_rows
+        del hidden, x, y
     return total_loss / max(total_tokens, 1)
+
+
+def _passkey_config():
+    return PasskeyConfig(
+        max_seq_len=MAX_SEQ_LEN,
+        distances=list(PASSKEY_DISTANCES),
+        trials=PASSKEY_TRIALS,
+        batch_size=PASSKEY_BATCH_SIZE,
+        words=list(_PASSKEY_WORDS),
+        filler_sentence=_FILLER_SENTENCE,
+        intro_template=_INTRO_TEMPLATE,
+        retrieval_cue=_RETRIEVAL_CUE,
+        pad_id=0,
+    )
 
 
 @torch.inference_mode()
 def passkey_accuracy(model, tokenizer, device):
-    model.eval()
-    filler_ids = tokenizer.encode(_FILLER_SENTENCE)
-    cue_ids = tokenizer.encode(_RETRIEVAL_CUE)
-    pad_id = 0
-    word_token_ids = {}
-    for word in _PASSKEY_WORDS:
-        encoded = tokenizer.encode(' ' + word) or tokenizer.encode(word)
-        if not encoded:
-            raise ValueError(f'Could not encode passkey word: {word}')
-        word_token_ids[word] = encoded[0]
-
-    results = {}
-    for d in PASSKEY_DISTANCES:
-        seqs, last_pos, cand_rows = [], [], []
-        for i in range(PASSKEY_TRIALS):
-            target = _PASSKEY_WORDS[i % len(_PASSKEY_WORDS)]
-            others = [w for w in _PASSKEY_WORDS if w != target]
-            intro_ids = tokenizer.encode(_INTRO_TEMPLATE.format(word=target))
-            available = MAX_SEQ_LEN - 1 - len(intro_ids) - len(cue_ids) - 1
-            if d > available:
-                continue
-            filler = []
-            while len(filler) < d:
-                filler.extend(filler_ids)
-            full_seq = intro_ids + filler[:d] + cue_ids
-            if len(full_seq) >= MAX_SEQ_LEN:
-                continue
-            seqs.append(full_seq + [pad_id] * (MAX_SEQ_LEN - len(full_seq)))
-            last_pos.append(len(full_seq) - 1)
-            cand_words = [target] + others[:9]
-            cand_rows.append([word_token_ids[w] for w in cand_words])
-
-        if not seqs:
-            results[d] = 0.0
-            continue
-
-        ids = torch.tensor(seqs, dtype=torch.long, device=device)
-        pos = torch.tensor(last_pos, dtype=torch.long, device=device)
-        cand = torch.tensor(cand_rows, dtype=torch.long, device=device)
-
-        correct = 0
-        total = ids.size(0)
-        for start in range(0, total, PASSKEY_BATCH_SIZE):
-            ids_b = ids[start:start + PASSKEY_BATCH_SIZE]
-            pos_b = pos[start:start + PASSKEY_BATCH_SIZE]
-            cand_b = cand[start:start + PASSKEY_BATCH_SIZE]
-            with _amp_context(device):
-                logits = model(ids_b)
-            row = torch.arange(ids_b.size(0), device=device)
-            next_logits = logits[row, pos_b, :]
-            cand_logits = torch.gather(next_logits, 1, cand_b)
-            correct += (cand_logits.argmax(dim=1) == 0).sum().item()
-        results[d] = correct / total
-    return results
+    audit = passkey_prefix_consistency_audit(model, tokenizer, device, _passkey_config())
+    print(
+        f"  [passkey audit] clean={audit['prefix_consistent']} "
+        f"max_pad_delta={audit['max_pad_logit_delta']:.3e} "
+        f"max_suffix_delta={audit['max_suffix_logit_delta']:.3e}",
+        flush=True,
+    )
+    if not audit['prefix_consistent']:
+        print(
+            '  [passkey audit] WARNING: prefix-only score is reported; legacy padded passkey is contaminated.',
+            flush=True,
+        )
+    return audit['prefix_accuracy']
 
 
 # =============================================================================
@@ -531,15 +555,20 @@ def passkey_accuracy(model, tokenizer, device):
 # =============================================================================
 
 def train():
-    device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    if torch.cuda.is_available():
-        torch.cuda.reset_peak_memory_stats()
+    if not torch.cuda.is_available():
+        raise RuntimeError('DWARF DSQG/HISA kernels require CUDA + Triton; CPU execution is not supported.')
+    device = 'cuda'
+    torch.cuda.reset_peak_memory_stats()
     t_start = time.time()
-    git_hash = subprocess.check_output(
-        ['git', 'rev-parse', '--short', 'HEAD']).decode().strip()
+    try:
+        git_hash = subprocess.check_output(
+            ['git', 'rev-parse', '--short', 'HEAD'], stderr=subprocess.DEVNULL
+        ).decode().strip()
+    except Exception:
+        git_hash = 'unknown'
 
     print('=' * 70)
-    print('  DWARF D512-L10 Triadic J=96 — DSR/HISA@L6 + R_PLANES=4, TIED LM_HEAD')
+    print(f'  DWARF D512-L10 Triadic J=96 — DSR/HISA@L{DSR_LAYER} + R_PLANES=4, TIED LM_HEAD')
     print(f'  DSR@L{DSR_LAYER}: HierarchicalSparseAttentionV15HISA(C={NUM_CHUNKS}, top_k={TOP_K_CHUNKS}, HISA_m={HISA_TOP_M_TOKENS})')
     print('  PURE LM loss only. No distillation. No teacher. Random init.')
     print('=' * 70)
@@ -555,15 +584,15 @@ def train():
     print(f'  MAX_TRAIN_SEQS={MAX_TRAIN_SEQS:,}, Epochs={SCREEN_EPOCHS}')
     print(f'  Batch: BS={BATCH_SIZE} x GA={GRAD_ACCUM} = eff_batch={BATCH_SIZE*GRAD_ACCUM}')
     print(f'  checkpoint_strategy={CHECKPOINT_STRATEGY}')
-    print('  DSQG: V19 (sequential Givens, grouped sparse, SE gates)')
-    print('  DSR:  V15HISA (hierarchical sparse attention + token refinement)')
+    print('  DSQG: V20-compatible (R=4 sequential Givens, grouped sparse, SE gates)')
+    print('  DSR:  V15HISA (query-chunk-scoped compact token refinement)')
     if USE_LIGER_CE:
         print('  Using Liger fused CE')
     else:
-        print('  Using chunked CE')
+        print('  Using streamed final-projection CE')
     print(f'  LayerNorm: {"LigerLayerNorm (fused)" if _LIGER_LN else "nn.LayerNorm"}')
     print(f'  SAC: {"enabled (PyTorch 2.4+)" if _SAC_AVAILABLE else "unavailable (requires PyTorch 2.4+)"}')
-    print(f'  PASSKEY_TRIALS={PASSKEY_TRIALS}  CE_CHUNK={CE_CHUNK}  LOG_INTERVAL={TRAIN_LOG_INTERVAL}')
+    print(f'  PASSKEY_TRIALS={PASSKEY_TRIALS}  CE_ROWS={CE_CHUNK}  LOG_INTERVAL={TRAIN_LOG_INTERVAL}  PIN_DATASET={PIN_DATASET}')
     if MAX_ACC_STEPS:
         print(f'  MAX_ACC_STEPS={MAX_ACC_STEPS}  BENCH_ONLY={BENCH_ONLY}')
     print(f'  git={git_hash}')
@@ -579,17 +608,18 @@ def train():
     if not os.path.exists(encoded_path):
         raise FileNotFoundError(f'Dataset not found: {encoded_path}')
     _cache = torch.load(encoded_path, weights_only=True)
-    train_data = _cache['train'].long()
-    val_data = _cache['val'].long()
+    # Keep cached sequences compact on host; cast targets to int64 per batch for CE.
+    train_data = _cache['train'].to(dtype=torch.int32).contiguous()
+    val_data = _cache['val'].to(dtype=torch.int32).contiguous()
 
     if len(train_data) > MAX_TRAIN_SEQS:
         train_data = train_data[torch.randperm(len(train_data))[:MAX_TRAIN_SEQS]]
     if len(val_data) > MAX_VAL_SEQS:
         val_data = val_data[:MAX_VAL_SEQS]
-    if device == 'cuda':
+    if PIN_DATASET:
         train_data = train_data.pin_memory()
         val_data = val_data.pin_memory()
-    print(f'  train: {len(train_data):,} seqs  val: {len(val_data):,} seqs')
+    print(f'  train: {len(train_data):,} seqs  val: {len(val_data):,} seqs  host_dtype={train_data.dtype}')
 
     model = TriadicJ96Dsr(
         vocab_size=VOCAB_SIZE,
@@ -649,7 +679,7 @@ def train():
         {'params': phase_params, 'lr': LR * 50, 'name': 'phase'},
     ], weight_decay=0.1, betas=(0.9, 0.95))
     print(f'  Optimizer: {_opt_cls.__name__}')
-    print(f'  phase params LR: {LR * 50:.2e} (50x base)')
+    print(f'  phase params LR: {LR * 50:.2e} (50x base; includes phase_base/gain/gate/probes)')
 
     steps_per_epoch_nominal = math.ceil(len(train_data) / BATCH_SIZE / GRAD_ACCUM)
     if MAX_ACC_STEPS:
@@ -719,54 +749,52 @@ def train():
         for acc_step in range(steps_per_epoch):
             t0 = time.time()
 
-            loss_val = 0.0
+            loss_accum = 0.0
+            micro_starts = []
             for ga in range(GRAD_ACCUM):
                 idx_start = (acc_step * GRAD_ACCUM + ga) * BATCH_SIZE
-                if idx_start >= len(train_data):
-                    continue
+                if idx_start < len(train_data):
+                    micro_starts.append(idx_start)
+            actual_ga = max(len(micro_starts), 1)
+
+            for idx_start in micro_starts:
                 batch = train_data[indices[idx_start:idx_start + BATCH_SIZE]]
                 x = batch[:, :-1].to(device, non_blocking=True)
-                y = batch[:, 1:].to(device, non_blocking=True)
+                if x.dtype not in (torch.int32, torch.int64):
+                    x = x.long()
+                y = batch[:, 1:].to(device, non_blocking=True).long()
 
                 if USE_LIGER_CE:
                     with _amp_context(device):
                         hidden = model.forward_hidden(x)
                     # LigerFusedLinearCrossEntropyLoss.forward(lin_weight, _input, target)
-                    # lin_weight first, hidden states second
                     loss = liger_ce_fn(
-                        model.out.weight,
+                        model_ref.out.weight,
                         hidden.contiguous().reshape(-1, hidden.size(-1)),
-                        y.view(-1))
-                    # Liger requires grad_output==1.0; scale grads manually after loop
+                        y.reshape(-1))
+                    # Liger requires grad_output==1.0; scale grads manually after loop.
                     loss.backward()
-                    loss_val = loss.item()
+                    loss_accum += float(loss.detach().item())
                     del hidden, loss
                 else:
+                    n_rows = y.numel()
                     with _amp_context(device):
-                        logits = model(x)
-                    logits_flat = logits.reshape(-1, logits.size(-1))
-                    y_flat = y.reshape(-1)
-                    T = logits_flat.size(0)
-                    grad_logits = torch.empty_like(logits_flat)
-                    total_loss = 0.0
-                    for chunk_start in range(0, T, CE_CHUNK):
-                        chunk_end = min(chunk_start + CE_CHUNK, T)
-                        chunk = logits_flat[chunk_start:chunk_end].detach().requires_grad_(True)
-                        chunk_loss = F.cross_entropy(
-                            chunk, y_flat[chunk_start:chunk_end], reduction='sum')
-                        chunk_loss.backward()
-                        grad_logits[chunk_start:chunk_end] = chunk.grad
-                        total_loss += chunk_loss.item()
-                    logits_flat.backward(grad_logits / (T * GRAD_ACCUM))
-                    loss_val = total_loss / T
-                    del logits, logits_flat, y_flat, grad_logits
+                        hidden = model.forward_hidden(x)
+                    total_loss, _ = _streamed_linear_ce_loss(
+                        hidden, y, model_ref.out.weight,
+                        chunk_rows=CE_CHUNK,
+                        grad_denom=n_rows * actual_ga,
+                    )
+                    loss_accum += float((total_loss / max(n_rows, 1)).item())
+                    del hidden, total_loss
 
+            loss_val = loss_accum / actual_ga
             if USE_LIGER_CE:
                 for p in model.parameters():
                     if p.grad is not None:
-                        p.grad.div_(GRAD_ACCUM)
+                        p.grad.div_(actual_ga)
 
-            torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+            grad_norm = torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
             optimizer.step()
             optimizer.zero_grad(set_to_none=True)
             scheduler.step()
@@ -784,16 +812,24 @@ def train():
                 se_max = max(
                     (p.abs().max().item() for p in model_ref.scale_embed_parameters()),
                     default=0.0)
-                total_norm = math.sqrt(sum(
-                    p.grad.square().sum().item()
-                    for p in model.parameters() if p.grad is not None))
+                total_norm = float(grad_norm.detach().item() if torch.is_tensor(grad_norm) else grad_norm)
                 lr_now = scheduler.get_last_lr()[0]
                 routing_entropy = getattr(
                     model_ref.blocks[DSR_LAYER].attn,
                     '_routing_entropy', None)
                 entropy_str = ''
                 if routing_entropy is not None:
+                    if torch.is_tensor(routing_entropy):
+                        routing_entropy = float(routing_entropy.detach().item())
                     entropy_str = f' routing_ent={routing_entropy:.3f}'
+                stage2_frac = getattr(
+                    model_ref.blocks[DSR_LAYER].attn,
+                    '_stage2_selected_fraction', None)
+                if stage2_frac is not None:
+                    if torch.is_tensor(stage2_frac):
+                        stage2_frac = float(stage2_frac.detach().item())
+                    if isinstance(stage2_frac, float) and math.isfinite(stage2_frac):
+                        entropy_str += f' stage2_frac={stage2_frac:.3f}'
                 print(f'  [ep{epoch} step {acc_step+1}/{steps_per_epoch}] '
                       f'ce={loss_val:.4f} se_max={se_max:.3f} '
                       f'grad_norm={total_norm:.4f} lr={lr_now:.2e} '
@@ -890,6 +926,8 @@ def train():
         routing_entropy = getattr(
             model_ref.blocks[DSR_LAYER].attn, '_routing_entropy', None)
         if routing_entropy is not None:
+            if torch.is_tensor(routing_entropy):
+                routing_entropy = float(routing_entropy.detach().item())
             print(f'  DSR routing entropy: {routing_entropy:.4f} '
                   f'(max={math.log(NUM_CHUNKS):.2f}, min=0.00)')
 
@@ -899,8 +937,7 @@ def train():
         pk_mean = sum(pk.values()) / len(pk)
         passkey_results[epoch] = pk_mean * 100
         print(f'  Passkey mean={pk_mean * 100:.1f}%')
-        parts = [f'd={d}:{int(pk[d] * 100)}%' for d in PASSKEY_DISTANCES]
-        print('  ' + '  '.join(parts))
+        print('  ' + format_passkey_results(pk))
 
     elapsed_s = time.time() - t_start
     memory_mb = torch.cuda.max_memory_allocated() / 1e6

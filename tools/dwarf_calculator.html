@@ -1,1027 +1,1161 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>DWARF Hyperparameter Calculator</title>
 <style>
   :root {
-    --bg: #0f1117;
-    --surface: #1a1d27;
-    --surface2: #232636;
-    --border: #2e3248;
-    --accent: #7c8ff7;
-    --accent2: #a78bfa;
-    --green: #4ade80;
-    --yellow: #fbbf24;
-    --red: #f87171;
-    --text: #e2e8f0;
-    --muted: #8892a4;
-    --small: 0.82rem;
+    --bg: #0a0f16;
+    --panel: #121a24;
+    --panel-2: #182231;
+    --border: #273447;
+    --text: #e7edf5;
+    --muted: #9cb0c8;
+    --accent: #74c0fc;
+    --accent-2: #8ce99a;
+    --warn: #ffd166;
+    --danger: #ff8787;
+    --good: #69db7c;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    --sans: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+  * { box-sizing: border-box; }
   body {
-    font-family: 'SF Mono', 'Fira Code', monospace;
-    background: var(--bg);
+    margin: 0;
+    font-family: var(--sans);
+    background: linear-gradient(180deg, #08111c 0%, #0b1320 100%);
     color: var(--text);
-    min-height: 100vh;
-    padding: 24px 16px;
-    font-size: 14px;
   }
-  h1 { font-size: 1.4rem; color: var(--accent); margin-bottom: 4px; }
-  .subtitle { color: var(--muted); font-size: var(--small); margin-bottom: 24px; }
-  .layout { display: grid; grid-template-columns: 360px 1fr; gap: 20px; max-width: 1100px; margin: 0 auto; }
-  @media (max-width: 800px) { .layout { grid-template-columns: 1fr; } }
-
-  .panel {
-    background: var(--surface);
+  .wrap {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 24px;
+  }
+  .hero {
+    margin-bottom: 20px;
+    padding: 22px 24px;
     border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 18px;
+    border-radius: 18px;
+    background: rgba(18, 26, 36, 0.92);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.28);
   }
-  .panel h2 { font-size: 0.9rem; color: var(--accent2); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 14px; }
-
-  .preset-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 18px; }
-  .preset-btn {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    color: var(--text);
-    padding: 8px 10px;
-    cursor: pointer;
-    font-family: inherit;
-    font-size: var(--small);
-    text-align: left;
-    transition: border-color 0.15s, background 0.15s;
+  h1, h2, h3 { margin: 0 0 10px; }
+  h1 {
+    font-size: 30px;
+    letter-spacing: -0.02em;
   }
-  .preset-btn:hover { border-color: var(--accent); background: #1e2235; }
-  .preset-btn.active { border-color: var(--accent); background: #1e2235; color: var(--accent); }
-  .preset-name { font-weight: bold; display: block; }
-  .preset-sub { color: var(--muted); font-size: 0.75rem; }
-
-  .field { margin-bottom: 12px; }
-  .field label { display: block; color: var(--muted); font-size: var(--small); margin-bottom: 4px; }
-  .field input, .field select {
-    width: 100%;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    color: var(--text);
-    padding: 7px 10px;
-    font-family: inherit;
-    font-size: 13px;
-    outline: none;
-    transition: border-color 0.15s;
+  h2 {
+    font-size: 18px;
+    color: var(--accent);
   }
-  .field input:focus, .field select:focus { border-color: var(--accent); }
-  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .field-note { font-size: 0.72rem; color: var(--muted); margin-top: 3px; }
-
-  .radio-group { display: flex; gap: 10px; margin-bottom: 12px; }
-  .radio-group label {
-    display: flex;
-    align-items: center;
-    gap: 5px;
+  h3 {
+    font-size: 15px;
+    color: var(--accent-2);
+  }
+  p {
+    margin: 0 0 10px;
     color: var(--muted);
-    font-size: var(--small);
-    cursor: pointer;
-  }
-  .radio-group input[type="radio"] { accent-color: var(--accent); }
-  .radio-group-label { display: block; color: var(--muted); font-size: var(--small); margin-bottom: 6px; }
-
-  .checkbox-group { display: flex; align-items: center; gap: 6px; margin-bottom: 12px; }
-  .checkbox-group label { color: var(--muted); font-size: var(--small); cursor: pointer; }
-  .checkbox-group input[type="checkbox"] { accent-color: var(--accent); }
-
-  .result-section { margin-bottom: 18px; }
-  .result-section h3 { font-size: 0.8rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
-  .result-row { display: flex; justify-content: space-between; align-items: baseline; padding: 5px 0; border-bottom: 1px solid #1e2235; }
-  .result-row:last-child { border-bottom: none; }
-  .result-label { color: var(--muted); font-size: var(--small); }
-  .result-value { font-weight: bold; color: var(--text); font-size: 0.95rem; }
-  .result-value.highlight { color: var(--green); }
-  .result-value.warn { color: var(--yellow); }
-  .result-value.danger { color: var(--red); }
-  .result-value.good { color: var(--accent); }
-
-  .formula {
-    font-size: 0.7rem;
-    color: var(--muted);
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 2px 6px;
-    margin-left: 8px;
-    font-style: italic;
-  }
-
-  .warning-box {
-    background: #2a1f00;
-    border: 1px solid #5a3e00;
-    border-radius: 6px;
-    padding: 10px 12px;
-    font-size: var(--small);
-    color: var(--yellow);
-    margin-bottom: 12px;
-    display: none;
-  }
-  .warning-box.visible { display: block; }
-
-  .callout-box {
-    background: #1a0f00;
-    border: 1px solid var(--red);
-    border-radius: 8px;
-    padding: 12px 14px;
-    font-size: var(--small);
-    color: var(--red);
-    margin-bottom: 16px;
     line-height: 1.5;
   }
-  .callout-box strong { color: #fca5a5; }
-
-  .divider { height: 1px; background: var(--border); margin: 14px 0; }
-
-  .compare-table { width: 100%; border-collapse: collapse; font-size: var(--small); }
-  .compare-table th { color: var(--muted); text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.06em; padding: 6px 8px; text-align: right; border-bottom: 1px solid var(--border); }
-  .compare-table th:first-child { text-align: left; }
-  .compare-table td { padding: 6px 8px; border-bottom: 1px solid #1a1d27; text-align: right; }
-  .compare-table td:first-child { text-align: left; color: var(--accent); }
-  .compare-table tr:hover td { background: var(--surface2); }
-  .compare-table .current-row td { color: var(--green); }
-  .compare-table .current-row td:first-child { color: var(--green); }
-
-  select option { background: var(--surface2); }
-  .tag { font-size: 0.68rem; background: var(--surface2); border: 1px solid var(--border); border-radius: 3px; padding: 1px 5px; color: var(--muted); margin-left: 4px; }
-  .tag.new { border-color: var(--green); color: var(--green); }
-
-  .layer-diagram {
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 10px 12px;
-    font-family: 'SF Mono', 'Fira Code', monospace;
-    font-size: 0.75rem;
-    color: var(--accent);
-    white-space: pre;
-    overflow-x: auto;
-    margin-top: 8px;
-    display: none;
-    line-height: 1.6;
+  .note {
+    font-size: 13px;
+    color: var(--muted);
   }
-  .layer-diagram.visible { display: block; }
+  .pill-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 14px;
+  }
+  .pill {
+    padding: 7px 10px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: rgba(116, 192, 252, 0.08);
+    font-size: 12px;
+    color: var(--text);
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: 560px minmax(520px, 1fr);
+    gap: 18px;
+    align-items: start;
+  }
+  .panel {
+    background: rgba(18, 26, 36, 0.94);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 18px;
+    box-shadow: 0 14px 40px rgba(0,0,0,0.22);
+  }
+  .panel + .panel { margin-top: 18px; }
+  .section-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .field.full { grid-column: 1 / -1; }
+  label {
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.01em;
+  }
+  input, select, textarea, button {
+    font: inherit;
+  }
+  input, select, textarea {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: #0d1520;
+    color: var(--text);
+    padding: 11px 12px;
+  }
+  textarea {
+    min-height: 160px;
+    resize: vertical;
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 1.45;
+  }
+  input[type="checkbox"] {
+    width: auto;
+    margin-right: 8px;
+  }
+  .check {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 12px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: #0d1520;
+    color: var(--text);
+    min-height: 47px;
+  }
+  .preset-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 12px;
+  }
+  .preset-btn {
+    text-align: left;
+    border: 1px solid var(--border);
+    background: #0d1520;
+    color: var(--text);
+    border-radius: 14px;
+    padding: 12px;
+    cursor: pointer;
+    transition: 0.15s ease;
+  }
+  .preset-btn:hover { border-color: var(--accent); transform: translateY(-1px); }
+  .preset-btn.active {
+    border-color: var(--accent);
+    box-shadow: inset 0 0 0 1px rgba(116, 192, 252, 0.35);
+    background: rgba(116, 192, 252, 0.08);
+  }
+  .preset-name {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .preset-sub { font-size: 12px; color: var(--muted); line-height: 1.4; }
+  .tag {
+    padding: 2px 7px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 700;
+    border: 1px solid var(--border);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .tag.best { color: var(--good); border-color: rgba(105, 219, 124, 0.4); }
+  .tag.current { color: var(--accent); border-color: rgba(116, 192, 252, 0.4); }
+  .tag.new { color: var(--warn); border-color: rgba(255, 209, 102, 0.4); }
+  .results {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
+  .card {
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: var(--panel-2);
+    padding: 16px;
+  }
+  .card.full { grid-column: 1 / -1; }
+  .kv {
+    display: grid;
+    grid-template-columns: minmax(180px, 1.1fr) minmax(0, 1fr);
+    gap: 8px 12px;
+    margin-top: 10px;
+  }
+  .k {
+    color: var(--muted);
+    font-size: 13px;
+  }
+  .v {
+    font-family: var(--mono);
+    font-size: 13px;
+    text-align: right;
+  }
+  .good { color: var(--good); }
+  .warn { color: var(--warn); }
+  .danger { color: var(--danger); }
+  .highlight { color: var(--accent); }
+  .big {
+    font-size: 24px;
+    font-weight: 800;
+    font-family: var(--mono);
+    color: var(--accent);
+    margin-top: 4px;
+  }
+  .summary {
+    font-family: var(--mono);
+    white-space: pre-wrap;
+    line-height: 1.5;
+    font-size: 12px;
+    color: #dbe6f4;
+    background: #0d1520;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px;
+  }
+  .warnings {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .warning {
+    border-radius: 12px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    font-size: 13px;
+    line-height: 1.45;
+    background: #0d1520;
+  }
+  .warning.good { border-color: rgba(105, 219, 124, 0.35); color: var(--good); }
+  .warning.warn { border-color: rgba(255, 209, 102, 0.35); color: var(--warn); }
+  .warning.danger { border-color: rgba(255, 135, 135, 0.35); color: var(--danger); }
+  .warning.info { border-color: rgba(116, 192, 252, 0.35); color: var(--accent); }
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 12px;
+  }
+  .action-btn {
+    border: 1px solid var(--border);
+    background: #0d1520;
+    color: var(--text);
+    border-radius: 12px;
+    padding: 10px 14px;
+    cursor: pointer;
+  }
+  .action-btn:hover { border-color: var(--accent); }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin-top: 10px;
+  }
+  th, td {
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    padding: 10px 8px;
+    vertical-align: top;
+    text-align: left;
+  }
+  th { color: var(--muted); font-weight: 600; }
+  code { font-family: var(--mono); }
+  @media (max-width: 1280px) {
+    .grid { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 820px) {
+    .section-grid, .results, .preset-grid { grid-template-columns: 1fr; }
+    .kv { grid-template-columns: 1fr; }
+    .v { text-align: left; }
+  }
 </style>
 </head>
 <body>
+<div class="wrap">
+  <div class="hero">
+    <h1>DWARF Hyperparameter Calculator</h1>
+    <p>Refreshed for current DWARF recipe families: legacy FA-anchored DSQG, triadic J=96 variants, and newer HISA/DSR layouts. This tool is now explicitly recipe-driven instead of pretending one formula fits every era of the repo.</p>
+    <p class="note">Important: the parameter math here is intentionally approximate for sparse-specific extras. Dense core counts are solid; DSQG / DSR / HISA routing overhead depends on the exact script and kernel version. Use this for planning, not for claiming an exact model-size integer.</p>
+    <div class="pill-row">
+      <div class="pill">Supports FA and HISA/DSR placement</div>
+      <div class="pill">32K fineweb, 32K mixed, and current 64K mixed tokenizer profiles</div>
+      <div class="pill">Current recipe presets pulled from train/*.py conventions</div>
+      <div class="pill">Generates a config snippet you can paste into training scripts</div>
+    </div>
+  </div>
 
-<div style="max-width:1100px;margin:0 auto;">
-  <h1>⚡ DWARF Hyperparameter Calculator</h1>
-  <div class="subtitle">DSQG + relay architecture · J=24 se015 offsets · FA@~25% depth · μP √D scaling · Triadic J=96 supported</div>
-
-  <div class="layout">
+  <div class="grid">
     <div>
-      <div class="panel" style="margin-bottom:16px;">
-        <h2>Architecture Presets</h2>
+      <div class="panel">
+        <h2>Reference presets</h2>
+        <p>These are grounded in current repo scripts, not the fossilized assumptions the old calculator was carrying around.</p>
         <div class="preset-grid" id="presetGrid"></div>
       </div>
 
       <div class="panel">
-        <h2>Architecture</h2>
-        <div class="field-row">
+        <h2>Architecture + training inputs</h2>
+        <div class="section-grid">
           <div class="field">
-            <label>Hidden dim D</label>
-            <input type="number" id="D" value="512" min="64" step="64" oninput="calc()">
+            <label for="family">Recipe family</label>
+            <select id="family">
+              <option value="fa">Legacy FA-anchored DSQG</option>
+              <option value="triadic_fa">Triadic J=96 + FA anchor</option>
+              <option value="hisa">Triadic J=96 + HISA/DSR</option>
+              <option value="pure_dsqg">Pure triadic DSQG (no FA / DSR anchor)</option>
+            </select>
           </div>
           <div class="field">
-            <label>Num heads H</label>
-            <input type="number" id="H" value="8" min="1" step="1" oninput="calc()">
-            <div class="field-note" id="hdNote">head_dim = 64</div>
+            <label for="regime">Training regime</label>
+            <select id="regime">
+              <option value="single_cold">Cold start, single-domain / fineweb-like</option>
+              <option value="mixed_cold">Cold start, mixed-domain DSQG</option>
+              <option value="hisa_search">Current HISA/DSR cold-start search</option>
+              <option value="continuation">Continuation / resume / continued pretraining</option>
+              <option value="sft">SFT / gentle adaptation</option>
+            </select>
           </div>
-        </div>
-        <div class="field-row">
-          <div class="field">
-            <label>Layers L</label>
-            <input type="number" id="L" value="8" min="1" step="1" oninput="calc()">
-          </div>
-          <div class="field">
-            <label>FFN dim</label>
-            <input type="number" id="FFN" value="1024" min="64" step="64" oninput="calc()">
-            <div class="field-note" id="ffnRatioNote">2×D</div>
-          </div>
-        </div>
-        <div class="field-row">
-          <div class="field">
-            <label>Vocab size</label>
-            <input type="number" id="V" value="32000" min="1000" step="1000" oninput="calc()">
-          </div>
-          <div class="field">
-            <label>Seq length</label>
-            <input type="number" id="SEQ" value="2048" min="128" step="128" oninput="calc()">
-          </div>
-        </div>
-        <div class="field">
-          <label>Tied embeddings</label>
-          <select id="tied" onchange="calc()">
-            <option value="1">Yes (tied lm_head)</option>
-            <option value="0" selected>No (untied lm_head)</option>
-          </select>
-        </div>
 
-        <div class="divider"></div>
-        <h2 style="margin-bottom:14px;">DWARF-Specific</h2>
+          <div class="field">
+            <label for="tokenizerProfile">Tokenizer + dataset profile</label>
+            <select id="tokenizerProfile">
+              <option value="fineweb32">FineWeb 32K standard</option>
+              <option value="mixed32">Mixed 32K legacy/current mixed</option>
+              <option value="mixed64">Mixed 64K current</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="checkpointStrategy">Checkpoint strategy</label>
+            <select id="checkpointStrategy">
+              <option value="none">none</option>
+              <option value="every_other">every_other</option>
+              <option value="all">all</option>
+              <option value="full_attn">full_attn</option>
+            </select>
+          </div>
 
-        <div class="radio-group-label">Offset mode</div>
-        <div class="radio-group">
-          <label><input type="radio" name="offsetMode" value="standard" checked onchange="onOffsetModeChange()"> Standard (J=24)</label>
-          <label><input type="radio" name="offsetMode" value="triadic" onchange="onOffsetModeChange()"> Triadic J=96 (J=32/layer)</label>
-        </div>
+          <div class="field"><label for="D">Embedding dim (D)</label><input id="D" type="number" min="64" step="64" value="768"></div>
+          <div class="field"><label for="H">Heads (H)</label><input id="H" type="number" min="1" step="1" value="12"></div>
+          <div class="field"><label for="L">Layers (L)</label><input id="L" type="number" min="1" step="1" value="32"></div>
+          <div class="field"><label for="FFN">FFN dim</label><input id="FFN" type="number" min="128" step="128" value="1536"></div>
+          <div class="field"><label for="V">Vocab size</label><input id="V" type="number" min="1024" step="256" value="32768"></div>
+          <div class="field"><label for="SEQ">Sequence length</label><input id="SEQ" type="number" min="128" step="128" value="2048"></div>
 
-        <div class="field-row">
           <div class="field">
-            <label>J offsets</label>
-            <input type="number" id="J" value="24" min="1" step="1" oninput="calc()">
-            <div class="field-note">se015 = 24</div>
+            <label for="anchorLayer" id="anchorLabel">Anchor layer index</label>
+            <input id="anchorLayer" type="number" min="0" step="1" value="8">
           </div>
           <div class="field">
-            <label>FA layer</label>
-            <input type="number" id="FA_LAYER" value="2" min="0" step="1" oninput="calc()">
-            <div class="field-note" id="faPlacementNote">25% depth</div>
+            <label for="sparsePattern">Sparse offset pattern</label>
+            <select id="sparsePattern">
+              <option value="standard24">Standard J=24</option>
+              <option value="triadic96">Triadic J=96 split as 32/32/32</option>
+              <option value="custom">Custom</option>
+            </select>
           </div>
-        </div>
-        <div class="field-row">
-          <div class="field">
-            <label>δ_relay_min</label>
-            <input type="number" id="DELTA_RELAY" value="48" min="1" step="1" oninput="calc()">
-            <div class="field-note">for EMA init</div>
-          </div>
-          <div class="field">
-            <label>Scale embed init</label>
-            <input type="number" id="SE_INIT" value="0.1" min="0.001" step="0.01" oninput="calc()">
-          </div>
-        </div>
 
-        <div class="divider"></div>
-        <h2 style="margin-bottom:14px;">Domain &amp; Training</h2>
+          <div class="field"><label for="totalOffsets">Total offsets (J_total)</label><input id="totalOffsets" type="number" min="1" step="1" value="24"></div>
+          <div class="field"><label for="perLayerJ">Per-layer sparse width</label><input id="perLayerJ" type="number" min="1" step="1" value="24"></div>
+          <div class="field"><label for="laneWidth">Bandwidth lane width</label><input id="laneWidth" type="number" min="1" step="1" value="64"></div>
+          <div class="field"><label for="tailJ">Tail / consolidation width</label><input id="tailJ" type="number" min="0" step="1" value="0"></div>
 
-        <div class="radio-group-label">Domain mode</div>
-        <div class="radio-group">
-          <label><input type="radio" name="domainMode" value="single" checked onchange="calc()"> Single (FineWeb/Wiki)</label>
-          <label><input type="radio" name="domainMode" value="mixed" onchange="calc()"> Mixed (+PG19/Stack)</label>
-        </div>
+          <div class="field"><label for="numChunks">HISA chunks (C)</label><input id="numChunks" type="number" min="1" step="1" value="32"></div>
+          <div class="field"><label for="topK">Top-k chunks</label><input id="topK" type="number" min="1" step="1" value="4"></div>
+          <div class="field"><label for="topM">HISA top-m tokens</label><input id="topM" type="number" min="1" step="1" value="32"></div>
+          <div class="field"><label for="seInit">scale_embed init</label><input id="seInit" type="number" min="0" step="0.01" value="0.15"></div>
 
-        <div class="field-row">
-          <div class="field">
-            <label>Chinchilla %</label>
-            <input type="number" id="CHIN_PCT" value="22" min="1" max="100" step="1" oninput="calc()">
-          </div>
-          <div class="field">
-            <label>Epochs</label>
-            <input type="number" id="EPOCHS" value="3" min="1" step="1" oninput="calc()">
-          </div>
-        </div>
-        <div class="field-row">
-          <div class="field">
-            <label>Batch size (seqs)</label>
-            <input type="number" id="BS" value="16" min="1" step="1" oninput="calc()">
-          </div>
-          <div class="field">
-            <label>Grad accum</label>
-            <input type="number" id="GRAD_ACCUM" value="8" min="1" step="1" oninput="calc()">
-          </div>
-        </div>
-        <div class="field">
-          <label>MAX_TRAIN_SEQS (0 = derive from Chinchilla)</label>
-          <input type="number" id="MAX_TRAIN_SEQS" value="0" min="0" step="10000" oninput="calc()">
-          <div class="field-note">Override sequence count for percolation predictor</div>
-        </div>
-        <div class="field">
-          <label>GPU</label>
-          <select id="GPU" onchange="calc()">
-            <option value="82.6">RTX 4090 (82.6 TFLOPS BF16)</option>
-            <option value="35.58">RTX 3090 (35.58 TFLOPS BF16)</option>
-            <option value="989">H200 SXM (989 TFLOPS BF16)</option>
-            <option value="494.5">H100 NVL (494.5 TFLOPS BF16)</option>
-            <option value="312">H100 SXM (312 TFLOPS BF16)</option>
-            <option value="77.97">A100 40GB (77.97 TFLOPS BF16)</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>GPU MFU estimate</label>
-          <select id="MFU" onchange="calc()">
-            <option value="0.45">45% (typical DSQG Triton)</option>
-            <option value="0.35">35% (conservative)</option>
-            <option value="0.55">55% (optimistic)</option>
-            <option value="0.65">65% (Flash-only baseline)</option>
-          </select>
-        </div>
+          <div class="field"><label for="chinPct">Target Chinchilla %</label><input id="chinPct" type="number" min="1" max="100" step="1" value="22"></div>
+          <div class="field"><label for="epochs">Epochs</label><input id="epochs" type="number" min="1" step="1" value="3"></div>
+          <div class="field"><label for="bs">Batch size</label><input id="bs" type="number" min="1" step="1" value="128"></div>
+          <div class="field"><label for="ga">Grad accum</label><input id="ga" type="number" min="1" step="1" value="1"></div>
+          <div class="field"><label for="maxTrainSeqs">Max train seqs (0 = use target)</label><input id="maxTrainSeqs" type="number" min="0" step="1000" value="364000"></div>
+          <div class="field"><label for="gpu">GPU peak TFLOPS (BF16)</label><input id="gpu" type="number" min="1" step="0.1" value="82.6"></div>
+          <div class="field"><label for="mfu">MFU</label><input id="mfu" type="number" min="0.05" max="1" step="0.01" value="0.45"></div>
 
-        <div class="checkbox-group">
-          <input type="checkbox" id="adamw8bit" checked onchange="calc()">
-          <label for="adamw8bit">AdamW8bit (default in all train scripts)</label>
+          <div class="field full">
+            <label>Options</label>
+            <div class="section-grid">
+              <div class="check"><input id="tied" type="checkbox" checked><span>Tied LM head</span></div>
+              <div class="check"><input id="adamw8bit" type="checkbox" checked><span>Assume AdamW8bit optimizer states</span></div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
     <div>
-      <div class="callout-box">
-        ⚠ <strong>Freeze scale_embed during SFT and mixed-domain continuation.</strong><br>
-        LR_MULT amplification causes amplitude decay → passkey collapse.<br>
-        Unfrozen SFT: 98.3%→73.3%. Unfrozen mixed-domain: 99.2%→79.2%.
-      </div>
-
-      <div id="warnBox" class="warning-box"></div>
-
-      <div class="panel" style="margin-bottom:16px;">
-        <h2>Architecture Summary</h2>
-        <div class="result-section">
-          <div class="result-row">
-            <span class="result-label">Total parameters</span>
-            <span class="result-value highlight" id="r_total_params">—</span>
-          </div>
-          <div class="result-row">
-            <span class="result-label">Non-embedding params</span>
-            <span class="result-value" id="r_non_emb_params">—</span>
-          </div>
-          <div class="result-row">
-            <span class="result-label">Embedding params</span>
-            <span class="result-value" id="r_emb_params">—</span>
-          </div>
-          <div class="result-row">
-            <span class="result-label">head_dim (D/H)</span>
-            <span class="result-value" id="r_hd">—</span>
-          </div>
-          <div class="result-row">
-            <span class="result-label">FFN ratio</span>
-            <span class="result-value" id="r_ffn_ratio">—</span>
-          </div>
-          <div class="result-row">
-            <span class="result-label">DSQG : FA ratio</span>
-            <span class="result-value" id="r_dsqg_ratio">—</span>
-          </div>
-          <div class="result-row">
-            <span class="result-label">FA placement (% depth)</span>
-            <span class="result-value" id="r_fa_pct">—</span>
-          </div>
-          <div class="result-row">
-            <span class="result-label">Post-FA relay layers</span>
-            <span class="result-value" id="r_post_fa">—</span>
-          </div>
-          <div class="result-row">
-            <span class="result-label">Coherence ceiling <span class="formula">⌊D/35⌋</span></span>
-            <span class="result-value" id="r_coherence_ceiling">—</span>
-          </div>
-          <div class="result-row">
-            <span class="result-label">L_optimal <span class="formula">(10+phase2)/0.75</span></span>
-            <span class="result-value" id="r_l_optimal">—</span>
-          </div>
-        </div>
-        <div id="triadicDiagram" class="layer-diagram"></div>
-      </div>
-
-      <div class="panel" style="margin-bottom:16px;">
-        <h2>DWARF Hyperparameters</h2>
-        <div class="result-section">
-          <div class="result-row">
-            <span class="result-label" id="r_ema_init_label">EMA_INIT (1/δ_relay_min) <span class="formula">se015</span></span>
-            <span class="result-value good" id="r_ema_init">—</span>
-          </div>
-          <div class="result-row">
-            <span class="result-label" id="r_ema_window_label">EMA window at init (tokens)</span>
-            <span class="result-value" id="r_ema_window">—</span>
-          </div>
-          <div class="result-row">
-            <span class="result-label">LR_MULT <span class="formula" id="r_lr_mult_formula">15×√(D/512)</span></span>
-            <span class="result-value good" id="r_lr_mult">—</span>
-          </div>
-          <div class="result-row">
-            <span class="result-label">Base LR</span>
-            <span class="result-value" id="r_lr">—</span>
-          </div>
-          <div class="result-row">
-            <span class="result-label">Scale embed LR <span class="formula">base×mult</span></span>
-            <span class="result-value" id="r_se_lr">—</span>
-          </div>
-          <div class="result-row">
-            <span class="result-label">Scale embed init</span>
-            <span class="result-value" id="r_se_init">—</span>
-          </div>
-          <div class="result-row">
-            <span class="result-label" id="r_relay_bw_label">Relay bandwidth (J×HD)</span>
-            <span class="result-value" id="r_relay_bw">—</span>
-          </div>
-          <div class="result-row">
-            <span class="result-label">Relay / residual stream <span class="formula" id="r_relay_note"></span></span>
-            <span class="result-value" id="r_relay_ratio">—</span>
-          </div>
-          <div class="result-row">
-            <span class="result-label">J required for ratio≥1.0 <span class="formula">⌈D/hd⌉</span></span>
-            <span class="result-value" id="r_j_required">—</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="panel" style="margin-bottom:16px;">
-        <h2>Chinchilla &amp; Training</h2>
-        <div class="result-section">
-          <div class="result-row">
-            <span class="result-label">100% Chinchilla tokens</span>
-            <span class="result-value" id="r_chin_100_tokens">—</span>
-          </div>
-          <div class="result-row">
-            <span class="result-label">100% Chinchilla sequences</span>
-            <span class="result-value" id="r_chin_100_seqs">—</span>
-          </div>
-          <div class="result-row">
-            <span class="result-label">Target sequences (<span id="r_chin_pct_label">22</span>%)</span>
-            <span class="result-value highlight" id="r_target_seqs">—</span>
-          </div>
-          <div class="result-row">
-            <span class="result-label">Target tokens</span>
-            <span class="result-value" id="r_target_tokens">—</span>
-          </div>
-          <div class="result-row">
-            <span class="result-label">Steps per epoch</span>
-            <span class="result-value" id="r_steps_epoch">—</span>
-          </div>
-          <div class="result-row">
-            <span class="result-label">Total steps</span>
-            <span class="result-value" id="r_total_steps">—</span>
-          </div>
-          <div class="result-row">
-            <span class="result-label">Effective batch (tokens)</span>
-            <span class="result-value" id="r_eff_batch_tokens">—</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="panel" style="margin-bottom:16px;">
-        <h2>Percolation &amp; Phase Transition</h2>
-        <div class="result-section">
-          <div class="result-row">
-            <span class="result-label">Percolation est. step</span>
-            <span class="result-value" id="r_percolation_step">—</span>
-          </div>
-          <div class="result-row">
-            <span class="result-label">Steps per epoch</span>
-            <span class="result-value" id="r_perc_steps_epoch">—</span>
-          </div>
-          <div class="result-row" id="r_perc_warn_row" style="display:none;">
-            <span class="result-label" style="color:var(--yellow);" id="r_perc_warn_text"></span>
-          </div>
-        </div>
-      </div>
-
-      <div class="panel" style="margin-bottom:16px;">
-        <h2>Compute &amp; Runtime</h2>
-        <div class="result-section">
-          <div class="result-row">
-            <span class="result-label">FLOPs per token <span class="formula">6×non-emb</span></span>
-            <span class="result-value" id="r_flops_token">—</span>
-          </div>
-          <div class="result-row">
-            <span class="result-label">Total training FLOPs</span>
-            <span class="result-value" id="r_total_flops">—</span>
-          </div>
-          <div class="result-row">
-            <span class="result-label">GPU peak TFLOPS (BF16)</span>
-            <span class="result-value" id="r_gpu_tflops">—</span>
-          </div>
-          <div class="result-row">
-            <span class="result-label">Effective throughput (MFU)</span>
-            <span class="result-value" id="r_eff_tflops">—</span>
-          </div>
-          <div class="result-row">
-            <span class="result-label">Est. time per epoch</span>
-            <span class="result-value warn" id="r_time_epoch">—</span>
-          </div>
-          <div class="result-row">
-            <span class="result-label">Est. total runtime</span>
-            <span class="result-value warn" id="r_time_total">—</span>
-          </div>
-          <div class="result-row">
-            <span class="result-label">Model weights (BF16)</span>
-            <span class="result-value" id="r_model_gb">—</span>
-          </div>
-          <div class="result-row">
-            <span class="result-label" id="r_optim_label">Optimizer states (AdamW8bit)</span>
-            <span class="result-value" id="r_optim_gb">—</span>
-          </div>
-          <div class="result-row">
-            <span class="result-label">Est. peak VRAM</span>
-            <span class="result-value warn" id="r_vram">—</span>
-          </div>
-        </div>
-      </div>
-
       <div class="panel">
-        <h2>Architecture Comparison</h2>
-        <table class="compare-table">
-          <thead>
-            <tr>
-              <th>Config</th>
-              <th>Params</th>
-              <th>PPL</th>
-              <th>Passkey</th>
-              <th>ar_score</th>
-            </tr>
-          </thead>
-          <tbody id="compareBody"></tbody>
-        </table>
+        <h2>Derived recipe</h2>
+        <div class="results">
+          <div class="card">
+            <h3>Headline</h3>
+            <div class="big" id="headline">—</div>
+            <div class="kv">
+              <div class="k">Head dim</div><div class="v" id="headDim">—</div>
+              <div class="k">FFN ratio</div><div class="v" id="ffnRatio">—</div>
+              <div class="k">Anchor depth</div><div class="v" id="anchorDepth">—</div>
+              <div class="k">Post-anchor layers</div><div class="v" id="postAnchor">—</div>
+              <div class="k">Per-layer bandwidth ratio</div><div class="v" id="bandwidthRatio">—</div>
+              <div class="k">Tail bandwidth ratio</div><div class="v" id="tailBandwidthRatio">—</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>Current recipe recommendations</h3>
+            <div class="kv">
+              <div class="k">Base LR</div><div class="v" id="recLR">—</div>
+              <div class="k">scale_embed LR mult</div><div class="v" id="recSeMult">—</div>
+              <div class="k">scale_embed LR</div><div class="v" id="recSeLR">—</div>
+              <div class="k">EMA_INIT</div><div class="v" id="recEMA">—</div>
+              <div class="k">Tokenizer</div><div class="v" id="recTokenizer">—</div>
+              <div class="k">Encoded dataset</div><div class="v" id="recDataset">—</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>Parameter estimate</h3>
+            <div class="kv">
+              <div class="k">Embedding + LM head</div><div class="v" id="embParams">—</div>
+              <div class="k">Dense core blocks</div><div class="v" id="denseParams">—</div>
+              <div class="k">Sparse / routing extras</div><div class="v" id="sparseExtras">—</div>
+              <div class="k">Approx total params</div><div class="v highlight" id="totalParams">—</div>
+              <div class="k">Dense block / layer</div><div class="v" id="paramsPerLayer">—</div>
+              <div class="k">Anchor extra approx</div><div class="v" id="anchorExtra">—</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>Training volume</h3>
+            <div class="kv">
+              <div class="k">100% Chinchilla tokens</div><div class="v" id="chinTokens">—</div>
+              <div class="k">100% Chinchilla sequences</div><div class="v" id="chinSeqs">—</div>
+              <div class="k">Target sequences</div><div class="v highlight" id="targetSeqs">—</div>
+              <div class="k">Target tokens</div><div class="v" id="targetTokens">—</div>
+              <div class="k">Effective batch (seqs)</div><div class="v" id="effBatchSeqs">—</div>
+              <div class="k">Steps / epoch</div><div class="v" id="stepsEpoch">—</div>
+              <div class="k">Total steps</div><div class="v" id="totalSteps">—</div>
+              <div class="k">Tokens / step</div><div class="v" id="tokensPerStep">—</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>Compute + memory</h3>
+            <div class="kv">
+              <div class="k">Approx FLOPs / token</div><div class="v" id="flopsPerToken">—</div>
+              <div class="k">Total training FLOPs</div><div class="v" id="totalFlops">—</div>
+              <div class="k">Effective TFLOPS</div><div class="v" id="effectiveTflops">—</div>
+              <div class="k">Time / epoch</div><div class="v" id="timeEpoch">—</div>
+              <div class="k">Total runtime</div><div class="v" id="timeTotal">—</div>
+              <div class="k">Weights (BF16)</div><div class="v" id="weightsGB">—</div>
+              <div class="k">Optimizer states</div><div class="v" id="optimGB">—</div>
+              <div class="k">Peak VRAM heuristic</div><div class="v" id="vramGB">—</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>Layout + script notes</h3>
+            <div class="summary" id="layoutSummary">—</div>
+          </div>
+
+          <div class="card full">
+            <h3>Warnings / notes</h3>
+            <div class="warnings" id="warnings"></div>
+          </div>
+
+          <div class="card full">
+            <h3>Generated config snippet</h3>
+            <textarea id="configSnippet" readonly></textarea>
+            <div class="actions">
+              <button class="action-btn" id="copySnippet">Copy snippet</button>
+              <button class="action-btn" id="copySummary">Copy summary</button>
+            </div>
+          </div>
+
+          <div class="card full">
+            <h3>Preset provenance</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Preset</th>
+                  <th>Source</th>
+                  <th>Key idea</th>
+                </tr>
+              </thead>
+              <tbody id="referenceTable"></tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </div>
 
 <script>
+const TOKENIZER_PROFILES = {
+  fineweb32: {
+    label: 'FineWeb 32K standard',
+    vocab: 32768,
+    tokenizer: 'results/fineweb_tokenizer_32k.json',
+    dataset: 'logs/fineweb_edu_encoded_2048_v2.pt'
+  },
+  mixed32: {
+    label: 'Mixed 32K',
+    vocab: 32768,
+    tokenizer: 'results/mixed_tokenizer_32k.json',
+    dataset: 'logs/mixed_encoded_2048_v6_modular_fw1000000.pt'
+  },
+  mixed64: {
+    label: 'Mixed 64K current',
+    vocab: 65536,
+    tokenizer: 'results/mixed_v6_modular_fw1000000_tokenizer_64k.json',
+    dataset: 'logs/mixed_encoded_2048_v6_modular_fw1000000_64k.pt'
+  }
+};
+
 const PRESETS = [
   {
-    name: "Moonshot-58M",
-    sub: "100% Chinchilla champion",
-    tag: "best",
-    D:512, H:8, L:8, FFN:1024, V:32000, SEQ:2048, tied:0,
-    J:24, FA_LAYER:2, DELTA_RELAY:48, SE_INIT:0.1,
-    CHIN_PCT:22, EPOCHS:3, BS:16, GRAD_ACCUM:8
+    name: 'Legacy d768_l32',
+    tag: 'best',
+    tagClass: 'best',
+    sub: 'FA-anchored baseline, current fineweb-standardized 32K view',
+    source: 'train/train_d768_l32_h100_bf16.py',
+    idea: 'Quarter-depth FA, 2×D FFN, hd=64, every_other checkpointing.',
+    family: 'fa', regime: 'single_cold', tokenizerProfile: 'fineweb32', checkpointStrategy: 'every_other',
+    D: 768, H: 12, L: 32, FFN: 1536, V: 32768, SEQ: 2048, anchorLayer: 8,
+    sparsePattern: 'standard24', totalOffsets: 24, perLayerJ: 24, laneWidth: 64, tailJ: 0,
+    numChunks: 32, topK: 4, topM: 32, seInit: 0.15, chinPct: 22, epochs: 3, bs: 128, ga: 1, maxTrainSeqs: 364000,
+    gpu: 989, mfu: 0.45, tied: true, adamw8bit: true
   },
   {
-    name: "d768_l16",
-    sub: "Borderline coherence",
-    tag: null,
-    D:768, H:12, L:16, FFN:1536, V:32000, SEQ:2048, tied:0,
-    J:24, FA_LAYER:4, DELTA_RELAY:48, SE_INIT:0.15,
-    CHIN_PCT:22, EPOCHS:3, BS:16, GRAD_ACCUM:8
+    name: 'Mixed d768_l16',
+    tag: 'current',
+    tagClass: 'current',
+    sub: 'Mixed-domain FA recipe with lower LR and EMA_INIT=0.010',
+    source: 'train/train_d768_l16_mixed_scratch_v13_4090_bf16.py',
+    idea: 'Mixed-domain DSQG recipe: 2.5e-4 base LR, 20.0 scale_embed multiplier.',
+    family: 'fa', regime: 'mixed_cold', tokenizerProfile: 'fineweb32', checkpointStrategy: 'every_other',
+    D: 768, H: 12, L: 16, FFN: 1536, V: 32768, SEQ: 2048, anchorLayer: 4,
+    sparsePattern: 'standard24', totalOffsets: 24, perLayerJ: 24, laneWidth: 64, tailJ: 0,
+    numChunks: 32, topK: 4, topM: 32, seInit: 0.15, chinPct: 41, epochs: 3, bs: 32, ga: 4, maxTrainSeqs: 452000,
+    gpu: 82.6, mfu: 0.45, tied: true, adamw8bit: true
   },
   {
-    name: "d768_l24",
-    sub: "Inhibitory attractor",
-    tag: null,
-    D:768, H:12, L:24, FFN:1536, V:32000, SEQ:2048, tied:0,
-    J:24, FA_LAYER:6, DELTA_RELAY:48, SE_INIT:0.15,
-    CHIN_PCT:22, EPOCHS:3, BS:32, GRAD_ACCUM:4
+    name: 'Triadic d512_l13',
+    tag: 'current',
+    tagClass: 'current',
+    sub: 'Triadic J=96 + FA anchor, the old calculator completely ignored this family',
+    source: 'train/train_d512_l13_triadic_j96_4090_bf16.py',
+    idea: 'Triadic groups of 32 with lane width 64; scale_embed multiplier 20.0.',
+    family: 'triadic_fa', regime: 'mixed_cold', tokenizerProfile: 'fineweb32', checkpointStrategy: 'none',
+    D: 512, H: 8, L: 13, FFN: 1024, V: 32768, SEQ: 2048, anchorLayer: 3,
+    sparsePattern: 'triadic96', totalOffsets: 96, perLayerJ: 32, laneWidth: 64, tailJ: 51,
+    numChunks: 32, topK: 4, topM: 32, seInit: 0.15, chinPct: 22, epochs: 3, bs: 16, ga: 8, maxTrainSeqs: 200000,
+    gpu: 82.6, mfu: 0.45, tied: false, adamw8bit: true
   },
   {
-    name: "d768_l32",
-    sub: "Best baseline (cont_ep2)",
-    tag: "best",
-    D:768, H:12, L:32, FFN:1536, V:32000, SEQ:2048, tied:0,
-    J:24, FA_LAYER:8, DELTA_RELAY:48, SE_INIT:0.15,
-    CHIN_PCT:22, EPOCHS:3, BS:32, GRAD_ACCUM:4
+    name: 'HISA d512_l20',
+    tag: 'new',
+    tagClass: 'new',
+    sub: 'Current D512 HISA/DSR direction: triadic J=96, H=16, FFN=1536',
+    source: 'train/train_d512_l20_hisa_hd32.py',
+    idea: 'Triadic sparse stack with a single HISA/DSR block and 27.0 scale_embed multiplier.',
+    family: 'hisa', regime: 'hisa_search', tokenizerProfile: 'mixed32', checkpointStrategy: 'all',
+    D: 512, H: 16, L: 19, FFN: 1536, V: 32768, SEQ: 2048, anchorLayer: 6,
+    sparsePattern: 'triadic96', totalOffsets: 96, perLayerJ: 32, laneWidth: 64, tailJ: 0,
+    numChunks: 32, topK: 4, topM: 32, seInit: 0.15, chinPct: 22, epochs: 3, bs: 32, ga: 1, maxTrainSeqs: 325000,
+    gpu: 82.6, mfu: 0.42, tied: true, adamw8bit: true
   },
   {
-    name: "d1024_267M",
-    sub: "First perfect relay",
-    tag: "best",
-    D:1024, H:16, L:24, FFN:2048, V:32000, SEQ:2048, tied:0,
-    J:24, FA_LAYER:6, DELTA_RELAY:48, SE_INIT:0.15,
-    CHIN_PCT:22, EPOCHS:3, BS:16, GRAD_ACCUM:4
+    name: 'HISA d512_l20 64K',
+    tag: 'new',
+    tagClass: 'new',
+    sub: 'Same HISA D512 branch but updated for the trained 64K tokenizer + dataset',
+    source: 'train/train_d512_l20_hisa_hd32_64k.py',
+    idea: '64K mixed tokenizer profile with 177K default train sequences and tied lm_head.',
+    family: 'hisa', regime: 'hisa_search', tokenizerProfile: 'mixed64', checkpointStrategy: 'all',
+    D: 512, H: 16, L: 19, FFN: 1536, V: 65536, SEQ: 2048, anchorLayer: 6,
+    sparsePattern: 'triadic96', totalOffsets: 96, perLayerJ: 32, laneWidth: 64, tailJ: 0,
+    numChunks: 32, topK: 4, topM: 32, seInit: 0.15, chinPct: 22, epochs: 3, bs: 16, ga: 2, maxTrainSeqs: 177000,
+    gpu: 82.6, mfu: 0.42, tied: true, adamw8bit: true
   },
   {
-    name: "Triadic L=9",
-    sub: "3-triad J=96, D=512",
-    tag: "new",
-    D:512, H:8, L:9, FFN:1024, V:32000, SEQ:2048, tied:0,
-    J:96, FA_LAYER:3, DELTA_RELAY:48, SE_INIT:0.1,
-    CHIN_PCT:22, EPOCHS:3, BS:16, GRAD_ACCUM:8
-  },
-  {
-    name: "Triadic L=13",
-    sub: "4-triad J=96, more slack",
-    tag: "new",
-    D:512, H:8, L:13, FFN:1024, V:32000, SEQ:2048, tied:0,
-    J:96, FA_LAYER:3, DELTA_RELAY:48, SE_INIT:0.1,
-    CHIN_PCT:22, EPOCHS:3, BS:16, GRAD_ACCUM:8
-  },
-  {
-    name: "D=2048 Billion",
-    sub: "J=96, safe ratio target",
-    tag: "hypo",
-    D:2048, H:16, L:24, FFN:4096, V:32000, SEQ:2048, tied:0,
-    J:96, FA_LAYER:6, DELTA_RELAY:48, SE_INIT:0.15,
-    CHIN_PCT:22, EPOCHS:3, BS:32, GRAD_ACCUM:4
-  },
+    name: 'HISA d1024_l16',
+    tag: 'current',
+    tagClass: 'current',
+    sub: 'Current larger-width HISA/DSR recipe with 24.0 scale_embed multiplier',
+    source: 'train/train_d1024_l16_dsr_l3_hisa_r4_h16_tied_4090_bf16.py',
+    idea: 'HISA/DSR at L3, H=16, FFN=2048, tied lm_head, mixed 32K tokenizer.',
+    family: 'hisa', regime: 'hisa_search', tokenizerProfile: 'mixed32', checkpointStrategy: 'none',
+    D: 1024, H: 16, L: 16, FFN: 2048, V: 32768, SEQ: 2048, anchorLayer: 3,
+    sparsePattern: 'triadic96', totalOffsets: 96, perLayerJ: 32, laneWidth: 64, tailJ: 0,
+    numChunks: 32, topK: 4, topM: 32, seInit: 0.15, chinPct: 22, epochs: 3, bs: 8, ga: 16, maxTrainSeqs: 500000,
+    gpu: 82.6, mfu: 0.38, tied: true, adamw8bit: true
+  }
 ];
 
-const KNOWN_RESULTS = [
-  { name:"Moonshot-58M ep2",      params:"45.6M", ppl:35.04,  passkey:"99.2%",  ar:null    },
-  { name:"d768_l32 cont_ep2",     params:"197M",  ppl:25.85,  passkey:"98.3%",  ar:"34.5%" },
-  { name:"d768_l32 Mixed-Frozen", params:"197M",  ppl:18.75,  passkey:"99.2%",  ar:"34.7%" },
-  { name:"H3 From-Scratch Mix",   params:"197M",  ppl:24.16,  passkey:"70.0%",  ar:null    },
-  { name:"LFM2.5-350M-Base",      params:"350M",  ppl:null,   passkey:"6.7%",   ar:"34.4%" },
-  { name:"Triadic L=13 (live)",   params:"48.4M", ppl:null,   passkey:"TBD",    ar:null    },
-];
-
-function fmtN(n, decimals=0) {
-  if (n === null || isNaN(n)) return "—";
-  if (n >= 1e12) return (n/1e12).toFixed(decimals || 2) + "T";
-  if (n >= 1e9)  return (n/1e9).toFixed(decimals || 2) + "B";
-  if (n >= 1e6)  return (n/1e6).toFixed(decimals || 1) + "M";
-  if (n >= 1e3)  return (n/1e3).toFixed(decimals || 1) + "K";
+function fmtNumber(n, decimals = 0) {
+  if (!Number.isFinite(n)) return '—';
+  const abs = Math.abs(n);
+  if (abs >= 1e12) return (n / 1e12).toFixed(decimals || 2) + 'T';
+  if (abs >= 1e9) return (n / 1e9).toFixed(decimals || 2) + 'B';
+  if (abs >= 1e6) return (n / 1e6).toFixed(decimals || 1) + 'M';
+  if (abs >= 1e3) return (n / 1e3).toFixed(decimals || 1) + 'K';
   return n.toFixed(decimals);
 }
 
-function fmtTime(seconds) {
-  if (seconds < 60) return seconds.toFixed(0) + "s";
-  if (seconds < 3600) return (seconds/60).toFixed(1) + " min";
-  if (seconds < 86400) return (seconds/3600).toFixed(1) + "h";
-  return (seconds/86400).toFixed(1) + " days";
+function fmtPlain(n, decimals = 0) {
+  if (!Number.isFinite(n)) return '—';
+  return n.toLocaleString(undefined, {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+  });
 }
 
-function set(id, val, cls="") {
+function fmtTime(seconds) {
+  if (!Number.isFinite(seconds) || seconds < 0) return '—';
+  if (seconds < 60) return seconds.toFixed(0) + 's';
+  if (seconds < 3600) return (seconds / 60).toFixed(1) + ' min';
+  if (seconds < 86400) return (seconds / 3600).toFixed(1) + 'h';
+  return (seconds / 86400).toFixed(1) + ' days';
+}
+
+function setText(id, value, cls = '') {
   const el = document.getElementById(id);
   if (!el) return;
-  el.textContent = val;
-  el.className = "result-value" + (cls ? " " + cls : "");
+  el.textContent = value;
+  el.className = 'v' + (cls ? ' ' + cls : '');
 }
 
-function getOffsetMode() {
-  return document.querySelector('input[name="offsetMode"]:checked').value;
+function val(id) {
+  return document.getElementById(id).value;
 }
 
-function getDomainMode() {
-  return document.querySelector('input[name="domainMode"]:checked').value;
+function num(id, fallback = 0) {
+  const n = Number(document.getElementById(id).value);
+  return Number.isFinite(n) ? n : fallback;
 }
 
-function onOffsetModeChange() {
-  const mode = getOffsetMode();
-  const jInput = document.getElementById("J");
-  if (mode === "triadic") {
-    jInput.value = 96;
+function checked(id) {
+  return document.getElementById(id).checked;
+}
+
+function applyTokenizerProfile(profileKey, forceVocab = false) {
+  const profile = TOKENIZER_PROFILES[profileKey];
+  if (!profile) return;
+  if (forceVocab) {
+    document.getElementById('V').value = profile.vocab;
+  }
+}
+
+function applySparsePattern(pattern, silent = false) {
+  if (pattern === 'standard24') {
+    document.getElementById('totalOffsets').value = 24;
+    document.getElementById('perLayerJ').value = 24;
+    document.getElementById('laneWidth').value = 64;
+    document.getElementById('tailJ').value = 0;
+  } else if (pattern === 'triadic96') {
+    document.getElementById('totalOffsets').value = 96;
+    document.getElementById('perLayerJ').value = 32;
+    document.getElementById('laneWidth').value = 64;
+    document.getElementById('tailJ').value = 51;
+  }
+  if (!silent) calc();
+}
+
+function updateLabels() {
+  const family = val('family');
+  const anchorLabel = document.getElementById('anchorLabel');
+  if (family === 'fa' || family === 'triadic_fa') anchorLabel.textContent = 'FA layer index';
+  else if (family === 'hisa') anchorLabel.textContent = 'DSR / HISA layer index';
+  else anchorLabel.textContent = 'Reference layer index';
+}
+
+function getRecommendations({ family, regime, D, H, V, tokenizerProfile }) {
+  const headDim = D / H;
+  const baseMuP = 15 * Math.sqrt(D / 512);
+  let baseLR = 3e-4;
+  let seMult = baseMuP;
+  let ema = 1 / 48;
+  let note = 'Base μP-style cold-start heuristic.';
+
+  if (regime === 'mixed_cold') {
+    baseLR = 2.5e-4;
+    seMult = Math.max(baseMuP, D <= 768 ? 20.0 : baseMuP);
+    ema = 0.010;
+    note = 'Mixed-domain DSQG heuristic from d768 mixed-scratch scripts.';
+  } else if (regime === 'hisa_search') {
+    baseLR = 3e-4;
+    seMult = D <= 768 ? 27.0 : Math.max(baseMuP, 24.0);
+    ema = 1 / 48;
+    note = 'Current HISA/DSR search heuristic from D512/D1024 scripts.';
+  } else if (regime === 'continuation') {
+    baseLR = 1e-4;
+    seMult = baseMuP;
+    ema = 1 / 48;
+    note = 'Continuation heuristic; usually gentler than cold start.';
+  } else if (regime === 'sft') {
+    baseLR = 5e-5;
+    seMult = 2.0;
+    ema = 1 / 48;
+    note = 'SFT heuristic from adapted DWARF scripts.';
+  }
+
+  if (family === 'hisa' && regime !== 'hisa_search' && regime !== 'sft') {
+    baseLR = 3e-4;
+    seMult = D <= 768 ? 27.0 : Math.max(baseMuP, 24.0);
+    ema = 1 / 48;
+    note += ' Family override: current HISA scripts are still using the stronger 24–27 scale_embed multipliers.';
+  }
+
+  const tokenizer = TOKENIZER_PROFILES[tokenizerProfile] || TOKENIZER_PROFILES.fineweb32;
+  return {
+    baseLR,
+    seMult,
+    seLR: baseLR * seMult,
+    ema,
+    note,
+    tokenizer: tokenizer.tokenizer,
+    dataset: tokenizer.dataset,
+    vocab: tokenizer.vocab,
+    headDim
+  };
+}
+
+function buildLayoutSummary(state) {
+  const {
+    family, L, anchorLayer, perLayerJ, totalOffsets, tailJ, numChunks, topK, topM,
+    laneWidth, checkpointStrategy, D, H, FFN, tokenizerProfile, regime
+  } = state;
+  const hd = D / H;
+  const profile = TOKENIZER_PROFILES[tokenizerProfile];
+  const lines = [];
+  lines.push(`Recipe family: ${family === 'fa' ? 'Legacy FA-anchored DSQG' : family === 'triadic_fa' ? 'Triadic J=96 + FA' : family === 'hisa' ? 'Triadic J=96 + HISA/DSR' : 'Pure triadic DSQG'}`);
+  lines.push(`Core dims: D=${D}, H=${H}, hd=${hd}, L=${L}, FFN=${FFN}`);
+  lines.push(`Tokenizer profile: ${profile.label} -> ${profile.tokenizer}`);
+  lines.push(`Dataset hint: ${profile.dataset}`);
+  lines.push(`Sparse pattern: total offsets=${totalOffsets}, per-layer J=${perLayerJ}, lane width=${laneWidth}`);
+  if (tailJ > 0) lines.push(`Tail / consolidation width: J=${tailJ}`);
+  if (family === 'hisa') {
+    lines.push(`Anchor block: DSR/HISA at L${anchorLayer} with C=${numChunks}, top_k=${topK}, top_m=${topM}`);
+  } else if (family === 'fa' || family === 'triadic_fa') {
+    lines.push(`Anchor block: FA at L${anchorLayer}`);
   } else {
-    jInput.value = 24;
+    lines.push(`No FA/DSR anchor: every layer is sparse DSQG.`);
   }
-  calc();
-}
+  lines.push(`Checkpoint strategy: ${checkpointStrategy}`);
+  lines.push(`Training regime: ${regime}`);
+  lines.push('');
+  lines.push('Layer sketch:');
 
-function buildTriadicDiagram(L, FA_LAYER) {
-  const layers = [];
+  const parts = [];
   for (let i = 0; i < L; i++) {
-    if (i === FA_LAYER) {
-      layers.push("FA");
-    } else if (i >= L - 3 && L > 6) {
-      layers.push("T");
+    if (family === 'fa' && i === anchorLayer) {
+      parts.push(`L${String(i).padStart(2, '0')}:FA`);
+      continue;
+    }
+    if (family === 'triadic_fa' && i === anchorLayer) {
+      parts.push(`L${String(i).padStart(2, '0')}:FA`);
+      continue;
+    }
+    if (family === 'hisa' && i === anchorLayer) {
+      parts.push(`L${String(i).padStart(2, '0')}:DSR`);
+      continue;
+    }
+    if (family === 'fa') {
+      parts.push(`L${String(i).padStart(2, '0')}:DSQG(J=${perLayerJ})`);
     } else {
-      const pos = i < FA_LAYER ? i : i - 1;
-      const inTriad = pos % 3;
-      layers.push(["A", "B", "C"][inTriad]);
+      const triadPos = i % 3;
+      const triadLabel = ['A', 'B', 'C'][triadPos];
+      parts.push(`L${String(i).padStart(2, '0')}:${triadLabel}(J=${perLayerJ})`);
     }
   }
+  lines.push(parts.join(' | '));
 
-  let diagram = "Layers: ";
-  let groups = [];
-  let current = [];
-  for (let i = 0; i < layers.length; i++) {
-    if (layers[i] === "FA") {
-      if (current.length) groups.push(current.join(" "));
-      groups.push("FA");
-      current = [];
-    } else {
-      current.push(layers[i]);
-      if (current.length === 3 && layers[i + 1] !== "FA") {
-        groups.push(current.join(" "));
-        current = [];
-      }
-    }
-  }
-  if (current.length) groups.push(current.join(" "));
-  diagram += groups.join(" | ");
-
-  const triadCount = Math.floor((L - 1) / 3);
-  const remainder = (L - 1) % 3;
-  diagram += `\nTriads: ${triadCount} complete` + (remainder ? ` + ${remainder} tail` : "") + ` + 1 FA`;
-
-  return diagram;
+  return lines.join('\n');
 }
 
-function isTriadicCompatible(L) {
-  const nonFA = L - 1;
-  return nonFA % 3 === 0 || (nonFA - 3) % 3 === 0;
+function buildSnippet(state, rec) {
+  const {
+    family, D, H, L, FFN, V, SEQ, anchorLayer, perLayerJ, totalOffsets, laneWidth, tailJ,
+    numChunks, topK, topM, seInit, chinPct, epochs, bs, ga, maxTrainSeqs,
+    checkpointStrategy, tied, tokenizerProfile
+  } = state;
+  const anchorKey = family === 'hisa' ? 'DSR_LAYER' : (family === 'pure_dsqg' ? '# no anchor layer' : 'FULL_ATTN_LAYER');
+  const anchorLine = family === 'pure_dsqg' ? '# no FA / DSR anchor in this recipe' : `${anchorKey} = ${anchorLayer}`;
+  const profile = TOKENIZER_PROFILES[tokenizerProfile];
+  const lines = [
+    `# DWARF calculator output`,
+    `# family=${family} tokenizer_profile=${tokenizerProfile}`,
+    `EMBEDDING_DIM = ${D}`,
+    `NUM_HEADS = ${H}`,
+    `FFN_DIM = ${FFN}`,
+    `NUM_LAYERS = ${L}`,
+    `${anchorLine}`,
+    `VOCAB_SIZE = ${V}`,
+    `MAX_SEQ_LEN = ${SEQ}`,
+    '',
+    `TOTAL_OFFSETS = ${totalOffsets}`,
+    `PER_LAYER_J = ${perLayerJ}`,
+    `BANDWIDTH_LANE_WIDTH = ${laneWidth}`,
+    `TAIL_J = ${tailJ}`,
+    '',
+    `NUM_CHUNKS = ${numChunks}`,
+    `TOP_K_CHUNKS = ${topK}`,
+    `HISA_TOP_M_TOKENS = ${topM}`,
+    '',
+    `SCALE_EMBED_INIT_VAL = ${seInit}`,
+    `SCALE_EMBED_LR_MULT = ${rec.seMult.toFixed(2)}`,
+    `EMA_INIT = ${rec.ema.toFixed(6)}`,
+    `LR = ${rec.baseLR}`,
+    '',
+    `BATCH_SIZE = ${bs}`,
+    `GRAD_ACCUM = ${ga}`,
+    `MAX_TRAIN_SEQS = ${maxTrainSeqs}`,
+    `SCREEN_EPOCHS = ${epochs}`,
+    `CHECKPOINT_STRATEGY = '${checkpointStrategy}'`,
+    '',
+    `TOKENIZER_CANDIDATES = ['${profile.tokenizer}']`,
+    `# dataset hint: ${profile.dataset}`,
+    `# target_chinchilla_pct: ${chinPct}`,
+    `# tied_lm_head: ${tied}`,
+  ];
+  return lines.join('\n');
+}
+
+function buildWarnings(state, rec, metrics) {
+  const warnings = [];
+  const {
+    family, D, H, L, FFN, V, SEQ, anchorLayer, perLayerJ, totalOffsets, tailJ,
+    numChunks, topK, topM, tokenizerProfile, checkpointStrategy, sparsePattern
+  } = state;
+  const { headDim, bandwidthRatio, tailRatio, ffnRatio, anchorDepthPct, chunkSize, stepsEpoch } = metrics;
+
+  if (D % H !== 0) {
+    warnings.push({ level: 'danger', text: `D=${D} is not divisible by H=${H}. That is not a real head layout.` });
+  }
+
+  if (headDim < 32) {
+    warnings.push({ level: 'danger', text: `hd=${headDim} is very small. Current DWARF branches have been living in the 32–64 zone, not below it.` });
+  } else if (family !== 'hisa' && headDim !== 64) {
+    warnings.push({ level: 'warn', text: `hd=${headDim}. Legacy FA / baseline DSQG recipes were most stable around hd=64.` });
+  } else if (family === 'hisa' && (headDim < 32 || headDim > 64)) {
+    warnings.push({ level: 'warn', text: `hd=${headDim}. Current HISA scripts commonly live around hd=32–64.` });
+  } else {
+    warnings.push({ level: 'good', text: `Head layout looks plausible for the selected family.` });
+  }
+
+  if (family === 'fa' || family === 'triadic_fa') {
+    if (anchorDepthPct < 18 || anchorDepthPct > 32) {
+      warnings.push({ level: 'warn', text: `FA anchor at ${anchorDepthPct.toFixed(1)}% depth. Quarter-depth remains the clean default for legacy FA recipes.` });
+    }
+  }
+
+  if (family === 'hisa') {
+    if (topK > numChunks) {
+      warnings.push({ level: 'danger', text: `top_k=${topK} exceeds chunk count C=${numChunks}.` });
+    }
+    if (topM > chunkSize) {
+      warnings.push({ level: 'warn', text: `top_m=${topM} is larger than the average chunk size (~${chunkSize.toFixed(1)} tokens). That defeats the point of refinement.` });
+    }
+    if (checkpointStrategy !== 'all' && checkpointStrategy !== 'none') {
+      warnings.push({ level: 'info', text: `Selected checkpoint strategy is ${checkpointStrategy}. Current HISA scripts in this repo skew toward all or none depending depth/VRAM pressure.` });
+    }
+  }
+
+  if (ffnRatio < 2.0) {
+    warnings.push({ level: 'danger', text: `FFN=${FFN} is under 2×D. That's below the modern floor this repo tends to trust.` });
+  } else if (family === 'hisa' && D <= 512 && ffnRatio < 3.0) {
+    warnings.push({ level: 'warn', text: `FFN ratio is ${ffnRatio.toFixed(2)}×D. Current D512 HISA scripts often use 3×D or wider.` });
+  } else if (ffnRatio > 4.5) {
+    warnings.push({ level: 'warn', text: `FFN ratio is ${ffnRatio.toFixed(2)}×D. That's wider than most current DWARF recipes.` });
+  }
+
+  if (sparsePattern === 'triadic96' && totalOffsets !== 96) {
+    warnings.push({ level: 'danger', text: `Triadic preset selected but total offsets is ${totalOffsets}, not 96.` });
+  }
+  if (sparsePattern === 'triadic96' && perLayerJ !== 32) {
+    warnings.push({ level: 'danger', text: `Triadic preset selected but per-layer J is ${perLayerJ}, not 32.` });
+  }
+
+  if (bandwidthRatio > 4.0) {
+    warnings.push({ level: 'warn', text: `Per-layer bandwidth ratio is ${bandwidthRatio.toFixed(2)}×. That's aggressive. Some triadic scripts do live here, but it's not gentle.` });
+  } else if (bandwidthRatio < 1.0) {
+    warnings.push({ level: 'warn', text: `Per-layer bandwidth ratio is ${bandwidthRatio.toFixed(2)}×, which may be too skinny to carry relay structure.` });
+  }
+
+  if (tailJ > 0 && tailRatio > 6.5) {
+    warnings.push({ level: 'warn', text: `Tail bandwidth ratio is ${tailRatio.toFixed(2)}×. Consolidation tails can be hot; treat them as a special layer, not a normal one.` });
+  }
+
+  if (stepsEpoch < 800) {
+    warnings.push({ level: 'warn', text: `Only ${fmtPlain(stepsEpoch)} steps/epoch. That's short for cold-start topology formation unless you know exactly why you're doing it.` });
+  }
+
+  const profile = TOKENIZER_PROFILES[tokenizerProfile];
+  if (V !== profile.vocab) {
+    warnings.push({ level: 'warn', text: `Vocab size ${V} does not match tokenizer profile ${profile.label} (${profile.vocab}).` });
+  }
+
+  warnings.push({ level: 'info', text: rec.note });
+  return warnings;
 }
 
 function calc() {
-  const D          = parseInt(document.getElementById("D").value) || 512;
-  const H          = parseInt(document.getElementById("H").value) || 8;
-  const L          = parseInt(document.getElementById("L").value) || 8;
-  const FFN        = parseInt(document.getElementById("FFN").value) || 1024;
-  const V          = parseInt(document.getElementById("V").value) || 32000;
-  const SEQ        = parseInt(document.getElementById("SEQ").value) || 2048;
-  const tied       = parseInt(document.getElementById("tied").value);
-  const J          = parseInt(document.getElementById("J").value) || 24;
-  const FA_LAYER   = parseInt(document.getElementById("FA_LAYER").value);
-  const DELTA_RELAY= parseInt(document.getElementById("DELTA_RELAY").value) || 48;
-  const SE_INIT    = parseFloat(document.getElementById("SE_INIT").value) || 0.1;
-  const CHIN_PCT   = parseFloat(document.getElementById("CHIN_PCT").value) || 22;
-  const EPOCHS     = parseInt(document.getElementById("EPOCHS").value) || 3;
-  const BS         = parseInt(document.getElementById("BS").value) || 16;
-  const GRAD_ACCUM = parseInt(document.getElementById("GRAD_ACCUM").value) || 8;
-  const GPU_TFLOPS = parseFloat(document.getElementById("GPU").value) || 82.6;
-  const MFU        = parseFloat(document.getElementById("MFU").value) || 0.45;
-  const maxTrainSeqsRaw = parseInt(document.getElementById("MAX_TRAIN_SEQS").value) || 0;
-  const adamw8bit  = document.getElementById("adamw8bit").checked;
+  updateLabels();
 
-  const offsetMode = getOffsetMode();
-  const domainMode = getDomainMode();
-  const isTriadic  = offsetMode === "triadic";
-  const isMixed    = domainMode === "mixed";
+  const family = val('family');
+  const regime = val('regime');
+  const tokenizerProfile = val('tokenizerProfile');
+  const sparsePattern = val('sparsePattern');
+  const checkpointStrategy = val('checkpointStrategy');
 
-  const HD = D / H;
+  const D = num('D', 768);
+  const H = num('H', 12);
+  const L = num('L', 32);
+  const FFN = num('FFN', 1536);
+  const V = num('V', 32768);
+  const SEQ = num('SEQ', 2048);
+  const anchorLayer = num('anchorLayer', 8);
+  const totalOffsets = num('totalOffsets', 24);
+  const perLayerJ = num('perLayerJ', 24);
+  const laneWidth = num('laneWidth', 64);
+  const tailJ = num('tailJ', 0);
+  const numChunks = num('numChunks', 32);
+  const topK = num('topK', 4);
+  const topM = num('topM', 32);
+  const seInit = num('seInit', 0.15);
+  const chinPct = num('chinPct', 22);
+  const epochs = num('epochs', 3);
+  const bs = num('bs', 16);
+  const ga = num('ga', 8);
+  const maxTrainSeqs = num('maxTrainSeqs', 0);
+  const gpu = num('gpu', 82.6);
+  const mfu = num('mfu', 0.45);
+  const tied = checked('tied');
+  const adamw8bit = checked('adamw8bit');
 
-  const emb_params = tied ? V * D : V * D * 2;
-  const relay_extra = J * H + J * HD + 10 * H;
-  const dsqg_layer = 4 * D * D + 2 * D * FFN + 4 * D + relay_extra;
-  const fa_layer = 4 * D * D + 2 * D;
-  const preIF_layer = 2 * D * D + J * H * 2 + J * HD;
-  const n_dsqg = L - 1 - 1;
-  const layer_params = n_dsqg * dsqg_layer + fa_layer + preIF_layer;
-  const non_emb = layer_params;
-  const total_params = emb_params + non_emb;
+  const rec = getRecommendations({ family, regime, D, H, V, tokenizerProfile });
+  const headDim = D / Math.max(H, 1);
+  const ffnRatio = FFN / Math.max(D, 1);
+  const anchorDepthPct = L > 1 ? (anchorLayer / (L - 1)) * 100 : 0;
+  const postAnchor = family === 'pure_dsqg' ? L : Math.max(0, L - anchorLayer - 1);
+  const sparseLayers = family === 'pure_dsqg' ? L : Math.max(0, L - 1);
+  const bandwidthRatio = (perLayerJ * laneWidth) / Math.max(D, 1);
+  const tailRatio = tailJ > 0 ? (tailJ * laneWidth) / Math.max(D, 1) : 0;
+  const chunkSize = SEQ / Math.max(numChunks, 1);
 
-  const ema_init = 1 / DELTA_RELAY;
-  const ema_window = Math.round(1 / ema_init);
+  const embParams = tied ? (V * D) : (2 * V * D);
+  const denseBlockParams = (4 * D * D) + (2 * D * FFN) + FFN + (9 * D);
+  const denseParams = denseBlockParams * L;
+  const sparseExtras = sparseLayers * ((perLayerJ * laneWidth) + (6 * D));
+  const anchorExtra = family === 'hisa'
+    ? (2 * D * D) + (2 * D * numChunks) + (topK * D) + (topM * H)
+    : 0;
+  const totalParams = embParams + denseParams + sparseExtras + anchorExtra;
 
-  const lr_mult_base = 15 * Math.sqrt(D / 512);
-  const lr_mult = isMixed ? lr_mult_base * 1.306 : lr_mult_base;
-  const base_lr = 3e-4;
+  const chinTokens = 20 * totalParams;
+  const chinSeqs = chinTokens / Math.max(SEQ, 1);
+  const targetSeqs = Math.round(chinSeqs * (chinPct / 100));
+  const actualTrainSeqs = maxTrainSeqs > 0 ? maxTrainSeqs : targetSeqs;
+  const effBatchSeqs = bs * ga;
+  const tokensPerStep = effBatchSeqs * SEQ;
+  const stepsEpoch = Math.ceil(actualTrainSeqs / Math.max(effBatchSeqs, 1));
+  const totalSteps = stepsEpoch * epochs;
+  const targetTokens = targetSeqs * SEQ;
 
-  const ema_init_single = 0.0208;
-  const ema_init_mixed = 0.010;
-  const ema_window_single = Math.round(1 / ema_init_single);
-  const ema_window_mixed = Math.round(1 / ema_init_mixed);
+  const flopsPerToken = 6 * (denseParams + sparseExtras + anchorExtra);
+  const totalFlops = flopsPerToken * targetTokens * epochs;
+  const effectiveTflops = gpu * mfu;
+  const totalSeconds = totalFlops / Math.max(effectiveTflops * 1e12, 1);
+  const secondsEpoch = totalSeconds / Math.max(epochs, 1);
 
-  const j_per_layer = isTriadic ? 32 : J;
-  const relay_bw = j_per_layer * HD;
-  const relay_ratio = relay_bw / D;
+  const weightsGB = totalParams * 2 / 1e9;
+  const optimBytes = adamw8bit ? 6 : 12;
+  const optimGB = totalParams * optimBytes / 1e9;
+  const activationsGB = bs * SEQ * D * L * 2 / 1e9;
+  const logitsGB = bs * Math.min(SEQ, 512) * V * 2 / 1e9;
+  const vramGB = weightsGB + optimGB + activationsGB + logitsGB;
 
-  const fa_pct = ((FA_LAYER + 1) / L * 100);
-  const post_fa = L - FA_LAYER - 1;
-  const dsqg_ratio = L - 1;
+  const headline = `${family === 'hisa' ? 'DWARF HISA/DSR' : family === 'triadic_fa' ? 'DWARF Triadic+FA' : family === 'pure_dsqg' ? 'DWARF Pure DSQG' : 'DWARF FA'} · D${D} L${L} H${H} V${fmtNumber(V)}`;
+  document.getElementById('headline').textContent = headline;
 
-  const chin_100_tokens = 20 * total_params;
-  const chin_100_seqs = Math.round(chin_100_tokens / SEQ);
-  const target_seqs = Math.round(chin_100_seqs * CHIN_PCT / 100);
-  const target_tokens = target_seqs * SEQ;
-  const eff_batch_seqs = BS * GRAD_ACCUM;
-  const eff_batch_tokens = eff_batch_seqs * SEQ;
-  const actual_train_seqs = maxTrainSeqsRaw > 0 ? maxTrainSeqsRaw : target_seqs;
-  const steps_epoch = Math.ceil(actual_train_seqs / eff_batch_seqs);
-  const total_steps = steps_epoch * EPOCHS;
+  setText('headDim', fmtPlain(headDim, 2) + (Number.isInteger(headDim) ? '' : ' (non-integer!)'), (headDim < 32 ? 'danger' : headDim === 64 ? 'good' : 'warn'));
+  setText('ffnRatio', ffnRatio.toFixed(2) + '×D', (ffnRatio >= 2 && ffnRatio <= 4 ? 'good' : 'warn'));
+  setText('anchorDepth', family === 'pure_dsqg' ? 'none' : `${anchorDepthPct.toFixed(1)}% (L${anchorLayer})`, (anchorDepthPct >= 20 && anchorDepthPct <= 30 ? 'good' : 'warn'));
+  setText('postAnchor', String(postAnchor), postAnchor >= 5 ? 'good' : 'warn');
+  setText('bandwidthRatio', bandwidthRatio.toFixed(2) + '×', bandwidthRatio >= 1 && bandwidthRatio <= 4 ? 'good' : 'warn');
+  setText('tailBandwidthRatio', tailJ > 0 ? tailRatio.toFixed(2) + '×' : 'n/a', tailJ > 0 && tailRatio > 6.0 ? 'warn' : '');
 
-  const flops_token = 6 * non_emb;
-  const total_flops = flops_token * target_tokens * EPOCHS;
-  const eff_tflops = GPU_TFLOPS * MFU * 1e12;
-  const total_seconds = total_flops / eff_tflops;
-  const seconds_per_epoch = total_seconds / EPOCHS;
+  setText('recLR', rec.baseLR.toExponential(2), 'good');
+  setText('recSeMult', rec.seMult.toFixed(2), 'good');
+  setText('recSeLR', rec.seLR.toExponential(2), 'highlight');
+  setText('recEMA', rec.ema.toFixed(6), 'good');
+  setText('recTokenizer', rec.tokenizer);
+  setText('recDataset', rec.dataset);
 
-  const model_gb = total_params * 2 / 1e9;
-  const optim_bytes_per_param = adamw8bit ? 6 : 12;
-  const optim_gb = non_emb * optim_bytes_per_param / 1e9;
-  const activations_gb = BS * SEQ * D * 2 * L / 1e9;
-  const CE_CHUNK = 512;
-  const logits_gb = (BS * CE_CHUNK * V * 2) / 1e9;
-  const vram_est = model_gb + optim_gb + activations_gb + logits_gb;
+  setText('embParams', fmtNumber(embParams));
+  setText('denseParams', fmtNumber(denseParams));
+  setText('sparseExtras', fmtNumber(sparseExtras));
+  setText('totalParams', fmtNumber(totalParams), 'highlight');
+  setText('paramsPerLayer', fmtNumber(denseBlockParams));
+  setText('anchorExtra', family === 'hisa' ? fmtNumber(anchorExtra) : '0');
 
-  const ffn_optimal = 2 * D;
-  const coherence_ceiling = Math.floor(D / 35);
-  const j_required = Math.ceil(D / HD);
+  setText('chinTokens', fmtNumber(chinTokens));
+  setText('chinSeqs', fmtNumber(chinSeqs));
+  setText('targetSeqs', fmtNumber(targetSeqs) + ' seqs', 'highlight');
+  setText('targetTokens', fmtNumber(targetTokens));
+  setText('effBatchSeqs', fmtNumber(effBatchSeqs));
+  setText('stepsEpoch', fmtNumber(stepsEpoch));
+  setText('totalSteps', fmtNumber(totalSteps));
+  setText('tokensPerStep', fmtNumber(tokensPerStep));
 
-  const phase2_layers = 10;
-  const l_optimal = Math.round((10 + phase2_layers) / 0.75);
+  setText('flopsPerToken', fmtNumber(flopsPerToken));
+  setText('totalFlops', fmtNumber(totalFlops));
+  setText('effectiveTflops', effectiveTflops.toFixed(1) + ' TFLOPS');
+  setText('timeEpoch', fmtTime(secondsEpoch), 'warn');
+  setText('timeTotal', fmtTime(totalSeconds), 'warn');
+  setText('weightsGB', weightsGB.toFixed(1) + ' GB');
+  setText('optimGB', optimGB.toFixed(1) + ' GB');
+  setText('vramGB', vramGB.toFixed(1) + ' GB', vramGB > 24 ? 'warn' : 'good');
 
-  const perc_step_single = "~700–800";
-  const perc_step_mixed = "~900–1000";
-  const perc_step = isMixed ? perc_step_mixed : perc_step_single;
+  const state = {
+    family, regime, tokenizerProfile, checkpointStrategy, sparsePattern, D, H, L, FFN, V, SEQ,
+    anchorLayer, totalOffsets, perLayerJ, laneWidth, tailJ, numChunks, topK, topM,
+    seInit, chinPct, epochs, bs, ga, maxTrainSeqs: actualTrainSeqs, tied
+  };
 
-  const warns = [];
+  document.getElementById('layoutSummary').textContent = buildLayoutSummary(state);
+  document.getElementById('configSnippet').value = buildSnippet(state, rec);
 
-  if (HD < 64) {
-    warns.push(`🔴 hd < 64 — relay formation confirmed broken at hd=32. Minimum validated: hd=64.`);
-  } else if (HD !== 64) {
-    warns.push(`⚠ head_dim=${HD} — kernel tuned for hd=64 (D÷H=64 → sm_89/sm_90 fast path). Non-64 values use slower autotune fallback.`);
-  }
-
-  if (post_fa < 5) warns.push(`⚠ Only ${post_fa} post-FA relay layers — minimum validated is 5.`);
-  if (post_fa > coherence_ceiling) warns.push(`⚠ ${post_fa} post-FA layers exceeds coherence ceiling (~${coherence_ceiling} for D=${D}). May exceed relay coherence length.`);
-
-  if (fa_pct < 15 || fa_pct > 35) warns.push(`🔴 FA at ${fa_pct.toFixed(0)}% depth — outside validated range (15–35%). FA@L/4 (25%) is canonical.`);
-  else if (fa_pct < 20 || fa_pct > 30) warns.push(`⚠ FA at ${fa_pct.toFixed(0)}% depth — outside optimal range (20–30%). 25% validated best.`);
-
-  if (FFN < D) warns.push(`🔴 FFN=${FFN} < D — definitely too narrow. Relay cannot form.`);
-  else if (Math.abs(FFN - ffn_optimal) / ffn_optimal > 0.25) {
-    warns.push(`⚠ FFN=${FFN} differs >25% from optimal ${ffn_optimal} (2×D for all scales).`);
-  }
-
-  if (relay_ratio > 6.0) {
-    warns.push(`🔴 Bandwidth ratio ${relay_ratio.toFixed(1)}× >6.0× — J=96/D=512 uniform at 12.0× confirmed unstable (gradient competition).`);
-  } else if (relay_ratio > 4.0) {
-    warns.push(`⚠ Bandwidth ratio ${relay_ratio.toFixed(1)}× >4.0× — approaching validated limit. Monitor percolation.`);
-  } else if (relay_ratio < 1.0 && relay_ratio >= 0.9) {
-    warns.push(`⚠ relay/residual = ${relay_ratio.toFixed(2)}× borderline <1.0 — test carefully. J≥${j_required} needed for ratio≥1.0.`);
-  } else if (relay_ratio < 0.9) {
-    warns.push(`🔴 relay/residual = ${relay_ratio.toFixed(2)}× < 1.0: DSQG bandwidth insufficient. Geometry collapse (D=4096/J=24). Need J≥${j_required} or increase hd.`);
-  }
-
-  if (!isTriadic && D === 512 && L > 8) {
-    warns.push(`⚠ D=512 with L=${L} > 8 — exceeds validated depth for standard J=24 at this width.`);
-  }
-
-  if (isTriadic) {
-    if (!isTriadicCompatible(L)) {
-      warns.push(`⚠ L=${L} is not triadic-compatible. Recommended: L=9 (3 triads) or L=13 (4 triads).`);
-    }
-  }
-
-  if (CHIN_PCT < 15) warns.push(`⚠ Only ${CHIN_PCT}% Chinchilla — percolation threshold may not cross in ep1. Minimum validated: ~22%.`);
-
-  if (steps_epoch < 1200) {
-    warns.push(`⚠ Short epoch (${steps_epoch} steps) — consider ≥200K sequences for adequate post-crossing crystallization.`);
-  }
-
-  const warnBox = document.getElementById("warnBox");
-  if (warns.length) {
-    warnBox.innerHTML = warns.join("<br>");
-    warnBox.classList.add("visible");
-  } else {
-    warnBox.classList.remove("visible");
-  }
-
-  document.getElementById("hdNote").textContent = `head_dim = ${HD}${HD < 64 ? " 🔴" : (HD !== 64 ? " ⚠" : " ✓")}`;
-  document.getElementById("ffnRatioNote").textContent = `${(FFN/D).toFixed(1)}×D (rec: 2×D)`;
-  document.getElementById("faPlacementNote").textContent = `${fa_pct.toFixed(0)}% depth`;
-  document.getElementById("r_chin_pct_label").textContent = CHIN_PCT;
-
-  set("r_total_params",  fmtN(total_params), "highlight");
-  set("r_non_emb_params", fmtN(non_emb));
-  set("r_emb_params",    fmtN(emb_params));
-  set("r_hd",            `${HD}${HD < 64 ? " 🔴 < 64" : (HD !== 64 ? " ⚠ not 64" : "")}`, HD < 64 ? "danger" : (HD !== 64 ? "warn" : ""));
-  set("r_ffn_ratio",     `${(FFN/D).toFixed(1)}×D`);
-  set("r_dsqg_ratio",    `${dsqg_ratio}:1`);
-  set("r_fa_pct",        `${fa_pct.toFixed(0)}% (layer ${FA_LAYER}/${L-1})`,
-      fa_pct >= 20 && fa_pct <= 30 ? "good" : "warn");
-  set("r_post_fa",       `${post_fa} layers`,
-      post_fa >= 5 && post_fa <= coherence_ceiling ? "good" : "warn");
-  set("r_coherence_ceiling", `${coherence_ceiling} layers (D=${D})`, "");
-  set("r_l_optimal",     `${l_optimal} layers`, L === l_optimal ? "highlight" : "");
-
-  const triadicDiagram = document.getElementById("triadicDiagram");
-  if (isTriadic) {
-    triadicDiagram.textContent = buildTriadicDiagram(L, FA_LAYER);
-    triadicDiagram.classList.add("visible");
-  } else {
-    triadicDiagram.classList.remove("visible");
-  }
-
-  if (isMixed) {
-    const emaLabel = document.getElementById("r_ema_init_label");
-    emaLabel.innerHTML = `EMA_INIT (mixed domain) <span class="formula">window ≈ ${ema_window_mixed}t</span>`;
-    set("r_ema_init", `${ema_init_mixed.toFixed(4)} (mixed)`, "good");
-    set("r_ema_window", `~${ema_window_mixed} tokens (closer to learned optimum 690–822t)`);
-  } else {
-    const emaLabel = document.getElementById("r_ema_init_label");
-    emaLabel.innerHTML = `EMA_INIT (single domain) <span class="formula">window ≈ ${ema_window_single}t</span>`;
-    set("r_ema_init", `${ema_init_single.toFixed(4)} (1/${DELTA_RELAY})`, "good");
-    set("r_ema_window", `~${ema_window_single} tokens`);
-  }
-
-  const lrMultFormula = document.getElementById("r_lr_mult_formula");
-  if (isMixed) {
-    lrMultFormula.textContent = "15×√(D/512)×1.306";
-    if (isTriadic) {
-      set("r_lr_mult", `${lr_mult.toFixed(1)} (mixed + triadic: 20.0 rec)`, "good");
-    } else {
-      set("r_lr_mult", `${lr_mult.toFixed(1)} (mixed domain)`, "good");
-    }
-  } else {
-    lrMultFormula.textContent = "15×√(D/512)";
-    set("r_lr_mult", lr_mult.toFixed(1), "good");
-  }
-
-  set("r_lr",            `${base_lr} (fixed)`);
-  const se_lr = base_lr * lr_mult;
-  set("r_se_lr",         se_lr.toExponential(2));
-  set("r_se_init",       SE_INIT.toFixed(3));
-
-  const bwLabel = isTriadic ? `Per-layer bandwidth (32×${HD})` : `Relay bandwidth (${J}×${HD})`;
-  document.getElementById("r_relay_bw_label").textContent = bwLabel;
-  set("r_relay_bw",      `${relay_bw} units`);
-
-  let relay_ratio_cls;
-  if (relay_ratio >= 1.5 && relay_ratio <= 4.0) relay_ratio_cls = "highlight";
-  else if (relay_ratio > 4.0 && relay_ratio <= 6.0) relay_ratio_cls = "warn";
-  else if (relay_ratio > 6.0) relay_ratio_cls = "danger";
-  else if (relay_ratio < 1.0) relay_ratio_cls = "danger";
-  else relay_ratio_cls = "good";
-
-  const relayNote = document.getElementById("r_relay_note");
-  relayNote.textContent = "Validated safe: 1.5–4.0×";
-
-  set("r_relay_ratio", `${relay_ratio.toFixed(2)}× residual`, relay_ratio_cls);
-  set("r_j_required",    `${j_required} (current: ${isTriadic ? "32/layer" : J})`,
-      (isTriadic ? 32 : J) >= j_required ? "good" : "warn");
-
-  set("r_chin_100_tokens", fmtN(chin_100_tokens));
-  set("r_chin_100_seqs",   fmtN(chin_100_seqs, 0));
-  set("r_target_seqs",     fmtN(target_seqs, 0) + " seqs", "highlight");
-  set("r_target_tokens",   fmtN(target_tokens));
-  set("r_steps_epoch",     fmtN(steps_epoch, 0) + " steps");
-  set("r_total_steps",     fmtN(total_steps, 0) + " steps");
-  set("r_eff_batch_tokens", fmtN(eff_batch_tokens) + " tokens");
-
-  set("r_percolation_step", perc_step, "good");
-  set("r_perc_steps_epoch", `${fmtN(steps_epoch, 0)} steps/epoch`);
-
-  const percWarnRow = document.getElementById("r_perc_warn_row");
-  const percWarnText = document.getElementById("r_perc_warn_text");
-  if (steps_epoch < 1200) {
-    percWarnRow.style.display = "flex";
-    percWarnText.textContent = `⚠ Short epoch — consider ≥200K sequences for adequate post-crossing crystallization.`;
-  } else {
-    percWarnRow.style.display = "none";
-  }
-
-  set("r_flops_token",    fmtN(flops_token) + " FLOPs");
-  set("r_total_flops",    fmtN(total_flops) + " FLOPs");
-  set("r_gpu_tflops",     GPU_TFLOPS.toFixed(1) + " TFLOPS");
-  set("r_eff_tflops",     (GPU_TFLOPS * MFU).toFixed(1) + " TFLOPS (" + (MFU*100).toFixed(0) + "% MFU)");
-  set("r_time_epoch",     fmtTime(seconds_per_epoch), "warn");
-  set("r_time_total",     fmtTime(total_seconds), "warn");
-  set("r_model_gb",       model_gb.toFixed(1) + " GB");
-
-  const optimLabel = document.getElementById("r_optim_label");
-  optimLabel.textContent = adamw8bit ? "Optimizer states (AdamW8bit)" : "Optimizer states (AdamW FP32)";
-  set("r_optim_gb",       optim_gb.toFixed(1) + " GB");
-  set("r_vram",           vram_est.toFixed(1) + " GB (chunked CE, no full logits)",
-      vram_est > 20 ? "warn" : "good");
-
-  updateActivePreset(D, H, L, FFN, V, SEQ, tied, J, FA_LAYER, DELTA_RELAY, SE_INIT, CHIN_PCT, EPOCHS, BS, GRAD_ACCUM);
-  renderCompare(total_params, target_seqs);
-}
-
-function renderCompare(cur_params, cur_seqs) {
-  const tbody = document.getElementById("compareBody");
-  tbody.innerHTML = "";
-  KNOWN_RESULTS.forEach(r => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${r.name}</td>
-      <td>${r.params}</td>
-      <td>${r.ppl !== null ? r.ppl.toFixed(2) : "—"}</td>
-      <td>${r.passkey}</td>
-      <td>${r.ar !== null ? r.ar : "—"}</td>`;
-    tbody.appendChild(tr);
+  const warningItems = buildWarnings(state, rec, { headDim, bandwidthRatio, tailRatio, ffnRatio, anchorDepthPct, chunkSize, stepsEpoch });
+  const warningsEl = document.getElementById('warnings');
+  warningsEl.innerHTML = '';
+  warningItems.forEach(item => {
+    const div = document.createElement('div');
+    div.className = `warning ${item.level}`;
+    div.textContent = item.text;
+    warningsEl.appendChild(div);
   });
-  const tr = document.createElement("tr");
-  tr.className = "current-row";
-  tr.innerHTML = `
-    <td>▶ Current config</td>
-    <td>${fmtN(cur_params)}</td>
-    <td>—</td>
-    <td>—</td>
-    <td>—</td>`;
-  tbody.appendChild(tr);
+
+  const activePresetIndex = PRESETS.findIndex(p =>
+    p.family === family && p.regime === regime && p.tokenizerProfile === tokenizerProfile &&
+    p.D === D && p.H === H && p.L === L && p.FFN === FFN && p.V === V && p.SEQ === SEQ &&
+    p.anchorLayer === anchorLayer && p.totalOffsets === totalOffsets && p.perLayerJ === perLayerJ &&
+    p.laneWidth === laneWidth && p.tailJ === tailJ && p.numChunks === numChunks && p.topK === topK &&
+    p.topM === topM && p.chinPct === chinPct && p.epochs === epochs && p.bs === bs && p.ga === ga &&
+    p.maxTrainSeqs === actualTrainSeqs && p.checkpointStrategy === checkpointStrategy && p.tied === tied
+  );
+  document.querySelectorAll('.preset-btn').forEach((btn, i) => btn.classList.toggle('active', i === activePresetIndex));
 }
 
-function buildPresets() {
-  const grid = document.getElementById("presetGrid");
-  PRESETS.forEach((p, i) => {
-    const btn = document.createElement("button");
-    btn.className = "preset-btn";
-    btn.id = "preset_" + i;
-    const tagHtml = p.tag ? `<span class="tag ${p.tag === 'new' ? 'new' : ''}">${p.tag}</span>` : "";
-    btn.innerHTML = `<span class="preset-name">${p.name}${tagHtml}</span><span class="preset-sub">${p.sub}</span>`;
-    btn.onclick = () => loadPreset(p, i);
+function loadPreset(preset, idx) {
+  document.getElementById('family').value = preset.family;
+  document.getElementById('regime').value = preset.regime;
+  document.getElementById('tokenizerProfile').value = preset.tokenizerProfile;
+  document.getElementById('checkpointStrategy').value = preset.checkpointStrategy;
+  document.getElementById('D').value = preset.D;
+  document.getElementById('H').value = preset.H;
+  document.getElementById('L').value = preset.L;
+  document.getElementById('FFN').value = preset.FFN;
+  document.getElementById('V').value = preset.V;
+  document.getElementById('SEQ').value = preset.SEQ;
+  document.getElementById('anchorLayer').value = preset.anchorLayer;
+  document.getElementById('sparsePattern').value = preset.sparsePattern;
+  document.getElementById('totalOffsets').value = preset.totalOffsets;
+  document.getElementById('perLayerJ').value = preset.perLayerJ;
+  document.getElementById('laneWidth').value = preset.laneWidth;
+  document.getElementById('tailJ').value = preset.tailJ;
+  document.getElementById('numChunks').value = preset.numChunks;
+  document.getElementById('topK').value = preset.topK;
+  document.getElementById('topM').value = preset.topM;
+  document.getElementById('seInit').value = preset.seInit;
+  document.getElementById('chinPct').value = preset.chinPct;
+  document.getElementById('epochs').value = preset.epochs;
+  document.getElementById('bs').value = preset.bs;
+  document.getElementById('ga').value = preset.ga;
+  document.getElementById('maxTrainSeqs').value = preset.maxTrainSeqs;
+  document.getElementById('gpu').value = preset.gpu;
+  document.getElementById('mfu').value = preset.mfu;
+  document.getElementById('tied').checked = preset.tied;
+  document.getElementById('adamw8bit').checked = preset.adamw8bit;
+  document.querySelectorAll('.preset-btn').forEach((btn, i) => btn.classList.toggle('active', i === idx));
+  calc();
+}
+
+function buildPresetButtons() {
+  const grid = document.getElementById('presetGrid');
+  PRESETS.forEach((preset, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'preset-btn';
+    const tag = preset.tag ? `<span class="tag ${preset.tagClass || ''}">${preset.tag}</span>` : '';
+    btn.innerHTML = `<div class="preset-name">${preset.name}${tag}</div><div class="preset-sub">${preset.sub}</div>`;
+    btn.addEventListener('click', () => loadPreset(preset, idx));
     grid.appendChild(btn);
   });
 }
 
-function loadPreset(p, idx) {
-  ["D","H","L","FFN","V","SEQ"].forEach(k => document.getElementById(k).value = p[k]);
-  document.getElementById("tied").value = p.tied;
-  document.getElementById("J").value = p.J;
-  document.getElementById("FA_LAYER").value = p.FA_LAYER;
-  document.getElementById("DELTA_RELAY").value = p.DELTA_RELAY;
-  document.getElementById("SE_INIT").value = p.SE_INIT;
-  document.getElementById("CHIN_PCT").value = p.CHIN_PCT;
-  document.getElementById("EPOCHS").value = p.EPOCHS;
-  document.getElementById("BS").value = p.BS;
-  document.getElementById("GRAD_ACCUM").value = p.GRAD_ACCUM;
-
-  const isTriadic = p.J >= 96;
-  document.querySelector(`input[name="offsetMode"][value="${isTriadic ? "triadic" : "standard"}"]`).checked = true;
-
-  calc();
-}
-
-function updateActivePreset(D, H, L, FFN, V, SEQ, tied, J, FA_LAYER, DELTA_RELAY, SE_INIT, CHIN_PCT, EPOCHS, BS, GRAD_ACCUM) {
-  PRESETS.forEach((p, i) => {
-    const btn = document.getElementById("preset_" + i);
-    if (!btn) return;
-    const match = p.D===D && p.H===H && p.L===L && p.FFN===FFN && p.V===V &&
-                  p.SEQ===SEQ && p.tied===tied && p.J===J && p.FA_LAYER===FA_LAYER &&
-                  p.DELTA_RELAY===DELTA_RELAY && p.CHIN_PCT===CHIN_PCT &&
-                  p.EPOCHS===EPOCHS && p.BS===BS && p.GRAD_ACCUM===GRAD_ACCUM;
-    btn.classList.toggle("active", match);
+function buildReferenceTable() {
+  const tbody = document.getElementById('referenceTable');
+  PRESETS.forEach(p => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${p.name}</td><td><code>${p.source}</code></td><td>${p.idea}</td>`;
+    tbody.appendChild(tr);
   });
 }
 
-buildPresets();
-calc();
+async function copyText(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+  } catch {
+    // ignore
+  }
+}
+
+function wireEvents() {
+  document.querySelectorAll('input, select').forEach(el => el.addEventListener('input', calc));
+  document.getElementById('tokenizerProfile').addEventListener('change', () => {
+    applyTokenizerProfile(val('tokenizerProfile'), true);
+    calc();
+  });
+  document.getElementById('sparsePattern').addEventListener('change', () => applySparsePattern(val('sparsePattern')));
+  document.getElementById('family').addEventListener('change', () => {
+    updateLabels();
+    if (val('family') === 'hisa') {
+      document.getElementById('sparsePattern').value = 'triadic96';
+      applySparsePattern('triadic96', true);
+      if (val('regime') !== 'hisa_search' && val('regime') !== 'sft') {
+        document.getElementById('regime').value = 'hisa_search';
+      }
+      if (val('checkpointStrategy') === 'every_other') {
+        document.getElementById('checkpointStrategy').value = 'all';
+      }
+    }
+    calc();
+  });
+  document.getElementById('copySnippet').addEventListener('click', () => copyText(document.getElementById('configSnippet').value));
+  document.getElementById('copySummary').addEventListener('click', () => copyText(document.getElementById('layoutSummary').textContent));
+}
+
+buildPresetButtons();
+buildReferenceTable();
+wireEvents();
+loadPreset(PRESETS[0], 0);
 </script>
 </body>
 </html>

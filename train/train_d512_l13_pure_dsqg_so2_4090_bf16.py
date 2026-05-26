@@ -160,11 +160,11 @@ def _fwd_fused(
         s    += tl.load(POS_BIAS + i * stride_pbi + h * stride_pbh)
         se_i  = tl.load(SE + i * stride_sei + ds * stride_sed, mask=dm, other=0.0).to(tl.float32)
         s    += tl.sum(q * se_i[None,:], axis=1) * sc
-        s     = tl.where(val, s, float('-inf'))
+        s     = tl.where(val.to(tl.int1), s, float('-inf'))
 
         mn    = tl.maximum(mi, s)
         cor   = tl.where(mi > float('-inf'), tl.exp(mi - mn), tl.zeros_like(mi))
-        p     = tl.where(val, tl.exp(s - mn), tl.zeros_like(s))
+        p     = tl.where(val.to(tl.int1), tl.exp(s - mn), tl.zeros_like(s))
         li    = li * cor + p;     mi = mn
 
         vt    = tl.load(vb + kp[:,None]*stride_vn + ds[None,:]*stride_vd,
@@ -288,8 +288,8 @@ def _bwd_dq_fused(
         s     = tl.sum(q * kt, axis=1) * sc
         s    += tl.load(PB + i*stride_pbi + h*stride_pbh)
         s    += tl.sum(q * se_i[None,:], axis=1) * sc
-        s     = tl.where(val, s, float('-inf'))
-        alpha = tl.where(val, tl.exp(s - lse), 0.0)
+        s     = tl.where(val.to(tl.int1), s, float('-inf'))
+        alpha = tl.where(val.to(tl.int1), tl.exp(s - lse), 0.0)
 
         if i < J_SMALL_VAL:
             dot_rv = tl.sum(do * vt, axis=1)
@@ -297,7 +297,7 @@ def _bwd_dq_fused(
             dq    += ds_v[:,None] * kt * sc
             dq    += ds_v[:,None] * se_i[None,:] * sc
             tl.store(DPB_BUF + bh*stride_dpb_bh + blk*stride_dpb_blk + i,
-                     tl.sum(tl.where(val, ds_v, 0.0)))
+                     tl.sum(tl.where(val.to(tl.int1), ds_v, 0.0)))
             dse_i = tl.sum(ds_v[:,None] * q, axis=0) * sc
             tl.store(DSE_BUF + bh*stride_dse_bh + blk*stride_dse_blk + i*HD + ds,
                      tl.where(dm, dse_i, 0.0), mask=dm)
@@ -329,7 +329,7 @@ def _bwd_dq_fused(
             dq    += ds_v[:,None] * kt * sc
             dq    += ds_v[:,None] * se_i[None,:] * sc
             tl.store(DPB_BUF + bh*stride_dpb_bh + blk*stride_dpb_blk + i,
-                     tl.sum(tl.where(val, ds_v, 0.0)))
+                     tl.sum(tl.where(val.to(tl.int1), ds_v, 0.0)))
             dse_i = tl.sum(ds_v[:,None] * q, axis=0) * sc
             tl.store(DSE_BUF + bh*stride_dse_bh + blk*stride_dse_blk + i*HD + ds,
                      tl.where(dm, dse_i, 0.0), mask=dm)
@@ -441,8 +441,8 @@ def _bwd_dkdv_fused(
         s     = tl.sum(qn * kt, axis=1) * sc
         s    += tl.load(PB + i*stride_pbi + h*stride_pbh)
         s    += tl.sum(qn * se_i[None,:], axis=1) * sc
-        s     = tl.where(val, s, float('-inf'))
-        alpha = tl.where(val, tl.exp(s - lsen), 0.0)
+        s     = tl.where(val.to(tl.int1), s, float('-inf'))
+        alpha = tl.where(val.to(tl.int1), tl.exp(s - lsen), 0.0)
 
         if i < J_SMALL_VAL:
             dot_rv = tl.sum(don * vt, axis=1)
@@ -484,15 +484,15 @@ def _bwd_dkdv_fused(
             dth1 = alpha * (don2*(-v2_t*sin1 - v3_t*cos1) + don3*(v2_t*cos1 - v3_t*sin1))
 
             buf_off = bh * stride_buf_bh + blk * stride_buf_blk + pi * 2
-            tl.store(DPHASE_BASE_BUF + buf_off + 0, tl.sum(tl.where(val, dth0, 0.0)))
-            tl.store(DPHASE_BASE_BUF + buf_off + 1, tl.sum(tl.where(val, dth1, 0.0)))
+            tl.store(DPHASE_BASE_BUF + buf_off + 0, tl.sum(tl.where(val.to(tl.int1), dth0, 0.0)))
+            tl.store(DPHASE_BASE_BUF + buf_off + 1, tl.sum(tl.where(val.to(tl.int1), dth1, 0.0)))
             tl.store(DPHASE_GAIN_BUF + buf_off + 0,
-                     tl.sum(tl.where(val, dth0 * y0_n * z0_t, 0.0)))
+                     tl.sum(tl.where(val.to(tl.int1), dth0 * y0_n * z0_t, 0.0)))
             tl.store(DPHASE_GAIN_BUF + buf_off + 1,
-                     tl.sum(tl.where(val, dth1 * y1_n * z1_t, 0.0)))
+                     tl.sum(tl.where(val.to(tl.int1), dth1 * y1_n * z1_t, 0.0)))
 
-            dz_pre0 += tl.where(val, dth0 * pg0 * y0_n, 0.0)
-            dz_pre1 += tl.where(val, dth1 * pg1 * y1_n, 0.0)
+            dz_pre0 += tl.where(val.to(tl.int1), dth0 * pg0 * y0_n, 0.0)
+            dz_pre1 += tl.where(val.to(tl.int1), dth1 * pg1 * y1_n, 0.0)
 
     dk += dz_pre0[:,None] * kp0_v[None,:] * sc
     dk += dz_pre1[:,None] * kp1_v[None,:] * sc

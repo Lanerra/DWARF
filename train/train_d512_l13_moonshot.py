@@ -107,9 +107,9 @@ EMA_FLOOR = 0.00001
 LR        = 3e-4
 DROPOUT   = 0.1
 
-BATCH_SIZE     = int(os.environ.get('DWARF_BS', '16'))
+BATCH_SIZE     = int(os.environ.get('DWARF_BS', '8'))
 GRAD_ACCUM     = int(os.environ.get('DWARF_GA', '8'))
-MAX_TRAIN_SEQS = int(os.environ.get('DWARF_MAX_TRAIN_SEQS', '200000'))
+MAX_TRAIN_SEQS = int(os.environ.get('DWARF_MAX_TRAIN_SEQS', '80000'))
 MAX_SEQ_LEN    = 2048
 MAX_VAL_SEQS   = 5_582
 CE_CHUNK       = 512

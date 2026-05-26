@@ -65,7 +65,7 @@ from dsqg_attention_v8_dynamic_j import (
     _compute_D_v8,
     npci_rotate, R_PLANES, _next_pow2,
 )
-from causal_ema_scan import causal_ema_scan as _causal_ema_scan
+from causal_ema_parallel import causal_ema_parallel as _causal_ema_scan
 
 # =============================================================================
 # OFFSET GROUPS
@@ -109,7 +109,7 @@ def _fwd_fused(
     stride_pgi, stride_pgh,
     H: tl.constexpr, N, HD: tl.constexpr,
     BLOCK_N: tl.constexpr, BLOCK_HD: tl.constexpr,
-    J_VAL: tl.constexpr, J_SMALL_VAL: tl.constexpr,
+    J_VAL: tl.constexpr, J_SMALL_VAL: tl.constexpr, J_PAD: tl.constexpr,
 ):
     bh  = tl.program_id(0); blk = tl.program_id(1)
     b   = bh // H;           h   = bh % H
@@ -120,6 +120,7 @@ def _fwd_fused(
     sc  = 1.0 / (HD ** 0.5)
     ds  = tl.arange(0, BLOCK_HD)
     dm  = ds < HD
+    js  = tl.arange(0, J_PAD)
 
     qb  = Q + b * stride_qb + h * stride_qh
     kb  = K + b * stride_kb + h * stride_kh
@@ -127,6 +128,14 @@ def _fwd_fused(
 
     q   = tl.load(qb + ns[:,None]*stride_qn + ds[None,:]*stride_qd,
                   mask=nm[:,None] & dm[None,:], other=0.0).to(tl.float32)
+
+    # Tensor Core: batch all scale_embed scores via tl.dot
+    SE_T = tl.load(
+        SE + ds[:, None] * stride_sed + js[None, :] * stride_sei,
+        mask=dm[:, None] & (js[None, :] < J_VAL),
+        other=0.0
+    ).to(tl.float32)
+    se_all_scores = tl.dot(q, SE_T) * sc
 
     qp0 = tl.load(QP0 + ds, mask=dm, other=0.0).to(tl.float32)
     qp1 = tl.load(QP1 + ds, mask=dm, other=0.0).to(tl.float32)
@@ -157,13 +166,13 @@ def _fwd_fused(
 
         s     = tl.sum(q * kt, axis=1) * sc
         s    += tl.load(POS_BIAS + i * stride_pbi + h * stride_pbh)
-        se_i  = tl.load(SE + i * stride_sei + ds * stride_sed, mask=dm, other=0.0).to(tl.float32)
-        s    += tl.sum(q * se_i[None,:], axis=1) * sc
-        s     = tl.where(val, s, float('-inf'))
+        col_mask = js == i
+        s    += tl.sum(se_all_scores * col_mask[None, :].to(tl.float32), axis=1)
+        s     = tl.where(val.to(tl.int1), s, float('-inf'))
 
         mn    = tl.maximum(mi, s)
         cor   = tl.where(mi > float('-inf'), tl.exp(mi - mn), tl.zeros_like(mi))
-        p     = tl.where(val, tl.exp(s - mn), tl.zeros_like(s))
+        p     = tl.where(val.to(tl.int1), tl.exp(s - mn), tl.zeros_like(s))
         li    = li * cor + p;     mi = mn
 
         vt    = tl.load(vb + kp[:,None]*stride_vn + ds[None,:]*stride_vd,
@@ -235,13 +244,14 @@ def _bwd_dq_fused(
     stride_pgi,  stride_pgh,
     H: tl.constexpr, N, HD: tl.constexpr,
     BLOCK_N: tl.constexpr, BLOCK_HD: tl.constexpr,
-    J_VAL: tl.constexpr, J_SMALL_VAL: tl.constexpr,
+    J_VAL: tl.constexpr, J_SMALL_VAL: tl.constexpr, J_PAD: tl.constexpr,
 ):
     bh  = tl.program_id(0); blk = tl.program_id(1)
     b   = bh // H; h = bh % H
     n0  = blk * BLOCK_N
     ns  = n0 + tl.arange(0, BLOCK_N); nm = ns < N
     ds  = tl.arange(0, BLOCK_HD);     dm = ds < HD
+    js  = tl.arange(0, J_PAD)
     sc  = 1.0 / (HD ** 0.5)
 
     qb  = Q  + b*stride_qb + h*stride_qh
@@ -255,6 +265,14 @@ def _bwd_dq_fused(
                    mask=nm[:,None] & dm[None,:], other=0.0).to(tl.float32)
     lse  = tl.load(LSE + b*stride_lb + h*stride_lh + ns*stride_ln, mask=nm, other=0.0)
     Dval = tl.load(Dv  + b*stride_Db + h*stride_Dh + ns*stride_Dn, mask=nm, other=0.0)
+
+    # Tensor Core: batch scale_embed scores for score recomputation
+    SE_T = tl.load(
+        SE + ds[:, None] * stride_sed + js[None, :] * stride_sei,
+        mask=dm[:, None] & (js[None, :] < J_VAL),
+        other=0.0
+    ).to(tl.float32)
+    se_all_scores = tl.dot(q, SE_T) * sc
 
     qp0 = tl.load(QP0 + ds, mask=dm, other=0.0).to(tl.float32)
     qp1 = tl.load(QP1 + ds, mask=dm, other=0.0).to(tl.float32)
@@ -273,6 +291,9 @@ def _bwd_dq_fused(
     dy_pre0 = tl.zeros([BLOCK_N], tl.float32)
     dy_pre1 = tl.zeros([BLOCK_N], tl.float32)
 
+    # Accumulator for batched dscale_embed via Tensor Core
+    DSV_all = tl.zeros([J_PAD, BLOCK_N], tl.float32)
+
     for i in range(J_VAL):
         delta = tl.load(OFFSETS + i).to(tl.int32)
         kp    = ns - delta
@@ -283,23 +304,24 @@ def _bwd_dq_fused(
         vt    = tl.load(vb + kp[:,None]*stride_vn + ds[None,:]*stride_vd,
                         mask=val[:,None] & dm[None,:], other=0.0).to(tl.float32)
 
-        se_i  = tl.load(SE + i*stride_sei + ds*stride_sed, mask=dm, other=0.0).to(tl.float32)
         s     = tl.sum(q * kt, axis=1) * sc
         s    += tl.load(PB + i*stride_pbi + h*stride_pbh)
-        s    += tl.sum(q * se_i[None,:], axis=1) * sc
-        s     = tl.where(val, s, float('-inf'))
-        alpha = tl.where(val, tl.exp(s - lse), 0.0)
+        col_mask = js == i
+        s    += tl.sum(se_all_scores * col_mask[None, :].to(tl.float32), axis=1)
+        s     = tl.where(val.to(tl.int1), s, float('-inf'))
+        alpha = tl.where(val.to(tl.int1), tl.exp(s - lse), 0.0)
 
         if i < J_SMALL_VAL:
             dot_rv = tl.sum(do * vt, axis=1)
             ds_v   = alpha * (dot_rv - Dval)
+            se_i_col = js == i
+            se_i_vec = tl.sum(SE_T * se_i_col[None, :].to(tl.float32), axis=1)
             dq    += ds_v[:,None] * kt * sc
-            dq    += ds_v[:,None] * se_i[None,:] * sc
+            dq    += ds_v[:,None] * se_i_vec[None,:] * sc
             tl.store(DPB_BUF + bh*stride_dpb_bh + blk*stride_dpb_blk + i,
-                     tl.sum(tl.where(val, ds_v, 0.0)))
-            dse_i = tl.sum(ds_v[:,None] * q, axis=0) * sc
-            tl.store(DSE_BUF + bh*stride_dse_bh + blk*stride_dse_blk + i*HD + ds,
-                     tl.where(dm, dse_i, 0.0), mask=dm)
+                     tl.sum(tl.where(val.to(tl.int1), ds_v, 0.0)))
+            row_mask = js == i
+            DSV_all = tl.where(row_mask[:, None], ds_v[None, :], DSV_all)
         else:
             pi  = i - J_SMALL_VAL
             z0  = tl.sum(kt * kp0[None,:], axis=1) * sc
@@ -325,13 +347,14 @@ def _bwd_dq_fused(
 
             dot_rv = tl.sum(do * vt_rot, axis=1)
             ds_v   = alpha * (dot_rv - Dval)
+            se_i_col2 = js == i
+            se_i_vec2 = tl.sum(SE_T * se_i_col2[None, :].to(tl.float32), axis=1)
             dq    += ds_v[:,None] * kt * sc
-            dq    += ds_v[:,None] * se_i[None,:] * sc
+            dq    += ds_v[:,None] * se_i_vec2[None,:] * sc
             tl.store(DPB_BUF + bh*stride_dpb_bh + blk*stride_dpb_blk + i,
-                     tl.sum(tl.where(val, ds_v, 0.0)))
-            dse_i = tl.sum(ds_v[:,None] * q, axis=0) * sc
-            tl.store(DSE_BUF + bh*stride_dse_bh + blk*stride_dse_blk + i*HD + ds,
-                     tl.where(dm, dse_i, 0.0), mask=dm)
+                     tl.sum(tl.where(val.to(tl.int1), ds_v, 0.0)))
+            row_mask = js == i
+            DSV_all = tl.where(row_mask[:, None], ds_v[None, :], DSV_all)
 
             do0 = tl.sum(do * f0[None,:], axis=1); do1 = tl.sum(do * f1[None,:], axis=1)
             do2 = tl.sum(do * f2[None,:], axis=1); do3 = tl.sum(do * f3[None,:], axis=1)
@@ -341,6 +364,15 @@ def _bwd_dq_fused(
 
             dy_pre0 += dth0 * pg0 * z0
             dy_pre1 += dth1 * pg1 * z1
+
+    # Tensor Core: batched dscale_embed
+    dse_all = tl.dot(DSV_all, q) * sc
+    buf_base = DSE_BUF + bh * stride_dse_bh + blk * stride_dse_blk
+    tl.store(
+        buf_base + js[:, None] * HD + ds[None, :],
+        dse_all,
+        mask=(js[:, None] < J_VAL) & dm[None, :]
+    )
 
     dq += dy_pre0[:,None] * qp0[None,:] * sc
     dq += dy_pre1[:,None] * qp1[None,:] * sc
@@ -440,8 +472,8 @@ def _bwd_dkdv_fused(
         s     = tl.sum(qn * kt, axis=1) * sc
         s    += tl.load(PB + i*stride_pbi + h*stride_pbh)
         s    += tl.sum(qn * se_i[None,:], axis=1) * sc
-        s     = tl.where(val, s, float('-inf'))
-        alpha = tl.where(val, tl.exp(s - lsen), 0.0)
+        s     = tl.where(val.to(tl.int1), s, float('-inf'))
+        alpha = tl.where(val.to(tl.int1), tl.exp(s - lsen), 0.0)
 
         if i < J_SMALL_VAL:
             dot_rv = tl.sum(don * vt, axis=1)
@@ -483,15 +515,15 @@ def _bwd_dkdv_fused(
             dth1 = alpha * (don2*(-v2_t*sin1 - v3_t*cos1) + don3*(v2_t*cos1 - v3_t*sin1))
 
             buf_off = bh * stride_buf_bh + blk * stride_buf_blk + pi * 2
-            tl.store(DPHASE_BASE_BUF + buf_off + 0, tl.sum(tl.where(val, dth0, 0.0)))
-            tl.store(DPHASE_BASE_BUF + buf_off + 1, tl.sum(tl.where(val, dth1, 0.0)))
+            tl.store(DPHASE_BASE_BUF + buf_off + 0, tl.sum(tl.where(val.to(tl.int1), dth0, 0.0)))
+            tl.store(DPHASE_BASE_BUF + buf_off + 1, tl.sum(tl.where(val.to(tl.int1), dth1, 0.0)))
             tl.store(DPHASE_GAIN_BUF + buf_off + 0,
-                     tl.sum(tl.where(val, dth0 * y0_n * z0_t, 0.0)))
+                     tl.sum(tl.where(val.to(tl.int1), dth0 * y0_n * z0_t, 0.0)))
             tl.store(DPHASE_GAIN_BUF + buf_off + 1,
-                     tl.sum(tl.where(val, dth1 * y1_n * z1_t, 0.0)))
+                     tl.sum(tl.where(val.to(tl.int1), dth1 * y1_n * z1_t, 0.0)))
 
-            dz_pre0 += tl.where(val, dth0 * pg0 * y0_n, 0.0)
-            dz_pre1 += tl.where(val, dth1 * pg1 * y1_n, 0.0)
+            dz_pre0 += tl.where(val.to(tl.int1), dth0 * pg0 * y0_n, 0.0)
+            dz_pre1 += tl.where(val.to(tl.int1), dth1 * pg1 * y1_n, 0.0)
 
     dk += dz_pre0[:,None] * kp0_v[None,:] * sc
     dk += dz_pre1[:,None] * kp1_v[None,:] * sc
@@ -616,6 +648,7 @@ class _DSQGFnGrouped(torch.autograd.Function):
             else:       BLOCK_N, _num_warps, _num_stages = 8, 4, 2
 
         BLOCK_HD = _next_pow2(HD)
+        J_PAD = _next_pow2(j_val)
         out = torch.empty_like(q)
         lse = torch.empty(B, H, N, device=q.device, dtype=torch.float32)
         g = (B * H, triton.cdiv(N, BLOCK_N))
@@ -635,7 +668,7 @@ class _DSQGFnGrouped(torch.autograd.Function):
             phase_base.stride(0), phase_base.stride(1),
             phase_gain.stride(0), phase_gain.stride(1),
             H=H, N=N, HD=HD, BLOCK_N=BLOCK_N, BLOCK_HD=BLOCK_HD,
-            J_VAL=j_val, J_SMALL_VAL=j_small,
+            J_VAL=j_val, J_SMALL_VAL=j_small, J_PAD=J_PAD,
             num_warps=_num_warps, num_stages=_num_stages,
         )
 
@@ -681,12 +714,13 @@ class _DSQGFnGrouped(torch.autograd.Function):
 
         blocks_n = (N + BN - 1) // BN
         _dev = q.device
+        J_PAD = _next_pow2(j_val)
 
         dq = torch.zeros_like(q)
         d_qp0 = torch.zeros(HD, device=_dev, dtype=torch.float32)
         d_qp1 = torch.zeros(HD, device=_dev, dtype=torch.float32)
         dpb_buf = torch.empty(B * H, blocks_n, j_val, device=_dev, dtype=torch.float32)
-        dse_buf = torch.empty(B * H, blocks_n, j_val * HD, device=_dev, dtype=torch.float32)
+        dse_buf = torch.zeros(B * H, blocks_n, J_PAD * HD, device=_dev, dtype=torch.float32)
 
         _bwd_dq_fused[g](
             q, k, v, pb, se, phase_base, phase_gain,
@@ -705,15 +739,15 @@ class _DSQGFnGrouped(torch.autograd.Function):
             blocks_n * j_val, j_val,
             pb.stride(0), pb.stride(1),
             se.stride(0), se.stride(1),
-            blocks_n * j_val * HD, j_val * HD,
+            blocks_n * J_PAD * HD, J_PAD * HD,
             phase_base.stride(0), phase_base.stride(1),
             phase_gain.stride(0), phase_gain.stride(1),
             H=H, N=N, HD=HD, BLOCK_N=BN, BLOCK_HD=BHD,
-            J_VAL=j_val, J_SMALL_VAL=j_small,
+            J_VAL=j_val, J_SMALL_VAL=j_small, J_PAD=J_PAD,
             num_warps=NW, num_stages=NS,
         )
         dpb = dpb_buf.view(B, H, blocks_n, j_val).sum(dim=(0, 2)).permute(1, 0).contiguous()
-        dse = dse_buf.view(B, H, blocks_n, j_val, HD).sum(dim=(0, 1, 2)).contiguous()
+        dse = dse_buf.view(B, H, blocks_n, J_PAD, HD)[:, :, :, :j_val, :].sum(dim=(0, 1, 2)).contiguous()
 
         dk = torch.zeros_like(k)
         dv = torch.zeros_like(v)

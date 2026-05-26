@@ -1,69 +1,76 @@
-# Rust build artifacts (math autoresearcher generates many Rust crates)
-**/target/
-**/*.module_build.log
-
+# Python cache/build artifacts
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
-
 *.egg-info/
 dist/
 build/
 *.egg
+.pytest_cache/
+.ipynb_checkpoints/
+*.ipynb
 
+# Virtualenvs and local environment/secrets
+.venv/
 .env
 *.pem
 *.key
+.DS_Store
+.vscode/
+.idea/
 
+# Model/checkpoint/data artifacts
 *.pt
 *.pth
 *.bin
 *.ckpt
 checkpoints/
+datasets/
+*_checkpoints/
 
-# Noisy/generated logs — training run logs live in autoresearch/logs/ and ARE tracked
-**/*.module_build.log
-autoresearch/loop_*.log
-autoresearch/probe*.log
-autoresearch/run.log
-autoresearch/j_run.log
-
-.ipynb_checkpoints/
-*.ipynb
-
-*.txt
-!requirements.txt
-!README.md
-
-.DS_Store
-.vscode/
-.idea/
-
+# Generated run outputs and experiment caches
+logs/
 wandb/
 runs/
 outputs/
+evals/logs/
+evals/viz_*/
+evals/shortlist_*/
+analysis_outputs/
+tools/viz_output/
+logs/dataset_cache/
+logs/tokenizer_corpora/
+logs/benchmark_cache/
 
-# Local experiment artifacts
-.venv/
-*_checkpoints/
-logs/condm_fineweb_edu_doc_cache.json
-!package.json
-!results/2048_condI_tokenizer.json
+# Archives / backups kept outside public git
+archived_backups/
+DWARF-clean/
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.7z
 
-# HuggingFace cache
-.cache/
-verification/target/
+# Rust/Lean build artifacts
+**/target/
+verification/.lake/build/
+verification/.lake/packages/
 
+# Local/private automation and scratch workspaces
+.hermes/
+.claude/settings.local.json
+.understand-anything/
+kanban-workspace/
 rag/
-benchmarks/logs/condm_fineweb_edu_doc_cache.json
-logs/benchmark_cache/arc_challenge.json
-logs/benchmark_cache/arc_easy.json
-logs/benchmark_cache/hellaswag.json
-logs/benchmark_cache/lambada.json
-logs/benchmark_cache/piqa.json
-logs/benchmark_cache/winogrande.json
-# autoresearch — track source files, exclude outputs/binaries
+.cache/
+
+# Autoresearch/exploration internals are private scratch, not public source
+# Keep any publishable findings as curated docs/results instead.
+autoresearch/
+exploration/
+
+# Autoresearch generated internals, retained for compatibility with older layouts
 autoresearch/checkpoints/
 autoresearch/run.log
 autoresearch/j_run.log
@@ -82,8 +89,6 @@ autoresearch/runs/
 autoresearch/modules/
 autoresearch/probe*.log
 autoresearch/*.pyc
-exploration/
-# autoresearch internals — keep off public repo
 autoresearch/math_loop*.py
 autoresearch/math_loop*.log
 autoresearch/math_history*.jsonl
@@ -99,3 +104,12 @@ autoresearch/program_*.md
 autoresearch/ar_agent.log
 autoresearch/math_summary.py
 autoresearch/analyze_j.py
+
+# Noisy local text exports; whitelist canonical project text files
+*.txt
+!/requirements.txt
+!/README.md
+
+# Local shell launchers are usually machine-specific; track explicit scripts intentionally with git add -f if needed.
+launch_*.sh
+runpod_setup.sh

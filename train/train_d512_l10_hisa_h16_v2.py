@@ -153,7 +153,8 @@ MAX_TRAIN_SEQS = int(os.environ.get('DWARF_MAX_TRAIN_SEQS', '325000'))
 MAX_SEQ_LEN    = 2048
 MAX_VAL_SEQS   = 5_582
 CE_CHUNK       = 1024
-SCREEN_EPOCHS  = 3
+SCREEN_EPOCHS  = 10
+
 TRAIN_LOG_INTERVAL = int(os.environ.get('DWARF_LOG_INTERVAL', '100'))
 MAX_ACC_STEPS = int(os.environ.get('DWARF_MAX_ACC_STEPS', '0'))
 BENCH_ONLY = os.getenv('DWARF_BENCH_ONLY', '0') == '1'

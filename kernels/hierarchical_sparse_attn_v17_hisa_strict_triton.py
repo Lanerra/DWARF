@@ -1,11 +1,11 @@
 """
-Hierarchical Sparse Attention V17-HISA-STRICT candidate.
+Hierarchical Sparse Attention V17-HISA-STRICT candidate — patched for retrieval coverage.
 
 Strict-causal semantics match V16:
   - exact causal attention within the active chunk
   - sparse retrieval only over strictly earlier chunks
-  - per-token Stage-1 chunk routing
-  - per-token Stage-2 token selection
+  - per-token Stage-1 chunk routing using a strictly causal query window
+  - per-token Stage-2 token selection using the same strictly causal query window
   - optional train-only routing-score scaffold in sparse attention
 
 This version replaces the hot strict-attention body with a real Triton forward
@@ -17,6 +17,7 @@ trainer only has to save x + weights, not Q/K/V plus sparse metadata.
 from __future__ import annotations
 
 import math
+import os
 
 import torch
 import torch.nn as nn
@@ -29,11 +30,44 @@ except Exception:  # pragma: no cover - CPU-only import environments
     triton = None
     tl = None
 
-from hierarchical_sparse_attn_v16_hisa_strict import (
-    _build_stage2_token_indices_per_token as _build_stage2_token_indices_per_token_eager,
-    _compute_chunk_representatives,
-    _compute_past_only_routing,
-)
+try:
+    from hierarchical_sparse_attn_v16_hisa_strict import (
+        _build_stage2_token_indices_per_token as _build_stage2_token_indices_per_token_eager,
+        _compute_chunk_representatives,
+        _compute_past_only_routing,
+    )
+except Exception:  # pragma: no cover - keeps this file usable standalone
+    _build_stage2_token_indices_per_token_eager = None
+
+    def _compute_chunk_representatives(K_pad: torch.Tensor, num_chunks: int) -> torch.Tensor:
+        """Fallback chunk representative: highest-L2 token in each chunk."""
+        B, H, N_padded, hd = K_pad.shape
+        if N_padded % num_chunks != 0:
+            raise ValueError('K_pad must be padded to chunk boundaries')
+        chunk_size = N_padded // num_chunks
+        K_chunks = K_pad.reshape(B, H, num_chunks, chunk_size, hd)
+        energy = K_chunks.float().square().sum(dim=-1)
+        best_idx = energy.argmax(dim=3, keepdim=True)
+        gather_idx = best_idx.unsqueeze(-1).expand(-1, -1, -1, 1, hd)
+        return torch.gather(K_chunks, dim=3, index=gather_idx).squeeze(3)
+
+    def _compute_past_only_routing(
+        Q: torch.Tensor,
+        chunk_reps: torch.Tensor,
+        *,
+        seq_len: int,
+        num_chunks: int,
+        chunk_size: int,
+        hd: int,
+    ) -> torch.Tensor:
+        """Fallback strict routing weights over chunks whose start is < position."""
+        logits = torch.matmul(Q.float(), chunk_reps.float().transpose(-2, -1)) / math.sqrt(hd)
+        positions = torch.arange(seq_len, device=Q.device)
+        chunk_starts = torch.arange(num_chunks, device=Q.device) * chunk_size
+        causal_ok = chunk_starts.unsqueeze(0) < positions.unsqueeze(1)
+        logits = logits.masked_fill(~causal_ok.view(1, 1, seq_len, num_chunks), float('-inf'))
+        weights = F.softmax(logits, dim=-1)
+        return torch.nan_to_num(weights, nan=0.0).to(dtype=Q.dtype)
 
 
 def _build_stage1_top_k_per_token_prev_mandatory(
@@ -44,26 +78,77 @@ def _build_stage1_top_k_per_token_prev_mandatory(
     num_chunks: int,
     top_k_chunks: int,
 ) -> torch.Tensor:
-    """
-    Strict-causal Stage-1 chunk selection with a mandatory previous-chunk slot.
+    """Strict-causal Stage-1 selection with previous chunk mandatory inside the fixed budget.
 
-    For tokens in query chunk c_q > 0:
-      - slot 0 is forced to chunk c_q - 1
-      - remaining slots are routed over strictly older chunks [0, ..., c_q - 2]
-
-    This keeps the total sparse chunk budget fixed (no free extra slot), preserves
-    strict causality, and guarantees a direct cross-boundary bridge without
-    allowing the current or future chunks into the sparse path.
+    This compatibility helper preserves the v17 candidate test contract: the
+    output has exactly ``top_k_chunks`` slots. For tokens after the first chunk,
+    slot 0 is the previous chunk and the remaining slots are routed over older
+    chunks only. The main module uses ``_prev_extra`` below to add the bridge slot
+    outside the routed budget.
     """
     B, H, N, _ = routing_weights.shape
     device = routing_weights.device
-
-    out = torch.full((B, H, N, top_k_chunks), -1, dtype=torch.long, device=device)
-    if top_k_chunks <= 0:
+    total_slots = max(int(top_k_chunks), 0)
+    out = torch.full((B, H, N, total_slots), -1, dtype=torch.long, device=device)
+    if total_slots <= 0:
         return out
 
     positions = torch.arange(seq_len, device=device)
-    query_chunks = torch.div(positions, chunk_size, rounding_mode='floor')
+    query_chunks = torch.div(positions, chunk_size, rounding_mode='floor').clamp(max=num_chunks - 1)
+    has_prev = query_chunks > 0
+    prev_chunk = (query_chunks - 1).clamp(min=0)
+    out[..., 0] = torch.where(
+        has_prev.view(1, 1, N),
+        prev_chunk.view(1, 1, N).expand(B, H, N),
+        out[..., 0],
+    )
+
+    remote_k = total_slots - 1
+    if remote_k <= 0:
+        return out
+
+    chunk_ids = torch.arange(num_chunks, device=device)
+    remote_mask = chunk_ids.unsqueeze(0) < (query_chunks.unsqueeze(1) - 1)
+    masked = routing_weights.masked_fill(~remote_mask[None, None], float('-inf'))
+    k_eff = min(remote_k, num_chunks)
+    values, indices = masked.topk(k_eff, dim=-1)
+    indices = indices.masked_fill(torch.isneginf(values), -1)
+    out[..., 1:1 + k_eff] = indices[..., :k_eff]
+    return out
+
+
+def _build_stage1_top_k_per_token_prev_extra(
+    routing_weights: torch.Tensor,
+    *,
+    seq_len: int,
+    chunk_size: int,
+    num_chunks: int,
+    top_k_chunks: int,
+) -> torch.Tensor:
+    """
+    Strict-causal Stage-1 chunk selection with the previous chunk as an
+    additional bridge slot rather than consuming the routed remote budget.
+
+    For tokens in query chunk c_q > 0:
+      - slot 0 is forced to chunk c_q - 1
+      - slots 1..top_k_chunks are routed over strictly older chunks
+        [0, ..., c_q - 2]
+
+    This preserves strict prefix causality: no current or future chunk can enter
+    the sparse path. It also avoids the old starvation mode where top_k=4 meant
+    "previous chunk + only three real remote chunks" at long range.
+    """
+    B, H, N, _ = routing_weights.shape
+    device = routing_weights.device
+    remote_k = max(int(top_k_chunks), 0)
+    total_slots = remote_k + 1  # +1 mandatory previous-chunk bridge slot
+
+    out = torch.full((B, H, N, total_slots), -1, dtype=torch.long, device=device)
+    if total_slots <= 0:
+        return out
+
+    positions = torch.arange(seq_len, device=device)
+    query_chunks = torch.div(positions, chunk_size, rounding_mode='floor').clamp(max=num_chunks - 1)
     has_prev = query_chunks > 0
     prev_chunk = (query_chunks - 1).clamp(min=0)
 
@@ -73,20 +158,23 @@ def _build_stage1_top_k_per_token_prev_mandatory(
         out[..., 0],
     )
 
-    if top_k_chunks == 1:
+    if remote_k == 0:
         return out
 
+    # Routed remote chunks are strictly older than the previous chunk. This
+    # intentionally excludes both the current chunk and c_q - 1 because c_q - 1
+    # is already present in the bridge slot.
     chunk_ids = torch.arange(num_chunks, device=device)
     remote_mask = chunk_ids.unsqueeze(0) < (query_chunks.unsqueeze(1) - 1)
     masked = routing_weights.masked_fill(~remote_mask[None, None], float('-inf'))
 
-    k_eff = min(top_k_chunks - 1, num_chunks)
+    k_eff = min(remote_k, num_chunks)
     if k_eff <= 0:
         return out
 
     values, indices = masked.topk(k_eff, dim=-1)
     indices = indices.masked_fill(torch.isneginf(values), -1)
-    out[..., 1:1 + k_eff] = indices[..., :top_k_chunks - 1]
+    out[..., 1:1 + k_eff] = indices[..., :k_eff]
     return out
 
 
@@ -110,6 +198,34 @@ def _to_heads(t: torch.Tensor, B: int, N: int, H: int, hd: int) -> torch.Tensor:
     return t.reshape(B, N, H, hd).transpose(1, 2)
 
 
+def _causal_window_mean_heads(x: torch.Tensor, window: int) -> torch.Tensor:
+    """
+    Prefix-causal query summarizer for strict routing/selection.
+
+    output[t] = mean(x[max(0, t-window+1):t+1])
+
+    This gives the router access to a short causal cue phrase without allowing
+    suffix/future information into the sparse metadata. For passkey-style
+    prompts, this is much less brittle than selecting chunks/tokens from a
+    single query token embedding.
+    """
+    w = int(window)
+    if w <= 1 or x.shape[2] <= 1:
+        return x
+
+    B, H, N, hd = x.shape
+    xf = x.to(torch.float32)
+    csum = torch.cumsum(xf, dim=2)
+    zero = torch.zeros((B, H, 1, hd), device=x.device, dtype=torch.float32)
+    cpad = torch.cat([zero, csum], dim=2)
+
+    end = torch.arange(1, N + 1, device=x.device)
+    start = (end - w).clamp(min=0)
+    sums = cpad.index_select(2, end) - cpad.index_select(2, start)
+    denom = (end - start).to(torch.float32).view(1, 1, N, 1)
+    return (sums / denom).to(dtype=x.dtype)
+
+
 def _strict_hisa_compute_routing_weights(
     Q: torch.Tensor,
     K: torch.Tensor,
@@ -117,17 +233,23 @@ def _strict_hisa_compute_routing_weights(
     num_chunks: int,
     chunk_size: int,
     detach_inputs: bool = True,
+    routing_query_window: int = 1,
 ) -> torch.Tensor:
     N = Q.shape[2]
     hd = Q.shape[-1]
     if detach_inputs:
         Q = Q.detach()
         K = K.detach()
+
+    # Strictly causal query summary. This is the main anti-crater change: the
+    # router sees the recent prefix cue, not only the final single-token query.
+    Q_route = _causal_window_mean_heads(Q, routing_query_window)
+
     pad_len = chunk_size * num_chunks - N
     K_pad = F.pad(K, (0, 0, 0, pad_len)) if pad_len > 0 else K
     chunk_reps = _compute_chunk_representatives(K_pad, num_chunks)
     return _compute_past_only_routing(
-        Q,
+        Q_route,
         chunk_reps,
         seq_len=N,
         num_chunks=num_chunks,
@@ -394,18 +516,19 @@ if triton is not None:
             valid_chunk = q_valid & (chunk_idx >= 0) & (chunk_idx < NUM_CHUNKS)
             safe_chunk_idx = tl.where(valid_chunk, chunk_idx, 0)
             abs_idx = safe_chunk_idx * CHUNK_SIZE + tok_offsets
+            valid_tok = valid_chunk & tok_mask & (abs_idx < N)
 
             k_block = tl.load(
                 k_base + abs_idx[:, None] * stride_kn + ds[None, :] * stride_kd,
-                mask=(valid_chunk & tok_mask)[:, None] & dm[None, :],
+                mask=valid_tok[:, None] & dm[None, :],
                 other=0.0,
             ).to(tl.float32)
             scores = tl.sum(k_block * q[None, :], axis=1) * sc
-            scores = tl.where(valid_chunk & tok_mask, scores, float('-inf'))
+            scores = tl.where(valid_tok, scores, float('-inf'))
 
             selected = tl.full([BLOCK_TOK], False, tl.int1)
             for mi in range(TOP_M):
-                cand = tl.where((~selected) & tok_mask & valid_chunk, scores, float('-inf'))
+                cand = tl.where((~selected) & valid_tok, scores, float('-inf'))
                 best_val, best_idx = tl.max(cand, axis=0, return_indices=True)
                 has_any = valid_chunk & (best_val > -3.0e38)
                 out_idx = slot * TOP_M + mi
@@ -994,6 +1117,58 @@ def _strict_hisa_core_backward(
     raise ValueError(f'Unsupported strict HISA backward_impl={backward_impl!r}')
 
 
+def _build_stage2_token_indices_per_token_strict_eager(
+    Q: torch.Tensor,
+    K_pad: torch.Tensor,
+    top_k_indices: torch.Tensor,
+    *,
+    seq_len: int,
+    num_chunks: int,
+    chunk_size: int,
+    hisa_top_m_tokens: int,
+) -> torch.Tensor:
+    """
+    Eager fallback for per-token Stage-2 selection with correct padding masks.
+    This mirrors the Triton builder but is mainly for debugging/CPU fallback.
+    """
+    B, H, N, hd = Q.shape
+    top_k = int(top_k_indices.shape[-1])
+    m_actual = min(int(hisa_top_m_tokens), int(chunk_size))
+    total_selected = top_k * m_actual
+    device = Q.device
+    if total_selected == 0:
+        return torch.empty((B, H, N, 0), device=device, dtype=torch.long)
+
+    out = torch.full((B, H, N, total_selected), -1, device=device, dtype=torch.long)
+    tok_offsets = torch.arange(chunk_size, device=device, dtype=torch.long)
+    b_idx = torch.arange(B, device=device).view(B, 1, 1, 1)
+    h_idx = torch.arange(H, device=device).view(1, H, 1, 1)
+    scale = 1.0 / math.sqrt(hd)
+
+    # Work one query chunk at a time to avoid a massive [B,H,N,chunk,hd]
+    # temporary on fallback paths.
+    for q0 in range(0, N, chunk_size):
+        q1 = min(q0 + chunk_size, N)
+        q = Q[:, :, q0:q1, :]
+        q_len = q1 - q0
+        for slot in range(top_k):
+            ci = top_k_indices[:, :, q0:q1, slot]
+            valid_chunk = (ci >= 0) & (ci < num_chunks)
+            safe_ci = ci.clamp(min=0, max=max(num_chunks - 1, 0))
+            abs_idx = safe_ci.unsqueeze(-1) * chunk_size + tok_offsets.view(1, 1, 1, chunk_size)
+            valid_tok = valid_chunk.unsqueeze(-1) & (abs_idx < seq_len)
+            safe_abs = abs_idx.clamp(min=0, max=max(seq_len - 1, 0))
+
+            k_block = K_pad[b_idx, h_idx, safe_abs]
+            scores = (q.unsqueeze(-2).float() * k_block.float()).sum(dim=-1) * scale
+            scores = scores.masked_fill(~valid_tok, float('-inf'))
+            vals, idx = scores.topk(m_actual, dim=-1)
+            abs_sel = safe_ci.unsqueeze(-1) * chunk_size + idx
+            abs_sel = abs_sel.masked_fill(torch.isneginf(vals), -1)
+            out[:, :, q0:q1, slot * m_actual:(slot + 1) * m_actual] = abs_sel
+    return out
+
+
 def _build_stage2_token_indices_per_token_triton(
     Q: torch.Tensor,
     K_pad: torch.Tensor,
@@ -1083,6 +1258,7 @@ def _strict_hisa_build_stage2_token_indices(
     hisa_top_m_tokens: int,
     chunk_size: int,
     routing_weights: torch.Tensor | None = None,
+    routing_query_window: int = 1,
 ) -> torch.Tensor:
     N = Q.shape[2]
 
@@ -1095,17 +1271,19 @@ def _strict_hisa_build_stage2_token_indices(
                 K,
                 num_chunks=num_chunks,
                 chunk_size=chunk_size,
+                routing_query_window=routing_query_window,
             )
-        top_k_indices = _build_stage1_top_k_per_token_prev_mandatory(
+        top_k_indices = _build_stage1_top_k_per_token_prev_extra(
             routing_weights,
             seq_len=N,
             chunk_size=chunk_size,
             num_chunks=num_chunks,
             top_k_chunks=top_k_chunks,
         )
+        Q_select = _causal_window_mean_heads(Q.detach(), routing_query_window)
         if Q.device.type == 'cuda' and triton is not None:
             return _build_stage2_token_indices_per_token_triton(
-                Q.detach(),
+                Q_select,
                 K_pad,
                 top_k_indices,
                 seq_len=N,
@@ -1113,8 +1291,8 @@ def _strict_hisa_build_stage2_token_indices(
                 chunk_size=chunk_size,
                 hisa_top_m_tokens=hisa_top_m_tokens,
             )
-        return _build_stage2_token_indices_per_token_eager(
-            Q.detach(),
+        return _build_stage2_token_indices_per_token_strict_eager(
+            Q_select,
             K_pad,
             top_k_indices,
             seq_len=N,
@@ -1151,6 +1329,7 @@ def _strict_hisa_module_recompute_state(
     hisa_top_m_tokens: int,
     chunk_size: int,
     routing_log_bias_scale: float = 0.0,
+    routing_query_window: int = 1,
     training: bool = False,
     kv_inject=None,
 ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor | None, int]:
@@ -1176,6 +1355,7 @@ def _strict_hisa_module_recompute_state(
             num_chunks=C,
             chunk_size=chunk_size,
             detach_inputs=False,
+            routing_query_window=routing_query_window,
         )
         stage2_routing_weights = routing_weights.detach()
     stage2_token_indices = _strict_hisa_build_stage2_token_indices(
@@ -1186,6 +1366,7 @@ def _strict_hisa_module_recompute_state(
         hisa_top_m_tokens=hisa_top_m_tokens,
         chunk_size=chunk_size,
         routing_weights=stage2_routing_weights,
+        routing_query_window=routing_query_window,
     )
     return Q, K, V, stage2_token_indices, routing_weights, C
 
@@ -1205,6 +1386,7 @@ def _strict_hisa_module_forward(
     chunk_size: int,
     sparse_block_size: int,
     routing_log_bias_scale: float = 0.0,
+    routing_query_window: int = 1,
     training: bool = False,
     kv_inject=None,
     use_fused: bool,
@@ -1222,6 +1404,7 @@ def _strict_hisa_module_forward(
         hisa_top_m_tokens=hisa_top_m_tokens,
         chunk_size=chunk_size,
         routing_log_bias_scale=routing_log_bias_scale,
+        routing_query_window=routing_query_window,
         training=training,
         kv_inject=kv_inject,
     )
@@ -1260,6 +1443,7 @@ class _StrictHISAModuleFn(torch.autograd.Function):
         backward_impl,
         routing_log_bias_scale,
         routing_log_bias_active,
+        routing_query_window,
     ):
         ctx.num_heads = int(num_heads)
         ctx.hd = int(hd)
@@ -1271,6 +1455,7 @@ class _StrictHISAModuleFn(torch.autograd.Function):
         ctx.backward_impl = str(backward_impl)
         ctx.routing_log_bias_scale = float(routing_log_bias_scale)
         ctx.routing_log_bias_active = bool(routing_log_bias_active) and ctx.routing_log_bias_scale != 0.0
+        ctx.routing_query_window = int(routing_query_window)
         ctx.device_type = x.device.type
         ctx.autocast_enabled = torch.is_autocast_enabled()
         ctx.autocast_dtype = torch.get_autocast_dtype(ctx.device_type)
@@ -1294,6 +1479,7 @@ class _StrictHISAModuleFn(torch.autograd.Function):
                 K,
                 num_chunks=C,
                 chunk_size=ctx.chunk_size,
+                routing_query_window=ctx.routing_query_window,
             )
         stage2_token_indices = _strict_hisa_build_stage2_token_indices(
             Q,
@@ -1303,6 +1489,7 @@ class _StrictHISAModuleFn(torch.autograd.Function):
             hisa_top_m_tokens=ctx.hisa_top_m_tokens,
             chunk_size=ctx.chunk_size,
             routing_weights=routing_weights,
+            routing_query_window=ctx.routing_query_window,
         )
         packed_stage2_token_indices = torch.empty(0, device=x.device, dtype=torch.int16)
         if ctx.backward_impl in {'eager', 'triton'}:
@@ -1365,6 +1552,7 @@ class _StrictHISAModuleFn(torch.autograd.Function):
                         num_chunks=C,
                         chunk_size=ctx.chunk_size,
                         detach_inputs=False,
+                        routing_query_window=ctx.routing_query_window,
                     )
                     stage2_token_indices = cached_stage2_token_indices
                     if stage2_token_indices is None:
@@ -1376,6 +1564,7 @@ class _StrictHISAModuleFn(torch.autograd.Function):
                             hisa_top_m_tokens=ctx.hisa_top_m_tokens,
                             chunk_size=ctx.chunk_size,
                             routing_weights=routing_weights.detach(),
+                            routing_query_window=ctx.routing_query_window,
                         )
                     out_core = _strict_hisa_core(
                         Q,
@@ -1398,7 +1587,7 @@ class _StrictHISAModuleFn(torch.autograd.Function):
                 retain_graph=False,
                 allow_unused=False,
             )
-            return dx, dW_q, dW_k, dW_v, dW_o, None, None, None, None, None, None, None, None, None, None
+            return dx, dW_q, dW_k, dW_v, dW_o, None, None, None, None, None, None, None, None, None, None, None
         if ctx.backward_impl == 'eager':
             with torch.enable_grad():
                 x_ = x.detach().requires_grad_(True)
@@ -1431,6 +1620,7 @@ class _StrictHISAModuleFn(torch.autograd.Function):
                             K,
                             num_chunks=C,
                             chunk_size=ctx.chunk_size,
+                            routing_query_window=ctx.routing_query_window,
                         )
                     if stage2_token_indices is None:
                         stage2_token_indices = _strict_hisa_build_stage2_token_indices(
@@ -1441,6 +1631,7 @@ class _StrictHISAModuleFn(torch.autograd.Function):
                             hisa_top_m_tokens=ctx.hisa_top_m_tokens,
                             chunk_size=ctx.chunk_size,
                             routing_weights=routing_weights,
+                            routing_query_window=ctx.routing_query_window,
                         )
                     out_core = _strict_hisa_core(
                         Q,
@@ -1463,7 +1654,7 @@ class _StrictHISAModuleFn(torch.autograd.Function):
                 retain_graph=False,
                 allow_unused=False,
             )
-            return dx, dW_q, dW_k, dW_v, dW_o, None, None, None, None, None, None, None, None, None, None
+            return dx, dW_q, dW_k, dW_v, dW_o, None, None, None, None, None, None, None, None, None, None, None
 
         if ctx.backward_impl != 'triton':
             raise ValueError(f"Unsupported strict HISA backward_impl={ctx.backward_impl!r}")
@@ -1499,6 +1690,7 @@ class _StrictHISAModuleFn(torch.autograd.Function):
                         K,
                         num_chunks=C,
                         chunk_size=ctx.chunk_size,
+                        routing_query_window=ctx.routing_query_window,
                     )
                 if stage2_token_indices is None:
                     stage2_token_indices = _strict_hisa_build_stage2_token_indices(
@@ -1509,6 +1701,7 @@ class _StrictHISAModuleFn(torch.autograd.Function):
                         hisa_top_m_tokens=ctx.hisa_top_m_tokens,
                         chunk_size=ctx.chunk_size,
                         routing_weights=routing_weights,
+                        routing_query_window=ctx.routing_query_window,
                     )
                 out_core, lse = _strict_hisa_core_with_lse(
                     Q,
@@ -1555,7 +1748,7 @@ class _StrictHISAModuleFn(torch.autograd.Function):
             retain_graph=False,
             allow_unused=False,
         )
-        return dx, dW_q, dW_k, dW_v, dW_o, None, None, None, None, None, None, None, None, None, None
+        return dx, dW_q, dW_k, dW_v, dW_o, None, None, None, None, None, None, None, None, None, None, None
 
 
 class HierarchicalSparseAttentionV17HISAStrictTriton(nn.Module):
@@ -1574,16 +1767,22 @@ class HierarchicalSparseAttentionV17HISAStrictTriton(nn.Module):
         H: int,
         hd: int,
         num_chunks: int = 32,
-        top_k_chunks: int = 4,
-        hisa_top_m_tokens: int = 32,
+        top_k_chunks: int = 8,
+        hisa_top_m_tokens: int = 64,
         chunk_size: int = 64,
         sparse_block_size: int = 64,
         backward_impl: str = 'triton',
-        routing_log_bias_scale: float = 0.0,
+        routing_log_bias_scale: float = 0.5,
         routing_entropy_target: float = 0.0,
         routing_entropy_reg_scale: float = 0.0,
+        routing_query_window: int = 8,
     ):
         super().__init__()
+        top_k_chunks = int(os.getenv('DWARF_STRICT_HISA_TOP_K', top_k_chunks))
+        hisa_top_m_tokens = int(os.getenv('DWARF_STRICT_HISA_TOP_M', hisa_top_m_tokens))
+        routing_log_bias_scale = float(os.getenv('DWARF_STRICT_HISA_ROUTING_BIAS', routing_log_bias_scale))
+        routing_query_window = int(os.getenv('DWARF_STRICT_HISA_ROUTING_WINDOW', routing_query_window))
+
         if backward_impl not in {'eager', 'triton'}:
             raise ValueError(
                 f"Unsupported strict HISA backward_impl={backward_impl!r}; expected 'eager' or 'triton'"
@@ -1600,6 +1799,7 @@ class HierarchicalSparseAttentionV17HISAStrictTriton(nn.Module):
         self.routing_log_bias_scale = float(routing_log_bias_scale)
         self.routing_entropy_target = float(routing_entropy_target)
         self.routing_entropy_reg_scale = float(routing_entropy_reg_scale)
+        self.routing_query_window = max(1, int(routing_query_window))
         self.W_q = nn.Linear(D, H * hd, bias=False)
         self.W_k = nn.Linear(D, H * hd, bias=False)
         self.W_v = nn.Linear(D, H * hd, bias=False)
@@ -1614,6 +1814,7 @@ class HierarchicalSparseAttentionV17HISAStrictTriton(nn.Module):
             f'top_k_chunks={self.top_k_chunks}, hisa_top_m_tokens={self.hisa_top_m_tokens}, '
             f'chunk_size={self.chunk_size}, sparse_block_size={self.sparse_block_size}, '
             f'backward_impl={self.backward_impl}, routing_log_bias_scale={self.routing_log_bias_scale}, '
+            f'routing_query_window={self.routing_query_window}, '
             f'routing_entropy_target={self.routing_entropy_target}, '
             f'routing_entropy_reg_scale={self.routing_entropy_reg_scale}'
         )
@@ -1640,6 +1841,7 @@ class HierarchicalSparseAttentionV17HISAStrictTriton(nn.Module):
                 chunk_size=chunk_size,
                 sparse_block_size=self.sparse_block_size,
                 routing_log_bias_scale=self.routing_log_bias_scale,
+                routing_query_window=self.routing_query_window,
                 training=self.training,
                 kv_inject=kv_inject,
                 use_fused=False,
@@ -1653,6 +1855,7 @@ class HierarchicalSparseAttentionV17HISAStrictTriton(nn.Module):
                 K,
                 num_chunks=C,
                 chunk_size=chunk_size,
+                routing_query_window=self.routing_query_window,
             )
             routing_entropy, routing_entropy_norm, _ = _compute_stage1_routing_entropy_stats(
                 routing_weights,
@@ -1672,6 +1875,7 @@ class HierarchicalSparseAttentionV17HISAStrictTriton(nn.Module):
                 num_chunks=C,
                 chunk_size=chunk_size,
                 detach_inputs=False,
+                routing_query_window=self.routing_query_window,
             )
             _, routing_entropy_norm_reg, floor_penalty = _compute_stage1_routing_entropy_stats(
                 routing_weights_reg,
@@ -1698,6 +1902,7 @@ class HierarchicalSparseAttentionV17HISAStrictTriton(nn.Module):
                 chunk_size=chunk_size,
                 sparse_block_size=self.sparse_block_size,
                 routing_log_bias_scale=self.routing_log_bias_scale,
+                routing_query_window=self.routing_query_window,
                 training=self.training,
                 use_fused=False,
             )
@@ -1718,6 +1923,7 @@ class HierarchicalSparseAttentionV17HISAStrictTriton(nn.Module):
             self.backward_impl,
             self.routing_log_bias_scale,
             self.training,
+            self.routing_query_window,
         )
 
 

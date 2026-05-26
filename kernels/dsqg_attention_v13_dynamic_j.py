@@ -118,7 +118,7 @@ def _two_pass_fwd_v13_dj(
             mask=dm, other=0.0
         ).to(tl.float32)
         s += tl.sum(q * se_i[None, :], axis=1) * sc
-        s = tl.where(val, s, float('-inf'))
+        s = tl.where(val.to(tl.int1), s, float('-inf'))
 
         col_mask = js == i
         scores = tl.where(col_mask[None, :], s[:, None], scores)
@@ -340,7 +340,7 @@ def _bwd_dq_v13_dj(
         s = tl.sum(q * kt, axis=1) * sc
         s += tl.load(POS_BIAS + i * stride_pbi + h * stride_pbh)
         s += tl.sum(q * se_i[None, :], axis=1) * sc
-        s = tl.where(val, s, float('-inf'))
+        s = tl.where(val.to(tl.int1), s, float('-inf'))
 
         diff = tl.minimum(s - lse, 0.0)
         alpha = tl.where(val & (lse > float('-inf')), tl.exp(diff), 0.0)
@@ -353,7 +353,7 @@ def _bwd_dq_v13_dj(
 
             tl.store(
                 DPB_BUF + bh * stride_dpb_bh + blk * stride_dpb_blk + i,
-                tl.sum(tl.where(val, ds_v, 0.0))
+                tl.sum(tl.where(val.to(tl.int1), ds_v, 0.0))
             )
             dse_i = tl.sum(ds_v[:, None] * q, axis=0) * sc
             tl.store(
@@ -391,7 +391,7 @@ def _bwd_dq_v13_dj(
 
             tl.store(
                 DPB_BUF + bh * stride_dpb_bh + blk * stride_dpb_blk + i,
-                tl.sum(tl.where(val, ds_v, 0.0))
+                tl.sum(tl.where(val.to(tl.int1), ds_v, 0.0))
             )
             dse_i = tl.sum(ds_v[:, None] * q, axis=0) * sc
             tl.store(
@@ -527,7 +527,7 @@ def _bwd_dkdv_v13_dj(
         s = tl.sum(qn * kt, axis=1) * sc
         s += tl.load(POS_BIAS + i * stride_pbi + h * stride_pbh)
         s += tl.sum(qn * se_i[None, :], axis=1) * sc
-        s = tl.where(val, s, float('-inf'))
+        s = tl.where(val.to(tl.int1), s, float('-inf'))
 
         diff = tl.minimum(s - lsen, 0.0)
         alpha = tl.where(val & (lsen > float('-inf')), tl.exp(diff), 0.0)
@@ -576,15 +576,15 @@ def _bwd_dkdv_v13_dj(
             dth1 = alpha * (don2 * (-v2_t * sin1 - v3_t * cos1) + don3 * (v2_t * cos1 - v3_t * sin1))
 
             buf_off = bh * stride_buf_bh + blk * stride_buf_blk + pi_idx * 2
-            tl.store(DPHASE_BASE_BUF + buf_off + 0, tl.sum(tl.where(val, dth0, 0.0)))
-            tl.store(DPHASE_BASE_BUF + buf_off + 1, tl.sum(tl.where(val, dth1, 0.0)))
+            tl.store(DPHASE_BASE_BUF + buf_off + 0, tl.sum(tl.where(val.to(tl.int1), dth0, 0.0)))
+            tl.store(DPHASE_BASE_BUF + buf_off + 1, tl.sum(tl.where(val.to(tl.int1), dth1, 0.0)))
             tl.store(DPHASE_GAIN_BUF + buf_off + 0,
-                     tl.sum(tl.where(val, dth0 * y0_n * z0_t, 0.0)))
+                     tl.sum(tl.where(val.to(tl.int1), dth0 * y0_n * z0_t, 0.0)))
             tl.store(DPHASE_GAIN_BUF + buf_off + 1,
-                     tl.sum(tl.where(val, dth1 * y1_n * z1_t, 0.0)))
+                     tl.sum(tl.where(val.to(tl.int1), dth1 * y1_n * z1_t, 0.0)))
 
-            dz_pre0 += tl.where(val, dth0 * pg0 * y0_n, 0.0)
-            dz_pre1 += tl.where(val, dth1 * pg1 * y1_n, 0.0)
+            dz_pre0 += tl.where(val.to(tl.int1), dth0 * pg0 * y0_n, 0.0)
+            dz_pre1 += tl.where(val.to(tl.int1), dth1 * pg1 * y1_n, 0.0)
 
     tl.store(
         DK + b * stride_dkb + h * stride_dkh + ms[:, None] * stride_dkn + ds[None, :] * stride_dkd,

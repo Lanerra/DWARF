@@ -95,6 +95,7 @@ from causal_ema_scan import causal_ema_scan as _causal_ema_scan
 GROUP_A = _ALL_96[0:32]
 GROUP_B = _ALL_96[32:64]
 GROUP_C = _ALL_96[64:96]
+GROUP_T = sorted([1, 2, 3] + _ALL_96[48:], key=lambda d: (0 if d <= 28 else 1, d))
 def _count_small_large(offsets):
     j_small = sum(1 for d in offsets if d <= 28)
     j_large = sum(1 for d in offsets if d >= 48)
@@ -859,7 +860,7 @@ def train():
         print(f'  GPU: {torch.cuda.get_device_name(0)}')
     print(f'  D={EMBEDDING_DIM}, H={NUM_HEADS}, hd={EMBEDDING_DIM//NUM_HEADS}, '
           f'L={NUM_LAYERS}, FFN={FFN_DIM}')
-    print(f'  Groups: A(J={len(GROUP_A)}) B(J={len(GROUP_B)}) C(J={len(GROUP_C)})')
+    print(f'  Groups: A(J={len(GROUP_A)}) B(J={len(GROUP_B)}) C(J={len(GROUP_C)}) T(J={len(GROUP_T)})')
     print(f'  Per-layer bandwidth ratio: {(len(GROUP_A)*64)/EMBEDDING_DIM:.2f}x  (safe ≤ 3.0x)')
     print(f'  scale_embed init={SCALE_EMBED_INIT_VAL}, LR mult={SCALE_EMBED_LR_MULT}')
     print(f'  EMA α₀={EMA_INIT} (window≈{round(1/EMA_INIT)}t)')
@@ -1101,7 +1102,7 @@ def train():
     print(f'ema_init: {EMA_INIT}')
     print(f'description: Triadic J=96 L=13 D={EMBEDDING_DIM} H={NUM_HEADS} '
           f'FFN={FFN_DIM} FA@L{FULL_ATTN_LAYER} preIF@L{FULL_ATTN_LAYER-1} '
-          f'groups=A({len(GROUP_A)})+B({len(GROUP_B)})+C({len(GROUP_C)})')
+          f'groups=A({len(GROUP_A)})+B({len(GROUP_B)})+C({len(GROUP_C)})+T({len(GROUP_T)})')
 
 
 if __name__ == '__main__':
