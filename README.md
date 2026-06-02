@@ -51,21 +51,6 @@ Relevant files:
 - Long-context probe: `evals/eval_cpt_long_passkey.py`
 - Result JSON: `results/cpt_long_passkey_16k_32k_perword.json`
 
-
-
----
-
-## Evaluation
-
-```bash
-# External benchmarks (HellaSwag, PIQA, ARC-Easy, ARC-Challenge, WinoGrande, LAMBADA)
-CUDA_VISIBLE_DEVICES=1 .venv/bin/python3 evals/eval_external.py \
-  --arch condu_13m \
-  --checkpoint checkpoints/condU/best.pt \
-  --label "condU 13M"
-
-# Available --arch values: condu_13m, condu_27m, condu_35m, condm_13m, standard_13m
-
 ---
 
 ## License
