@@ -1,21 +1,22 @@
 """
-causal_ema_scan.py — Memory-efficient causal EMA via Triton parallel scan.
+causal_ema_scan.py — memory-efficient causal EMA via Triton scans.
 
 Forward recurrence:
     y[t] = α·x[t] + (1−α)·y[t−1],  y[−1] = 0
 
 Backward:
-    dx[t]  via reverse scan
+    dx[t] via reverse scan
         s[t] = dy[t] + (1−α)·s[t+1]
         dx[t] = α·s[t]
 
-    dα     via forward sensitivity scan, fully on GPU in Triton
+    dα via forward sensitivity scan, fully on GPU in Triton
         sens[t] = (x[t] − y[t−1]) + (1−α)·sens[t−1]
         dα = Σ_t dy[t]·sens[t]
 
-This version avoids the old Python-side O(N) loop in backward and also avoids
-scalar `.item()` syncs for alpha during forward/backward. The only host-side
-work left in backward is summing one float32 partial per Triton program.
+Compared with the earlier version, backward recomputes the fp32 EMA state for
+its dα sensitivity scan instead of saving/loading the bf16 Y tensor. That saves
+one full activation tensor and makes dα use the same fp32 recurrence state as
+forward rather than a quantized saved output.
 """
 
 from __future__ import annotations
@@ -24,17 +25,17 @@ import torch
 import triton
 import triton.language as tl
 
-BLOCK_D = 64   # D-dims per program; tuned for HD/D multiples common in DWARF
+BLOCK_D = 64  # D-dims per program; tuned for HD/D multiples common in DWARF
 
-def _ema_num_stages():
+
+def _ema_num_stages() -> int:
     if not torch.cuda.is_available():
         return 2
-    _cc = torch.cuda.get_device_capability()
-    _sm90 = (_cc[0] == 9 and _cc[1] == 0) or _cc[0] > 9
-    return 4 if _sm90 else 2
+    cc = torch.cuda.get_device_capability()
+    sm90_or_newer = (cc[0] == 9 and cc[1] == 0) or cc[0] > 9
+    return 4 if sm90_or_newer else 2
 
 
-# ── forward kernel ────────────────────────────────────────────────────────────
 @triton.jit
 def _fwd(
     X, Y, ALPHA,
@@ -63,7 +64,6 @@ def _fwd(
         tl.store(Yb + n * sYn + d_off * sYd, state, mask=mask)
 
 
-# ── backward kernel — reverse scan for dx ─────────────────────────────────────
 @triton.jit
 def _bwd_dx(
     DY, DX, ALPHA,
@@ -73,7 +73,7 @@ def _bwd_dx(
     sDXb, sDXn, sDXd,
     BLOCK_D: tl.constexpr,
 ):
-    """s[t] = dy[t] + (1−α)·s[t+1];  dx[t] = α·s[t]"""
+    """s[t] = dy[t] + (1−α)·s[t+1]; dx[t] = α·s[t]."""
     pid = tl.program_id(0)
     n_dblk = tl.cdiv(D, BLOCK_D)
     b = pid // n_dblk
@@ -94,17 +94,16 @@ def _bwd_dx(
         tl.store(DXb + n * sDXn + d_off * sDXd, a * state, mask=mask)
 
 
-# ── backward kernel — forward sensitivity scan for dα partials ─────────────────
 @triton.jit
 def _bwd_da_partial(
-    X, Y, DY, ALPHA, DA_PARTIAL,
+    X, DY, ALPHA, DA_PARTIAL,
     N: tl.constexpr,
     D: tl.constexpr,
     sXb, sXn, sXd,
-    sYb, sYn, sYd,
     sDYb, sDYn, sDYd,
     BLOCK_D: tl.constexpr,
 ):
+    """Forward sensitivity scan for dα. Recomputes fp32 y_prev from X."""
     pid = tl.program_id(0)
     n_dblk = tl.cdiv(D, BLOCK_D)
     b = pid // n_dblk
@@ -120,67 +119,66 @@ def _bwd_da_partial(
     acc = tl.zeros([BLOCK_D], dtype=tl.float32)
 
     Xb = X + b * sXb
-    Yb = Y + b * sYb
     DYb = DY + b * sDYb
 
     for n in range(N):
         x = tl.load(Xb + n * sXn + d_off * sXd, mask=mask, other=0.0).to(tl.float32)
-        y = tl.load(Yb + n * sYn + d_off * sYd, mask=mask, other=0.0).to(tl.float32)
         dy = tl.load(DYb + n * sDYn + d_off * sDYd, mask=mask, other=0.0).to(tl.float32)
         sens = (x - y_prev) + decay * sens
+        y = a * x + decay * y_prev
         acc += dy * sens
         y_prev = y
 
     tl.store(DA_PARTIAL + pid, tl.sum(acc, axis=0))
 
 
-# ── autograd Function ─────────────────────────────────────────────────────────
 class _Fn(torch.autograd.Function):
 
     @staticmethod
-    def forward(ctx, x: torch.Tensor, ema_factor: torch.Tensor,
-                floor: float) -> torch.Tensor:
+    def forward(ctx, x: torch.Tensor, ema_factor: torch.Tensor, floor: float) -> torch.Tensor:
         x = x.contiguous()
         B, N, D = x.shape
-        alpha = ema_factor.detach().clamp(float(floor), 0.5).to(device=x.device, dtype=torch.float32).reshape(1)
+        alpha = ema_factor.detach().clamp(float(floor), 0.5).to(
+            device=x.device, dtype=torch.float32
+        ).reshape(1)
 
         y = torch.empty_like(x)
         grid = (B * triton.cdiv(D, BLOCK_D),)
-        _ns = _ema_num_stages()
+        num_stages = _ema_num_stages()
         _fwd[grid](
             x, y, alpha, N, D,
             x.stride(0), x.stride(1), x.stride(2),
             y.stride(0), y.stride(1), y.stride(2),
-            BLOCK_D=BLOCK_D, num_stages=_ns,
+            BLOCK_D=BLOCK_D, num_stages=num_stages,
         )
-        ctx.save_for_backward(x, y, ema_factor, alpha)
+        # Do not save y. dα recomputes the fp32 recurrence state from x.
+        ctx.save_for_backward(x, ema_factor, alpha)
         ctx.floor = float(floor)
         return y
 
     @staticmethod
     def backward(ctx, dy: torch.Tensor):
-        x, y, ema_factor, alpha = ctx.saved_tensors
+        x, ema_factor, alpha = ctx.saved_tensors
         dy = dy.contiguous()
         B, N, D = dy.shape
         num_programs = B * triton.cdiv(D, BLOCK_D)
 
         dx = torch.empty_like(dy)
         grid = (num_programs,)
-        _ns = _ema_num_stages()
+        num_stages = _ema_num_stages()
         _bwd_dx[grid](
             dy, dx, alpha, N, D,
             dy.stride(0), dy.stride(1), dy.stride(2),
             dx.stride(0), dx.stride(1), dx.stride(2),
-            BLOCK_D=BLOCK_D, num_stages=_ns,
+            BLOCK_D=BLOCK_D, num_stages=num_stages,
         )
 
         da_partial = torch.empty(num_programs, device=x.device, dtype=torch.float32)
         _bwd_da_partial[grid](
-            x, y, dy, alpha, da_partial, N, D,
+            x, dy, alpha, da_partial, N, D,
             x.stride(0), x.stride(1), x.stride(2),
-            y.stride(0), y.stride(1), y.stride(2),
             dy.stride(0), dy.stride(1), dy.stride(2),
-            BLOCK_D=BLOCK_D, num_stages=_ns,
+            BLOCK_D=BLOCK_D, num_stages=num_stages,
         )
         da = da_partial.sum().reshape_as(ema_factor).to(dtype=ema_factor.dtype)
 
@@ -189,19 +187,34 @@ class _Fn(torch.autograd.Function):
         return dx, d_ema, None
 
 
-def causal_ema_scan(x: torch.Tensor, ema_factor: torch.Tensor,
-                    floor: float = 1e-5) -> torch.Tensor:
+def _reference_ema_autograd(x: torch.Tensor, ema_factor: torch.Tensor, floor: float) -> torch.Tensor:
+    """Small CPU/non-CUDA fallback; intentionally simple and differentiable."""
+    B, N, D = x.shape
+    del B, D
+    a = ema_factor.clamp(float(floor), 0.5).to(dtype=torch.float32)
+    decay = 1.0 - a
+    state = torch.zeros(x.shape[0], x.shape[2], device=x.device, dtype=torch.float32)
+    ys = []
+    xf = x.float()
+    for t in range(N):
+        state = a * xf[:, t, :] + decay * state
+        ys.append(state)
+    return torch.stack(ys, dim=1).to(dtype=x.dtype)
+
+
+def causal_ema_scan(x: torch.Tensor, ema_factor: torch.Tensor, floor: float = 1e-5) -> torch.Tensor:
     """
     Drop-in replacement for _causal_ema() in DWARF training scripts.
 
-    x:          [B, N, D]  typically bf16
+    x:          [B, N, D] typically bf16
     ema_factor: scalar tensor / nn.Parameter (raw or transformed before call)
     floor:      minimum alpha value
     """
+    if not x.is_cuda:
+        return _reference_ema_autograd(x, ema_factor, floor)
     return _Fn.apply(x, ema_factor, floor)
 
 
-# ── exact reference + basic correctness / memory test ─────────────────────────
 if __name__ == "__main__":
     def _reference_ema(x: torch.Tensor, alpha: torch.Tensor) -> torch.Tensor:
         B, N, D = x.shape
@@ -215,6 +228,10 @@ if __name__ == "__main__":
             ys.append(state)
         return torch.stack(ys, dim=1).to(dtype=x.dtype)
 
+    if not torch.cuda.is_available():
+        print("CUDA is required for the Triton self-test.")
+        raise SystemExit(0)
+
     torch.manual_seed(42)
     dev = "cuda"
     B, N, D = 4, 256, 128
@@ -223,14 +240,12 @@ if __name__ == "__main__":
     x = torch.randn(B, N, D, device=dev, dtype=torch.bfloat16, requires_grad=True)
     ef = torch.tensor(alpha_v, device=dev, dtype=torch.float32, requires_grad=True)
 
-    # Forward
     ref = _reference_ema(x.detach(), ef.detach())
     out = causal_ema_scan(x, ef)
     err = (ref.float() - out.float()).abs()
     print(f"Forward  max_err={err.max():.4e}  mean_err={err.mean():.4e}")
     assert err.max() < 5e-3, "Forward mismatch too large"
 
-    # Backward against exact reference implementation
     gout = torch.randn_like(out, dtype=torch.bfloat16)
     out.backward(gout)
     dx_triton = x.grad.detach().clone()
@@ -250,22 +265,3 @@ if __name__ == "__main__":
     assert dx_err.max() < 5e-3, "dx mismatch too large"
     assert da_err.max() < 5e-2, "dα mismatch too large"
     print("✓ forward + backward correct")
-
-    # Memory comparison at training scale
-    B2, N2, D2 = 8, 2048, 512
-    x2 = torch.randn(B2, N2, D2, device=dev, dtype=torch.bfloat16)
-    ef2 = torch.tensor(alpha_v, device=dev, dtype=torch.float32)
-
-    torch.cuda.reset_peak_memory_stats()
-    _ = causal_ema_scan(x2, ef2)
-    torch.cuda.synchronize()
-    scan_mb = torch.cuda.max_memory_allocated() / 1e6
-
-    torch.cuda.reset_peak_memory_stats()
-    _ = _reference_ema(x2, ef2)
-    torch.cuda.synchronize()
-    ref_mb = torch.cuda.max_memory_allocated() / 1e6
-
-    print("\nMemory @ B=8, N=2048, D=512:")
-    print(f"  scan:   {scan_mb:.1f} MB")
-    print(f"  ref:    {ref_mb:.1f} MB")

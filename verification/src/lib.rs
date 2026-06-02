@@ -1,81 +1,42 @@
-//! Physics-based verification suite for Wave Field Transformer extensions.
+//! Wave field verification library (legacy)
 //!
-//! These modules prove mathematical properties of proposed architectural
-//! components *before* committing to full training runs.
+//! This library is largely historical. The verification logic has been
+//! superseded by the `dwarf_filter` binary (src/bin/dwarf_filter.rs).
 //!
-//! # Modules
-//!
-//! - [`rg_init`]          — RG-motivated scale gain initialization
-//! - [`soliton`]          — KdV soliton stability (continuous case)
-//! - [`nonlinear_field`]  — Discrete KdV field update causality and amplitude
-//! - [`dsqg`]             — Dyadic Sparse Q·K Gather (condL candidate) verification
-//! - [`cond_d_db4`]       — condD-DB4: D4 kernel + KdV on matrix fields verification
-//! - [`condl_ablation`]   — condL design: ELU normaliser variance + RG init persistence
-//! - [`rank_bottleneck`]      — outer-product field rank capacity vs head dimension (13M/85M/7B)
-//! - [`coverage_attractor`]  — coverage density metrics + collapse/copy attractor dynamics (condP/condM)
-//!
-//! # Running tests
-//!
-//! ```bash
-//! cd verification && cargo test -- --nocapture
-//! ```
-//!
-//! Original 28 tests + 15 (dsqg/cond_d_db4) + 2 condl_ablation + 4 rank_bottleneck
-//! + 3 coverage_attractor + 6 hop_reachability + 3 variance_vanishing = 61 total.
-//! (3 known failures in cond_d_db4: KdV instability, correct behavior)
+//! The archived modules are preserved in verification/legacy/ for
+//! reference and can be restored if needed.
 
-// ─── Exploratory sweep infrastructure (see EXPLORATION_ROADMAP.md) ────────────
-pub mod depth_scaling_optimizer; // Depth-variant hyperparameter analysis (LR, SE_mult, batch, coverage, IF blocks)
-pub mod sweep_engine;           // Generic parallel sweep engine (Rayon, progress, JSON output)
-pub mod offset_space_explorer;  // Offset set design space: path counts, coverage, budget analysis
-pub mod layer_placement_explorer; // Interference/full-attn layer placement scoring
-pub mod scale_embed_dynamics;   // Phase transition threshold prediction (power law / logistic fit)
-pub mod gate_equilibrium;       // Bypass gate equilibrium scaling law (g_eq ∝ N^β)
-pub mod knob_interactions;      // 9×9 pairwise coupling matrix over DWARF hyperparameters
-pub mod scale_optimizer;        // Per-scale (14M/35M/85M) full knob sweep + recommendations
+#[path = "../legacy/offsets_triadic.rs"]
+pub mod offsets_triadic;
 
-pub mod cond_d_db4;
-pub mod cond_m;            // NOTE: tests hypothetical gated-mixture condM (never built); see condm_actual
-pub mod cond_o;
-pub mod condm_actual;      // Tests the ACTUAL condM (5:1 interleaving, trained Feb 27 2026, 54.529 PPL)
-pub mod condm_sawtooth;
-pub mod condl_ablation;
-pub mod coverage_attractor;
-pub mod dsqg;
-pub mod fk_norm;
-pub mod hop_reachability;
-pub mod offset_optimizer;  // Offset-set filter-bank analysis: path counts, AM-GM, block optimizer
-pub mod nonlinear_field;
-pub mod rank_bottleneck;
-pub mod rg_init;
-pub mod soliton;
-pub mod variance_vanishing;
-pub mod gradient_consolidation;  // AdamW momentum amplification: repeated vs unique data
-pub mod gate_retrieval;           // Sigmoid gate necessity for long-range retrieval
-pub mod passkey_data_efficiency;  // Unified passkey bound: gate × data repetition
-pub mod dsqg_chinchilla;          // DSQG-specific Chinchilla number derivation
-pub mod coherent_scale_retrieval;  // Q-weighted scale gains: matched filter SNR analysis
-pub mod huygens_kv_injection;      // Huygens K/V-only injection vs x-injection coherence
-pub mod if_amplifier;              // Per-head IF amplifier: attenuation compensation
-pub mod spectral_band_separation;  // Hard spectral band assignment per head: SNR isolation
-pub mod pll_adaptive_q;            // Phase-Locked Loop: adaptive Q tracking, induction head emergence
-pub mod agc_dynamic_gain;          // Automatic Gain Control: dynamic IF amplifier (replaces static if_gain)
-pub mod kalman_interference;       // Kalman filter: optimal estimator for interference block (vs running mean)
-pub mod beamforming_coherent;      // Beamforming: Q-steered head combination, array gain
-pub mod soliton_dsqg_retrieval;    // Soliton DSQG: KdV stabilisation improves long-range retrieval SNR
-pub mod sampling_theory;          // DWARF sampling theory: Nyquist-Shannon application to offset design
-pub mod receiver_chain_interaction; // Combined chain: PLL+AGC+Kalman+beamforming interaction verification
-pub mod kalman_predict_step;        // Kalman predict step: dynamic gain preserves passkey signal vs plain EMA (condX hypothesis)
-pub mod h0_saturation;              // h0 entropy saturation + energy conservation: why h1 > h0 in pure DSQG
-pub mod advanced_annealing;         // Dispersive kernel, power-law/matched-filter annealing, PLL adaptive schedule
-pub mod coupling_stability;         // Pre-flight K/V vs residual coupling check; calibrated threshold = 24,577
-pub mod movt_orthogonal_transport;  // MOVT: multi-plane Givens rotation value transport (generalises condU-phase r=1)
-pub mod qk_ovt;                     // QK-OVT: content-dependent orthogonal value transport (fifth DSQG mechanism)
-pub mod npci;                       // NPCI: norm-preserving coupled injection (replaces additive K/V injection)
-pub mod offset_gradient_energy;     // Gradient energy dilution: why d41s3 [48,128,384] beats d41s5 [48,128,384,768,1536]
-pub mod scale_embed_second_crossing; // scale_embed >1.0 threshold: per-head Q-match activation for global heads
-pub mod ema_window_retrieval_snr;   // EMA window b0 × retrieval distance SNR: d41s3 vs d41s5
-pub mod d41_scale_search;           // Optimal sparse set for d41s3 at 35M-scale dense widths
-pub mod softmax_gain_competition;   // Softmax gain-weight competition: why pos_bias init kills long offsets
+#[path = "../legacy/offset_space_explorer.rs"]
+pub mod offset_space_explorer;
+
+#[path = "../legacy/offset_optimizer.rs"]
+pub mod offset_optimizer;
+
+#[path = "../legacy/sweep_engine.rs"]
+pub mod sweep_engine;
+
+#[path = "../legacy/layer_placement_explorer.rs"]
+pub mod layer_placement_explorer;
+
+#[path = "../legacy/scale_embed_dynamics.rs"]
+pub mod scale_embed_dynamics;
+
+#[path = "../legacy/gate_equilibrium.rs"]
+pub mod gate_equilibrium;
+
+#[path = "../legacy/knob_interactions.rs"]
+pub mod knob_interactions;
+
+#[path = "../legacy/frobenius_offset_search.rs"]
 pub mod frobenius_offset_search;
+
+#[path = "../legacy/frobenius_coopt_search.rs"]
 pub mod frobenius_coopt_search;
+
+#[path = "../legacy/scale_optimizer.rs"]
+pub mod scale_optimizer;
+
+pub const LEGACY_VERSION: &str = env!("CARGO_PKG_VERSION");

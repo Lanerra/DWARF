@@ -50,12 +50,14 @@ from train.train_d512_l13_triadic_aabbc_mixed_scratch_4090_bf16 import (
     _PASSKEY_WORDS, _FILLER_SENTENCE, _INTRO_TEMPLATE, _RETRIEVAL_CUE,
     _amp_context, passkey_accuracy,
 )
+from dsqg_attention_v17 import DSQGAttentionV17 as _V13Cls
+from causal_ema_parallel import causal_ema_parallel as _causal_ema_scan
 from kernels.topk_sparse_attn import TopKSparseAttention
 
 TOPK_K          = 64
-LR              = 2.5e-4          # mixed-domain LR for D=512
-BATCH_SIZE      = int(os.environ.get('DWARF_BS', '1'))
-GRAD_ACCUM      = int(os.environ.get('DWARF_GA', '8'))
+LR              = 3e-4            # match triadic script
+BATCH_SIZE      = int(os.environ.get('DWARF_BS', '2'))
+GRAD_ACCUM      = int(os.environ.get('DWARF_GA', '4'))
 MAX_TRAIN_SEQS  = 20_000
 MAX_VAL_SEQS    = 1_000
 EPOCHS          = 3
@@ -363,8 +365,19 @@ def train():
         dropout=DROPOUT,
     ).to(device)
 
-    # At TOPK_LAYER=3, blocks[3].attn is already DSQGAttentionGrouped from TriadicJ96.
-    # No weight loading from teacher (random init) — pure student.
+    # Swap DSQGAttentionGrouped → DSQGAttentionV17 on all DSQG blocks
+    for block, (label, offsets, j_small, j_large, _) in zip(student.blocks, LAYER_LAYOUT):
+        if label == 'FA':
+            continue
+        block.attn = _V13Cls(
+            embedding_dim=EMBEDDING_DIM,
+            num_heads=NUM_HEADS,
+            offsets=offsets,
+            j_small=j_small,
+            j_large=j_large,
+            seq_len=MAX_SEQ_LEN,
+            dropout=DROPOUT,
+        ).to(device)
 
     # NOTE: Gradient checkpointing removed — breaks hook capture during backward recompute
     print(f"  No gradient checkpointing (hook compatibility required)")

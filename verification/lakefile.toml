@@ -38,3 +38,6 @@ name = "additive_combinatorics"
 
 [[lean_lib]]
 name = "sampling_theory"
+
+[[lean_lib]]
+name = "spectral_gap_theorems"

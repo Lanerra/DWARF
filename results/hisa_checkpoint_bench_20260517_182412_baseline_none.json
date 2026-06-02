@@ -1,0 +1,9 @@
+{
+  "baseline_none": {
+    "mode": "baseline_none",
+    "checkpoint": "none",
+    "hisa_recompute": "none",
+    "git_hash": "8b227721",
+    "compile": false
+  }
+}

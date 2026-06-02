@@ -177,6 +177,18 @@ MODEL_REGISTRY = {
         'checkpoint': 'autoresearch/checkpoints/d768_l25_triadic_mixed_scratch_best.pt',
         'params_ref': 159_977_185,
     },
+    'd640_l20_movt_r4': {
+        'train_script': 'train/train_d640_l20_movt_r4_4090_bf16.py',
+        'model_class': 'TriadicJ96',
+        'D': 640, 'H': 10, 'FFN': 1280, 'L': 20, 'full_attn_layer': 6,
+        'offsets': 'per_layer',
+        'no_num_layers': True,
+        'tokenizer': 'fineweb_32k',
+        'scale_embed_init': 0.15,
+        'label': 'D640 L20 Triadic J=96 MOVT R_PLANES=4 (140M, ep2 PPL=36.23, passkey=99.2%)',
+        'checkpoint': 'autoresearch/checkpoints/d640_l20_movt_r4_ep2_full_attn.pt',
+        'params_ref': 140_000_000,
+    },
     'triadic_l25_d1024_mixed': {
         'train_script': 'train/train_d1024_l25_triadic_aabbc_h200_bf16.py',
         'model_class': 'TriadicJ96',
@@ -241,7 +253,62 @@ MODEL_REGISTRY = {
         'topk_k': 64,
         'label': 'TopK-L25 D1024 (k=64, distillation)',
         'checkpoint': 'autoresearch/checkpoints/d1024_l25_topk_distill_best.pt',
-    },    'pure_dsqg_l13_so2': {
+    },
+    'dsr_nodistill_l13_d512': {
+        'train_script': 'train/train_d512_l13_dsr_nodistill.py',
+        'model_class': 'TriadicJ96',
+        'D': 512, 'H': 8, 'FFN': 1024, 'L': 13, 'full_attn_layer': 3,
+        'offsets': 'per_layer',
+        'no_num_layers': True,
+        'tokenizer': 'fineweb_32k',
+        'scale_embed_init': 0.15,
+        'is_dsr': True,
+        'dsr_num_chunks': 32,
+        'dsr_top_k': 4,
+        'label': 'DSR-L13 D512 (C=32, top_k=4, no distillation, ep10 93.3% passkey)',
+        'checkpoint': 'autoresearch/checkpoints/d512_l13_dsr_nodistill_best.pt',
+        'params_ref': 48_100_241,
+    },
+    'd512_l10_hisa_h16_v2': {
+        'train_script': 'train/train_d512_l10_hisa_h16_v2.py',
+        'model_class': 'TriadicJ96Dsr',
+        'D': 512, 'H': 8, 'FFN': 1536, 'L': 10, 'full_attn_layer': 6,
+        'offsets': 'per_layer',
+        'no_num_layers': True,
+        'no_full_attn': True,
+        'tokenizer': 'tokenizers/mixed_tokenizer_32k.json',
+        'scale_embed_init': 0.15,
+        'init_kwargs': {'dsr_layer': 6, 'num_chunks': 32, 'top_k_chunks': 4},
+        'label': 'D512-L10 HISA v2 (ep1 PPL=39.01, passkey=85.0%)',
+        'checkpoint': 'autoresearch/checkpoints/d512_l10_hisa_h16_v2_best.pt',
+        'params_ref': 46_115_334,
+    },
+    'd512_l10_hisa_h16_v2_l3': {
+        'train_script': 'train/train_d512_l10_hisa_h16_v2_l3.py',
+        'model_class': 'TriadicJ96Dsr',
+        'D': 512, 'H': 8, 'FFN': 1536, 'L': 10, 'full_attn_layer': 3,
+        'offsets': 'per_layer',
+        'no_num_layers': True,
+        'no_full_attn': True,
+        'tokenizer': 'tokenizers/mixed_tokenizer_32k.json',
+        'scale_embed_init': 0.15,
+        'init_kwargs': {'dsr_layer': 3, 'num_chunks': 32, 'top_k_chunks': 4},
+        'label': 'D512-L10 HISA v2 relocated to L3',
+        'params_ref': 46_115_334,
+    },
+    'd512_l10_fa_h16_v2_lq': {
+        'train_script': 'train/train_d512_l10_fa_h16_v2_lq.py',
+        'model_class': 'TriadicJ96FA',
+        'D': 512, 'H': 8, 'FFN': 1536, 'L': 10, 'full_attn_layer': 2,
+        'offsets': 'per_layer',
+        'no_num_layers': True,
+        'tokenizer': 'tokenizers/mixed_tokenizer_32k.json',
+        'scale_embed_init': 0.15,
+        'label': 'D512-L10 FA/DSQG v2, single Triton FA at L//4',
+        'checkpoint': None,
+        'params_ref': None,
+    },
+    'pure_dsqg_l13_so2': {
         'train_script': 'train/train_d512_l13_pure_dsqg_so2_4090_bf16.py',
         'model_class': 'TriadicJ96',
         'D': 512, 'H': 8, 'FFN': 1024, 'L': 13,
@@ -540,7 +607,30 @@ def _import_train_script(relative_path):
         script_path,
     )
     module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
+    original_set_threads = getattr(torch, 'set_num_threads', None)
+    original_set_interop = getattr(torch, 'set_num_interop_threads', None)
+
+    def _safe_thread_setter(fn):
+        def wrapper(*args, **kwargs):
+            try:
+                return fn(*args, **kwargs)
+            except RuntimeError as exc:
+                if 'cannot set number of interop threads' in str(exc) or 'cannot set number of threads' in str(exc):
+                    return None
+                raise
+        return wrapper
+
+    if original_set_threads is not None:
+        torch.set_num_threads = _safe_thread_setter(original_set_threads)
+    if original_set_interop is not None:
+        torch.set_num_interop_threads = _safe_thread_setter(original_set_interop)
+    try:
+        spec.loader.exec_module(module)
+    finally:
+        if original_set_threads is not None:
+            torch.set_num_threads = original_set_threads
+        if original_set_interop is not None:
+            torch.set_num_interop_threads = original_set_interop
     return module
 
 
@@ -641,6 +731,18 @@ def build_model(arch_name, device='cpu', checkpoint_path=None):
         )
         print(f'  TopK: replaced blocks[{full_attn_layer}].attn → '
               f'TopKSparseAttention(k={topk_k})')
+
+    if cfg.get('is_dsr', False) and full_attn_layer is not None:
+        from kernels.hierarchical_sparse_attn import HierarchicalSparseAttention
+        head_dim = embedding_dim // number_of_heads
+        num_chunks = cfg.get('dsr_num_chunks', 32)
+        top_k_chunks = cfg.get('dsr_top_k', 4)
+        model.blocks[full_attn_layer].attn = HierarchicalSparseAttention(
+            D=embedding_dim, H=number_of_heads, hd=head_dim,
+            num_chunks=num_chunks, top_k_chunks=top_k_chunks,
+        )
+        print(f'  DSR: replaced blocks[{full_attn_layer}].attn → '
+              f'HierarchicalSparseAttention(C={num_chunks}, top_k={top_k_chunks})')
 
     if absolute_checkpoint:
         _missing, _unexpected, ck = load_checkpoint(model, absolute_checkpoint)

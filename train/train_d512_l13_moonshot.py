@@ -1,41 +1,31 @@
 """
-🚀 DWARF D=768 L=25 Triadic J=96 — phase-informed offset partitioning, 4090, cold start
+🌲 DWARF D=512 L=13 Moonshot — all proven mechanisms, AABBC + multi-IF
 
-Architecture: D=768, H=12 (hd=64), L=25, FFN=1536, TIED lm_head
-  Triadic partitioning: 96 offsets split into 3 pure groups of 32 (no tail)
-  Per-layer bandwidth ratio at D=768: (32×64)/768 = 2.67x (safe ≤ 3.0x)
+Architecture: D=512, H=8 (hd=64), L=13, FFN=1024, TIED lm_head
+  Triadic partitioning: 96 offsets split into 3 groups of 32 + tail group of 51
+  Per-layer bandwidth ratio at D=512: (32×64)/512 = 4.0x (safe)
+  Tail bandwidth: (51×64)/512 = 6.4x (consolidation, acceptable)
 
-  L00: DSQGBlock(GROUP_A)  -- triad 1 (local + low-mid, J=32)
-  L01: DSQGBlock(GROUP_B)  -- triad 1 (mid range)
-  L02: DSQGBlock(GROUP_C)  -- triad 1 (long range)
-  L03: DSQGBlock(GROUP_A)  -- triad 2
-  L04: DSQGBlock(GROUP_B)
-  L05: DSQGBlock(GROUP_C)  + preIF
-  L06: FullAttentionBlock  -- FA at 24% depth
-  L07: DSQGBlock(GROUP_A)  -- triad 3 (Phase-1)
-  L08: DSQGBlock(GROUP_B)
-  L09: DSQGBlock(GROUP_C)
-  L10: DSQGBlock(GROUP_A)  -- triad 4 (Phase-1)
-  L11: DSQGBlock(GROUP_B)
+  L0:  DSQGBlock(GROUP_A)
+  L1:  DSQGBlock(GROUP_A)
+  L2:  DSQGBlock(GROUP_B) + preIF
+  L3:  FullAttentionBlock  — FA at 33% depth
+  L4:  DSQGBlock(GROUP_B)
+  L5:  DSQGBlock(GROUP_C) + IF   ← mid-depth interference
+  L6:  DSQGBlock(GROUP_C)
+  L7:  DSQGBlock(GROUP_A)
+  L8:  DSQGBlock(GROUP_A)
+  L9:  DSQGBlock(GROUP_B)
+  L10: DSQGBlock(GROUP_B)
+  L11: DSQGBlock(GROUP_C) + IF   ← late interference
   L12: DSQGBlock(GROUP_C)
-  L13: DSQGBlock(GROUP_A)  -- triad 5 (Phase-2 start)
-  L14: DSQGBlock(GROUP_B)
-  L15: DSQGBlock(GROUP_C)
-  L16: DSQGBlock(GROUP_A)  -- triad 6
-  L17: DSQGBlock(GROUP_B)
-  L18: DSQGBlock(GROUP_C)
-  L19: DSQGBlock(GROUP_A)  -- triad 7
-  L20: DSQGBlock(GROUP_B)
-  L21: DSQGBlock(GROUP_C)
-  L22: DSQGBlock(GROUP_A)  -- triad 8
-  L23: DSQGBlock(GROUP_B)
-  L24: DSQGBlock(GROUP_C)
 
-  pre-FA: 2 triads (L0-5), post-FA: 6 triads (L7-24) — both perfectly divisible.
-  Full J=96 topological coverage within each 3-layer triad.
+  Full J=96 topological coverage achieved within each 3-layer triad.
+  Multi-IF hypothesis: interference at 3 depths (pre-FA, mid, late) enables
+  richer cross-offset information flow than single preIF.
 
 Run:
-  CUDA_VISIBLE_DEVICES=0 .venv/bin/python3 -u train/train_d768_l25_triadic_j96_4090_bf16.py
+  CUDA_VISIBLE_DEVICES=0 .venv/bin/python3 -u train/train_d512_l13_moonshot.py
 """
 
 import contextlib, math, os, subprocess, sys, time
@@ -76,16 +66,6 @@ from dsqg_attention_v8_dynamic_j import (
     _fwd_v8, _compute_D_v8, _bwd_dq_v8, _bwd_dkdv_v8,
     npci_rotate, R_PLANES, _next_pow2,
 )
-_USE_V13 = os.environ.get('DWARF_USE_V13', '1') == '1'
-_V13Cls = None
-if _USE_V13:
-    try:
-        from dsqg_attention_v13_dynamic_j import DSQGAttentionV13Dynamic as _V13Cls
-        print('  Kernel: V13-dynamic-J (two-pass, faster)')
-    except Exception as _e:
-        print(f'  V13 import failed ({_e}), falling back to V8')
-        _USE_V13 = False
-_DSQG_TYPES = None  # set after DSQGAttentionGrouped is defined
 from causal_ema_scan import causal_ema_scan as _causal_ema_scan
 
 # =============================================================================
@@ -96,6 +76,7 @@ GROUP_A = _ALL_96[0:32]
 GROUP_B = _ALL_96[32:64]
 GROUP_C = _ALL_96[64:96]
 GROUP_T = sorted([1, 2, 3] + _ALL_96[48:], key=lambda d: (0 if d <= 28 else 1, d))
+
 def _count_small_large(offsets):
     j_small = sum(1 for d in offsets if d <= 28)
     j_large = sum(1 for d in offsets if d >= 48)
@@ -106,28 +87,29 @@ def _count_small_large(offsets):
 J_SMALL_A, J_LARGE_A = _count_small_large(GROUP_A)  # 17, 15
 J_SMALL_B, J_LARGE_B = _count_small_large(GROUP_B)  # 0, 32
 J_SMALL_C, J_LARGE_C = _count_small_large(GROUP_C)  # 0, 32
+J_SMALL_T, J_LARGE_T = _count_small_large(GROUP_T)  # 3, 48
 
 # =============================================================================
 # EXPERIMENT KNOBS
 # =============================================================================
 
-EMBEDDING_DIM    = 768
-NUM_HEADS        = 12
-FFN_DIM          = 1536
-NUM_LAYERS       = 25
-FULL_ATTN_LAYER  = 6
+EMBEDDING_DIM    = 512
+NUM_HEADS        = 8
+FFN_DIM          = 1024
+NUM_LAYERS       = 13
+FULL_ATTN_LAYER  = 3
 VOCAB_SIZE       = 32768
 
 SCALE_EMBED_INIT_VAL = 0.15
-SCALE_EMBED_LR_MULT  = 18.37  # μP rule: 15 × √(D/512) = 15 × √(768/512) = 18.37
+SCALE_EMBED_LR_MULT  = 15.0
 EMA_INIT  = 0.020833
 EMA_FLOOR = 0.00001
 LR        = 3e-4
 DROPOUT   = 0.1
 
 BATCH_SIZE     = int(os.environ.get('DWARF_BS', '8'))
-GRAD_ACCUM     = int(os.environ.get('DWARF_GA', '16'))
-MAX_TRAIN_SEQS = int(os.environ.get('DWARF_MAX_TRAIN_SEQS', '338000'))  # 338K seqs = 22% Chinchilla for 157M params at N=2048
+GRAD_ACCUM     = int(os.environ.get('DWARF_GA', '8'))
+MAX_TRAIN_SEQS = int(os.environ.get('DWARF_MAX_TRAIN_SEQS', '80000'))
 MAX_SEQ_LEN    = 2048
 MAX_VAL_SEQS   = 5_582
 CE_CHUNK       = 512
@@ -143,40 +125,28 @@ _FILLER_SENTENCE  = 'the weather was mild and the air was still . '
 _INTRO_TEMPLATE   = 'the secret word is {word} .'
 _RETRIEVAL_CUE    = 'the secret word is'
 CHECKPOINT_DIR    = 'autoresearch/checkpoints'
-CKPT_BASE_NAME    = 'd768_l25_triadic_j96'
+CKPT_BASE_NAME    = 'd512_l13_moonshot'
 
 CHECKPOINT_STRATEGY = os.getenv('DWARF_CKPT', 'none').lower()
 
 # =============================================================================
-# LAYER LAYOUT: L=13, FA@L3
+# LAYER LAYOUT: L=13, FA@L3, IF@L2,L5,L11
 # =============================================================================
 
 LAYER_LAYOUT = [
-    ('A', GROUP_A, J_SMALL_A, J_LARGE_A, False),   # L00: triad 1
-    ('B', GROUP_B, J_SMALL_B, J_LARGE_B, False),   # L01
-    ('C', GROUP_C, J_SMALL_C, J_LARGE_C, False),   # L02
-    ('A', GROUP_A, J_SMALL_A, J_LARGE_A, False),   # L03: triad 2
-    ('B', GROUP_B, J_SMALL_B, J_LARGE_B, False),   # L04
-    ('C', GROUP_C, J_SMALL_C, J_LARGE_C, True),    # L05 + preIF
-    ('FA', None, 0, 0, False),                       # L06: FullAttention @ 24% depth
-    ('A', GROUP_A, J_SMALL_A, J_LARGE_A, False),   # L07: triad 3 (Phase-1)
-    ('B', GROUP_B, J_SMALL_B, J_LARGE_B, False),   # L08
-    ('C', GROUP_C, J_SMALL_C, J_LARGE_C, False),   # L09
-    ('A', GROUP_A, J_SMALL_A, J_LARGE_A, False),   # L10: triad 4
-    ('B', GROUP_B, J_SMALL_B, J_LARGE_B, False),   # L11
+    ('A', GROUP_A, J_SMALL_A, J_LARGE_A, False),   # L0
+    ('A', GROUP_A, J_SMALL_A, J_LARGE_A, False),   # L1
+    ('B', GROUP_B, J_SMALL_B, J_LARGE_B, True),    # L2 + preIF
+    ('FA', None, 0, 0, False),                       # L3: FullAttention
+    ('B', GROUP_B, J_SMALL_B, J_LARGE_B, False),   # L4
+    ('C', GROUP_C, J_SMALL_C, J_LARGE_C, True),    # L5 + IF
+    ('C', GROUP_C, J_SMALL_C, J_LARGE_C, False),   # L6
+    ('A', GROUP_A, J_SMALL_A, J_LARGE_A, False),   # L7
+    ('A', GROUP_A, J_SMALL_A, J_LARGE_A, False),   # L8
+    ('B', GROUP_B, J_SMALL_B, J_LARGE_B, False),   # L9
+    ('B', GROUP_B, J_SMALL_B, J_LARGE_B, False),   # L10
+    ('C', GROUP_C, J_SMALL_C, J_LARGE_C, True),    # L11 + IF
     ('C', GROUP_C, J_SMALL_C, J_LARGE_C, False),   # L12
-    ('A', GROUP_A, J_SMALL_A, J_LARGE_A, False),   # L13: triad 5 (Phase-2)
-    ('B', GROUP_B, J_SMALL_B, J_LARGE_B, False),   # L14
-    ('C', GROUP_C, J_SMALL_C, J_LARGE_C, False),   # L15
-    ('A', GROUP_A, J_SMALL_A, J_LARGE_A, False),   # L16: triad 6
-    ('B', GROUP_B, J_SMALL_B, J_LARGE_B, False),   # L17
-    ('C', GROUP_C, J_SMALL_C, J_LARGE_C, False),   # L18
-    ('A', GROUP_A, J_SMALL_A, J_LARGE_A, False),   # L19: triad 7
-    ('B', GROUP_B, J_SMALL_B, J_LARGE_B, False),   # L20
-    ('C', GROUP_C, J_SMALL_C, J_LARGE_C, False),   # L21
-    ('A', GROUP_A, J_SMALL_A, J_LARGE_A, False),   # L22: triad 8
-    ('B', GROUP_B, J_SMALL_B, J_LARGE_B, False),   # L23
-    ('C', GROUP_C, J_SMALL_C, J_LARGE_C, False),   # L24
 ]
 
 assert len(LAYER_LAYOUT) == NUM_LAYERS
@@ -429,7 +399,6 @@ class DSQGAttentionGrouped(nn.Module):
 
         self.phase_base = nn.Parameter(torch.zeros(max(j_large, 1), num_heads, R_PLANES))
         self.phase_gain = nn.Parameter(torch.zeros(max(j_large, 1), num_heads, R_PLANES))
-        self.phase_gate = nn.Parameter(torch.zeros(max(j_large, 1)))
 
         self.query_probes = nn.Parameter(torch.zeros(R_PLANES, HD))
         self.key_probes = nn.Parameter(torch.zeros(R_PLANES, HD))
@@ -454,23 +423,16 @@ class DSQGAttentionGrouped(nn.Module):
             k = npci_rotate(k, k_delta, self.npci_theta_k)
             v = npci_rotate(v, v_delta, self.npci_theta_v)
 
-        q_norm = F.normalize(q.float(), dim=-1)
-        k_norm = F.normalize(k.float(), dim=-1)
-        qp_norm = F.normalize(self.query_probes.float(), dim=-1)
-        kp_norm = F.normalize(self.key_probes.float(), dim=-1)
+        sc = HD ** -0.5
         y_pre = torch.einsum('bhnd,rd->bhnr',
-                             q_norm, qp_norm).contiguous()
+                             q, self.query_probes.to(q.dtype)).mul(sc).float().contiguous()
         z_pre = torch.einsum('bhnd,rd->bhnr',
-                             k_norm, kp_norm).contiguous()
-
-        gate = torch.sigmoid(self.phase_gate)[:, None, None]
-        gated_phase_base = self.phase_base * gate
-        gated_phase_gain = self.phase_gain * gate
+                             k, self.key_probes.to(k.dtype)).mul(sc).float().contiguous()
 
         out = dsqg_attention_grouped(
             q, k, v,
             self.pos_bias, self.scale_embed,
-            gated_phase_base, gated_phase_gain,
+            self.phase_base, self.phase_gain,
             y_pre, z_pre,
             self.offsets_dev, self.j_val, self.j_small, self.j_large,
         )
@@ -523,8 +485,7 @@ class DSQGBlockTriadic(nn.Module):
         self.head_dim = embedding_dim // num_heads
         self.norm1 = nn.LayerNorm(embedding_dim)
         self.norm2 = nn.LayerNorm(embedding_dim)
-        _AttnCls = _V13Cls if (_USE_V13 and _V13Cls is not None) else DSQGAttentionGrouped
-        self.attn = _AttnCls(
+        self.attn = DSQGAttentionGrouped(
             embedding_dim, num_heads, offsets, j_small, j_large,
             seq_len=seq_len, dropout=dropout)
         self.ffn = FFN(embedding_dim, ffn_dim, dropout)
@@ -633,16 +594,12 @@ class TriadicJ96(nn.Module):
         for m in self.modules():
             if hasattr(m, 'gate_proj') and isinstance(m.gate_proj, nn.Linear):
                 nn.init.constant_(m.gate_proj.bias, 0.0)
-        global _DSQG_TYPES
-        if _DSQG_TYPES is None:
-            _DSQG_TYPES = (DSQGAttentionGrouped,) + ((_V13Cls,) if _USE_V13 else ())
         for m in self.modules():
-            if isinstance(m, _DSQG_TYPES):
+            if isinstance(m, DSQGAttentionGrouped):
                 nn.init.normal_(m.phase_base, 0.0, 0.01)
                 nn.init.normal_(m.query_probes, 0.0, 0.01)
                 nn.init.normal_(m.key_probes, 0.0, 0.01)
                 nn.init.normal_(m.phase_gain, 0.0, 0.001)
-                nn.init.zeros_(m.phase_gate)
                 if scale_embed_init_val != 0.0:
                     nn.init.constant_(m.scale_embed, scale_embed_init_val)
 
@@ -684,23 +641,14 @@ class TriadicJ96(nn.Module):
 
     def scale_embed_parameters(self):
         for m in self.modules():
-            if isinstance(m, _DSQG_TYPES):
+            if isinstance(m, DSQGAttentionGrouped):
                 yield m.scale_embed
 
     def non_scale_embed_parameters(self):
-        exclude_ids = {id(p) for p in self.scale_embed_parameters()}
-        exclude_ids.update(id(p) for p in self.phase_parameters())
+        se_ids = {id(p) for p in self.scale_embed_parameters()}
         for p in self.parameters():
-            if id(p) not in exclude_ids:
+            if id(p) not in se_ids:
                 yield p
-
-    def phase_parameters(self):
-        for m in self.modules():
-            if isinstance(m, _DSQG_TYPES):
-                yield m.phase_gain
-                yield m.phase_gate
-                yield m.query_probes
-                yield m.key_probes
 
     def physics_summary(self):
         entries = []
@@ -828,11 +776,12 @@ def save_full_attn_checkpoint(model, epoch, git_hash, checkpoint_dir):
         "config": {
             "embedding_dim": EMBEDDING_DIM, "num_heads": NUM_HEADS,
             "ffn_dim": FFN_DIM, "seq_len": MAX_SEQ_LEN,
-            "source_script": "train/train_d512_l13_triadic_j96_4090_bf16.py",
+            "source_script": "train/train_d512_l13_moonshot.py",
             "source_layer": FULL_ATTN_LAYER, "num_layers": NUM_LAYERS,
             "epoch": epoch, "git_hash": git_hash,
-            "note": (f"Triadic J=96 L=13: D={EMBEDDING_DIM} H={NUM_HEADS} "
-                     f"FA@L{FULL_ATTN_LAYER}. Epoch {epoch}/{SCREEN_EPOCHS}."),
+            "note": (f"Moonshot D={EMBEDDING_DIM} H={NUM_HEADS} "
+                     f"FA@L{FULL_ATTN_LAYER} IF@L2,L5,L11. "
+                     f"Epoch {epoch}/{SCREEN_EPOCHS}."),
         },
     }
     out_path = os.path.join(checkpoint_dir, f"{CKPT_BASE_NAME}_ep{epoch}_full_attn.pt")
@@ -845,23 +794,26 @@ def save_full_attn_checkpoint(model, epoch, git_hash, checkpoint_dir):
 # =============================================================================
 
 def train():
-    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
     if torch.cuda.is_available():
+        torch.cuda.set_device(0)
         torch.cuda.reset_peak_memory_stats()
     t_start = time.time()
     git_hash = subprocess.check_output(
         ['git', 'rev-parse', '--short', 'HEAD']).decode().strip()
 
     print('=' * 70)
-    print('  🚀 DWARF D768-L25 Triadic J=96 — phase-informed partitioning, cold start')
-    print(f'  FA@L{FULL_ATTN_LAYER}, preIF@L{FULL_ATTN_LAYER-1}')
+    print('  🌲 DWARF D512-L13 Moonshot — all proven mechanisms, AABBC + multi-IF')
+    print(f'  FA@L{FULL_ATTN_LAYER}, IF@L2,L5,L11')
     print('=' * 70)
     if torch.cuda.is_available():
         print(f'  GPU: {torch.cuda.get_device_name(0)}')
     print(f'  D={EMBEDDING_DIM}, H={NUM_HEADS}, hd={EMBEDDING_DIM//NUM_HEADS}, '
           f'L={NUM_LAYERS}, FFN={FFN_DIM}')
-    print(f'  Groups: A(J={len(GROUP_A)}) B(J={len(GROUP_B)}) C(J={len(GROUP_C)}) T(J={len(GROUP_T)})')
-    print(f'  Per-layer bandwidth ratio: {(len(GROUP_A)*64)/EMBEDDING_DIM:.2f}x  (safe ≤ 3.0x)')
+    print(f'  Groups: A(J={len(GROUP_A)}) B(J={len(GROUP_B)}) '
+          f'C(J={len(GROUP_C)}) T(J={len(GROUP_T)})')
+    print(f'  Bandwidth ratios: A/B/C={(len(GROUP_A)*64)/EMBEDDING_DIM:.1f}x  '
+          f'T={(len(GROUP_T)*64)/EMBEDDING_DIM:.1f}x')
     print(f'  scale_embed init={SCALE_EMBED_INIT_VAL}, LR mult={SCALE_EMBED_LR_MULT}')
     print(f'  EMA α₀={EMA_INIT} (window≈{round(1/EMA_INIT)}t)')
     print(f'  MAX_TRAIN_SEQS={MAX_TRAIN_SEQS:,}, Epochs={SCREEN_EPOCHS}')
@@ -911,14 +863,11 @@ def train():
     os.makedirs(CHECKPOINT_DIR, exist_ok=True)
 
     scale_embed_params = list(model.scale_embed_parameters())
-    phase_params = list(model.phase_parameters())
-    other_params = list(model.non_scale_embed_parameters())
+    non_scale_embed_params = list(model.non_scale_embed_parameters())
     optimizer = (bnb.optim.AdamW8bit if _BNB_AVAILABLE else torch.optim.AdamW)([
-        {'params': other_params, 'lr': LR},
+        {'params': non_scale_embed_params, 'lr': LR},
         {'params': scale_embed_params, 'lr': LR * SCALE_EMBED_LR_MULT},
-        {'params': phase_params, 'lr': LR * 50, 'name': 'phase'},
     ], weight_decay=0.1, betas=(0.9, 0.95))
-    print(f'  phase params LR: {LR * 50:.2e} (50× base)')
 
     total_steps = SCREEN_EPOCHS * math.ceil(
         len(train_data) / BATCH_SIZE / GRAD_ACCUM)
@@ -930,8 +879,7 @@ def train():
 
     scheduler = torch.optim.lr_scheduler.LambdaLR(
         optimizer,
-        lr_lambda=[lambda s: _lr_lambda(s, 0), lambda s: _lr_lambda(s, 1),
-                   lambda s: _lr_lambda(s, 2)])
+        lr_lambda=[lambda s: _lr_lambda(s, 0), lambda s: _lr_lambda(s, 1)])
 
     freeze_se = os.getenv('DWARF_FREEZE_SE', '0') == '1'
     if freeze_se:
@@ -946,14 +894,7 @@ def train():
         ckpt = torch.load(resume_path, map_location=device)
         if 'model_state_dict' in ckpt:
             model.load_state_dict(ckpt['model_state_dict'], strict=False)
-            skip_opt = os.getenv('DWARF_SKIP_OPT', '0') == '1'
-            if not skip_opt:
-                try:
-                    optimizer.load_state_dict(ckpt['optimizer_state_dict'])
-                except (ValueError, RuntimeError) as _oe:
-                    print(f'  [resume] optimizer state mismatch ({_oe}); starting fresh optimizer (DWARF_SKIP_OPT=1 to suppress this warning)')
-            else:
-                print('  [resume] skipping optimizer state (DWARF_SKIP_OPT=1)')
+            optimizer.load_state_dict(ckpt['optimizer_state_dict'])
             if 'scheduler_state_dict' in ckpt:
                 scheduler.load_state_dict(ckpt['scheduler_state_dict'])
         else:
@@ -1029,7 +970,7 @@ def train():
 
             if step % 100 == 0:
                 se_vals = [m.scale_embed.detach().abs()
-                           for m in model.modules() if isinstance(m, _DSQG_TYPES)]
+                           for m in model.modules() if isinstance(m, DSQGAttentionGrouped)]
                 se_max = torch.cat(se_vals).max().item() if se_vals else 0.0
                 avg_ms = sum(step_times) / len(step_times)
                 tok_s = tokens_per_step / (avg_ms / 1000.0)
@@ -1053,7 +994,7 @@ def train():
         print(f'\nEp {epoch}/{SCREEN_EPOCHS} | Val PPL {val_ppl:.2f}{marker}')
 
         se_vals = [m.scale_embed.detach().abs()
-                   for m in model.modules() if isinstance(m, _DSQG_TYPES)]
+                   for m in model.modules() if isinstance(m, DSQGAttentionGrouped)]
         if se_vals:
             se_all = torch.cat(se_vals)
             print(f'  scale_embed |mean|={se_all.mean():.4f} |max|={se_all.max():.4f}')
@@ -1100,8 +1041,8 @@ def train():
     print(f'num_layers: {NUM_LAYERS}')
     print(f'scale_embed_lr_mult: {SCALE_EMBED_LR_MULT}')
     print(f'ema_init: {EMA_INIT}')
-    print(f'description: Triadic J=96 L=13 D={EMBEDDING_DIM} H={NUM_HEADS} '
-          f'FFN={FFN_DIM} FA@L{FULL_ATTN_LAYER} preIF@L{FULL_ATTN_LAYER-1} '
+    print(f'description: Moonshot D={EMBEDDING_DIM} H={NUM_HEADS} '
+          f'FFN={FFN_DIM} FA@L{FULL_ATTN_LAYER} IF@L2,L5,L11 '
           f'groups=A({len(GROUP_A)})+B({len(GROUP_B)})+C({len(GROUP_C)})+T({len(GROUP_T)})')
 
 
