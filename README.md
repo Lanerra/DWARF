@@ -1,6 +1,6 @@
 # DWARF
 
-**Dyadic Wave And Resonant Field Attention** — a hybrid sparse/dense attention architecture combining O(1)-KV-cache DSQG layers with a single full causal attention layer, trained jointly from initialization.
+**Dyadic Wave And Resonant Field Attention** — a pure sparse attention architecture combining O(1)-KV-cache DSQG layers with HISA (Hierarchical Sparse Attention) layers, trained jointly from initialization. Dense (full) attention has been deprecated.
 
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 
@@ -8,9 +8,12 @@
 
 ## What is DWARF?
 
-DWARF replaces most of a transformer's attention layers with **DSQG** (Dyadic Sparse Q-K Gather) layers that attend to a fixed set of 44 sparse offsets — a dense local window plus semi-dyadic long-range taps. Because the offset set is fixed regardless of sequence length, each DSQG layer's KV cache at inference is a fixed-size circular buffer: **O(1) memory, not O(N)**.
+DWARF replaces all transformer attention layers with sparse alternatives — no full causal attention layer. The two layer types are:
 
-One standard full causal attention layer remains, providing global context binding that sparse offsets alone cannot supply. The two layer types co-train from initialization: gradient signal from the full attention layer teaches the DSQG layers what to preprocess for it. This co-training is load-bearing — the preprocessing advantage is zero at epoch 1 and emerges entirely through joint training.
+- **DSQG** (Dyadic Sparse Q-K Gather) — attends to a fixed set of 96 sparse offsets (triadic partitioning: three groups of 32). Because the offset set is fixed regardless of sequence length, each DSQG layer's KV cache at inference is a fixed-size circular buffer: **O(1) memory, not O(N)**.
+- **HISA** (Hierarchical Sparse Attention) — two-stage chunked attention: Stage 1 selects top-k chunks per query chunk (self-chunk guaranteed), Stage 2 selects top-m key tokens within each selected chunk. Uses Triton kernels with compact token refinement, reducing both QK and V work.
+
+The DSQG layers handle local and long-range relay patterns through their fixed offset structure. HISA provides the global context binding that fixed sparse offsets alone cannot supply, but does so sparsely rather than through full attention. Both layer types co-train from initialization: gradient signal from HISA teaches DSQG layers what to preprocess for it. This co-training is load-bearing — the preprocessing advantage is zero at epoch 1 and emerges entirely through joint training.
 
 ---
 
@@ -18,7 +21,7 @@ One standard full causal attention layer remains, providing global context bindi
 
 ### Current May 2026 HISA-DSQG Result
 
-The current best DWARF recipe is no longer the early condM/condU hybrid line described below. It is a pure sparse HISA-DSQG model:
+The current best DWARF recipe is a pure sparse HISA-DSQG model:
 
 | Model | Params | Training | Val PPL | Passkey |
 |---|---:|---|---:|---:|
