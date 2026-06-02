@@ -1,0 +1,173 @@
+{
+  "checkpoint": "/home/dlewis3/Desktop/AI/DWARF/autoresearch/checkpoints/cpt8192_muon_boundary/d512_l10_muon_cpt8192_boundary_new_dataset_best.pt",
+  "tokenizer": "/home/dlewis3/Desktop/AI/DWARF/tokenizers/mixed_tokenizer_32k.json",
+  "trials": 10,
+  "mode": "context_length",
+  "results": {
+    "8192": {
+      "accuracy": 0.9,
+      "correct": 9,
+      "total": 10,
+      "mode": "context_length",
+      "target": 8192,
+      "min_distance": 8181,
+      "max_distance": 8182,
+      "min_seq_len": 8192,
+      "max_seq_len": 8192,
+      "per_word": {
+        "apple": {
+          "correct": 0,
+          "total": 1
+        },
+        "banana": {
+          "correct": 1,
+          "total": 1
+        },
+        "orange": {
+          "correct": 1,
+          "total": 1
+        },
+        "cherry": {
+          "correct": 1,
+          "total": 1
+        },
+        "grape": {
+          "correct": 1,
+          "total": 1
+        },
+        "lemon": {
+          "correct": 1,
+          "total": 1
+        },
+        "mango": {
+          "correct": 1,
+          "total": 1
+        },
+        "peach": {
+          "correct": 1,
+          "total": 1
+        },
+        "plum": {
+          "correct": 1,
+          "total": 1
+        },
+        "berry": {
+          "correct": 1,
+          "total": 1
+        }
+      },
+      "elapsed_sec": 1.1432456970214844,
+      "peak_vram_gb": 0.793927168
+    },
+    "16384": {
+      "accuracy": 1.0,
+      "correct": 10,
+      "total": 10,
+      "mode": "context_length",
+      "target": 16384,
+      "min_distance": 16373,
+      "max_distance": 16374,
+      "min_seq_len": 16384,
+      "max_seq_len": 16384,
+      "per_word": {
+        "apple": {
+          "correct": 1,
+          "total": 1
+        },
+        "banana": {
+          "correct": 1,
+          "total": 1
+        },
+        "orange": {
+          "correct": 1,
+          "total": 1
+        },
+        "cherry": {
+          "correct": 1,
+          "total": 1
+        },
+        "grape": {
+          "correct": 1,
+          "total": 1
+        },
+        "lemon": {
+          "correct": 1,
+          "total": 1
+        },
+        "mango": {
+          "correct": 1,
+          "total": 1
+        },
+        "peach": {
+          "correct": 1,
+          "total": 1
+        },
+        "plum": {
+          "correct": 1,
+          "total": 1
+        },
+        "berry": {
+          "correct": 1,
+          "total": 1
+        }
+      },
+      "elapsed_sec": 0.9633588790893555,
+      "peak_vram_gb": 1.360223744
+    },
+    "32768": {
+      "accuracy": 0.4,
+      "correct": 4,
+      "total": 10,
+      "mode": "context_length",
+      "target": 32768,
+      "min_distance": 32757,
+      "max_distance": 32758,
+      "min_seq_len": 32768,
+      "max_seq_len": 32768,
+      "per_word": {
+        "apple": {
+          "correct": 0,
+          "total": 1
+        },
+        "banana": {
+          "correct": 0,
+          "total": 1
+        },
+        "orange": {
+          "correct": 0,
+          "total": 1
+        },
+        "cherry": {
+          "correct": 0,
+          "total": 1
+        },
+        "grape": {
+          "correct": 1,
+          "total": 1
+        },
+        "lemon": {
+          "correct": 0,
+          "total": 1
+        },
+        "mango": {
+          "correct": 1,
+          "total": 1
+        },
+        "peach": {
+          "correct": 1,
+          "total": 1
+        },
+        "plum": {
+          "correct": 1,
+          "total": 1
+        },
+        "berry": {
+          "correct": 0,
+          "total": 1
+        }
+      },
+      "elapsed_sec": 1.6050429344177246,
+      "peak_vram_gb": 2.492816896
+    }
+  }
+}
