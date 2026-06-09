@@ -328,7 +328,7 @@ def _dsr_fwd_hisa(
 
         q_f = q_c.to(tl.float32)
         k_f = k_block.to(tl.float32)
-        s = tl.dot(q_f, tl.trans(k_f)) * sc
+        s = tl.dot(q_f, tl.trans(k_f), input_precision="tf32") * sc
 
         selected = (ks[None, :] < qs[:, None]) & qm[:, None] & km[None, :] & chunk_valid
         s = tl.where(selected, s, float("-inf"))
@@ -364,7 +364,9 @@ def _dsr_fwd_hisa(
             mask=km[:, None] & dm[None, :],
             other=0.0,
         )
-        acc = acc * cor[:, None] + tl.dot(p.to(tl.float32), v_block.to(tl.float32))
+        acc = acc * cor[:, None] + tl.dot(
+            p.to(tl.float32), v_block.to(tl.float32), input_precision="tf32"
+        )
 
     ls = tl.where(li > 0.0, li, 1.0)
     acc = acc / ls[:, None]
@@ -478,7 +480,7 @@ def _dsr_bwd_hisa(
 
         q_f = q_c.to(tl.float32)
         k_f = k_block.to(tl.float32)
-        s = tl.dot(q_f, tl.trans(k_f)) * sc
+        s = tl.dot(q_f, tl.trans(k_f), input_precision="tf32") * sc
 
         selected = (ks[None, :] < qs[:, None]) & qm[:, None] & km[None, :] & chunk_valid
 
@@ -501,19 +503,19 @@ def _dsr_bwd_hisa(
 
         do_f = do_c.to(tl.float32)
         v_f = v_block.to(tl.float32)
-        dot_rv = tl.dot(do_f, tl.trans(v_f))
+        dot_rv = tl.dot(do_f, tl.trans(v_f), input_precision="tf32")
         ds_matrix = alpha * (dot_rv - D_c[:, None])
 
-        dq_c += tl.dot(ds_matrix, k_f) * sc
+        dq_c += tl.dot(ds_matrix, k_f, input_precision="tf32") * sc
 
-        dk_block = tl.dot(tl.trans(ds_matrix), q_f) * sc
+        dk_block = tl.dot(tl.trans(ds_matrix), q_f, input_precision="tf32") * sc
         tl.atomic_add(
             DK + b * stride_dkb + h * stride_dkh + ks[:, None] * stride_dkn + ds[None, :] * stride_dkd,
             tl.where(km[:, None] & dm[None, :], dk_block, 0.0),
             mask=km[:, None] & dm[None, :],
         )
 
-        dv_block = tl.dot(tl.trans(alpha), do_f)
+        dv_block = tl.dot(tl.trans(alpha), do_f, input_precision="tf32")
         tl.atomic_add(
             DV + b * stride_dvb + h * stride_dvh + ks[:, None] * stride_dvn + ds[None, :] * stride_dvd,
             tl.where(km[:, None] & dm[None, :], dv_block, 0.0),
